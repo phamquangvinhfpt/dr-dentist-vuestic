@@ -1,0 +1,76 @@
+name: Vue.js CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build
+      run: npm run build
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist
+
+  deploy-test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+    - name: Deploy to Test
+      uses: easingthemes/ssh-deploy@v5.0.3
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        ARGS: '-rlgoDzvc -i'
+        REMOTE_HOST: ${{ secrets.SSH_HOST }}
+        REMOTE_USER: ${{ secrets.SSH_USER }}
+        TARGET: ${{ secrets.SSH_PATH_TEST }}
+        SCRIPT_BEFORE: "echo 'Clearing test environment'; chmod +x /var/www/drdentist/clear-dr-dentist-test.sh; /var/www/drdentist/clear-dr-dentist-test.sh; echo 'Deployed to test.'"
+      if: github.ref == 'refs/heads/dev'
+
+  deploy-prod:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+    - name: Deploy to Prod
+      uses: easingthemes/ssh-deploy@v5.0.3
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        ARGS: '-rlgoDzvc -i'
+        REMOTE_HOST: ${{ secrets.SSH_HOST }}
+        REMOTE_USER: ${{ secrets.SSH_USER }}
+        TARGET: ${{ secrets.SSH_PATH_PROD }}
+        SCRIPT_BEFORE: "echo 'Clearing test environment'; chmod +x /var/www/drdentist/clear-dr-dentist-prod.sh; /var/www/drdentist/clear-dr-dentist-prod.sh; echo 'Deployed to production.'"
+      if: github.ref == 'refs/heads/main'
