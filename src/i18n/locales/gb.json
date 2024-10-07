@@ -266,7 +266,8 @@
     "audit-logs": "Audit logs",
     "help": "Help",
     "infor": "Information",
-    "orders": "Orders"
+    "orders": "Orders",
+    "message": "Message"
   },
   "bin": {
     "title": "Trash",
@@ -509,6 +510,7 @@
     "switch": "Switch",
     "inputField": "Input field",
     "fileTypeIncorrect": "File type is incorrect",
-    "select": "Select an option"
+    "select": "Select an option",
+    "message": "Message"
   }
 }

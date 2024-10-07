@@ -2,7 +2,7 @@ import jwtService from '@/services/jwt.service'
 import { HubConnection, HubConnectionBuilder, IHttpConnectionOptions } from '@microsoft/signalr'
 
 class SignalRService {
-  private connection: HubConnection | null = null
+  private connections: Map<string, HubConnection> = new Map()
   private token: string | null = jwtService.getToken()
 
   private getAccessToken = (): string | Promise<string> => {
@@ -12,9 +12,9 @@ class SignalRService {
     return this.token
   }
 
-  async connect(url: string) {
-    if (this.connection && this.connection.state === 'Connected') {
-      console.log('Already connected to SignalR.')
+  async connect(url: string, hubName: string) {
+    if (this.connections.has(hubName) && this.connections.get(hubName)?.state === 'Connected') {
+      console.log(`Already connected to ${hubName} hub.`)
       return
     }
 
@@ -22,42 +22,57 @@ class SignalRService {
       const option: IHttpConnectionOptions = {
         accessTokenFactory: () => this.getAccessToken(),
       }
-      this.connection = new HubConnectionBuilder().withUrl(url, option).withAutomaticReconnect().build()
+      const connection = new HubConnectionBuilder().withUrl(url, option).withAutomaticReconnect().build()
       try {
-        await this.connection.start()
+        await connection.start()
+        this.connections.set(hubName, connection)
+        console.log(`Connected to ${hubName} hub.`)
       } catch (error) {
-        console.error('Error connecting to SignalR:', error)
+        console.error(`Error connecting to ${hubName} hub:`, error)
       }
     }
   }
 
-  async disconnect() {
-    if (this.connection) {
-      await this.connection.stop()
+  async disconnect(hubName: string) {
+    const connection = this.connections.get(hubName)
+    if (connection) {
+      await connection.stop()
+      this.connections.delete(hubName)
+      console.log(`Disconnected from ${hubName} hub.`)
     }
   }
 
-  on(eventName: any, callback: any) {
-    if (this.connection) {
-      this.connection.on(eventName, callback)
+  on(hubName: string, eventName: string, callback: (...args: any[]) => void) {
+    const connection = this.connections.get(hubName)
+    if (connection) {
+      connection.on(eventName, callback)
+    } else {
+      console.error(`No connection found for hub: ${hubName}`)
     }
   }
 
-  off(eventName: any) {
-    if (this.connection) {
-      this.connection.off(eventName)
+  off(hubName: string, eventName: string) {
+    const connection = this.connections.get(hubName)
+    if (connection) {
+      connection.off(eventName)
+    } else {
+      console.error(`No connection found for hub: ${hubName}`)
     }
   }
 
-  async invoke(methodName: any, ...args: any) {
-    if (this.connection) {
+  async invoke(hubName: string, methodName: string, ...args: any[]) {
+    const connection = this.connections.get(hubName)
+    if (connection) {
       try {
-        return await this.connection.invoke(methodName, ...args)
+        return await connection.invoke(methodName, ...args)
       } catch (err) {
-        console.error(`Error invoking method ${methodName}:`, err)
+        console.error(`Error invoking method ${methodName} on hub ${hubName}:`, err)
       }
+    } else {
+      console.error(`No connection found for hub: ${hubName}`)
     }
   }
 }
+
 const signalRService = new SignalRService()
 export default signalRService

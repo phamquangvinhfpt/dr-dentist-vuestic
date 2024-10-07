@@ -264,7 +264,8 @@
     "audit-logs": "Nhật ký",
     "help": "Trợ giúp",
     "infor": "Thông tin",
-    "orders": "Gói đã đặt"
+    "orders": "Gói đã đặt",
+    "message": "Tin nhắn"
   },
   "bin": {
     "title": "Thùng rác",
@@ -507,6 +508,7 @@
     "switch": "Chuyển đổi",
     "inputField": "Trường nhập liệu",
     "fileTypeIncorrect": "Loại tệp không đúng",
-    "select": "Chọn một tùy chọn"
+    "select": "Chọn một tùy chọn",
+    "message": "Tin nhắn"
   }
 }

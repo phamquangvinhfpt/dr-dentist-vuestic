@@ -29,5 +29,12 @@ export default {
         permission: 'AuditLogs.View',
       },
     },
+    {
+      name: 'message',
+      displayName: 'menu.message',
+      meta: {
+        icon: 'message',
+      },
+    },
   ] as INavigationRoute[],
 }

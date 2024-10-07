@@ -100,14 +100,25 @@ const handleReceiveNotification = (type, notification) => {
 onMounted(async () => {
   const url = import.meta.env.VITE_APP_BASE_URL
   const url_without_api = url.slice(0, -3)
-  const path = url_without_api + 'notifications'
-  await signalRService.connect(`${path}`)
-  signalRService.on('NotificationFromServer', handleReceiveNotification)
+  const notificationPath = url_without_api + 'notifications'
+  const messagePath = url_without_api + 'chat'
+
+  // Kết nối đến hub thông báo
+  await signalRService.connect(notificationPath, 'notificationHub')
+
+  // Kết nối đến hub tin nhắn
+  await signalRService.connect(messagePath, 'messageHub')
+
+  // Đăng ký sự kiện cho hub thông báo
+  signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
+
+  // Đăng ký sự kiện cho hub tin nhắn
+  signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
 })
 
 onBeforeUnmount(() => {
-  signalRService.off('receiveNotificationFromServer')
-  signalRService.disconnect()
+  signalRService.off('notificationHub', 'receiveNotificationFromServer')
+  signalRService.disconnect('notificationHub')
 })
 </script>
 
