@@ -46,6 +46,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('../pages/audit-logs/AuditLogs.vue'),
       },
+      {
+        name: 'message',
+        path: 'message',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Chat/Chat.vue'),
+      },
     ],
   },
   {

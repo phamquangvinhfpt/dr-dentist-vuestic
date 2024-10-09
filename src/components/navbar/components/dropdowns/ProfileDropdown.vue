@@ -4,7 +4,7 @@
       <template #anchor>
         <VaButton preset="secondary" color="textPrimary">
           <span class="profile-dropdown__anchor min-w-max">
-            <slot />
+            <!-- <slot /> -->
             <Avatar :size="32" color="warning" :txt="shortNameLetter">
               {{ shortNameLetter }}
             </Avatar>

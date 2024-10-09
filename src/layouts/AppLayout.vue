@@ -36,7 +36,7 @@ import { onBeforeUnmount, onMounted, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { onBeforeRouteUpdate } from 'vue-router'
 import { useBreakpoint } from 'vuestic-ui'
-
+import { useOnlineUsersStore } from '../stores/online-users-store' // Adjust the path as needed
 import { useGlobalStore } from '../stores/global-store'
 
 import AppLayoutNavigation from '../components/app-layout-navigation/AppLayoutNavigation.vue'
@@ -45,7 +45,7 @@ import AppSidebar from '../components/sidebar/AppSidebar.vue'
 import signalRService from '@/signalR'
 
 const GlobalStore = useGlobalStore()
-
+const onlineUsersStore = useOnlineUsersStore()
 const breakpoints = useBreakpoint()
 
 const sidebarWidth = ref('16rem')
@@ -97,17 +97,35 @@ const handleReceiveNotification = (type, notification) => {
     notificationDropdownRef.receiveNotificationFromServer(type, notification)
   }
 }
+
+const handleUserIsOnline = (users) => {
+  console.log(`Users online: ${users}`)
+  onlineUsersStore.updateOnlineUsers(users)
+}
+
 onMounted(async () => {
   const url = import.meta.env.VITE_APP_BASE_URL
   const url_without_api = url.slice(0, -3)
-  const path = url_without_api + 'notifications'
-  await signalRService.connect(`${path}`)
-  signalRService.on('NotificationFromServer', handleReceiveNotification)
+  const notificationPath = url_without_api + 'notifications'
+  const messagePath = url_without_api + 'chat'
+
+  // Kết nối đến hub thông báo
+  await signalRService.connect(notificationPath, 'notificationHub')
+
+  // Kết nối đến hub tin nhắn
+  await signalRService.connect(messagePath, 'messageHub')
+
+  // Đăng ký sự kiện cho hub thông báo
+  signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
+
+  // Đăng ký sự kiện cho hub tin nhắn
+  signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
 })
 
 onBeforeUnmount(() => {
-  signalRService.off('receiveNotificationFromServer')
-  signalRService.disconnect()
+  signalRService.off('notificationHub', 'receiveNotificationFromServer')
+  signalRService.disconnect('notificationHub')
+  signalRService.disconnect('messageHub')
 })
 </script>
 
