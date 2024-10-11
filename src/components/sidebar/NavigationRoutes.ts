@@ -29,5 +29,13 @@ export default {
         permission: 'AuditLogs.View',
       },
     },
+    {
+      name: 'users-management',
+      displayName: 'menu.usersManagement',
+      meta: {
+        icon: 'vuestic-iconset-user',
+        permission: 'Users.View',
+      },
+    },
   ] as INavigationRoute[],
 }

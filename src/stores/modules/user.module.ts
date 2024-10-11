@@ -1,9 +1,11 @@
 import {
   ChangeEmailFormData,
   ChangePhoneNumberFormData,
+  FilterUser,
   PasswordDetailFormData,
   UserDetail,
   UserDetailsUpdate,
+  ListUserPagination,
 } from '@/pages/user/types'
 import { defineStore } from 'pinia'
 import userService from '@services/user.service'
@@ -11,6 +13,8 @@ import { useAuthStore } from './auth.module'
 
 export const useUserProfileStore = defineStore('userProfile', {
   state: () => ({
+    id: '' as string,
+    userList: {} as ListUserPagination,
     userDetails: {} as UserDetail,
     isLoading: false as boolean,
   }),
@@ -136,6 +140,18 @@ export const useUserProfileStore = defineStore('userProfile', {
         .catch((error) => {
           return Promise.reject(error)
         })
+    },
+    async getUsers(filter: FilterUser): Promise<ListUserPagination> {
+      try {
+        this.isLoading = true
+        const response = await userService.getAllUsers(filter)
+        this.isLoading = false
+        this.userList = response
+        return await Promise.resolve(this.userList)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
     },
   },
 })

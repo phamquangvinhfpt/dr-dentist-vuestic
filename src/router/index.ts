@@ -46,6 +46,22 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('../pages/audit-logs/AuditLogs.vue'),
       },
+      {
+        name: 'users-management',
+        path: 'users-management',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/user/UsersManagement.vue'),
+      },
+      {
+        name: 'permission-management',
+        path: 'permission',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/permission/PermissionManagement.vue'),
+      },
     ],
   },
   {

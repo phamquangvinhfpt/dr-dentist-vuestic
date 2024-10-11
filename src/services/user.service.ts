@@ -1,6 +1,7 @@
 import {
   ChangeEmailFormData,
   ChangePhoneNumberFormData,
+  FilterUser,
   PasswordDetailFormData,
   UserDetail,
   UserDetailsUpdate,
@@ -131,6 +132,17 @@ class UserService {
   async getUserDetail(id: string): Promise<UserDetail> {
     return apiService
       .get(`/users/${id}`)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  async getAllUsers(filter: FilterUser): Promise<any> {
+    return apiService
+      .post(`/users/get-users`, filter)
       .then((response) => {
         return Promise.resolve(response.data)
       })

@@ -65,3 +65,38 @@ export type Avatar = {
 export type RemoveAvatar = {
   deleteCurrentImage: boolean
 }
+
+export type Role = {
+  roleId: string
+  roleName: string
+  description: string
+  enabled: boolean
+}
+
+export type User = {
+  id: string
+  imageUrl: string | null
+  userName: string
+  gender: boolean | null
+  email: string
+  isActive: boolean
+  phoneNumber: string | null
+  address: string | null
+  role: Role
+}
+
+export type ListUserPagination = {
+  data: User[]
+  currentPage: number
+  totalPages: number
+  totalCount: number
+  pageSize: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+}
+export type FilterUser = {
+  pageNumber: number
+  pageSize: number
+  isActive: boolean
+  orderBy?: string[]
+}
