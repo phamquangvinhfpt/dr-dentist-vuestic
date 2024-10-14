@@ -12,7 +12,7 @@
             ]"
           >
             <div class="p-4 animate-pulse">
-              <VaInput type="text" placeholder="Search Messenger" label="Search" />
+              <VaInput v-model="keyword" type="text" placeholder="Search Messenger" label="Search" :change="search()" />
             </div>
             <VaScrollContainer
               vertical
@@ -37,10 +37,7 @@
                       class="mr-2"
                       :color="user.isOnline ? 'success' : 'secondary'"
                     >
-                      <VaAvatar
-                        :src="user.imageUrl || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
-                        alt="Avatar"
-                      />
+                      <VaAvatar :src="user.imageUrl" :fallback-text="user.name.charAt(0).toUpperCase()" alt="Avatar" />
                     </VaBadge>
                   </div>
                   <div class="ml-3 flex-grow overflow-hidden">
@@ -69,18 +66,20 @@
                   </svg>
                 </button>
                 <div class="w-10 h-10 rounded-full bg-gray-300 mr-3 relative">
-                  <img
-                    :src="selectedUser?.imageUrl || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
-                    alt="Avatar"
-                    class="w-10 h-10 rounded-full bg-gray-300"
-                  />
-                  <div
-                    :class="[
-                      'w-2 h-2 rounded-full',
-                      isStaff ? (selectedUser?.isOnline ? 'bg-green-300' : 'bg-slate-500') : 'bg-red-300',
-                      isStaff ? 'flex-shrink-0 absolute bottom-0 right-1 z-20 translate-x-1' : 'hidden',
-                    ]"
-                  ></div>
+                  <VaBadge
+                    :dot="isStaff ? true : false"
+                    overlap
+                    placement="bottom-right"
+                    :offset="[-7, -7]"
+                    class="mr-2"
+                    :color="selectedUser?.isOnline ? 'success' : 'secondary'"
+                  >
+                    <VaAvatar
+                      :src="selectedUser?.imageUrl"
+                      :fallback-text="selectedUser?.name.charAt(0).toUpperCase()"
+                      alt="Avatar"
+                    />
+                  </VaBadge>
                 </div>
                 <div class="font-semibold">
                   {{ isStaff ? (selectedUser ? selectedUser.name : 'Chat Name') : staffName }}
@@ -97,14 +96,12 @@
                   <div
                     :class="['mb-4 flex', messageGroup[0].sender === 'me' ? 'justify-end' : 'justify-start relative']"
                   >
-                    <div
-                      v-if="messageGroup[0].sender !== 'me'"
-                      class="w-8 h-8 rounded-full bg-gray-300 mr-2 flex-shrink-0 self-end group"
-                    >
-                      <img
-                        :src="messageGroup[0]?.imageUrl || 'https://www.svgrepo.com/show/452030/avatar-default.svg'"
+                    <div v-if="messageGroup[0].sender !== 'me'" class="mr-2 flex-shrink-0 self-end group">
+                      <VaAvatar
+                        size="small"
+                        :src="messageGroup[0]?.imageUrl"
                         alt="Avatar"
-                        class="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0"
+                        :fallback-text="messageGroup[0]?.name?.charAt(0).toUpperCase()"
                       />
                       <!-- <div class="text-xs absolute">{{messageGroup[0]?.time}}</div> -->
                     </div>
@@ -209,23 +206,7 @@ import {
 import { useOnlineUsersStore } from '@/stores/online-users-store'
 import { storeToRefs } from 'pinia'
 import signalRService from '@/signalR'
-
-interface User {
-  id: string
-  name: string
-  lastMessage?: string
-  imageUrl?: string
-  isOnline?: boolean
-}
-
-interface Message {
-  id: number
-  content: string
-  sender: 'me' | 'other'
-  name?: string
-  imageUrl?: string
-  time?: string
-}
+import { Message, User } from './types'
 
 const authStore = useAuthStore()
 
@@ -243,6 +224,7 @@ const onlineUsersStore = useOnlineUsersStore()
 const { onlineUsers } = storeToRefs(onlineUsersStore)
 const { receivedMessage } = storeToRefs(onlineUsersStore)
 const newMessage = ref('')
+const keyword = ref('')
 const selectedUser = ref<User | null>(null)
 const isLargeScreen = ref(window.innerWidth >= 1024) // lg breakpoint
 // New computed property to group messages
@@ -310,6 +292,15 @@ const sendMessage = async () => {
   }
 }
 
+const search = async () => {
+  if (keyword.value) {
+    const filteredUsers = users.value?.filter((user) => user.name.toLowerCase().includes(keyword.value.toLowerCase()))
+    users.value = filteredUsers
+  } else {
+    loadUsers()
+  }
+}
+
 const getSrcAvatar = (img: any) => {
   const url = import.meta.env.VITE_APP_BASE_URL as string
   const url_without_api = url.slice(0, -3)
@@ -336,7 +327,6 @@ const loadUsers = async () => {
   try {
     const messages = await chatService.getListUserDto()
     if (messages && messages.length > 0) {
-      // console.log('Messages loaduers:', messages)
       users.value = messages.map((message: any) => ({
         id: message.senderId,
         name: message.senderName,
@@ -403,9 +393,7 @@ watch(
       content: receivedMessage.value?.message,
       sender: receivedMessage.value.senderId === authStore.user?.id ? 'me' : 'other',
       name: receivedMessage.value.senderName,
-      imageUrl: receivedMessage.value.imageUrl
-        ? getSrcAvatar(receivedMessage.value.imageUrl)
-        : 'https://www.svgrepo.com/show/452030/avatar-default.svg',
+      imageUrl: getSrcAvatar(receivedMessage.value.imageUrl),
       time: convertDateTimeToTime(receivedMessage.value.createdOn),
     })
     // update getListUserDto again

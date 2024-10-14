@@ -48,6 +48,9 @@ class SignalRService {
       connection.on(eventName, callback)
     } else {
       console.error(`No connection found for hub: ${hubName}`)
+      // reconnect
+      this.reconnect(hubName)
+      this.connect('', hubName)
     }
   }
 
@@ -76,6 +79,18 @@ class SignalRService {
   isConnected(hubName: string): boolean {
     const connection = this.connections.get(hubName)
     return connection?.state === 'Connected'
+  }
+
+  reconnect(hubName: string) {
+    const connection = this.connections.get(hubName)
+    if (connection) {
+      try {
+        connection.start()
+        console.log(`Reconnected to ${hubName} hub.`)
+      } catch (error) {
+        console.error(`Error reconnecting to ${hubName} hub:`, error)
+      }
+    }
   }
 }
 

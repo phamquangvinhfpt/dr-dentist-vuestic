@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, computed } from 'vue'
+import { onBeforeUnmount, onMounted, ref, computed, onBeforeMount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { onBeforeRouteUpdate } from 'vue-router'
 import { useBreakpoint } from 'vuestic-ui'
@@ -99,7 +99,7 @@ const handleReceiveNotification = (type, notification) => {
 }
 
 const handleUserIsOnline = (users, staffs) => {
-  console.log(`Users online: ${users}`)
+  // console.log(`Users online: ${users}`)
   onlineUsersStore.updateOnlineUsers(users, staffs)
 }
 
@@ -107,7 +107,7 @@ const handleReceiveMessage = (message) => {
   onlineUsersStore.receiveMessage(message)
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const url = import.meta.env.VITE_APP_BASE_URL
   const url_without_api = url.slice(0, -3)
   const notificationPath = url_without_api + 'notifications'
@@ -119,12 +119,19 @@ onMounted(async () => {
   // Kết nối đến hub tin nhắn
   await signalRService.connect(messagePath, 'messageHub')
 
-  // Đăng ký sự kiện cho hub thông báo
-  signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
+  if (signalRService.isConnected('notificationHub') && signalRService.isConnected('messageHub')) {
+    // Đăng ký sự kiện cho hub thông báo
+    signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
 
-  // Đăng ký sự kiện cho hub tin nhắn
-  signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
-  signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
+    // Đăng ký sự kiện cho hub tin nhắn
+    signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
+    signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
+  } else {
+    //retry connect
+    setTimeout(() => {
+      location.reload()
+    }, 100)
+  }
 })
 
 onBeforeUnmount(() => {

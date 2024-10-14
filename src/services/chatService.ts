@@ -16,7 +16,6 @@ class ChatService {
   }
 
   public onReceiveConversation(callback: (conversation: any) => void) {
-    console.log('Receive conversation')
     signalRService.on(this.hubName, 'ReceiveConversation', callback)
   }
 

@@ -21,12 +21,9 @@ export const useOnlineUsersStore = defineStore('onlineUsers', {
   actions: {
     updateOnlineUsers(users: string[]) {
       this.onlineUsers = users
-      console.log('updateOnlineUsers', users)
     },
     receiveMessage(message: Message) {
-      console.log('value', message)
       this.receivedMessage = message
-      console.log('value of rêcvied', this.receivedMessage)
     },
   },
 })
