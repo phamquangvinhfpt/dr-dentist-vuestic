@@ -52,7 +52,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
         },
-        component: () => import('../pages/Chat/Chat.vue'),
+        component: () => import('../pages/Chat/Message.vue'),
       },
     ],
   },

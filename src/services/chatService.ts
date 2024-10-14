@@ -23,18 +23,10 @@ class ChatService {
   public async getListUserDto(): Promise<any[] | null> {
     try {
       const result = await signalRService.invoke(this.hubName, 'GetListUserDto')
-      return result || null
+      return result
     } catch (err) {
       console.error('Error getting list message:', err)
       throw err
-    }
-  }
-
-  public async joinPatientGroup() {
-    try {
-      await signalRService.invoke(this.hubName, 'JoinPatientGroup')
-    } catch (err) {
-      console.error('Error joining patient group:', err)
     }
   }
 
@@ -43,22 +35,6 @@ class ChatService {
       return await signalRService.invoke(this.hubName, 'GetConversation', patientId)
     } catch (err) {
       console.error('Error getting conversation:', err)
-    }
-  }
-
-  public async leavePatientGroup() {
-    try {
-      await signalRService.invoke(this.hubName, 'LeavePatientGroup')
-    } catch (err) {
-      console.error('Error leaving patient group:', err)
-    }
-  }
-
-  public async markMessagesAsRead(patientId: string) {
-    try {
-      await signalRService.invoke(this.hubName, 'MarkMessagesAsRead', patientId)
-    } catch (err) {
-      console.error('Error marking messages as read:', err)
     }
   }
 
@@ -71,12 +47,10 @@ class ChatService {
   }
 
   public disconnect() {
-    console.log('Disconnecting from chat service')
     signalRService.off(this.hubName, 'ReceiveMessage')
     signalRService.off(this.hubName, 'UserIsOnline')
     signalRService.off(this.hubName, 'UserIsOffline')
     signalRService.off(this.hubName, 'ReceiveConversation')
-    console.log('Disconnected from chat service')
   }
 }
 

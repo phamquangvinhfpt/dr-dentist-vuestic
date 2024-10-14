@@ -19,7 +19,7 @@
         </div>
       </div>
       <AppLayoutNavigation v-if="!isMobile" class="p-4" />
-      <main class="p-4 pt-0">
+      <main class="sm:p-4 pt-0">
         <article>
           <!-- <RouterView /> -->
           <RouterView v-slot="{ Component }">
@@ -98,9 +98,13 @@ const handleReceiveNotification = (type, notification) => {
   }
 }
 
-const handleUserIsOnline = (users) => {
+const handleUserIsOnline = (users, staffs) => {
   console.log(`Users online: ${users}`)
-  onlineUsersStore.updateOnlineUsers(users)
+  onlineUsersStore.updateOnlineUsers(users, staffs)
+}
+
+const handleReceiveMessage = (message) => {
+  onlineUsersStore.receiveMessage(message)
 }
 
 onMounted(async () => {
@@ -120,10 +124,13 @@ onMounted(async () => {
 
   // Đăng ký sự kiện cho hub tin nhắn
   signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
+  signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
 })
 
 onBeforeUnmount(() => {
-  signalRService.off('notificationHub', 'receiveNotificationFromServer')
+  signalRService.off('notificationHub', 'NotificationFromServer')
+  signalRService.off('messageHub', 'UpdateOnlineUsers')
+  signalRService.off('messageHub', 'ReceiveMessage')
   signalRService.disconnect('notificationHub')
   signalRService.disconnect('messageHub')
 })

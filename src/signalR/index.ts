@@ -72,6 +72,11 @@ class SignalRService {
       console.error(`No connection found for hub: ${hubName}`)
     }
   }
+
+  isConnected(hubName: string): boolean {
+    const connection = this.connections.get(hubName)
+    return connection?.state === 'Connected'
+  }
 }
 
 const signalRService = new SignalRService()
