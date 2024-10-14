@@ -78,7 +78,7 @@
                     :class="[
                       'w-2 h-2 rounded-full',
                       isStaff ? (selectedUser?.isOnline ? 'bg-green-300' : 'bg-slate-500') : 'bg-red-300',
-                      'flex-shrink-0 absolute bottom-0 right-1 z-20 p-1.5 translate-x-1',
+                      isStaff ? 'flex-shrink-0 absolute bottom-0 right-1 z-20 translate-x-1' : 'hidden',
                     ]"
                   ></div>
                 </div>
@@ -191,7 +191,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, watchEffect } from 'vue'
+import { ref, computed, watch, watchEffect, onBeforeMount } from 'vue'
 import { chatService } from '@/services/chatService'
 import { useAuthStore } from '@modules/auth.module'
 import { getErrorMessage } from '@/services/utils'
@@ -318,7 +318,6 @@ const getSrcAvatar = (img: any) => {
 }
 
 const convertDateTimeToTime = (date: string) => {
-  // convert date to time only vd: 12:00 vietnam
   return new Date(date).toLocaleTimeString('vi-VN', {
     hour: '2-digit',
     minute: '2-digit',
@@ -344,7 +343,6 @@ const loadUsers = async () => {
         lastMessage: message.latestMessage,
         imageUrl: getSrcAvatar(message.imageUrl),
       }))
-      // console.log('Users loaded successfully:', users.value)
     }
     handleUserOnline()
   } catch (error) {
@@ -410,6 +408,9 @@ watch(
         : 'https://www.svgrepo.com/show/452030/avatar-default.svg',
       time: convertDateTimeToTime(receivedMessage.value.createdOn),
     })
+    // update getListUserDto again
+    loadUsers()
+    handleUserOnline()
     scrollToBottom()
   },
   { immediate: true },
@@ -420,7 +421,7 @@ watchEffect(() => {
   scrollToBottom()
 })
 
-onMounted(() => {
+onBeforeMount(() => {
   scrollToBottom()
   loadUsers()
 })
