@@ -93,7 +93,8 @@
     "change_email": "Thay đổi email",
     "change_password": "Thay đổi mật khẩu",
     "verify_email": "Xác minh email",
-    "password": "Mật khẩu"
+    "password": "Mật khẩu",
+    "login_success": "Đăng nhập thành công"
   },
   "settings": {
     "title": "Cài đặt",

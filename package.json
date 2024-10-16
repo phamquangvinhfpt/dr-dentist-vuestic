@@ -21,6 +21,8 @@
     ]
   },
   "dependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "@capacitor/core": "^6.1.2",
     "@gtm-support/vue-gtm": "^2.0.0",
     "@microsoft/signalr": "^8.0.0",
     "@storybook/test": "^8.0.8",

@@ -33,7 +33,16 @@ router.beforeEach((to, from, next) => {
     if (!authStore.isAuthenticated) {
       next({ name: 'login' })
     } else {
-      next()
+      if (to.matched.some((record) => record.meta.permission)) {
+        const permission = to.meta.permission as string
+        if (authStore.hasAccess(permission)) {
+          next()
+        } else {
+          next({ name: '403' })
+        }
+      } else {
+        next()
+      }
     }
   } else {
     next()

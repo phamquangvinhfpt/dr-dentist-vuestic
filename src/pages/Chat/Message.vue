@@ -65,7 +65,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                   </svg>
                 </button>
-                <div class="w-10 h-10 rounded-full bg-gray-300 mr-3 relative">
+                <div class="w-10 h-10 rounded-full mr-3 relative">
                   <VaBadge
                     :dot="isStaff ? true : false"
                     overlap
@@ -376,6 +376,11 @@ const handleUserOnline = () => {
       user.isOnline = isOnline
     })
   }
+
+  if (selectedUser.value) {
+    const isOnline = onlineUsers.value.some((onlineUser) => onlineUser === selectedUser.value?.id.toString())
+    selectedUser.value.isOnline = isOnline
+  }
 }
 watch(
   onlineUsers,
@@ -388,6 +393,7 @@ watch(
 watch(
   receivedMessage,
   () => {
+    console.log('receivedMessage', receivedMessage.value)
     messages.value.push({
       id: receivedMessage.value.id,
       content: receivedMessage.value?.message,

@@ -28,9 +28,9 @@
             </p>
             <p>
               This Privacy Policy applies to our website, and its associated subdomains (collectively, our “Service”)
-              alongside our application, GEO. By accessing or using our Service, you signify that you have read,
-              understood, and agree to our collection, storage, use, and disclosure of your personal information as
-              described in this Privacy Policy and our Terms of Service. This Privacy Policy was created with
+              alongside our application, "Dr. Dentist". By accessing or using our Service, you signify that you have
+              read, understood, and agree to our collection, storage, use, and disclosure of your personal information
+              as described in this Privacy Policy and our Terms of Service. This Privacy Policy was created with
               <a href="https://termify.io" target="_blank">Termify</a>.
             </p>
 
@@ -44,26 +44,28 @@
                 preference or login information.
               </li>
               <li>
-                Company: when this policy mentions “Company,” “we,” “us,” or “our,” it refers to GEO, that is
+                Company: when this policy mentions “Company,” “we,” “us,” or “our,” it refers to "Dr. Dentist", that is
                 responsible for your information under this Privacy Policy.
               </li>
-              <li>Country: where GEO or the owners/founders of GEO are based, in this case is Viet Nam</li>
               <li>
-                Customer: refers to the company, organization or person that signs up to use the GEO Service to manage
-                the relationships with your consumers or service users.
+                Country: where "Dr. Dentist" or the owners/founders of "Dr. Dentist" are based, in this case is Viet Nam
+              </li>
+              <li>
+                Customer: refers to the company, organization or person that signs up to use the "Dr. Dentist" Service
+                to manage the relationships with your consumers or service users.
               </li>
               <li>
                 Device: any internet connected device such as a phone, tablet, computer or any other device that can be
-                used to visit GEO and use the services.
+                used to visit "Dr. Dentist" and use the services.
               </li>
               <li>
                 IP address: Every device connected to the Internet is assigned a number known as an Internet protocol
-                (IP) address. These numbers are usually assigned in geographic blocks. An IP address can often be used
-                to identify the location from which a device is connecting to the Internet.
+                (IP) address. These numbers are usually assigned in "Dr. Dentist"graphic blocks. An IP address can often
+                be used to identify the location from which a device is connecting to the Internet.
               </li>
               <li>
-                Personnel: refers to those individuals who are employed by GEO or are under contract to perform a
-                service on behalf of one of the parties.
+                Personnel: refers to those individuals who are employed by "Dr. Dentist" or are under contract to
+                perform a service on behalf of one of the parties.
               </li>
               <li>
                 Personal Data: any information that directly, indirectly, or in connection with other information —
@@ -71,15 +73,15 @@
                 natural person.
               </li>
               <li>
-                Service: refers to the service provided by GEO as described in the relative terms (if available) and on
-                this platform.
+                Service: refers to the service provided by "Dr. Dentist" as described in the relative terms (if
+                available) and on this platform.
               </li>
               <li>
                 Third-party service: refers to advertisers, contest sponsors, promotional and marketing partners, and
                 others who provide our content or whose products or services we think may interest you.
               </li>
-              <li>Website: GEO's site, which can be accessed via this URL: https://guardianexam.com/</li>
-              <li>You: a person or entity that is registered with GEO to use the Services.</li>
+              <li>Website: "Dr. Dentist"'s site, which can be accessed via this URL: https://guardianexam.com/</li>
+              <li>You: a person or entity that is registered with "Dr. Dentist" to use the Services.</li>
             </ul>
             <h1>Information automatically collected</h1>
             <p>
@@ -109,20 +111,20 @@
             <h1>Sale of Business</h1>
             <p>
               We reserve the right to transfer information to a third party in the event of a sale, merger or other
-              transfer of all or substantially all of the assets of GEO or any of its Corporate Affiliates (as defined
-              herein), or that portion of GEO or any of its Corporate Affiliates to which the Service relates, or in the
-              event that we discontinue our business or file a petition or have filed against us a petition in
-              bankruptcy, reorganization or similar proceeding, provided that the third party agrees to adhere to the
-              terms of this Privacy Policy.
+              transfer of all or substantially all of the assets of "Dr. Dentist" or any of its Corporate Affiliates (as
+              defined herein), or that portion of "Dr. Dentist" or any of its Corporate Affiliates to which the Service
+              relates, or in the event that we discontinue our business or file a petition or have filed against us a
+              petition in bankruptcy, reorganization or similar proceeding, provided that the third party agrees to
+              adhere to the terms of this Privacy Policy.
             </p>
 
             <h1>Affiliates</h1>
             <p>
               We may disclose information (including personal information) about you to our Corporate Affiliates. For
               purposes of this Privacy Policy, "Corporate Affiliate" means any person or entity which directly or
-              indirectly controls, is controlled by or is under common control with GEO, whether by ownership or
-              otherwise. Any information relating to you that we provide to our Corporate Affiliates will be treated by
-              those Corporate Affiliates in accordance with the terms of this Privacy Policy.
+              indirectly controls, is controlled by or is under common control with "Dr. Dentist", whether by ownership
+              or otherwise. Any information relating to you that we provide to our Corporate Affiliates will be treated
+              by those Corporate Affiliates in accordance with the terms of this Privacy Policy.
             </p>
 
             <h1>Governing Law</h1>
@@ -138,11 +140,11 @@
               international laws.
             </p>
             <p>
-              By using GEO or contacting us directly, you signify your acceptance of this Privacy Policy. If you do not
-              agree to this Privacy Policy, you should not engage with our website, or use our services. Continued use
-              of the website, direct engagement with us, or following the posting of changes to this Privacy Policy that
-              do not significantly affect the use or disclosure of your personal information will mean that you accept
-              those changes.
+              By using "Dr. Dentist" or contacting us directly, you signify your acceptance of this Privacy Policy. If
+              you do not agree to this Privacy Policy, you should not engage with our website, or use our services.
+              Continued use of the website, direct engagement with us, or following the posting of changes to this
+              Privacy Policy that do not significantly affect the use or disclosure of your personal information will
+              mean that you accept those changes.
             </p>
 
             <h1>Your Consent</h1>
@@ -155,23 +157,23 @@
             <h1>Links to Other Websites</h1>
             <p>
               This Privacy Policy applies only to the Services. The Services may contain links to other websites not
-              operated or controlled by GEO. We are not responsible for the content, accuracy or opinions expressed in
-              such websites, and such websites are not investigated, monitored or checked for accuracy or completeness
-              by us. Please remember that when you use a link to go from the Services to another website, our Privacy
-              Policy is no longer in effect. Your browsing and interaction on any other website, including those that
-              have a link on our platform, is subject to that website’s own rules and policies. Such third parties may
-              use their own cookies or other methods to collect information about you.
+              operated or controlled by "Dr. Dentist". We are not responsible for the content, accuracy or opinions
+              expressed in such websites, and such websites are not investigated, monitored or checked for accuracy or
+              completeness by us. Please remember that when you use a link to go from the Services to another website,
+              our Privacy Policy is no longer in effect. Your browsing and interaction on any other website, including
+              those that have a link on our platform, is subject to that website’s own rules and policies. Such third
+              parties may use their own cookies or other methods to collect information about you.
             </p>
             <h1>Cookies</h1>
             <p>
-              GEO uses "Cookies" to identify the areas of our website that you have visited. A Cookie is a small piece
-              of data stored on your computer or mobile device by your web browser. We use Cookies to enhance the
-              performance and functionality of our website/app but are non-essential to their use. However, without
-              these cookies, certain functionality like videos may become unavailable or you would be required to enter
-              your login details every time you visit the website/app as we would not be able to remember that you had
-              logged in previously. Most web browsers can be set to disable the use of Cookies. However, if you disable
-              Cookies, you may not be able to access functionality on our website correctly or at all. We never place
-              Personally Identifiable Information in Cookies.
+              "Dr. Dentist" uses "Cookies" to identify the areas of our website that you have visited. A Cookie is a
+              small piece of data stored on your computer or mobile device by your web browser. We use Cookies to
+              enhance the performance and functionality of our website/app but are non-essential to their use. However,
+              without these cookies, certain functionality like videos may become unavailable or you would be required
+              to enter your login details every time you visit the website/app as we would not be able to remember that
+              you had logged in previously. Most web browsers can be set to disable the use of Cookies. However, if you
+              disable Cookies, you may not be able to access functionality on our website correctly or at all. We never
+              place Personally Identifiable Information in Cookies.
             </p>
 
             <h1>Blocking and disabling cookies and similar technologies</h1>
@@ -208,10 +210,10 @@
               Services").
             </p>
             <p>
-              You acknowledge and agree that GEO shall not be responsible for any Third-Party Services, including their
-              accuracy, completeness, timeliness, validity, copyright compliance, legality, decency, quality or any
-              other aspect thereof. GEO does not assume and shall not have any liability or responsibility to you or any
-              other person or entity for any Third-Party Services.
+              You acknowledge and agree that "Dr. Dentist" shall not be responsible for any Third-Party Services,
+              including their accuracy, completeness, timeliness, validity, copyright compliance, legality, decency,
+              quality or any other aspect thereof. "Dr. Dentist" does not assume and shall not have any liability or
+              responsibility to you or any other person or entity for any Third-Party Services.
             </p>
             <p>
               Third-Party Services and links thereto are provided solely as a convenience to you and you access and use
@@ -277,17 +279,17 @@
             <p>
               GDPR adds some new requirements regarding how companies should protect individuals' personal data that
               they collect and process. It also raises the stakes for compliance by increasing enforcement and imposing
-              greater fines for breach. Beyond these facts it's simply the right thing to do. At GEO we strongly believe
-              that your data privacy is very important and we already have solid security and privacy practices in place
-              that go beyond the requirements of this new regulation.
+              greater fines for breach. Beyond these facts it's simply the right thing to do. At "Dr. Dentist" we
+              strongly believe that your data privacy is very important and we already have solid security and privacy
+              practices in place that go beyond the requirements of this new regulation.
             </p>
 
             <h1>Individual Data Subject's Rights - Data Access, Portability and Deletion</h1>
             <p>
-              We are committed to helping our customers meet the data subject rights requirements of GDPR. GEO processes
-              or stores all personal data in fully vetted, DPA compliant vendors. We do store all conversation and
-              personal data for up to 6 years unless your account is deleted. In which case, we dispose of all data in
-              accordance with our Terms of Service and Privacy Policy, but we will not hold it longer than 60 days.
+              We are committed to helping our customers meet the data subject rights requirements of GDPR. "Dr. Dentist"
+              processes or stores all personal data in fully vetted, DPA compliant vendors. We do store all conversation
+              and personal data for up to 6 years unless your account is deleted. In which case, we dispose of all data
+              in accordance with our Terms of Service and Privacy Policy, but we will not hold it longer than 60 days.
             </p>
             <p>
               We are aware that if you are working with EU customers, you need to be able to provide them with the

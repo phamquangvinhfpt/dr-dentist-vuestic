@@ -80,7 +80,7 @@ const submit = async () => {
     store
       .login(formData.email, formData.password, captchaToken ?? '', formData.keepLoggedIn)
       .then(() => {
-        init({ message: "You've successfully logged in", color: 'success', position: 'bottom-right' })
+        init({ message: t('auth.login_success'), color: 'success', position: 'bottom-right' })
         push({ name: 'dashboard' })
       })
       .catch((error: any) => {
