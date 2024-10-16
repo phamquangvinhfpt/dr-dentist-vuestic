@@ -93,7 +93,8 @@
     "change_email": "Thay đổi email",
     "change_password": "Thay đổi mật khẩu",
     "verify_email": "Xác minh email",
-    "password": "Mật khẩu"
+    "password": "Mật khẩu",
+    "login_success": "Đăng nhập thành công"
   },
   "settings": {
     "title": "Cài đặt",
@@ -264,7 +265,8 @@
     "audit-logs": "Nhật ký",
     "help": "Trợ giúp",
     "infor": "Thông tin",
-    "orders": "Gói đã đặt"
+    "orders": "Gói đã đặt",
+    "message": "Tin nhắn"
   },
   "bin": {
     "title": "Thùng rác",
@@ -507,6 +509,7 @@
     "switch": "Chuyển đổi",
     "inputField": "Trường nhập liệu",
     "fileTypeIncorrect": "Loại tệp không đúng",
-    "select": "Chọn một tùy chọn"
+    "select": "Chọn một tùy chọn",
+    "message": "Tin nhắn"
   }
 }

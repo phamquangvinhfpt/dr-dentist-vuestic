@@ -13,6 +13,7 @@ class ApiService {
     baseURL: this.api_url,
     headers: {
       'x-from-host': location.host,
+      'Accept-Language': localStorage.getItem('locale') || 'en',
     },
   })
 

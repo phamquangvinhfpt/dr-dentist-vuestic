@@ -22,6 +22,14 @@ export default {
       },
     },
     {
+      name: 'users-management',
+      displayName: 'menu.usersManagement',
+      meta: {
+        icon: 'vuestic-iconset-user',
+        permission: 'Users.View',
+      },
+    },
+    {
       name: 'audit logs',
       displayName: 'menu.audit-logs',
       meta: {
@@ -30,11 +38,10 @@ export default {
       },
     },
     {
-      name: 'users-management',
-      displayName: 'menu.usersManagement',
+      name: 'message',
+      displayName: 'menu.message',
       meta: {
-        icon: 'vuestic-iconset-user',
-        permission: 'Users.View',
+        icon: 'message',
       },
     },
   ] as INavigationRoute[],
