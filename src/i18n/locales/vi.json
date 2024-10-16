@@ -266,7 +266,8 @@
     "help": "Trợ giúp",
     "infor": "Thông tin",
     "orders": "Gói đã đặt",
-    "message": "Tin nhắn"
+    "message": "Tin nhắn",
+    "user-management": "Quản lý người dùng"
   },
   "bin": {
     "title": "Thùng rác",

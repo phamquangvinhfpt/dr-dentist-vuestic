@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { onMounted, Ref, ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ListUserPagination, User } from './types'
+import { VaButton } from 'vuestic-ui'
 
 const { t } = useI18n()
 const userStore = useUserProfileStore()
@@ -127,7 +128,12 @@ onMounted(() => {
       </div>
     </template>
     <template #cell(action)="{ row }">
-      <button class="btn btn-detail" @click="viewDetails(row.rowData.id)">Detail</button>
+      <VaButton
+        color="info"
+        class="mr-6 mb-2 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300"
+        @click="viewDetails(row.rowData.id)"
+        >Detail</VaButton
+      >
     </template>
   </VaDataTable>
   <VaCardContent>

@@ -268,7 +268,8 @@
     "help": "Help",
     "infor": "Information",
     "orders": "Orders",
-    "message": "Message"
+    "message": "Message",
+    "user-management": "User Management"
   },
   "bin": {
     "title": "Trash",

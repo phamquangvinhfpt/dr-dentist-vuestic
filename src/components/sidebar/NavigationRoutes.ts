@@ -23,7 +23,7 @@ export default {
     },
     {
       name: 'users-management',
-      displayName: 'menu.usersManagement',
+      displayName: 'menu.user-management',
       meta: {
         icon: 'vuestic-iconset-user',
         permission: 'Users.View',
