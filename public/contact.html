@@ -371,5 +371,81 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBk25E4mNfVIEt3tNl3K1HwNZVruVoFBlA"></script>
     <script src="js/gmaps.js"></script>
     <script src="js/map-helper.js"></script>
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script>
+      const sendEmail = () => {
+        const name = sanitizeInput(document.getElementById('name').value)
+        const fname = sanitizeInput(document.getElementById('fname').value)
+        const lname = sanitizeInput(document.getElementById('lname').value)
+        const senderEmail = sanitizeInput(document.getElementById('email').value)
+        const phone = sanitizeInput(document.getElementById('phone').value)
+        const zip = sanitizeInput(document.getElementById('zip').value)
+        const role = sanitizeInput(document.getElementById('role').value)
+        const clientCode = sanitizeInput(document.getElementById('client-code').value)
+        const companyName = sanitizeInput(document.getElementById('company-name').value)
+        const services = sanitizeInput(document.getElementById('services').value)
+        const discussion = sanitizeInput(document.getElementById('discussion').value)
+        const subject = sanitizeInput(document.getElementById('subject').value)
+        const website = sanitizeInput(document.getElementById('website').value)
+        const message = sanitizeInput(document.getElementById('message').value)
+
+        let fullName = name
+        if (!name) {
+          fullName = `${fname} ${lname}`
+        }
+
+        const mailSubject = `A contact request sent by ${fullName}`
+        let mailBody = `Name: ${fullName}\nEmail: ${senderEmail}`
+
+        if (phone) {
+          mailBody += `\nPhone: ${phone}`
+        }
+        if (services) {
+          mailBody += `\nServices: ${services}`
+        }
+        if (subject) {
+          mailBody += `\nSubject: ${subject}`
+        }
+        if (website) {
+          mailBody += `\nWebsite: ${website}`
+        }
+        if (zip) {
+          mailBody += `\nZip: ${zip}`
+        }
+        if (role) {
+          mailBody += `\nRole: ${role}`
+        }
+        if (clientCode) {
+          mailBody += `\nClient Code: ${clientCode}`
+        }
+        if (companyName) {
+          mailBody += `\nCompany Name: ${companyName}`
+        }
+        if (discussion) {
+          mailBody += `\nDiscussion: ${discussion}`
+        }
+        mailBody += `\nMessage: ${message}`
+
+        const senderEmailValue = sanitizeInput(document.getElementById('sender-email').value)
+        const senderPasswordValue = sanitizeInput(document.getElementById('sender-password').value)
+        const recipientEmailValue = sanitizeInput(document.getElementById('recipient-email').value)
+
+        Email.send({
+          Host: 'smtp.gmail.com',
+          Username: senderEmailValue,
+          Password: senderPasswordValue,
+          To: recipientEmailValue,
+          From: senderEmailValue,
+          Subject: mailSubject,
+          Body: mailBody,
+        }).then(function (message) {
+          alert('Email sent successfully')
+        })
+      }
+
+      function sanitizeInput(input) {
+        return input.replace(/[^\.\-\' a-zA-Z0-9]/g, '')
+      }
+    </script>
   </body>
 </html>

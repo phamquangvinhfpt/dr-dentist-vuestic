@@ -22,5 +22,6 @@ export type Message = {
   sender: 'me' | 'other'
   name?: string
   imageUrl?: string
+  originalTime?: string
   time?: string
 }

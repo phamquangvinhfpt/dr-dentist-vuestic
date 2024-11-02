@@ -1063,10 +1063,31 @@ hr.style-one {
   -webkit-backface-visibility: visible !important;
   backface-visibility: visible !important;
 }
-.banner-one__slide {
+/* .banner-one__slide {
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
+} */
+.banner-one__slide {
+  position: relative;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.banner-one__slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Điều chỉnh màu sắc và độ trong suốt ở đây */
+}
+
+.banner-one__slide .container {
+  position: relative;
+  z-index: 1; /* Đảm bảo nội dung nằm trên lớp overlay */
 }
 .banner-one__light-color {
   color: #fff;
@@ -3986,56 +4007,37 @@ hr.style-one {
   color: #ff6b35;
   font-size: 16px;
 }
-.testimonials-three .video-popup {
-  display: inline-block;
-  vertical-align: middle;
-  width: 50px;
-  height: 50px;
-  background-color: #fff;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 50px;
-  color: #0384ce;
-  font-size: 15px;
-  margin-top: 50px;
-}
+
 .testimonials-three .owl-carousel .owl-item img {
   width: auto;
 }
 
 .testimonials-three__carousel {
-  position: absolute;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  transform: translateY(-50%);
-  right: -165px;
+  position: relative;
+  top: 0;
+  transform: translateY(0);
+  right: 0;
   z-index: 11;
   max-width: 1170px;
   padding-left: 15px;
   padding-right: 15px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 70px;
 }
+
 @media (max-width: 1440px) {
   .testimonials-three__carousel {
     max-width: 900px;
   }
 }
-@media (max-width: 991px) {
-  .testimonials-three__carousel {
-    position: relative;
-    top: 0;
-    -webkit-transform: translateY(0);
-    transform: translateY(0);
-    right: 0;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 70px;
-  }
-}
+
 .testimonials-three__carousel .testimonials-three__single {
   background-color: #fff;
   position: relative;
   padding: 30px;
 }
+
 .testimonials-three__carousel .testimonials-three__box-icon {
   position: absolute;
   top: 30px;
@@ -4043,13 +4045,16 @@ hr.style-one {
   font-size: 130px;
   opacity: 0.05;
 }
+
 .testimonials-three__carousel .testimonials-three__title,
 .testimonials-three__carousel .testimonials-three__text {
   color: #0f4469;
 }
+
 .testimonials-three__carousel .testimonials-three__text {
   font-style: italic;
 }
+
 .testimonials-three__carousel .testimonials-three__icon .inner-block > img {
   width: 100% !important;
 }
@@ -5298,13 +5303,27 @@ hr.style-one {
 * 13. inner-banner style
 */
 .inner-banner {
+  position: relative;
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
   text-align: center;
   padding: 235px 0;
 }
+
+.inner-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Điều chỉnh màu sắc và độ trong suốt ở đây */
+}
+
 .inner-banner__title {
+  position: relative;
+  z-index: 1;
   margin: 0;
   color: #fff;
   font-family: 'Source Sans Pro', sans-serif;
@@ -5312,14 +5331,16 @@ hr.style-one {
   font-weight: bold;
   margin-bottom: 25px;
 }
+
 .inner-banner .post-filter-one {
+  position: relative;
+  z-index: 1;
   max-width: 690px;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
-  padding: 0;
+  padding: 0 15px;
   border-radius: 28px;
-  padding-left: 15px;
   margin-top: 90px;
 }
 .inner-banner .post-filter-one__search button[type='submit'],
@@ -5389,8 +5410,10 @@ hr.style-one {
 }
 
 .thm-breadcrumb {
+  position: relative;
   margin: 0;
   padding: 0;
+  z-index: 1;
   list-style: none;
 }
 .thm-breadcrumb li {

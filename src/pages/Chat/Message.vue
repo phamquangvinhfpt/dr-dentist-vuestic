@@ -37,7 +37,12 @@
                       class="mr-2"
                       :color="user.isOnline ? 'success' : 'secondary'"
                     >
-                      <VaAvatar :src="user.imageUrl" :fallback-text="user.name.charAt(0).toUpperCase()" alt="Avatar" />
+                      <VaAvatar
+                        color="#692BEB"
+                        :src="user.imageUrl"
+                        :fallback-text="user.name.charAt(0).toUpperCase()"
+                        alt="Avatar"
+                      />
                     </VaBadge>
                   </div>
                   <div class="ml-3 flex-grow overflow-hidden">
@@ -75,7 +80,12 @@
                     :color="selectedUser?.isOnline ? 'success' : 'secondary'"
                   >
                     <VaAvatar
-                      :src="selectedUser?.imageUrl"
+                      :src="
+                        isStaff
+                          ? selectedUser?.imageUrl
+                          : 'https://img.icons8.com/?size=100&id=99333&format=png&color=4D7A77'
+                      "
+                      color="#692BEB"
                       :fallback-text="selectedUser?.name.charAt(0).toUpperCase()"
                       alt="Avatar"
                     />
@@ -99,6 +109,7 @@
                     <div v-if="messageGroup[0].sender !== 'me'" class="mr-2 flex-shrink-0 self-end group">
                       <VaAvatar
                         size="small"
+                        color="#692BEB"
                         :src="messageGroup[0]?.imageUrl"
                         alt="Avatar"
                         :fallback-text="messageGroup[0]?.name?.charAt(0).toUpperCase()"
@@ -136,7 +147,7 @@
                           </div>
                         </div>
                         <div :class="['text-xs', messageGroup[0].sender === 'me' ? 'text-right' : 'text-left']">
-                          {{ messageGroup[0]?.time }}
+                          {{ messageGroup[messageGroup.length - 1]?.time }}
                         </div>
                       </div>
                     </div>
@@ -188,7 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, onBeforeMount } from 'vue'
+import { ref, computed, watch, watchEffect, onBeforeMount, onBeforeUnmount } from 'vue'
 import { chatService } from '@/services/chatService'
 import { useAuthStore } from '@modules/auth.module'
 import { getErrorMessage } from '@/services/utils'
@@ -226,8 +237,8 @@ const { receivedMessage } = storeToRefs(onlineUsersStore)
 const newMessage = ref('')
 const keyword = ref('')
 const selectedUser = ref<User | null>(null)
-const isLargeScreen = ref(window.innerWidth >= 1024) // lg breakpoint
-// New computed property to group messages
+const isLargeScreen = ref(window.innerWidth >= 768 && window.innerWidth < 1024)
+
 const groupedMessages = computed(() => {
   const groups: Message[][] = []
   let currentGroup: Message[] = []
@@ -251,6 +262,7 @@ const groupedMessages = computed(() => {
 
   return groups
 })
+
 // Methods
 const selectUser = async (user: User) => {
   selectedUser.value = user
@@ -282,12 +294,11 @@ const sendMessage = async () => {
       sender: 'me',
       name: authStore.user?.fullName,
       imageUrl: getSrcAvatar(authStore.user?.avatarUrl),
-      time: new Date().toLocaleTimeString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      originalTime: new Date().toISOString(),
+      time: convertDateTimeToTime(new Date().toISOString()),
     })
     newMessage.value = ''
+    await loadUsers()
     scrollToBottom()
   }
 }
@@ -308,11 +319,63 @@ const getSrcAvatar = (img: any) => {
   return ''
 }
 
+const TIME_NAMES = {
+  second: 1000,
+  minute: 1000 * 60,
+  hour: 1000 * 60 * 60,
+  day: 1000 * 60 * 60 * 24,
+  week: 1000 * 60 * 60 * 24 * 7,
+  month: 1000 * 60 * 60 * 24 * 30,
+  year: 1000 * 60 * 60 * 24 * 365,
+}
+
+const getTimeName = (differenceTime: number) => {
+  return Object.keys(TIME_NAMES).reduce(
+    (acc, key) => (TIME_NAMES[key as keyof typeof TIME_NAMES] < differenceTime ? key : acc),
+    'second',
+  ) as keyof typeof TIME_NAMES
+}
+
+const convertToUTC = (date: string | Date): Date => {
+  const localDate = new Date(date)
+  return new Date(
+    localDate.getUTCFullYear(),
+    localDate.getUTCMonth(),
+    localDate.getUTCDate(),
+    localDate.getUTCHours(),
+    localDate.getUTCMinutes(),
+    localDate.getUTCSeconds(),
+  )
+}
+
+const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+
 const convertDateTimeToTime = (date: string) => {
-  return new Date(date).toLocaleTimeString('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const currentUTCDate = convertToUTC(new Date())
+  const itemUTCDate = convertToUTC(date)
+  const timeDifference = Math.round(currentUTCDate.getTime() - itemUTCDate.getTime())
+  const timeName = getTimeName(timeDifference)
+
+  if (timeDifference < TIME_NAMES.minute) {
+    return 'Just now'
+  } else if (timeDifference < TIME_NAMES.day) {
+    return rtf.format(-1 * Math.round(timeDifference / TIME_NAMES[timeName]), timeName)
+  } else {
+    return itemUTCDate.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+}
+
+const updateMessageTimes = () => {
+  messages.value = messages.value.map((message) => ({
+    ...message,
+    time: convertDateTimeToTime(message.originalTime || ''),
+  }))
 }
 
 const loadUsers = async () => {
@@ -365,6 +428,7 @@ const getUserConversion = async (userid: string) => {
     sender: message.senderId === authStore.user?.id ? 'me' : 'other',
     name: message.senderName,
     imageUrl: getSrcAvatar(message.imageUrl),
+    originalTime: message.createdOn,
     time: convertDateTimeToTime(message.createdOn),
   }))
 }
@@ -400,9 +464,10 @@ watch(
       sender: receivedMessage.value.senderId === authStore.user?.id ? 'me' : 'other',
       name: receivedMessage.value.senderName,
       imageUrl: getSrcAvatar(receivedMessage.value.imageUrl),
+      originalTime: receivedMessage.value.createdOn,
       time: convertDateTimeToTime(receivedMessage.value.createdOn),
     })
-    // update getListUserDto again
+
     loadUsers()
     handleUserOnline()
     scrollToBottom()
@@ -410,14 +475,32 @@ watch(
   { immediate: true },
 )
 
-// update length of messages
 watchEffect(() => {
   scrollToBottom()
 })
 
 onBeforeMount(() => {
-  scrollToBottom()
   loadUsers()
+})
+
+watch(
+  messages,
+  () => {
+    scrollToBottom()
+  },
+  { deep: true },
+)
+
+watchEffect(() => {
+  updateMessageTimes()
+
+  const interval = setInterval(() => {
+    updateMessageTimes()
+  }, 60 * 1000)
+
+  onBeforeUnmount(() => {
+    clearInterval(interval)
+  })
 })
 </script>
 <style scoped>
