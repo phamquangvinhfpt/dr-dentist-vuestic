@@ -218,6 +218,7 @@ import { useOnlineUsersStore } from '@/stores/online-users-store'
 import { storeToRefs } from 'pinia'
 import signalRService from '@/signalR'
 import { Message, User } from './types'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 
@@ -237,6 +238,7 @@ const { receivedMessage } = storeToRefs(onlineUsersStore)
 const newMessage = ref('')
 const keyword = ref('')
 const selectedUser = ref<User | null>(null)
+const router = useRouter()
 const isLargeScreen = ref(window.innerWidth >= 768 && window.innerWidth < 1024)
 
 const groupedMessages = computed(() => {
@@ -276,6 +278,11 @@ const selectUser = async (user: User) => {
 const deselectUser = () => {
   selectedUser.value = null
   isUserListVisible.value = true
+
+  if (!isStaff) {
+    //redirect to home by router
+    router.push({ name: 'dashboard' })
+  }
 }
 
 const scrollToBottom = () => {

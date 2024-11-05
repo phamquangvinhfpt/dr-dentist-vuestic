@@ -1,5 +1,5 @@
 <template>
-  <div class="flex gap-2">
+  <div v-if="!isPatientOrGuest" class="flex gap-2">
     <VaIconMenuCollapsed
       class="cursor-pointer"
       :class="{ 'x-flip': !isSidebarMinimized }"
@@ -30,8 +30,11 @@ import VaIconMenuCollapsed from '../icons/VaIconMenuCollapsed.vue'
 import { storeToRefs } from 'pinia'
 import { useGlobalStore } from '../../stores/global-store'
 import NavigationRoutes from '../sidebar/NavigationRoutes'
+import { useAuthStore } from '@/stores/modules/auth.module'
 
 const { isSidebarMinimized } = storeToRefs(useGlobalStore())
+const authStore = useAuthStore()
+const isPatientOrGuest = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)
 
 const router = useRouter()
 const route = useRoute()

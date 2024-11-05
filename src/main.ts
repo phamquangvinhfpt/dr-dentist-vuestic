@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { computed, createApp } from 'vue'
 import i18n from './i18n'
 import { createVuestic } from 'vuestic-ui'
 import { createGtm } from '@gtm-support/vue-gtm'
@@ -19,7 +19,15 @@ app.use(createVuestic({ config: vuesticGlobalConfig }))
 
 const authStore = useAuthStore()
 authStore.checkAuth()
+const isGuestOrPatient = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)
 router.beforeEach((to, from, next) => {
+  if (to.matched.some((record) => record.meta.requiresGuest)) {
+    if (isGuestOrPatient.value) {
+      next()
+    } else {
+      next({ name: 'dashboard' })
+    }
+  }
   if (to.matched.some((record) => record.meta.requiresCaptcha)) {
     app.use(VueReCaptcha, {
       siteKey: import.meta.env.VITE_APP_RECAPTCHA_SITE_KEY,

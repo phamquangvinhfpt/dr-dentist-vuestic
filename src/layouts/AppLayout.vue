@@ -9,7 +9,12 @@
     </template>
 
     <template #left>
-      <AppSidebar :minimized="isSidebarMinimized" :animated="!isMobile" :mobile="isMobile" />
+      <AppSidebar
+        v-if="!isPatientOrGuest || isMobile"
+        :minimized="isSidebarMinimized"
+        :animated="!isMobile"
+        :mobile="isMobile"
+      />
     </template>
 
     <template #content>
@@ -19,7 +24,7 @@
         </div>
       </div>
       <AppLayoutNavigation v-if="!isMobile" class="p-4" />
-      <main class="sm:p-4 pt-0">
+      <main :class="isPatientOrGuest ? '' : 'p-4 pt-0'">
         <article>
           <!-- <RouterView /> -->
           <RouterView v-slot="{ Component }">
@@ -43,6 +48,7 @@ import AppLayoutNavigation from '../components/app-layout-navigation/AppLayoutNa
 import AppNavbar from '../components/navbar/AppNavbar.vue'
 import AppSidebar from '../components/sidebar/AppSidebar.vue'
 import signalRService from '@/signalR'
+import { useAuthStore } from '@/stores/modules/auth.module'
 
 const GlobalStore = useGlobalStore()
 const onlineUsersStore = useOnlineUsersStore()
@@ -50,6 +56,10 @@ const breakpoints = useBreakpoint()
 
 const sidebarWidth = ref('16rem')
 const sidebarMinimizedWidth = ref(undefined)
+
+const authStore = useAuthStore()
+const isPatientOrGuest = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)
+const isGuest = computed(() => authStore.user === null)
 
 const isMobile = ref(false)
 const isTablet = ref(false)
@@ -108,38 +118,44 @@ const handleReceiveMessage = (message) => {
 }
 
 onBeforeMount(async () => {
-  const url = import.meta.env.VITE_APP_BASE_URL
-  const url_without_api = url.slice(0, -3)
-  const notificationPath = url_without_api + 'notifications'
-  const messagePath = url_without_api + 'chat'
+  if (!isGuest.value) {
+    const url = import.meta.env.VITE_APP_BASE_URL
+    const url_without_api = url.slice(0, -3)
+    const notificationPath = url_without_api + 'notifications'
+    const messagePath = url_without_api + 'chat'
 
-  // Kết nối đến hub thông báo
-  await signalRService.connect(notificationPath, 'notificationHub')
+    // Kết nối đến hub thông báo
+    await signalRService.connect(notificationPath, 'notificationHub')
 
-  // Kết nối đến hub tin nhắn
-  await signalRService.connect(messagePath, 'messageHub')
+    // Kết nối đến hub tin nhắn
+    await signalRService.connect(messagePath, 'messageHub')
 
-  if (signalRService.isConnected('notificationHub') && signalRService.isConnected('messageHub')) {
-    // Đăng ký sự kiện cho hub thông báo
-    signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
+    if (signalRService.isConnected('notificationHub') && signalRService.isConnected('messageHub')) {
+      // Đăng ký sự kiện cho hub thông báo
+      signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
 
-    // Đăng ký sự kiện cho hub tin nhắn
-    signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
-    signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
-  } else {
-    //retry connect
-    setTimeout(() => {
-      location.reload()
-    }, 100)
+      // Đăng ký sự kiện cho hub tin nhắn
+      signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
+      signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
+    } else {
+      //retry connect
+      setTimeout(() => {
+        location.reload()
+      }, 100)
+    }
   }
 })
 
+// watch for user change
+
 onBeforeUnmount(() => {
-  signalRService.off('notificationHub', 'NotificationFromServer')
-  signalRService.off('messageHub', 'UpdateOnlineUsers')
-  signalRService.off('messageHub', 'ReceiveMessage')
-  signalRService.disconnect('notificationHub')
-  signalRService.disconnect('messageHub')
+  if (!isGuest.value) {
+    signalRService.off('notificationHub', 'NotificationFromServer')
+    signalRService.off('messageHub', 'UpdateOnlineUsers')
+    signalRService.off('messageHub', 'ReceiveMessage')
+    signalRService.disconnect('notificationHub')
+    signalRService.disconnect('messageHub')
+  }
 })
 </script>
 

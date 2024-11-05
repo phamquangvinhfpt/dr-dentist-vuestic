@@ -111,9 +111,10 @@ import { getErrorMessage } from '@/services/utils'
 import { useToast } from 'vuestic-ui/web-components'
 import { IconColor, IconType, LabelType } from '@/pages/notification/Notification.enum'
 import { useNotificationStore } from '@/stores/modules/notification.module'
+import { useAuthStore } from '@/stores/modules/auth.module'
 
 const { t, locale } = useI18n()
-
+const userStore = useAuthStore()
 const { init: notify } = useToast()
 const rtf = new Intl.RelativeTimeFormat(locale.value, { style: 'short' })
 const router = useRouter()
@@ -121,6 +122,7 @@ const doShowDropdown = ref(false)
 const isLoading = ref(false)
 const amountOfNewNotification = ref(0)
 const showMoreButton = ref(false)
+const isGuest = computed(() => userStore.user === null)
 const pagination = ref<PagingNotification>({
   pageNumber: 1,
   pageSize: 5,
@@ -275,7 +277,7 @@ const getAmountOfNewNotification = async () => {
 }
 
 watch(
-  () => useNotificationStore().isRefreshData,
+  () => (!isGuest.value ? useNotificationStore().isRefreshData : null),
   (isRefreshData) => {
     if (isRefreshData?.status && isRefreshData?.isFromDropDown === false) {
       const tempPageNumber = 1
@@ -301,7 +303,9 @@ onMounted(() => {
     pageSize: pagination.value.pageSize,
     isRead: undefined,
   }
-  getNotifications(data, false)
+  if (!isGuest.value) {
+    getNotifications(data, false)
+  }
 })
 
 const TIME_NAMES = {

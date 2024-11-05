@@ -12,13 +12,16 @@ const routes: Array<RouteRecordRaw> = [
   {
     name: 'landingPage',
     path: '/index',
+    meta: {
+      requiresGuest: true,
+    },
     component: LandingPage,
   },
   {
     name: 'home',
     path: '/',
     component: AppLayout,
-    redirect: { name: 'landingPage' },
+    redirect: { name: 'home-page' },
     children: [
       {
         name: 'dashboard',
@@ -27,6 +30,14 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: true,
         },
         component: () => import('../pages/home/dashboard/Dashboard.vue'),
+      },
+      {
+        name: 'home-page',
+        path: 'home',
+        meta: {
+          requiresGuest: true,
+        },
+        component: () => import('../pages/home/dashboard/widgets/Patient-v2.vue'),
       },
       {
         name: 'profile',
