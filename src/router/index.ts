@@ -2,7 +2,6 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import LandingPage from '../layouts/LandingPage.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import AppLayout from '../layouts/AppLayout.vue'
-import { Capacitor } from '@capacitor/core'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -180,20 +179,6 @@ const router = createRouter({
     }
   },
   routes,
-})
-router.beforeEach((to, from, next) => {
-  const platform = Capacitor.getPlatform()
-  if (platform === 'android' || platform === 'ios') {
-    // Nếu là mobile (Android hoặc iOS), chuyển hướng đến trang login khi vào trang chủ
-    if (to.path === '/') {
-      next('/login')
-    } else {
-      next()
-    }
-  } else {
-    // Nếu là web, giữ nguyên điều hướng
-    next()
-  }
 })
 
 export default router

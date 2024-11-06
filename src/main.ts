@@ -9,6 +9,7 @@ import vuesticGlobalConfig from '@services/vuestic-ui/global-config'
 import App from './App.vue'
 import { useAuthStore } from '@modules/auth.module'
 import { VueReCaptcha } from 'vue-recaptcha-v3'
+import { Capacitor } from '@capacitor/core'
 
 const app = createApp(App)
 
@@ -66,5 +67,20 @@ if (import.meta.env.VITE_APP_GTM_ENABLED) {
     }),
   )
 }
+
+router.beforeEach((to, from, next) => {
+  const platform = Capacitor.getPlatform()
+  if (platform === 'android' || platform === 'ios') {
+    // Nếu là mobile (Android hoặc iOS), chuyển hướng đến trang login khi vào trang chủ
+    if (to.path === '/') {
+      next('/login')
+    } else {
+      next()
+    }
+  } else {
+    // Nếu là web, giữ nguyên điều hướng
+    next()
+  }
+})
 
 app.mount('#app')

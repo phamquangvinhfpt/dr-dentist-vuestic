@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { onBeforeMount, onMounted, ref } from 'vue'
-import { VaCarousel, VaInnerLoading, VaButton, VaInput, VaDateInput, VaCardContent } from 'vuestic-ui'
+import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle } from 'vuestic-ui'
 import { Doctors } from './types'
-import router from '@/router'
+import { useRouter } from 'vue-router'
 
 const loading = ref(true)
 const currentSlide = ref(0)
 const showContent = ref(true)
 const animationKey = ref(0)
 const isLargeScreen = ref(window.innerWidth >= 1024)
-const appointmentDate = ref(new Date())
 const doctorStore = useDoctorProfileStore()
 const doctors = ref<Doctors[]>([])
+const router = useRouter()
 
 const INTERVAL_TIME = 3000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
@@ -38,47 +38,6 @@ const handleGetDoctors = async () => {
   }
   loading.value = false
 }
-
-const options = [
-  { label: 'Dr. John Smith', value: 'john-smith' },
-  { label: 'Dr. Emily Johnson', value: 'emily-johnson' },
-  { label: 'Dr. Michael Lee', value: 'michael-lee' },
-]
-
-// value
-const value = ref('')
-
-// fake doctors
-// const fakedoctors = ref([
-//   {
-//     name: 'Dr. John Smith',
-//     image:
-//       'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     description:
-//       'Dr. John Smith is a highly experienced dentist with a passion for providing quality care to his patients. He specializes in cosmetic dentistry and has helped many patients achieve their dream smiles.',
-//   },
-//   {
-//     name: 'Dr. Emily Johnson',
-//     image:
-//       'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     description:
-//       'Dr. Emily Johnson is a dedicated dentist who is committed to providing the best care to her patients. She specializes in pediatric dentistry and ensures children feel comfortable and safe during their visits.',
-//   },
-//   {
-//     name: 'Dr. Michael Lee',
-//     image:
-//       'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     description:
-//       'Dr. Michael Lee is a skilled dentist who is dedicated to providing comprehensive care to his patients. He specializes in restorative dentistry and ensures patients receive the best treatments for their needs.',
-//   },
-//   {
-//     name: 'Dr. Sarah Brown',
-//     image:
-//       'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-//     description:
-//       'Dr. Sarah Brown is a caring dentist who is dedicated to providing personalized care to her patients. She specializes in preventive dentistry and helps patients maintain healthy smiles for life.',
-//   },
-// ])
 
 onMounted(() => {
   const handleResize = () => {
@@ -109,7 +68,7 @@ window.addEventListener('resize', () => {
   <VaInnerLoading :loading="loading">
     <div class="relative">
       <div class="relative w-full">
-        <!-- Carousel phần giữ nguyên -->
+        <!-- Carousel -->
         <VaCarousel
           v-model="currentSlide"
           :items="items"
@@ -145,8 +104,25 @@ window.addEventListener('resize', () => {
                 </h3>
               </div>
               <div class="slide-up">
-                <VaButton class="lg:px-8 lg:py-4 text-sm font-semibold shadow-lg hover:shadow-xl" color="primary">
-                  Get Appointment
+                <VaButton
+                  class="bg-transparent lg:px-4 lg:py-4 text-sm font-semibold shadow-lg hover:shadow-xl md:float-right"
+                  color="info"
+                >
+                  Get Started
+                  <svg
+                    class="ml-2 w-4 h-4 fill-current"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
+                  </svg>
                 </VaButton>
               </div>
             </div>
@@ -155,12 +131,12 @@ window.addEventListener('resize', () => {
       </div>
 
       <!-- Services section -->
-      <div :class="[isLargeScreen ? 'container mx-auto p-4' : '']">
+      <div v-if="!isLargeScreen" :class="[isLargeScreen ? 'container mx-auto p-4' : '']">
         <div v-if="!isLargeScreen" class="flex justify-between items-center mt-4 m-3">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white">Our Category</h2>
           <a href="#" class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400">See All</a>
         </div>
-        <div class="grid grid-cols-3 gap-4 lg:gap-8 mt-8 lg:-mt-16 place-content-center lg:relative lg:px-4 z-10 m-3">
+        <div class="grid grid-cols-3 gap-4 lg:gap-16 mt-8 lg:-mt-16 place-content-center lg:relative lg:px-4 z-10 m-3">
           <!-- Service 1-->
           <a href="#" class="group block">
             <div
@@ -250,12 +226,85 @@ window.addEventListener('resize', () => {
         </div>
       </div>
 
+      <div id="services" class="px-4 py-10 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24">
+        <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700">OUR SERVICES</h5>
+        <div class="grid row-gap-8 sm:row-gap-0 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="p-8">
+            <div class="max-w-md text-center">
+              <div
+                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
+              >
+                <img src="../../../../../public/services/general_dentistry.ico" />
+              </div>
+              <h1 class="mb-2 text-2xl font-semibold leading-5">GENERAL DENTISTRY</h1>
+            </div>
+          </div>
+          <div class="p-8">
+            <div class="max-w-md text-center">
+              <div
+                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
+              >
+                <img src="../../../../../public/services/cosmetic_dentistry.ico" />
+              </div>
+              <h1 class="mb-2 text-2xl font-semibold leading-5">COSMETICS SURGERY</h1>
+            </div>
+          </div>
+          <div class="p-8">
+            <div class="max-w-md text-center">
+              <div
+                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
+              >
+                <img src="../../../../../public/services/oral_surgery.ico" />
+              </div>
+              <h1 class="mb-2 text-2xl font-semibold leading-5">ORAL SURGERY</h1>
+            </div>
+          </div>
+          <div class="p-8">
+            <div class="max-w-md text-center">
+              <div
+                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
+              >
+                <img src="../../../../../public/services/orthodontics.ico" />
+              </div>
+              <h1 class="mb-2 text-2xl font-semibold leading-5">ORTHODONTICS</h1>
+            </div>
+          </div>
+          <div class="p-8">
+            <div class="max-w-md text-center">
+              <div
+                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
+              >
+                <img src="../../../../../public/services/pediatric_dentistry.ico" />
+              </div>
+              <h1 class="mb-2 text-2xl font-semibold leading-5">PEDIATRIC DENTISTRY</h1>
+            </div>
+          </div>
+          <div class="p-8">
+            <div class="max-w-md text-center">
+              <div
+                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
+              >
+                <img src="../../../../../public/services/prosthodontics.ico" />
+              </div>
+              <h1 class="mb-2 text-2xl font-semibold leading-5">PROSTHODONTICS</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ====== Services Section End -->
+
       <!-- Doctors section-->
-      <div :class="[isLargeScreen ? 'w-full max-w-4xl md:max-w-7xl mx-auto mb-6' : '']">
+      <div :class="[isLargeScreen ? 'w-full max-w-4xl md:max-w-screen-xl mx-auto mt-16 mb-6' : '']">
         <div v-if="!isLargeScreen" class="flex justify-between items-center mt-4 m-3">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white">Top Doctors</h2>
           <a href="#" class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400">See All</a>
         </div>
+        <VaCardTitle
+          v-else
+          class="flex justify-center text-center text-9xl mb-2 font-semibold text-gray-900 dark:text-white hover:text-blue-800 dark:hover:text-blue-300 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
+        >
+          <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700">TOP DOCTORS</h5>
+        </VaCardTitle>
         <VaCardContent>
           <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div
@@ -272,6 +321,7 @@ window.addEventListener('resize', () => {
                 <!-- Added pb-16 to make space for buttons -->
                 <div class="flex justify-center">
                   <img
+                    lazy
                     :src="
                       doctor.imageUrl
                         ? doctor.imageUrl
@@ -380,55 +430,49 @@ window.addEventListener('resize', () => {
             </div>
           </div>
           <div class="px-4">
-            <form action="#" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
               <div class="mb-6">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Schedule an Appointment</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Patient Testimonials</h3>
               </div>
-              <div>
-                <div class="mb-4">
-                  <VaInput label="Name" placeholder="Enter your name">
-                    <template #prependInner>
-                      <VaIcon name="person" color="secondary" />
-                    </template>
-                  </VaInput>
-                </div>
-                <div class="mb-4">
-                  <VaInput label="Phone" placeholder="Enter your phone">
-                    <template #prependInner>
-                      <VaIcon name="phone" color="secondary" />
-                    </template>
-                  </VaInput>
-                </div>
-                <div class="mb-4">
-                  <VaDateInput
-                    v-model="appointmentDate"
-                    label="Date"
-                    class="w-full"
-                    placeholder="Enter Date"
-                    manual-input
-                  >
-                    <template #prependInner>
-                      <VaIcon name="date_range" color="secondary" />
-                    </template>
-                  </VaDateInput>
-                </div>
-                <div class="mb-4">
-                  <VaSelect
-                    v-model="value"
-                    class="mb-6"
-                    label="Select Doctor"
-                    :options="options"
-                    :text-by="'label'"
-                    :value-by="'value'"
+              <div class="space-y-4">
+                <div class="flex items-center">
+                  <img
+                    src="https://images.unsplash.com/photo-1482849297070-f4fae2173efe?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    alt="Patient 1"
+                    class="w-16 h-16 rounded-full object-cover"
                   />
+                  <div class="ml-4">
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Jane Doe</h4>
+                    <p class="text-gray-700 dark:text-gray-300">
+                      "The best dental care I have ever experienced! Professional, courteous, and friendly staff made me
+                      feel like family... would highly recommend to anyone!!!"
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <button type="submit" class="w-full p-3 bg-blue-500 text-white rounded-lg">
-                    Request Appointment
-                  </button>
+                <div class="flex items-center">
+                  <img
+                    src="https://images.unsplash.com/photo-1570045006801-08ec03621a42?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    alt="Patient 2"
+                    class="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div class="ml-4">
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">John Smith</h4>
+                    <p class="text-gray-700 dark:text-gray-300">
+                      "Great attention and service. You know you are in good hands when you learn things about your bone
+                      structure that you had no clue about. Keen eye on detail!"
+                    </p>
+                  </div>
+                </div>
+                <!-- Add more testimonials as needed -->
+              </div>
+              <div class="flex justify-center">
+                <div
+                  class="w-56 px-4 py-4 mt-10 text-center transition ease-in-out delay-150 bg-white hover:-translate-y-1 hover:scale-110 hover:bg-sky-500 hover:text-white text-sky-700 rounded-md duration-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:hover:text-white"
+                >
+                  <button>View More</button>
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
@@ -477,6 +521,206 @@ window.addEventListener('resize', () => {
           </Transition>
         </div>
       </div>
+
+      <!--- Start of Frequently Asked Questions -->
+      <section>
+        <div class="z-20 w-full bg-gradient-to-br from-teal-500 to-sky-700 dark:from-teal-700 dark:to-sky-900">
+          <div class="max-w-4xl px-4 py-10 mx-auto sm:px-6 lg:px-8 faqs">
+            <h5 class="mb-10 text-3xl md:text-5xl font-bold text-center text-white">FREQUENTLY ASKED QUESTIONS</h5>
+
+            <blockquote
+              class="p-8 transition-colors duration-200 ease-in-out bg-white rounded shadow-lg hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            >
+              <div class="flex items-center">
+                <div class="ml-4 text-sm">
+                  <p class="font-medium text-gray-900 dark:text-gray-100">
+                    Do I need to arrive early for my first appointment?
+                  </p>
+                </div>
+              </div>
+
+              <p class="mt-4 text-gray-500 dark:text-gray-300">
+                <span class="text-xl">&ldquo;</span>
+                Yes, at least 15 minutes early to fill out essential paperwork and give the staff time to get you all
+                set up.
+                <span class="text-xl">&rdquo;</span>
+              </p>
+            </blockquote>
+
+            <blockquote
+              class="p-8 mt-4 transition-colors duration-200 ease-in-out bg-white rounded shadow-lg hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            >
+              <div class="flex items-center">
+                <div class="ml-4 text-sm">
+                  <p class="font-medium text-gray-900 dark:text-gray-100">What are early signs of dental trouble?</p>
+                </div>
+              </div>
+              <p class="mt-4 text-gray-500 dark:text-gray-300">
+                <span class="text-xl">&ldquo;</span>
+                The possible early signs of dental trouble are: Toothache; Sensitive Teeth; Bleeding or Sore Gums; Bad
+                Breath; Cavities; Jaw Pain; Mouth Sores; Dry Mouth; Broken, Cracked, Chipped, Lost.
+                <span class="text-xl">&rdquo;</span>
+              </p>
+            </blockquote>
+
+            <blockquote
+              class="p-8 mt-4 transition-colors duration-200 ease-in-out bg-white rounded shadow-lg hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+            >
+              <div class="flex items-center">
+                <div class="ml-4 text-sm">
+                  <p class="font-medium text-gray-900 dark:text-gray-100">What are early signs of dental trouble?</p>
+                </div>
+              </div>
+              <p class="mt-4 text-gray-500 dark:text-gray-300">
+                <span class="text-xl">&ldquo;</span>
+                The possible early signs of dental trouble are: Toothache; Sensitive Teeth; Bleeding or Sore Gums; Bad
+                Breath; Cavities; Jaw Pain; Mouth Sores; Dry Mouth; Broken, Cracked, Chipped, Lost.
+                <span class="text-xl">&rdquo;</span>
+              </p>
+            </blockquote>
+
+            <div class="flex justify-center">
+              <div
+                class="w-56 px-4 py-4 mt-10 text-center transition ease-in-out delay-150 bg-white hover:-translate-y-1 hover:scale-110 hover:bg-sky-500 hover:text-white text-sky-700 rounded-md duration-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:hover:text-white"
+              >
+                <button>View More</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- End of Frequently Asked Questions -->
+
+      <!-- Start of Instructions -->
+      <div class="sm:px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
+        <div class="max-w-xl mb-10 md:mx-auto sm:text-center lg:max-w-2xl md:mb-12">
+          <div class="text-center">
+            <p
+              class="inline-block px-3 py-px mb-4 text-sm font-semibold tracking-wider uppercase rounded-full text-sky-700 bg-teal-accent-400"
+            >
+              LFI DENTAL CLINIC
+            </p>
+          </div>
+          <h2
+            class="max-w-lg mb-6 font-sans text-3xl font-bold leading-none tracking-tight text-center text-teal-500 sm:text-4xl md:mx-auto"
+          >
+            <span class="relative inline-block">
+              <svg
+                viewBox="0 0 52 24"
+                fill="currentColor"
+                class="absolute top-0 left-0 z-0 hidden w-32 -mt-8 -ml-20 text-blue-gray-100 lg:w-32 lg:-ml-28 lg:-mt-10 sm:block"
+              >
+                <defs>
+                  <pattern id="f51618fb-0edb-4bcb-b35a-ffc770941286" x="0" y="0" width=".135" height=".30">
+                    <circle cx="1" cy="1" r=".7"></circle>
+                  </pattern>
+                </defs>
+                <rect fill="url(#f51618fb-0edb-4bcb-b35a-ffc770941286)" width="52" height="24"></rect>
+              </svg>
+              <span class="relative text-sky-700">HOW</span>
+            </span>
+            TO SET AN APPOINTMENT
+          </h2>
+          <p class="text-base text-center teal-5 md:text-lg">
+            Set your appointment now through these three (3) easy steps.
+          </p>
+        </div>
+        <div class="grid gap-8 row-gap-0 lg:grid-cols-3 px-6">
+          <div class="relative text-center">
+            <div
+              class="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-200 ease-in-out bg-gray-300 rounded-full hover:bg-teal-300 sm:w-20 sm:h-20 hover:scale-110 hover:rounded-full"
+            >
+              <div
+                class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110"
+              >
+                <h1 class="text-6xl text-blue-500">1</h1>
+              </div>
+            </div>
+            <h6 class="mb-2 text-2xl font-extrabold">Choose a date.</h6>
+            <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto">
+              Go the
+              <span class="border-b border-sky-700">Set an Appointment</span>
+              page. Choose and select your preferred date and time. Then, specify the needed service.
+            </p>
+            <span
+              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
+              >View our Schedules
+            </span>
+            <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
+              <svg
+                class="w-8 text-teal-500 transform rotate-90 lg:rotate-0"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <line fill="none" stroke-miterlimit="10" x1="2" y1="12" x2="22" y2="12"></line>
+                <polyline fill="none" stroke-miterlimit="10" points="15,5 22,12 15,19 "></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="relative text-center">
+            <div
+              class="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-200 ease-in-out bg-gray-300 rounded-full hover:bg-teal-300 sm:w-20 sm:h-20 hover:scale-110 hover:rounded-full"
+            >
+              <div
+                class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110"
+              >
+                <h1 class="text-6xl text-blue-500">2</h1>
+              </div>
+            </div>
+            <h6 class="mb-2 text-2xl font-extrabold">Create your Account.</h6>
+            <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
+              Create an account or
+              <span class="border-b border-sky-700">Sign in</span>
+              with an existing account.
+            </p>
+            <div
+              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
+              @click="router.push({ name: 'login' })"
+            >
+              Login or Sign up
+            </div>
+            <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
+              <svg
+                class="w-8 text-teal-500 transform rotate-90 lg:rotate-0"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <line fill="none" stroke-miterlimit="10" x1="2" y1="12" x2="22" y2="12"></line>
+                <polyline fill="none" stroke-miterlimit="10" points="15,5 22,12 15,19 "></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="relative text-center">
+            <div
+              class="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-200 ease-in-out bg-gray-300 rounded-full hover:bg-teal-300 sm:w-20 sm:h-20 hover:scale-110 hover:rounded-full"
+            >
+              <div
+                class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110"
+              >
+                <h1 class="text-6xl text-blue-500">3</h1>
+              </div>
+            </div>
+            <h6 class="mb-2 text-2xl font-extrabold">Done.</h6>
+            <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
+              View your scheduled appointments in the
+              <span class="border-b border-sky-700"> My Appointments </span>
+              page.
+            </p>
+            <div
+              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
+            >
+              See your Appointments
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--- End of Instructions -->
     </div>
   </VaInnerLoading>
 </template>

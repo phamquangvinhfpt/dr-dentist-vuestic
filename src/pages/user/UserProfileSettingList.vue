@@ -4,6 +4,7 @@ import { SettingProfile } from './types'
 import { SettingProfileOptions } from './UserProfile.enum'
 import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
+import { useAuthStore } from '@/stores/modules/auth.module'
 
 const { t } = useI18n()
 
@@ -21,6 +22,8 @@ const listSettings = ref<SettingProfile[]>([
 ])
 const activeOption = ref(SettingProfileOptions.General)
 const emit = defineEmits(['select-setting-option'])
+const authStore = useAuthStore()
+const isPatient = computed(() => authStore.musHaveRole('Patient'))
 
 function selectSettingOption(item: SettingProfile) {
   emit('select-setting-option', item)
@@ -40,14 +43,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <VaCard class="p-2 ml-1 rounded">
-    <VaTabs v-model="selectedTab" vertical grow class="mr-5">
-      <template #tabs>
-        <VaTab v-for="tab in tabs" :key="tab.id" :name="tab.id" @click="selectSettingOption(tab)">
-          <VaIcon :name="tab.icon" class="mr-2" />
-          {{ tab.name }}
-        </VaTab>
-      </template>
-    </VaTabs>
-  </VaCard>
+  <div :class="{ 'max-w-3xl container items-center': isPatient }">
+    <VaCard class="p-2 ml-1 rounded">
+      <VaTabs v-model="selectedTab" vertical grow class="mr-5">
+        <template #tabs>
+          <VaTab v-for="tab in tabs" :key="tab.id" :name="tab.id" @click="selectSettingOption(tab)">
+            <VaIcon :name="tab.icon" class="mr-2" />
+            {{ tab.name }}
+          </VaTab>
+        </template>
+      </VaTabs>
+    </VaCard>
+  </div>
 </template>
