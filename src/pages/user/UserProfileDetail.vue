@@ -531,7 +531,7 @@ const verifyEmail = async () => {
 
 <template>
   <VaInnerLoading :loading="userProfileStore?.isLoading" class="z-50">
-    <div :class="{ 'max-w-3xl mx-auto': isPatient }">
+    <div :class="{ 'max-w-6xl mx-auto p-10': isPatient }">
       <VaCard v-if="isShowProfile" class="p-2 ml-1 rounded">
         <div class="mt-3 mb-10 flex items-center gap-5">
           <div>
@@ -569,7 +569,7 @@ const verifyEmail = async () => {
           </div>
         </div>
         <VaForm ref="form" @submit.prevent="submit">
-          <div class="grid md:grid-cols-2 gap-4">
+          <div class="grid md:grid-cols-2 gap-4 p-3">
             <VaField>
               <VaInput
                 v-model="formData.firstName"

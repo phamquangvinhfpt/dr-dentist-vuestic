@@ -514,5 +514,17 @@
     "fileTypeIncorrect": "File type is incorrect",
     "select": "Select an option",
     "message": "Message"
+  },
+  "contact": {
+    "get-in-touch": "Get in Touch",
+    "address": "Address",
+    "phone": "Phone",
+    "send-message": "Send Message",
+    "title": "Title",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send",
+    "sending": "Sending",
+    "success": "Your message has been sent successfully!"
   }
 }

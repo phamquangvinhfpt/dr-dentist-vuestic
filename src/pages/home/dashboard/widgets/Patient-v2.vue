@@ -54,9 +54,6 @@ onMounted(() => {
 
 onBeforeMount(() => {
   handleGetDoctors()
-  // if (!isPatientOrGuest.value) {
-  //   router.push({ name: 'dashboard' })
-  // }
 })
 
 window.addEventListener('resize', () => {
@@ -227,14 +224,16 @@ window.addEventListener('resize', () => {
       </div>
 
       <div id="services" class="px-4 py-10 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24">
-        <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700">OUR SERVICES</h5>
+        <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer">
+          OUR SERVICES
+        </h5>
         <div class="grid row-gap-8 sm:row-gap-0 sm:grid-cols-2 lg:grid-cols-3">
           <div class="p-8">
             <div class="max-w-md text-center">
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../public/services/general_dentistry.ico" />
+                <img src="../../../../../services/general_dentistry.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">GENERAL DENTISTRY</h1>
             </div>
@@ -244,7 +243,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../public/services/cosmetic_dentistry.ico" />
+                <img src="../../../../../services/cosmetic_dentistry.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">COSMETICS SURGERY</h1>
             </div>
@@ -254,7 +253,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../public/services/oral_surgery.ico" />
+                <img src="../../../../../services/oral_surgery.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">ORAL SURGERY</h1>
             </div>
@@ -264,7 +263,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../public/services/orthodontics.ico" />
+                <img src="../../../../../services/orthodontics.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">ORTHODONTICS</h1>
             </div>
@@ -274,7 +273,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../public/services/pediatric_dentistry.ico" />
+                <img src="../../../../../services/pediatric_dentistry.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">PEDIATRIC DENTISTRY</h1>
             </div>
@@ -284,7 +283,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../public/services/prosthodontics.ico" />
+                <img src="../../../../../services/prosthodontics.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">PROSTHODONTICS</h1>
             </div>
@@ -303,7 +302,9 @@ window.addEventListener('resize', () => {
           v-else
           class="flex justify-center text-center text-9xl mb-2 font-semibold text-gray-900 dark:text-white hover:text-blue-800 dark:hover:text-blue-300 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
         >
-          <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700">TOP DOCTORS</h5>
+          <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer">
+            TOP DOCTORS
+          </h5>
         </VaCardTitle>
         <VaCardContent>
           <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -583,7 +584,7 @@ window.addEventListener('resize', () => {
               <div
                 class="w-56 px-4 py-4 mt-10 text-center transition ease-in-out delay-150 bg-white hover:-translate-y-1 hover:scale-110 hover:bg-sky-500 hover:text-white text-sky-700 rounded-md duration-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:hover:text-white"
               >
-                <button>View More</button>
+                <button @click="router.push({ name: 'faq' })">View More</button>
               </div>
             </div>
           </div>

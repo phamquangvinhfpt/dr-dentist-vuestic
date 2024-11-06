@@ -512,5 +512,17 @@
     "fileTypeIncorrect": "Loại tệp không đúng",
     "select": "Chọn một tùy chọn",
     "message": "Tin nhắn"
+  },
+  "contact": {
+    "get-in-touch": "Liên hệ",
+    "address": "Địa chỉ",
+    "phone": "Điện thoại",
+    "send-message": "Gửi tin nhắn",
+    "title": "Tiêu đề",
+    "email": "Email",
+    "message": "Nội dung",
+    "send": "Gửi",
+    "sending": "Đang gửi",
+    "success": "Tin nhắn của bạn đã được gửi thành công!"
   }
 }

@@ -24,11 +24,12 @@ const isGuestOrPatient = computed(() => authStore.musHaveRole('Patient') || auth
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresGuest)) {
     if (isGuestOrPatient.value) {
-      next()
+      return next()
     } else {
-      next({ name: 'dashboard' })
+      return next({ name: 'dashboard' })
     }
   }
+
   if (to.matched.some((record) => record.meta.requiresCaptcha)) {
     app.use(VueReCaptcha, {
       siteKey: import.meta.env.VITE_APP_RECAPTCHA_SITE_KEY,
@@ -37,25 +38,27 @@ router.beforeEach((to, from, next) => {
         autoHideBadge: true,
       },
     })
+    return next()
   }
+
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     if (!authStore.isAuthenticated) {
-      next({ name: 'login' })
+      return next({ name: 'login' })
     } else {
       if (to.matched.some((record) => record.meta.permission)) {
         const permission = to.meta.permission as string
         if (authStore.hasAccess(permission)) {
-          next()
+          return next()
         } else {
-          next({ name: '403' })
+          return next({ name: '403' })
         }
       } else {
-        next()
+        return next()
       }
     }
-  } else {
-    next()
   }
+
+  return next()
 })
 
 if (import.meta.env.VITE_APP_GTM_ENABLED) {

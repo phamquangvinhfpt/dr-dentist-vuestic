@@ -39,6 +39,22 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/home/dashboard/widgets/Patient-v2.vue'),
       },
       {
+        name: 'faq',
+        path: 'faq',
+        meta: {
+          requiresGuest: true,
+        },
+        component: () => import('../pages/home/landingpage/FAQ.vue'),
+      },
+      {
+        name: 'contact',
+        path: 'contact',
+        meta: {
+          requiresGuest: true,
+        },
+        component: () => import('../pages/home/landingpage/Contact.vue'),
+      },
+      {
         name: 'profile',
         path: 'profile',
         meta: {

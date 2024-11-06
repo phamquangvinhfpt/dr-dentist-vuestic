@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
 }
 
 .app-layout__content-wrapper {
-  padding-top: var(--va-navbar-height, 64px);
+  padding-top: var(--va-navbar-height, 0);
   margin-left: var(--va-layout-left-width, 0);
   min-height: 100vh;
   transition: margin-left 0.3s ease;
