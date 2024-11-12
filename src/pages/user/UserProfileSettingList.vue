@@ -18,6 +18,19 @@ const listSettings = ref<SettingProfile[]>([
     name: t('auth.change_password'),
     icon: 'lock',
   },
+  // doctor profile
+  {
+    id: '3',
+    name: t('settings.doctor'),
+    icon: 'person',
+  },
+
+  // patient profile
+  {
+    id: '4',
+    name: t('settings.patient'),
+    icon: 'person',
+  },
 ])
 const activeOption = ref(SettingProfileOptions.General)
 const emit = defineEmits(['select-setting-option'])
@@ -30,6 +43,7 @@ function selectSettingOption(item: SettingProfile) {
 const tabs = computed(() => [
   { id: '1', name: t('settings.general'), icon: 'person' },
   { id: '2', name: t('auth.change_password'), icon: 'lock' },
+  { id: '3', name: t('settings.doctor'), icon: 'person' },
 ])
 
 const selectedTab = ref(tabs.value[0].id)

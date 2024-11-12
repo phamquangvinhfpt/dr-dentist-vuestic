@@ -1,6 +1,7 @@
 export const SettingProfileOptions = {
   General: 'General',
   ChangePassword: 'Change Password',
+  Doctor: 'Doctor',
 }
 
 export const AvatarFiles = {

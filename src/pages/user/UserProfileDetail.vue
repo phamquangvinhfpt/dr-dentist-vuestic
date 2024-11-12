@@ -7,11 +7,14 @@ import {
   SettingProfile,
   UserDetailFormData,
   UserDetailsUpdate,
+  // DoctorDetailFormData,
+  DoctorDetailsUpdate,
 } from './types'
 import { VaAvatar, useForm, useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { AvatarFiles, OTP } from './UserProfile.enum'
 import { useUserProfileStore } from '@/stores/modules/user.module'
+
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
 
@@ -29,7 +32,8 @@ const { init: notify } = useToast()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const authStores = useAuthStore()
 const userProfileStore = useUserProfileStore()
-const isShowProfile = ref(true)
+const isShowProfile = ref(false)
+const isShowDoctorProfile = ref(false)
 const OTPTime = ref(OTP.TimeOut)
 const typesImage = ref(AvatarFiles.Type)
 const isShowModal = ref({
@@ -55,12 +59,30 @@ const userDetail = ref<UserDetailFormData>({
   email: '',
   phoneNumber: '',
   imageUrl: '',
+  job: '',
+  address: '',
+  // role: '',
+  doctorProfile: {
+    education: null,
+    college: null,
+    certification: null,
+    yearOfExp: null,
+    seftDescription: null,
+  },
 })
+
 const passwordDetail = ref<PasswordDetailFormData>({
   password: '',
   confirmNewPassword: '',
   newPassword: '',
 })
+// const doctorDetail = ref<DoctorDetailFormData>({
+//   education: '',
+//   college: '',
+//   certification: '',
+//   yearOfExp: '',
+//   seftDescription: '',
+// })
 const fileUploaded = ref(null)
 
 const getUserDetail = async () => {
@@ -74,9 +96,26 @@ const getUserDetail = async () => {
       email: userProfileStore?.userDetails?.email,
       phoneNumber: userProfileStore?.userDetails?.phoneNumber,
       imageUrl: userProfileStore?.userDetails?.imageUrl,
+      job: userProfileStore?.userDetails?.job,
+      address: userProfileStore?.userDetails?.address,
+      // role: userProfileStore?.userDetails?.role,
+      doctorProfile: {
+        education: userProfileStore?.userDetails?.doctorProfile?.education ?? null,
+        college: userProfileStore?.userDetails?.doctorProfile?.college ?? null,
+        certification: userProfileStore?.userDetails?.doctorProfile?.certification ?? null,
+        yearOfExp: userProfileStore?.userDetails?.doctorProfile?.yearOfExp ?? null,
+        seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription ?? null,
+      },
     }
     Object.assign(formData, userDetail.value)
     authStores.updateAvatarUrl(userDetail.value.imageUrl ? userDetail.value.imageUrl : undefined)
+    doctorProfile.value = {
+      education: userProfileStore?.userDetails?.doctorProfile?.education,
+      college: userProfileStore?.userDetails?.doctorProfile?.college,
+      certification: userProfileStore?.userDetails?.doctorProfile?.certification,
+      yearOfExp: userProfileStore?.userDetails?.doctorProfile?.yearOfExp,
+      seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription,
+    }
   } catch (error) {
     console.error(error)
   }
@@ -85,21 +124,56 @@ const getUserDetail = async () => {
 watch(
   () => props.settingOption?.id,
   (id) => {
-    const showProfile = id == '1'
+    const showProfile = id === '1'
     if (showProfile) {
       getUserDetail()
+      isShowProfile.value = true
+      isShowDoctorProfile.value = false
+    } else if (id === '3') {
+      // Tab Doctor
+      getUserDetail() // vẫn gọi API để lấy data
+      isShowDoctorProfile.value = true
+      isShowProfile.value = false
+    } else {
+      isShowProfile.value = false
+      isShowDoctorProfile.value = false
     }
-    isShowProfile.value = showProfile
   },
   { immediate: true },
 )
-
+// watch(() => userDetail.value?.doctorProfile, (newProfile) => {
+//   if (newProfile && isDoctor.value) {
+//     formData.doctorProfile = {
+//       education: newProfile.education ?? null,
+//       college: newProfile.college ?? null,
+//       certification: newProfile.certification ?? null,
+//       yearOfExp: newProfile.yearOfExp ?? null,
+//       selfDescription: newProfile.seftDescription ?? null
+//     }
+//   }
+// }, { immediate: true })
 onMounted(() => {
   getUserDetail()
-  isShowProfile.value = props.settingOption?.id == '1'
+  isShowProfile.value = props.settingOption?.id === '1'
+  isShowDoctorProfile.value = props.settingOption?.id === '3'
 })
 
-const formData = reactive({ ...userDetail.value })
+// test
+// const isDoctor = computed(() => {
+//   return userProfileStore?.userDetails?.role === 'DOCTOR'
+// })
+//end test
+
+const formData = reactive({ ...userDetail.value, doctorProfile: { ...userDetail.value.doctorProfile } })
+const doctorProfile = ref<any>({
+  education: '',
+  college: '',
+  certification: '',
+  yearOfExp: '',
+  seftDescription: '',
+})
+console.log('doctorProfile', doctorProfile)
+// const formDataGetDoctor = reactive({ ...doctorDetail.value })
 const formDataChangePassword = reactive({ ...passwordDetail.value })
 const formDataChangePhoneNumber = reactive({ phoneNumber: '', password: '' })
 const formDataChangePhoneOTP = reactive({ otpCode: '' })
@@ -159,6 +233,18 @@ const isFormHasNotChanged = computed(() => {
   })
 })
 
+const isFormHasNotChangedDoctor = computed(() => {
+  const doctorProfiles = userDetail.value.doctorProfile
+
+  if (!doctorProfiles || typeof doctorProfiles !== 'object') {
+    return false
+  }
+
+  return Object.entries(doctorProfiles).every(([key, value]) => {
+    return doctorProfile.value[key] === value
+  })
+})
+
 const isDisabledButtonUpdateProfile = computed(() => {
   if (isFormHasNotChanged.value) return true
   else if (!isValid) return true
@@ -183,6 +269,22 @@ const isDisabledButtonChangePassword = computed(() => {
   ) {
     return true
   }
+  return false
+})
+
+const isDisabledButtonChangeDoctorProfile = computed(() => {
+  if (isFormHasNotChangedDoctor.value) return true
+  else if (!isValid) return true
+  else if (
+    checkEmptyField(formData.doctorProfile.education) ||
+    checkEmptyField(formData.doctorProfile.college) ||
+    checkEmptyField(formData.doctorProfile.certification) ||
+    checkEmptyField(formData.doctorProfile.yearOfExp) ||
+    checkEmptyField(formData.doctorProfile.seftDescription)
+  ) {
+    return true
+  }
+  console.log('isDisabledButtonChangeDoctorProfile', isDisabledButtonChangeDoctorProfile)
   return false
 })
 
@@ -228,7 +330,7 @@ const getDateFormated = (date: Date) => {
   const day = String(date?.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
-
+//submit user profile
 const submit = async () => {
   if (validate()) {
     const dob: any = formData?.dob
@@ -245,6 +347,38 @@ const submit = async () => {
         notify({
           title: t('auth.success'),
           message: t('auth.updated_profile_successfully'),
+          color: 'success',
+        })
+        getUserDetail()
+      })
+      .catch((error) => {
+        const message = getErrorMessage(error)
+        notify({
+          title: t('auth.error'),
+          message: message,
+          color: 'danger',
+        })
+      })
+  }
+}
+
+// submit doctor profile
+
+const submitDoctorProfile = async () => {
+  if (validate()) {
+    const doctorProfileData: DoctorDetailsUpdate = {
+      education: formData.doctorProfile.education ?? null,
+      college: formData.doctorProfile.college ?? null,
+      certification: formData.doctorProfile.certification ?? null,
+      yearOfExp: formData.doctorProfile.yearOfExp ?? null,
+      seftDescription: formData.doctorProfile.certification ?? null,
+    }
+    await userProfileStore
+      .updateDoctorProfile(doctorProfileData)
+      .then(() => {
+        notify({
+          title: t('auth.success'),
+          message: t('auth.updated_doctor_profile_successfully'),
           color: 'success',
         })
         getUserDetail()
@@ -669,6 +803,21 @@ const verifyEmail = async () => {
               </template>
             </VaInput>
           </VaField>
+          <!--phần test thử của Tuấn -->
+          <VaField>
+            <VaInput v-model="formData.job" :label="t('auth.Job')" class="mb-3" :placeholder="t('auth.enter_job')" />
+          </VaField>
+          <VaField>
+            <VaInput
+              v-model="formData.address"
+              :label="t('auth.Address')"
+              class="mb-3"
+              :rules="[(v: any) => !!v || t('auth.address_required')]"
+              :placeholder="t('auth.enter_address')"
+            />
+          </VaField>
+
+          <!--kết phần test thử của Tuấn -->
         </div>
         <div class="flex justify-end">
           <VaButton class="w-fit rounded mb-3" :disabled="isDisabledButtonUpdateProfile" @click="submit">
@@ -677,7 +826,69 @@ const verifyEmail = async () => {
         </div>
       </VaForm>
     </VaCard>
-    <VaCard v-if="!isShowProfile" class="p-2 ml-1 rounded">
+
+    <!-- Hiển thị form thông tin doctor khi id === 3 -->
+    <!-- Tab Doctor Fields -->
+    <VaCard v-if="isShowDoctorProfile" class="p-2 ml-1 rounded">
+      <VaForm ref="form" @submit.prevent="submitDoctorProfile">
+        <div class="grid md:grid-cols-2 gap-4">
+          <VaField>
+            <VaInput
+              v-model="doctorProfile.education"
+              :label="t('auth.education')"
+              class="mb-3"
+              :placeholder="t('auth.enter_education')"
+            />
+          </VaField>
+          <VaField>
+            <VaInput
+              v-model="doctorProfile.college"
+              :label="t('auth.college')"
+              class="mb-3"
+              :placeholder="t('auth.enter_college')"
+            />
+          </VaField>
+          <VaField>
+            <VaInput
+              v-model="doctorProfile.certification"
+              :label="t('auth.certification')"
+              class="mb-3"
+              :placeholder="t('auth.enter_certification')"
+            />
+          </VaField>
+          <VaField>
+            <VaInput
+              v-model="doctorProfile.yearOfExp"
+              type="number"
+              :label="t('auth.year_of_experience')"
+              class="mb-3"
+              :placeholder="t('auth.enter_year_of_experience')"
+            />
+          </VaField>
+          <VaField>
+            <VaInput
+              v-model="doctorProfile.seftDescription"
+              :label="t('auth.self_description')"
+              class="mb-3"
+              :placeholder="t('auth.enter_self_description')"
+              textarea
+            />
+          </VaField>
+        </div>
+
+        <div class="flex justify-end">
+          <VaButton
+            class="w-fit rounded mb-3"
+            :disabled="isDisabledButtonChangeDoctorProfile"
+            @click="submitDoctorProfile"
+          >
+            {{ t('auth.update') }}
+          </VaButton>
+        </div>
+      </VaForm>
+    </VaCard>
+    <!--Form change password-->
+    <VaCard v-if="!isShowProfile && !isShowDoctorProfile" class="p-2 ml-1 rounded">
       <VaForm ref="formChangePassword" class="mt-4" @submit.prevent="submitChangePassword">
         <div class="grid md:grid-cols-3 gap-4">
           <VaField>

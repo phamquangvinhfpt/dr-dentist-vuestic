@@ -94,8 +94,57 @@
     "change_password": "Change password",
     "verify_email": "Verify email",
     "password": "Password",
-    "login_success": "You've successfully logged in"
+    "login_success": "You've successfully logged in",
+    "Job": "Job",
+    "Address": "Address",
+    "enter_job": "Enter job",
+    "enter_address": "Enter address",
+    "address_required": "Address field is required",
+    "college": "College",
+    "enter_college": "Enter college",
+    "college_required": "College field is required",
+    "certification": "Certification",
+    "enter_certification": "Enter certification",
+    "certification_required": "Certification field is required",
+    "year_of_experience": "Years of Experience",
+    "enter_year_of_experience": "Enter years of experience",
+    "experience_required": "Years of Experience field is required",
+    "self_description": "Self Description",
+    "enter_self_description": "Enter self description",
+    "description_required": "Self Description field is required",
+    "education": "Education",
+    "education_required": "Education field is required",
+    "enter_education": "Enter education",
+    "education_level": "Education Level",
+    "enter_education_level": "Enter education level",
+    "education_level_required": "Education Level field is required",
+    "specialty": "Specialty",
+    "enter_specialty": "Enter specialty",
+    "specialty_required": "Specialty field is required"
+
   },
+"doctor": {
+    "education": "Education Level",
+    "education_required": "Please enter your education level",
+    "enter_education": "Enter your education level",
+
+    "college": "Institution",
+    "college_required": "Please enter your institution",
+    "enter_college": "Enter your institution name",
+
+    "certification": "Certification",
+    "certification_required": "Please enter your certification",
+    "enter_certification": "Enter your certification details",
+
+    "years_of_experience": "Years of Experience",
+    "experience_required": "Please enter your years of experience",
+    "enter_years_of_experience": "Enter your years of experience",
+
+    "self_description": "Professional Summary",
+    "description_required": "Please enter your professional summary",
+    "enter_self_description": "Enter a brief description about yourself"
+  },
+
   "settings": {
     "title": "Settings",
     "language": "Language",
@@ -123,7 +172,8 @@
     "search": "Search",
     "submit": "Submit",
     "close": "Close",
-    "results_per_page": "per page"
+    "results_per_page": "per page",
+    "doctor": "Doctor"
   },
   "auditLogs": {
     "title": "Audit Logs",

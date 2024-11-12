@@ -1,6 +1,7 @@
 import {
   ChangeEmailFormData,
   ChangePhoneNumberFormData,
+  DoctorDetailsUpdate,
   FilterUser,
   PasswordDetailFormData,
   UserDetail,
@@ -145,6 +146,18 @@ class UserService {
       .post(`/users/get-users`, filter)
       .then((response) => {
         return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  // update doctor profile
+  async updateDoctorProfile(data: DoctorDetailsUpdate): Promise<any> {
+    return apiService
+      .put(`/personal/update-doctor-profile`, data)
+      .then((response) => {
+        return Promise.resolve(response)
       })
       .catch((error) => {
         return Promise.reject(error)

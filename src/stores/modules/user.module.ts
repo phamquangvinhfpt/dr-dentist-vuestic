@@ -6,6 +6,7 @@ import {
   UserDetail,
   UserDetailsUpdate,
   ListUserPagination,
+  DoctorDetailsUpdate,
 } from '@/pages/user/types'
 import { defineStore } from 'pinia'
 import userService from '@services/user.service'
@@ -148,6 +149,19 @@ export const useUserProfileStore = defineStore('userProfile', {
         this.isLoading = false
         this.userList = response
         return await Promise.resolve(this.userList)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+
+    //doctor
+    async updateDoctorProfile(data: DoctorDetailsUpdate): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updateDoctorProfile(data) // Thay đổi để gọi API riêng cho doctor
+        this.isLoading = false
+        return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false
         return await Promise.reject(error)

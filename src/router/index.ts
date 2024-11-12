@@ -36,6 +36,8 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('../pages/user/UserProfile.vue'),
       },
+      // test thôi
+      //end test
       {
         name: 'notifications',
         path: 'notification',
