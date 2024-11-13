@@ -137,7 +137,7 @@
     "medical_name": "Medical name",
     "enter_medical_name": "Enter medical name",
     "Medical_Name_required": "Medical Name field is required",
-    "note" : "Note",
+    "note": "Note",
     "enter_note": "Enter note",
     "id_card_number": "ID Card Number",
     "enter_id_card_number": "Enter ID Card Number",
@@ -146,9 +146,6 @@
     "occupation": "Occupation",
     "enter_occupation": "Enter occupation",
     "occupation_required": "Occupation field is required"
-
-
-
   },
   "doctor": {
     "education": "Education Level",
@@ -209,8 +206,6 @@
     "medical_history_updated_successfully": "Medical history updated successfully",
     "medical_history_deleted_successfully": "Medical history deleted successfully",
     "patient_profile": "Patient Profile"
-
-
   },
   "auditLogs": {
     "title": "Audit Logs",
