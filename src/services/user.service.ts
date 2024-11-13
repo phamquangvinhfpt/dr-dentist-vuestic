@@ -170,7 +170,7 @@ class UserService {
   // update patient family profile
   async updatePatientFamilyProfile(data: PatientFamilyUpdate): Promise<any> {
     return apiService
-      .put(`/personal/update-profile`, data)
+      .put(`/personal/patient/update-profile`, data)
       .then((response) => {
         return Promise.resolve(response)
       })
@@ -182,7 +182,7 @@ class UserService {
   // update medical history
   async updateMedicalHistory(data: MedicalHistoryUpdate): Promise<any> {
     return apiService
-      .put(`/personal/update-profile`, data)
+      .put(`/personal/patient/update-profile`, data)
       .then((response) => {
         return Promise.resolve(response)
       })
@@ -194,7 +194,7 @@ class UserService {
   // update patient profile
   async updatePatientProfile(data: PatientProfileUpdate): Promise<any> {
     return apiService
-      .put(`/personal/update-profile`, data)
+      .put(`/personal/patient/update-profile`, data)
       .then((response) => {
         return Promise.resolve(response)
       })

@@ -66,11 +66,10 @@ type MedicalHistoryInfor = {
 }
 
 export enum Rela {
-  Parent = 0,
-  Spouse = 1,
-  Child = 2,
-  Sibling = 3,
-  Other = 4,
+  Father,
+  Mother,
+  Sister,
+  Brother,
 }
 
 export type SettingProfile = {

@@ -11,7 +11,6 @@ import {
   DoctorDetailsUpdate,
   Rela,
   MedicalHistoryUpdate,
-  PatientFamilyUpdate,
   PatientProfileUpdate,
   // RoleEnum,
 } from './types'
@@ -32,11 +31,10 @@ const props = defineProps({
   },
 })
 const relationshipOptions = [
-  { value: Rela.Parent, label: 'Parent' },
-  { value: Rela.Spouse, label: 'Spouse' },
-  { value: Rela.Child, label: 'Child' },
-  { value: Rela.Sibling, label: 'Sibling' },
-  { value: Rela.Other, label: 'Other' },
+  { text: t('auth.father'), value: Rela.Father, id: 1 },
+  { text: t('auth.mother'), value: Rela.Mother, id: 2 },
+  { text: t('auth.sister'), value: Rela.Sister, id: 3 },
+  { text: t('auth.brother'), value: Rela.Brother, id: 4 },
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -89,7 +87,7 @@ const userDetail = ref<UserDetailFormData>({
     name: '',
     phone: '',
     email: '',
-    relationship: Rela.Other,
+    relationship: Rela.Father,
   },
   medicalHistory: {
     medicalname: [],
@@ -140,7 +138,7 @@ const getUserDetail = async () => {
         name: userProfileStore?.userDetails?.patientFamily?.name || '', // Thuộc tính `name` ở đây nằm trong `patientFamily`
         phone: userProfileStore?.userDetails?.patientFamily?.phone || '',
         email: userProfileStore?.userDetails?.patientFamily?.email || '',
-        relationship: userProfileStore?.userDetails?.patientFamily?.relationship || Rela.Other,
+        relationship: userProfileStore?.userDetails?.patientFamily?.relationship || Rela.Father,
       },
       medicalHistory: {
         medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalname || [],
@@ -275,7 +273,7 @@ const patientFamily = ref<any>({
   name: '',
   phone: '',
   email: '',
-  relationship: Rela.Other,
+  relationship: Rela.Father,
 })
 const medicalHistory = ref<any>({
   medicalname: [],
@@ -285,7 +283,6 @@ const PatientProfile = ref<any>({
   idCardNumber: '',
   occupation: '',
 })
-console.log('doctorProfile', doctorProfile)
 // const formDataGetDoctor = reactive({ ...doctorDetail.value })
 const formDataChangePassword = reactive({ ...passwordDetail.value })
 const formDataChangePhoneNumber = reactive({ phoneNumber: '', password: '' })
@@ -433,7 +430,6 @@ const isDisabledButtonChangeDoctorProfile = computed(() => {
   ) {
     return true
   }
-  console.log('isDisabledButtonChangeDoctorProfile', isDisabledButtonChangeDoctorProfile)
   return false
 })
 
@@ -445,8 +441,10 @@ const isDisabledButtonChangePatientFamily = computed(() => {
   } else if (
     checkEmptyField(formData.patientFamily.name) ||
     checkEmptyField(formData.patientFamily.phone) ||
-    checkEmptyField(formData.patientFamily.email)
+    checkEmptyField(formData.patientFamily.email) ||
+    checkEmptyField(formData.patientFamily.relationship)
   ) {
+    // get value of relationship
     return true
   }
   return false
@@ -583,17 +581,38 @@ const submitDoctorProfile = async () => {
   }
 }
 
+const getRelationShipValue = (value: Rela | undefined) => {
+  return relationshipOptions.find((item) => item.value === value)?.value
+}
+
+const patientFamilyModal = ref<any>({
+  patientProfileId: '',
+  isUpdatePatientFamily: true,
+  patientFamily: {
+    name: '',
+    phone: '',
+    email: '',
+    relationship: 1,
+  },
+})
+
 // submit Patient Family
 const submitPatientFamily = async () => {
   if (validate()) {
-    const patientFamilyData: PatientFamilyUpdate = {
-      name: formData.patientFamily.name ?? '',
-      phone: formData.patientFamily.phone ?? '',
-      email: formData.patientFamily.email ?? '',
-      relationship: formData.patientFamily.relationship ?? Rela.Other,
+    const value: Rela | undefined = formData.patientFamily.relationship
+    console.log(value)
+    patientFamilyModal.value = {
+      patientProfileId: userProfileStore?.userDetails?.id, // get id của profile
+      isUpdatePatientFamily: true,
+      patientFamily: {
+        name: formData.patientFamily.name ?? '',
+        phone: formData.patientFamily.phone ?? '',
+        email: formData.patientFamily.email ?? '',
+        relationship: getRelationShipValue(value) ?? 1,
+      },
     }
     await userProfileStore
-      .updatePatientFamilyProfile(patientFamilyData)
+      .updatePatientFamilyProfile(patientFamilyModal.value)
       .then(() => {
         notify({
           title: t('auth.success'),
@@ -1109,7 +1128,7 @@ const verifyEmail = async () => {
           <div class="grid md:grid-cols-2 gap-4">
             <VaField>
               <VaInput
-                v-model="doctorProfile.education"
+                v-model="formData.doctorProfile.education"
                 :label="t('auth.education')"
                 class="mb-3"
                 :placeholder="t('auth.enter_education')"
@@ -1117,7 +1136,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="doctorProfile.college"
+                v-model="formData.doctorProfile.college"
                 :label="t('auth.college')"
                 class="mb-3"
                 :placeholder="t('auth.enter_college')"
@@ -1125,7 +1144,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="doctorProfile.certification"
+                v-model="formData.doctorProfile.certification"
                 :label="t('auth.certification')"
                 class="mb-3"
                 :placeholder="t('auth.enter_certification')"
@@ -1133,7 +1152,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="doctorProfile.yearOfExp"
+                v-model="formData.doctorProfile.yearOfExp"
                 type="number"
                 :label="t('auth.year_of_experience')"
                 class="mb-3"
@@ -1142,7 +1161,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="doctorProfile.seftDescription"
+                v-model="formData.doctorProfile.seftDescription"
                 :label="t('auth.self_description')"
                 class="mb-3"
                 :placeholder="t('auth.enter_self_description')"
@@ -1170,7 +1189,7 @@ const verifyEmail = async () => {
           <div class="grid md:grid-cols-2 gap-4">
             <VaField>
               <VaInput
-                v-model="patientFamily.name"
+                v-model="formData.patientFamily.name"
                 :label="t('auth.name')"
                 class="mb-3"
                 :placeholder="t('auth.enter_name')"
@@ -1178,7 +1197,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="patientFamily.phone"
+                v-model="formData.patientFamily.phone"
                 :label="t('auth.phone')"
                 class="mb-3"
                 :placeholder="t('auth.enter_phone')"
@@ -1186,7 +1205,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="patientFamily.email"
+                v-model="formData.patientFamily.email"
                 :label="t('auth.email')"
                 class="mb-3"
                 :placeholder="t('auth.enter_email')"
@@ -1194,7 +1213,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaSelect
-                v-model="patientFamily.relationship"
+                v-model="formData.patientFamily.relationship"
                 :label="t('auth.relationship')"
                 class="mb-3"
                 :placeholder="t('auth.choose_relationship')"
@@ -1221,7 +1240,7 @@ const verifyEmail = async () => {
           <div class="grid md:grid-cols-2 gap-4">
             <VaField>
               <VaInput
-                v-model="medicalHistory.medicalname"
+                v-model="formData.medicalHistory.medicalname"
                 :label="t('auth.medical_name')"
                 class="mb-3"
                 :placeholder="t('auth.enter_medical_name')"
@@ -1229,7 +1248,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="medicalHistory.note"
+                v-model="formData.medicalHistory.note"
                 :label="t('auth.note')"
                 class="mb-3"
                 :placeholder="t('auth.enter_note')"
@@ -1256,7 +1275,7 @@ const verifyEmail = async () => {
           <div class="grid md:grid-cols-2 gap-4">
             <VaField>
               <VaInput
-                v-model="PatientProfile.idCardNumber"
+                v-model="formData.PatientProfile.idCardNumber"
                 :label="t('auth.id_card_number')"
                 class="mb-3"
                 :placeholder="t('auth.enter_id_card_number')"
@@ -1264,7 +1283,7 @@ const verifyEmail = async () => {
             </VaField>
             <VaField>
               <VaInput
-                v-model="PatientProfile.occupation"
+                v-model="formData.PatientProfile.occupation"
                 :label="t('auth.occupation')"
                 class="mb-3"
                 :placeholder="t('auth.enter_occupation')"
