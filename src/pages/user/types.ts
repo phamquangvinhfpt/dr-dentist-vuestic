@@ -27,15 +27,50 @@ export type UserDetail = {
   gender: boolean
   job: string | null
   address: string | null
-  // role: string
+  // role: RoleEnum
   doctorProfile?: DoctorProfileInfo
+  patientFamily?: PatientFamilyInfor
+  medicalHistory?: MedicalHistoryInfor
+  PatientProfile?: PatientProfileInfor
 }
+export enum RoleEnum {
+  Admin = 'Admin',
+  Dentist = 'Dentist',
+  Staff = 'Staff',
+  Patient = 'Patient',
+  Guest = 'Guest',
+}
+
+type PatientProfileInfor = {
+  idCardNumber: string
+  occupation: string
+}
+
 type DoctorProfileInfo = {
   education: string | null // Trình độ học vấn
   college: string | null // Trường học
   certification: string | null // Chứng chỉ
   yearOfExp: string | null // Số năm kinh nghiệm
   seftDescription: string | null // Mô tả bản thâns
+}
+type PatientFamilyInfor = {
+  name: string
+  phone: string
+  email: string
+  relationship: Rela
+}
+
+type MedicalHistoryInfor = {
+  medicalname: string[]
+  note: string
+}
+
+export enum Rela {
+  Parent = 0,
+  Spouse = 1,
+  Child = 2,
+  Sibling = 3,
+  Other = 4,
 }
 
 export type SettingProfile = {
@@ -54,8 +89,11 @@ export type UserDetailFormData = {
   imageUrl: string | null
   job: string | null
   address: string | null
-  // role: string
+  // role: RoleEnum
   doctorProfile?: DoctorProfileInfo
+  patientFamily?: PatientFamilyInfor
+  medicalHistory?: MedicalHistoryInfor
+  PatientProfile?: PatientProfileInfor
 }
 
 export type PasswordDetailFormData = {
@@ -173,6 +211,25 @@ export type DoctorDetailsUpdate = {
   certification: string | null
   yearOfExp: string | null
   seftDescription: string | null
+}
+
+// Update patientfamily
+export type PatientFamilyUpdate = {
+  name: string
+  phone: string
+  email: string
+  relationship: Rela
+}
+//update medical history
+export type MedicalHistoryUpdate = {
+  medicalname: string[]
+  note: string
+}
+
+// update patient profile
+export type PatientProfileUpdate = {
+  idCardNumber: string
+  occupation: string
 }
 
 export type Doctor = {
