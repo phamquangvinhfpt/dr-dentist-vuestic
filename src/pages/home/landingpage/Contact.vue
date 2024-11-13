@@ -66,7 +66,7 @@ const onSendButton = async () => {
     class="flex items-center justify-center min-h-screen transition-colors duration-300 dark:text-gray-100 dark:bg-gray-900"
   >
     <div
-      class="max-w-screen-xl px-8 grid gap-8 grid-cols-1 md:grid-cols-2 md:px-12 lg:px-16 xl:px-32 py-16 text-gray-900 bg-white dark:text-gray-100 dark:bg-gray-900"
+      class="max-w-screen-2xl px-8 grid gap-8 grid-cols-1 md:grid-cols-2 md:px-12 lg:px-16 xl:px-32 py-16 text-gray-900 bg-white dark:text-gray-100 dark:bg-gray-900"
     >
       <div class="flex flex-col justify-between mr-5 text-sky-700">
         <div>
@@ -100,7 +100,7 @@ const onSendButton = async () => {
 
           <input
             v-model="message.title"
-            class="w-full mt-2 p-3 rounded-full focus:outline-none focus:shadow-outline transition duration-200 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 bg-gray-100 text-sky-700 border-sky-700"
+            class="sm:w-[350px] mt-2 p-3 rounded-full focus:outline-none focus:shadow-outline transition duration-200 dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 bg-gray-100 text-sky-700 border-sky-700"
             type="text"
             :placeholder="t('contact.title')"
             :class="{

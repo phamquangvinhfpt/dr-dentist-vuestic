@@ -269,7 +269,9 @@
     "infor": "Information",
     "orders": "Orders",
     "message": "Message",
-    "user-management": "User Management"
+    "user-management": "User Management",
+    "contact": "Contact",
+    "appointment": "Appointment"
   },
   "bin": {
     "title": "Trash",
@@ -307,7 +309,10 @@
     "helpAndSupport": "Help & support",
     "projects": "Projects",
     "account": "Account",
-    "explore": "Explore"
+    "explore": "Explore",
+    "auth": "Auth",
+    "login": "Sign in",
+    "signup": "Sign up"
   },
   "treeView": {
     "basic": "Basic",

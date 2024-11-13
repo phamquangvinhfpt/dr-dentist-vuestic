@@ -5,9 +5,10 @@
         <VaButton preset="secondary" color="textPrimary">
           <span class="profile-dropdown__anchor min-w-max">
             <!-- <slot /> -->
-            <Avatar :size="32" color="warning" :txt="shortNameLetter">
+            <Avatar v-if="isLogged" :size="32" color="warning" :txt="shortNameLetter">
               {{ shortNameLetter }}
             </Avatar>
+            <span v-else class="material-symbols-outlined">account_circle</span>
           </span>
         </VaButton>
       </template>
@@ -15,7 +16,7 @@
         class="profile-dropdown__content md:w-60 px-0 py-4 w-full"
         :style="{ '--hover-color': hoverColor }"
       >
-        <VaList v-for="group in options" :key="group.name">
+        <VaList v-for="group in menuOptions" :key="group.name">
           <header v-if="group.name" class="uppercase text-[var(--va-secondary)] opacity-80 font-bold text-xs px-4">
             {{ t(`user.${group.name}`) }}
           </header>
@@ -65,10 +66,31 @@ type ProfileOptions = {
 const { user } = useAuthStore()
 // Nguyen Van A -> NA
 const shortNameLetter = computed(() => user?.fullName?.charAt(0).toUpperCase())
+const authStore = useAuthStore()
+const isLogged = computed(() => authStore.user !== null)
 const { logout } = useAuthStore()
 const { push } = useRouter()
 
-withDefaults(
+const defaultAuthOptions: ProfileOptions[] = [
+  {
+    name: 'auth',
+    separator: false,
+    list: [
+      {
+        name: 'login',
+        to: 'login',
+        icon: 'mso-login',
+      },
+      {
+        name: 'signup',
+        to: 'signup',
+        icon: 'mso-person_add',
+      },
+    ],
+  },
+]
+
+const props = withDefaults(
   defineProps<{
     options?: ProfileOptions[]
   }>(),
@@ -110,6 +132,8 @@ withDefaults(
     ],
   },
 )
+
+const menuOptions = computed(() => (isLogged.value ? props.options : defaultAuthOptions))
 
 const isShown = ref(false)
 

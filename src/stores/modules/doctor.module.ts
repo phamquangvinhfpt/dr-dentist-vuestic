@@ -8,12 +8,12 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
     isLoading: false as boolean,
   }),
   actions: {
-    async getDoctors(): Promise<any> {
+    async getDoctors(data: any): Promise<any> {
       try {
         this.isLoading = true
-        const response = await doctorService.getDoctors()
+        const response = await doctorService.getDoctors(data)
         this.isLoading = false
-        this.doctors = [...response.data]
+        this.doctors = [...response.data.data]
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false
@@ -26,6 +26,17 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         const response = await doctorService.getTopDoctors()
         this.isLoading = false
         this.doctors = [...response.data]
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getAvailableTime(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.getAvailableTime(data)
+        this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false

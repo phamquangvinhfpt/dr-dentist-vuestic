@@ -267,7 +267,9 @@
     "infor": "Thông tin",
     "orders": "Gói đã đặt",
     "message": "Tin nhắn",
-    "user-management": "Quản lý người dùng"
+    "user-management": "Quản lý người dùng",
+    "contact": "Liên hệ",
+    "appointment": "Đặt hẹn"
   },
   "bin": {
     "title": "Thùng rác",
@@ -305,7 +307,10 @@
     "helpAndSupport": "Trợ giúp & hỗ trợ",
     "projects": "Dự án",
     "account": "Tài khoản",
-    "explore": "Khám phá"
+    "explore": "Khám phá",
+    "auth":"Xác thực",
+    "login": "Đăng nhập",
+    "signup": "Đăng ký"
   },
   "treeView": {
     "basic": "Cơ bản",

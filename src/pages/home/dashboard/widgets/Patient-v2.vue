@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { onBeforeMount, onMounted, ref } from 'vue'
-import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle } from 'vuestic-ui'
+import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useToast } from 'vuestic-ui'
 import { Doctors } from './types'
 import { useRouter } from 'vue-router'
+import { getErrorMessage } from '@/services/utils'
 
 const loading = ref(true)
 const currentSlide = ref(0)
@@ -13,6 +14,7 @@ const isLargeScreen = ref(window.innerWidth >= 1024)
 const doctorStore = useDoctorProfileStore()
 const doctors = ref<Doctors[]>([])
 const router = useRouter()
+const { init } = useToast()
 
 const INTERVAL_TIME = 3000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
@@ -29,14 +31,22 @@ const startContentAnimation = () => {
 
 const handleGetDoctors = async () => {
   loading.value = true
-  try {
-    const response = await doctorStore.getTopDoctors()
-    doctors.value = response.data
-    console.log(doctors.value)
-  } catch (error) {
-    console.error(error)
-  }
-  loading.value = false
+  doctorStore
+    .getTopDoctors()
+    .then(() => {
+      doctors.value = doctorStore.doctors
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'Error',
+        message: message,
+        color: 'danger',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 onMounted(() => {
@@ -223,7 +233,11 @@ window.addEventListener('resize', () => {
         </div>
       </div>
 
-      <div id="services" class="px-4 py-10 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24">
+      <div
+        v-if="isLargeScreen"
+        id="services"
+        class="px-4 py-10 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24"
+      >
         <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer">
           OUR SERVICES
         </h5>
@@ -233,7 +247,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../services/general_dentistry.ico" />
+                <img lazy src="/services/general_dentistry.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">GENERAL DENTISTRY</h1>
             </div>
@@ -243,7 +257,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../services/cosmetic_dentistry.ico" />
+                <img lazy src="/services/cosmetic_dentistry.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">COSMETICS SURGERY</h1>
             </div>
@@ -253,7 +267,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../services/oral_surgery.ico" />
+                <img lazy src="/services/oral_surgery.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">ORAL SURGERY</h1>
             </div>
@@ -263,7 +277,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../services/orthodontics.ico" />
+                <img lazy src="/services/orthodontics.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">ORTHODONTICS</h1>
             </div>
@@ -273,7 +287,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../services/pediatric_dentistry.ico" />
+                <img lazy src="/services/pediatric_dentistry.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">PEDIATRIC DENTISTRY</h1>
             </div>
@@ -283,7 +297,7 @@ window.addEventListener('resize', () => {
               <div
                 class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
               >
-                <img src="../../../../../services/prosthodontics.ico" />
+                <img lazy src="/services/prosthodontics.ico" />
               </div>
               <h1 class="mb-2 text-2xl font-semibold leading-5">PROSTHODONTICS</h1>
             </div>
@@ -438,6 +452,7 @@ window.addEventListener('resize', () => {
               <div class="space-y-4">
                 <div class="flex items-center">
                   <img
+                    lazy
                     src="https://images.unsplash.com/photo-1482849297070-f4fae2173efe?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                     alt="Patient 1"
                     class="w-16 h-16 rounded-full object-cover"
@@ -452,6 +467,7 @@ window.addEventListener('resize', () => {
                 </div>
                 <div class="flex items-center">
                   <img
+                    lazy
                     src="https://images.unsplash.com/photo-1570045006801-08ec03621a42?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                     alt="Patient 2"
                     class="w-16 h-16 rounded-full object-cover"

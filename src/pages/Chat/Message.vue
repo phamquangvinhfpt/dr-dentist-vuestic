@@ -1,7 +1,7 @@
 <template>
   <VaInnerLoading>
     <VaCard>
-      <div class="flex flex-col h-[calc(100vh-64px)] lg:h-[calc(100vh-126px)] dark:font-semibold">
+      <div class="flex flex-col h-[calc(100vh-20px)] lg:h-[calc(100vh-76px)] dark:font-semibold">
         <VaCard class="flex-1 flex flex-col lg:flex-row">
           <VaCard
             v-if="isStaff"
@@ -100,7 +100,7 @@
               <VaScrollContainer
                 vertical
                 :color="currentColor"
-                class="overflow-y-auto h-[calc(100vh-200px)] lg:h-[calc(100vh-313px)] p-4 list"
+                class="overflow-y-auto h-[calc(100vh-200px)] lg:h-[calc(100vh-313px)] p-4"
               >
                 <template v-for="(messageGroup, groupIndex) in groupedMessages" :key="groupIndex">
                   <div
@@ -157,7 +157,7 @@
 
               <!-- Message input -->
               <VaDivider />
-              <VaCard class="p-4">
+              <VaCard class="p-4 lg:pt-9">
                 <div class="flex items-center rounded-full p-2">
                   <VaInput
                     v-model="newMessage"
@@ -517,6 +517,10 @@ watchEffect(() => {
 
 .scrollbar-hide {
   -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scroll {
   scrollbar-width: none;
 }
 </style>

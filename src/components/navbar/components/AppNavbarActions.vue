@@ -5,7 +5,6 @@ import LanguageSwitcher from '@/pages/settings/language-switcher/LanguageSwitche
 import ThemeSwitcher from '@/pages/settings/theme-switcher/ThemeSwitcher.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { computed } from 'vue'
-import { VaButton } from 'vuestic-ui'
 
 defineProps({
   isMobile: { type: Boolean, default: false },
@@ -22,12 +21,7 @@ const isLogged = computed(() => authStore.user !== null)
     <h4 v-if="!isMobile && isLogged" class="app-navbar-actions__item">
       Hello, <b>{{ authStore.user?.fullName }}</b>
     </h4>
-    <ProfileDropdown v-if="isLogged" class="app-navbar-actions__item app-navbar-actions__item--profile mr-1" />
-    <div v-if="!isLogged">
-      <a href="/auth/login" class="app-navbar-actions__item">
-        <VaButton>Log in</VaButton>
-      </a>
-    </div>
+    <ProfileDropdown class="app-navbar-actions__item app-navbar-actions__item--profile mr-1" />
   </div>
 </template>
 

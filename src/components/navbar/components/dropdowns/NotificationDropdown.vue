@@ -330,25 +330,28 @@ const getTimeName = (differenceTime: number) => {
   ) as keyof typeof TIME_NAMES
 }
 
-const showToastNotification = (notification: any) => {
+const showToastNotification = (type: string, notification: any) => {
   const icon = getIconType(notification?.label)
-  notify({
-    title: 'Notification',
-    message: `
+  if (type !== 'Payment') {
+    notify({
+      title: 'Notification',
+      message: `
     <div>
       <p class="text-sm font-bold">${notification?.title}</p>
       <p class="text-sm">${notification?.message}</p>
       </div>
     </div>
     `,
-    dangerouslyUseHtmlString: true,
-    color: icon?.color || '#ffffff',
-    position: 'bottom-right',
-    onClick: () => handleClickToNotificationItem(notification?.url, notification?.id, notification?.isRead),
-  })
+      dangerouslyUseHtmlString: true,
+      color: icon?.color || '#ffffff',
+      position: 'bottom-right',
+      onClick: () => handleClickToNotificationItem(notification?.url, notification?.id, notification?.isRead),
+    })
+  }
 }
 
 const receiveNotificationFromServer = (type: string, notification: any) => {
+  console.log('type', type)
   const tempPageNumber = 1
   const tempPageSize = pagination.value.currentPages * pagination.value.pageSize
   const data = {
@@ -357,7 +360,7 @@ const receiveNotificationFromServer = (type: string, notification: any) => {
     isRead: undefined,
   }
   getNotifications(data, false)
-  showToastNotification(notification)
+  showToastNotification(type, notification)
 }
 
 const convertToUTC = (date: string | Date): Date => {

@@ -55,6 +55,14 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/home/landingpage/Contact.vue'),
       },
       {
+        name: 'appointment',
+        path: 'appointment',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/appointment/Appointment.vue'),
+      },
+      {
         name: 'profile',
         path: 'profile',
         meta: {
