@@ -1,8 +1,12 @@
 import {
   ChangeEmailFormData,
   ChangePhoneNumberFormData,
+  DoctorDetailsUpdate,
   FilterUser,
+  MedicalHistoryUpdate,
   PasswordDetailFormData,
+  PatientFamilyUpdate,
+  PatientProfileUpdate,
   UserDetail,
   UserDetailsUpdate,
 } from '@/pages/user/types'
@@ -145,6 +149,54 @@ class UserService {
       .post(`/users/get-users`, filter)
       .then((response) => {
         return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  // update doctor profile
+  async updateDoctorProfile(data: DoctorDetailsUpdate): Promise<any> {
+    return apiService
+      .put(`/personal/update-doctor-profile`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  // update patient family profile
+  async updatePatientFamilyProfile(data: PatientFamilyUpdate): Promise<any> {
+    return apiService
+      .put(`/personal/update-profile`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  // update medical history
+  async updateMedicalHistory(data: MedicalHistoryUpdate): Promise<any> {
+    return apiService
+      .put(`/personal/update-profile`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  // update patient profile
+  async updatePatientProfile(data: PatientProfileUpdate): Promise<any> {
+    return apiService
+      .put(`/personal/update-profile`, data)
+      .then((response) => {
+        return Promise.resolve(response)
       })
       .catch((error) => {
         return Promise.reject(error)

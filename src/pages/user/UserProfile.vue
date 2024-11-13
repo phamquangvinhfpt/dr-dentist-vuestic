@@ -26,6 +26,7 @@ const selectedSettingOption = ref<SettingProfile | null>({
   name: t('settings.general'),
   icon: 'person',
 })
+
 function handleSelectedSettingOption(item: SettingProfile) {
   selectedSettingOption.value = item
 }

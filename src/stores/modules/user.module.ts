@@ -6,6 +6,10 @@ import {
   UserDetail,
   UserDetailsUpdate,
   ListUserPagination,
+  DoctorDetailsUpdate,
+  PatientFamilyUpdate,
+  MedicalHistoryUpdate,
+  PatientProfileUpdate,
 } from '@/pages/user/types'
 import { defineStore } from 'pinia'
 import userService from '@services/user.service'
@@ -148,6 +152,58 @@ export const useUserProfileStore = defineStore('userProfile', {
         this.isLoading = false
         this.userList = response
         return await Promise.resolve(this.userList)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+
+    //doctor
+    async updateDoctorProfile(data: DoctorDetailsUpdate): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updateDoctorProfile(data) // Thay đổi để gọi API riêng cho doctor
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+
+    // update patient family profile
+    async updatePatientFamilyProfile(data: PatientFamilyUpdate): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updatePatientFamilyProfile(data) // Thay đổi để gọi API riêng cho patient family
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+
+    // update medical history
+    async updateMedicalHistory(data: MedicalHistoryUpdate): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updateMedicalHistory(data) // Thay đổi để gọi API riêng cho medical history
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+
+    // update patient profile
+    async updatePatientProfile(data: PatientProfileUpdate): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updatePatientProfile(data) // Thay đổi để gọi API riêng cho patient
+        this.isLoading = false
+        return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false
         return await Promise.reject(error)
