@@ -25,8 +25,8 @@ export type UserDetail = {
   imageUrl: string | null
   birthDate: string | null
   gender: boolean
-  job: string | null
-  address: string | null
+  job: string
+  address: string
   // role: RoleEnum
   doctorProfile?: DoctorProfileInfo
   patientFamily?: PatientFamilyInfor
@@ -49,11 +49,11 @@ type PatientProfileInfor = {
 }
 
 type DoctorProfileInfo = {
-  education: string | null // Trình độ học vấn
-  college: string | null // Trường học
-  certification: string | null // Chứng chỉ
-  yearOfExp: string | null // Số năm kinh nghiệm
-  seftDescription: string | null // Mô tả bản thâns
+  education: string
+  college: string
+  certification: string
+  yearOfExp: string
+  seftDescription: string
 }
 type PatientFamilyInfor = {
   name: string
@@ -88,8 +88,8 @@ export type UserDetailFormData = {
   gender: boolean | null
   phoneNumber: string
   imageUrl: string | null
-  job: string | null
-  address: string | null
+  job: string
+  address: string
   // role: RoleEnum
   doctorProfile?: DoctorProfileInfo
   patientFamily?: PatientFamilyInfor

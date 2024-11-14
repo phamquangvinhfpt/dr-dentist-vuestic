@@ -78,11 +78,11 @@ const userDetail = ref<UserDetailFormData>({
   address: '',
   // role: RoleEnum.User,
   doctorProfile: {
-    education: null,
-    college: null,
-    certification: null,
-    yearOfExp: null,
-    seftDescription: null,
+    education: '',
+    college: '',
+    certification: '',
+    yearOfExp: '',
+    seftDescription: '',
   },
   patientFamily: {
     name: '',
@@ -131,11 +131,11 @@ const getUserDetail = async () => {
       address: userProfileStore?.userDetails?.address,
       // role: userProfileStore?.userDetails?.role,
       doctorProfile: {
-        education: userProfileStore?.userDetails?.doctorProfile?.education ?? null,
-        college: userProfileStore?.userDetails?.doctorProfile?.college ?? null,
-        certification: userProfileStore?.userDetails?.doctorProfile?.certification ?? null,
-        yearOfExp: userProfileStore?.userDetails?.doctorProfile?.yearOfExp ?? null,
-        seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription ?? null,
+        education: userProfileStore?.userDetails?.doctorProfile?.education ?? '',
+        college: userProfileStore?.userDetails?.doctorProfile?.college ?? '',
+        certification: userProfileStore?.userDetails?.doctorProfile?.certification ?? '',
+        yearOfExp: userProfileStore?.userDetails?.doctorProfile?.yearOfExp ?? '',
+        seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription ?? '',
       },
       patientFamily: {
         name: userProfileStore?.userDetails?.patientFamily?.name || '', // Thuộc tính `name` ở đây nằm trong `patientFamily`
