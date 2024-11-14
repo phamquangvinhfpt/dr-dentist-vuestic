@@ -31,7 +31,7 @@ export type UserDetail = {
   doctorProfile?: DoctorProfileInfo
   patientFamily?: PatientFamilyInfor
   medicalHistory?: MedicalHistoryInfor
-  PatientProfile?: PatientProfileInfor
+  patientProfile?: PatientProfileInfor
 }
 export enum RoleEnum {
   Admin = 'Admin',
@@ -42,6 +42,8 @@ export enum RoleEnum {
 }
 
 type PatientProfileInfor = {
+  id: string
+  userId: string
   idCardNumber: string
   occupation: string
 }
@@ -214,21 +216,21 @@ export type DoctorDetailsUpdate = {
 
 // Update patientfamily
 export type PatientFamilyUpdate = {
-  name: string
-  phone: string
-  email: string
-  relationship: Rela
+  isUpdatePatientFamily: boolean
+  patientProfileId: string | undefined
+  patientFamily: PatientFamilyInfor
 }
 //update medical history
 export type MedicalHistoryUpdate = {
-  medicalname: string[]
-  note: string
+  isUpdateMedicalHistory: boolean
+  medicalHistory: MedicalHistoryInfor
 }
 
 // update patient profile
 export type PatientProfileUpdate = {
-  idCardNumber: string
-  occupation: string
+  patientProfileId: string
+  isUpdatePatientProfile: boolean
+  Patientprofile: PatientProfileInfor
 }
 
 export type Doctor = {

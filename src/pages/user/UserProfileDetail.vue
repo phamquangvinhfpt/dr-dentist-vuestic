@@ -10,6 +10,7 @@ import {
   // DoctorDetailFormData,
   DoctorDetailsUpdate,
   Rela,
+  PatientFamilyUpdate,
   MedicalHistoryUpdate,
   PatientProfileUpdate,
   // RoleEnum,
@@ -94,6 +95,8 @@ const userDetail = ref<UserDetailFormData>({
     note: '',
   },
   PatientProfile: {
+    id: '',
+    userId: '',
     idCardNumber: '',
     occupation: '',
   },
@@ -145,8 +148,10 @@ const getUserDetail = async () => {
         note: userProfileStore?.userDetails?.medicalHistory?.note || '',
       },
       PatientProfile: {
-        idCardNumber: userProfileStore?.userDetails?.PatientProfile?.idCardNumber || '',
-        occupation: userProfileStore?.userDetails?.PatientProfile?.occupation || '',
+        id: userProfileStore?.userDetails?.patientProfile?.id || '',
+        userId: userProfileStore?.userDetails?.id || '',
+        idCardNumber: userProfileStore?.userDetails?.patientProfile?.idCardNumber || '',
+        occupation: userProfileStore?.userDetails?.patientProfile?.occupation || '',
       },
     }
     Object.assign(formData, userDetail.value)
@@ -169,8 +174,10 @@ const getUserDetail = async () => {
       note: userProfileStore?.userDetails?.medicalHistory?.note,
     }
     PatientProfile.value = {
-      idCardNumber: userProfileStore?.userDetails?.PatientProfile?.idCardNumber,
-      occupation: userProfileStore?.userDetails?.PatientProfile?.occupation,
+      userId: userProfileStore?.userDetails?.id,
+      Id: userProfileStore?.userDetails?.patientProfile?.id || '',
+      idCardNumber: userProfileStore?.userDetails?.patientProfile?.idCardNumber,
+      occupation: userProfileStore?.userDetails?.patientProfile?.occupation,
     }
   } catch (error) {
     console.error(error)
@@ -247,6 +254,7 @@ onMounted(() => {
   isShowDoctorProfile.value = props.settingOption?.id === '3'
   isShowPatientFamily.value = props.settingOption?.id === '4'
   isShowMedicalHistory.value = props.settingOption?.id === '5'
+  isShowPatientProfile.value = props.settingOption?.id === '6'
 })
 
 // test
@@ -280,6 +288,8 @@ const medicalHistory = ref<any>({
   note: '',
 })
 const PatientProfile = ref<any>({
+  id: '',
+  userId: '',
   idCardNumber: '',
   occupation: '',
 })
@@ -585,24 +595,25 @@ const getRelationShipValue = (value: Rela | undefined) => {
   return relationshipOptions.find((item) => item.value === value)?.value
 }
 
-const patientFamilyModal = ref<any>({
-  patientProfileId: '',
-  isUpdatePatientFamily: true,
-  patientFamily: {
-    name: '',
-    phone: '',
-    email: '',
-    relationship: 1,
-  },
-})
+// const patientFamilyModal = ref<any>({
+//   isUpdatePatientFamily: true,
+//   patientFamily: {
+//     name: '',
+//     phone: '',
+//     email: '',
+//     relationship: 1,
+//   },
+// })
 
 // submit Patient Family
 const submitPatientFamily = async () => {
   if (validate()) {
-    const value: Rela | undefined = formData.patientFamily.relationship
-    console.log(value)
-    patientFamilyModal.value = {
-      patientProfileId: userProfileStore?.userDetails?.id, // get id của profile
+    // Lấy thông tin từ form
+    const value = formData.patientFamily.relationship
+    console.log('Value:', userDetail.value.PatientProfile?.id)
+    // Dữ liệu cần cập nhật
+    const updatedData: PatientFamilyUpdate = {
+      patientProfileId: userProfileStore?.userDetails ? userProfileStore?.userDetails?.patientProfile?.id : '', // Dùng ID của PatientProfile hoặc User nếu không có
       isUpdatePatientFamily: true,
       patientFamily: {
         name: formData.patientFamily.name ?? '',
@@ -611,8 +622,11 @@ const submitPatientFamily = async () => {
         relationship: getRelationShipValue(value) ?? 1,
       },
     }
+
+    console.log('Data will be sent:', updatedData)
+
     await userProfileStore
-      .updatePatientFamilyProfile(patientFamilyModal.value)
+      .updatePatientFamilyProfile(updatedData)
       .then(() => {
         notify({
           title: t('auth.success'),
@@ -620,6 +634,7 @@ const submitPatientFamily = async () => {
           color: 'success',
         })
         getUserDetail()
+        console.log('Data sent successfully' + updatedData)
       })
       .catch((error) => {
         const message = getErrorMessage(error)
@@ -632,15 +647,25 @@ const submitPatientFamily = async () => {
   }
 }
 
+// const medicalHistoryModal = ref<any>({
+// isUpdateMedicalHistory: true,
+//   medicalHistory: {
+//     medicalname: [],
+//     note: '',
+//   },
+// })
 // submit Medical History
 const submitMedicalHistory = async () => {
   if (validate()) {
-    const medicalHistoryData: MedicalHistoryUpdate = {
-      medicalname: formData.medicalHistory.medicalname ?? [],
-      note: formData.medicalHistory.note ?? '',
+    const updatedMedicalData: MedicalHistoryUpdate = {
+      isUpdateMedicalHistory: true,
+      medicalHistory: {
+        medicalname: formData.medicalHistory.medicalname ?? [],
+        note: formData.medicalHistory.note ?? '',
+      },
     }
     await userProfileStore
-      .updateMedicalHistory(medicalHistoryData)
+      .updateMedicalHistory(updatedMedicalData)
       .then(() => {
         notify({
           title: t('auth.success'),
@@ -660,15 +685,44 @@ const submitMedicalHistory = async () => {
   }
 }
 
+// const PatientProfileModal = ref<any>({
+//   patientProfileId: '',
+//   isUpdatePatientProfile: true,
+//   PatientProfile: {
+//     userId : '',
+//     idCardNumber: '',
+//     occupation: '',
+//   },
+// })
 // submit Patient Profile
 const submitPatientProfile = async () => {
   if (validate()) {
-    const PatientProfileData: PatientProfileUpdate = {
-      idCardNumber: formData.PatientProfile.idCardNumber ?? '',
-      occupation: formData.PatientProfile.occupation ?? '',
+    const userId = userProfileStore?.userDetails?.id
+
+    if (!userId) {
+      notify({
+        title: t('auth.error'),
+        message: 'User ID not found',
+        color: 'danger',
+      })
+      return
+    }
+
+    // Lấy ID của patient profile từ bảng patient profile
+    const patientProfileId = userProfileStore?.userDetails?.patientProfile?.id
+
+    const updatePatientProfiledData: PatientProfileUpdate = {
+      patientProfileId: patientProfileId || '', // ID từ bảng patient profile
+      isUpdatePatientProfile: true,
+      Patientprofile: {
+        id: patientProfileId || '', // ID từ bảng patient profile
+        userId: userId, // ID của user
+        idCardNumber: formData.PatientProfile.idCardNumber || '',
+        occupation: formData.PatientProfile.occupation || '',
+      },
     }
     await userProfileStore
-      .updatePatientProfile(PatientProfileData)
+      .updatePatientProfile(updatePatientProfiledData)
       .then(() => {
         notify({
           title: t('auth.success'),
