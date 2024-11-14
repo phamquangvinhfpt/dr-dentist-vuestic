@@ -110,6 +110,41 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('../pages/Chat/Message.vue'),
       },
+      {
+        name: 'doctors-for-users',
+        path: 'find-doctors',
+        meta: {
+          requiresAuth: true,
+          title: 'Our Medical Team',
+        },
+        component: () => import('../pages/Doctor/DoctorListForUser.vue'),
+      },
+      {
+        name: 'doctor-detail',
+        path: 'doctors/:id',
+        component: () => import('../pages/Doctor/DoctorDetail.vue'),
+        meta: {
+          requiresAuth: true,
+          title: 'Doctor Details',
+        },
+      },
+      {
+        path: '/doctors/create',
+        name: 'doctor-create',
+        component: () => import('@/pages/Doctor/AddDoctor.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: '/doctors',
+        name: 'doctors-list',
+        component: () => import('@/pages/Doctor/DoctorsList.vue'),
+        meta: {
+          requiresAuth: true,
+          title: 'Doctors List',
+        },
+      },
     ],
   },
   {
