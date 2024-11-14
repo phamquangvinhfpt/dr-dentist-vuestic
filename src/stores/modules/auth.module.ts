@@ -35,6 +35,7 @@ export const Resource = {
   UserRoles: 'UserRoles',
   Roles: 'Roles',
   RoleClaims: 'RoleClaims',
+  AuditLogs: 'AuditLogs',
 }
 
 export const useAuthStore = defineStore('auth', {

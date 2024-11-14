@@ -16,10 +16,10 @@ Object.entries(fileNameToLocaleModuleDict)
   .forEach((localeNameLocaleMessagesTuple) => {
     messages[localeNameLocaleMessagesTuple[0]] = localeNameLocaleMessagesTuple[1]
   })
-
+const locale = localStorage.getItem('locale')
 export default createI18n({
   legacy: false,
-  locale: 'gb',
-  fallbackLocale: 'gb',
+  locale: locale || 'en',
+  fallbackLocale: 'en',
   messages,
 })

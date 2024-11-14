@@ -37,6 +37,7 @@ watch(
   () => mode.value,
   (value) => {
     theme.value = value ? 'dark' : 'light'
+    document.body.setAttribute('data-mode', value ? 'dark' : 'light')
   },
 )
 
@@ -49,6 +50,7 @@ onMounted(() => {
       mode.value = false
     }
     applyPreset(theme)
+    document.body.setAttribute('data-mode', theme)
   }
 })
 </script>

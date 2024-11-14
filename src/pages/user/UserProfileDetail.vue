@@ -7,11 +7,19 @@ import {
   SettingProfile,
   UserDetailFormData,
   UserDetailsUpdate,
+  // DoctorDetailFormData,
+  DoctorDetailsUpdate,
+  Rela,
+  PatientFamilyUpdate,
+  MedicalHistoryUpdate,
+  PatientProfileUpdate,
+  // RoleEnum,
 } from './types'
 import { VaAvatar, useForm, useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { AvatarFiles, OTP } from './UserProfile.enum'
 import { useUserProfileStore } from '@/stores/modules/user.module'
+
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
 
@@ -23,15 +31,26 @@ const props = defineProps({
     default: null,
   },
 })
+const relationshipOptions = [
+  { text: t('auth.father'), value: Rela.Father, id: 1 },
+  { text: t('auth.mother'), value: Rela.Mother, id: 2 },
+  { text: t('auth.sister'), value: Rela.Sister, id: 3 },
+  { text: t('auth.brother'), value: Rela.Brother, id: 4 },
+]
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { init: notify } = useToast()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const authStores = useAuthStore()
 const userProfileStore = useUserProfileStore()
-const isShowProfile = ref(true)
+const isShowProfile = ref(false)
+const isShowDoctorProfile = ref(false)
+const isShowPatientFamily = ref(false)
+const isShowMedicalHistory = ref(false)
+const isShowPatientProfile = ref(false)
 const OTPTime = ref(OTP.TimeOut)
 const typesImage = ref(AvatarFiles.Type)
+const isPatient = computed(() => authStores.musHaveRole('Patient'))
 const isShowModal = ref({
   email: false,
   phoneNumber: false,
@@ -55,12 +74,46 @@ const userDetail = ref<UserDetailFormData>({
   email: '',
   phoneNumber: '',
   imageUrl: '',
+  job: '',
+  address: '',
+  // role: RoleEnum.User,
+  doctorProfile: {
+    education: '',
+    college: '',
+    certification: '',
+    yearOfExp: '',
+    seftDescription: '',
+  },
+  patientFamily: {
+    name: '',
+    phone: '',
+    email: '',
+    relationship: Rela.Father,
+  },
+  medicalHistory: {
+    medicalname: [],
+    note: '',
+  },
+  PatientProfile: {
+    id: '',
+    userId: '',
+    idCardNumber: '',
+    occupation: '',
+  },
 })
+
 const passwordDetail = ref<PasswordDetailFormData>({
   password: '',
   confirmNewPassword: '',
   newPassword: '',
 })
+// const doctorDetail = ref<DoctorDetailFormData>({
+//   education: '',
+//   college: '',
+//   certification: '',
+//   yearOfExp: '',
+//   seftDescription: '',
+// })
 const fileUploaded = ref(null)
 
 const getUserDetail = async () => {
@@ -74,9 +127,58 @@ const getUserDetail = async () => {
       email: userProfileStore?.userDetails?.email,
       phoneNumber: userProfileStore?.userDetails?.phoneNumber,
       imageUrl: userProfileStore?.userDetails?.imageUrl,
+      job: userProfileStore?.userDetails?.job,
+      address: userProfileStore?.userDetails?.address,
+      // role: userProfileStore?.userDetails?.role,
+      doctorProfile: {
+        education: userProfileStore?.userDetails?.doctorProfile?.education ?? '',
+        college: userProfileStore?.userDetails?.doctorProfile?.college ?? '',
+        certification: userProfileStore?.userDetails?.doctorProfile?.certification ?? '',
+        yearOfExp: userProfileStore?.userDetails?.doctorProfile?.yearOfExp ?? '',
+        seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription ?? '',
+      },
+      patientFamily: {
+        name: userProfileStore?.userDetails?.patientFamily?.name || '', // Thuộc tính `name` ở đây nằm trong `patientFamily`
+        phone: userProfileStore?.userDetails?.patientFamily?.phone || '',
+        email: userProfileStore?.userDetails?.patientFamily?.email || '',
+        relationship: userProfileStore?.userDetails?.patientFamily?.relationship || Rela.Father,
+      },
+      medicalHistory: {
+        medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalname || [],
+        note: userProfileStore?.userDetails?.medicalHistory?.note || '',
+      },
+      PatientProfile: {
+        id: userProfileStore?.userDetails?.patientProfile?.id || '',
+        userId: userProfileStore?.userDetails?.id || '',
+        idCardNumber: userProfileStore?.userDetails?.patientProfile?.idCardNumber || '',
+        occupation: userProfileStore?.userDetails?.patientProfile?.occupation || '',
+      },
     }
     Object.assign(formData, userDetail.value)
     authStores.updateAvatarUrl(userDetail.value.imageUrl ? userDetail.value.imageUrl : undefined)
+    doctorProfile.value = {
+      education: userProfileStore?.userDetails?.doctorProfile?.education,
+      college: userProfileStore?.userDetails?.doctorProfile?.college,
+      certification: userProfileStore?.userDetails?.doctorProfile?.certification,
+      yearOfExp: userProfileStore?.userDetails?.doctorProfile?.yearOfExp,
+      seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription,
+    }
+    patientFamily.value = {
+      name: userProfileStore?.userDetails?.patientFamily?.name,
+      phone: userProfileStore?.userDetails?.patientFamily?.phone,
+      email: userProfileStore?.userDetails?.patientFamily?.email,
+      relationship: userProfileStore?.userDetails?.patientFamily?.relationship,
+    }
+    medicalHistory.value = {
+      medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalname,
+      note: userProfileStore?.userDetails?.medicalHistory?.note,
+    }
+    PatientProfile.value = {
+      userId: userProfileStore?.userDetails?.id,
+      Id: userProfileStore?.userDetails?.patientProfile?.id || '',
+      idCardNumber: userProfileStore?.userDetails?.patientProfile?.idCardNumber,
+      occupation: userProfileStore?.userDetails?.patientProfile?.occupation,
+    }
   } catch (error) {
     console.error(error)
   }
@@ -85,21 +187,113 @@ const getUserDetail = async () => {
 watch(
   () => props.settingOption?.id,
   (id) => {
-    const showProfile = id == '1'
+    const showProfile = id === '1'
     if (showProfile) {
       getUserDetail()
+      isShowProfile.value = true
+      isShowDoctorProfile.value = false
+      isShowMedicalHistory.value = false
+      isShowPatientFamily.value = false
+      isShowPatientProfile.value = false
+    } else if (id === '3') {
+      // Tab Doctor
+      getUserDetail() // vẫn gọi API để lấy data
+      isShowDoctorProfile.value = true
+      isShowProfile.value = false
+      isShowMedicalHistory.value = false
+      isShowPatientFamily.value = false
+      isShowPatientProfile.value = false
+    } else if (id === '4') {
+      // Tab Patient Family
+      getUserDetail() // vẫn gọi API để lấy data
+      isShowPatientFamily.value = true
+      isShowProfile.value = false
+      isShowDoctorProfile.value = false
+      isShowMedicalHistory.value = false
+      isShowPatientProfile.value = false
+    } else if (id === '5') {
+      // Tab Medical History
+      getUserDetail() // vẫn gọi API để lấy data
+      isShowMedicalHistory.value = true
+      isShowProfile.value = false
+      isShowDoctorProfile.value = false
+      isShowPatientFamily.value = false
+      isShowPatientProfile.value = false
+    } else if (id === '6') {
+      // Tab Patient Profile
+      getUserDetail() // vẫn gọi API để lấy data
+      isShowPatientProfile.value = true
+      isShowProfile.value = false
+      isShowDoctorProfile.value = false
+      isShowMedicalHistory.value = false
+      isShowPatientFamily.value = false
+    } else {
+      isShowProfile.value = false
+      isShowDoctorProfile.value = false
+      isShowMedicalHistory.value = false
+      isShowPatientFamily.value = false
+      isShowPatientProfile.value = false
     }
-    isShowProfile.value = showProfile
   },
   { immediate: true },
 )
-
+// watch(() => userDetail.value?.doctorProfile, (newProfile) => {
+//   if (newProfile && isDoctor.value) {
+//     formData.doctorProfile = {
+//       education: newProfile.education ?? null,
+//       college: newProfile.college ?? null,
+//       certification: newProfile.certification ?? null,
+//       yearOfExp: newProfile.yearOfExp ?? null,
+//       selfDescription: newProfile.seftDescription ?? null
+//     }
+//   }
+// }, { immediate: true })
 onMounted(() => {
   getUserDetail()
-  isShowProfile.value = props.settingOption?.id == '1'
+  isShowProfile.value = props.settingOption?.id === '1'
+  isShowDoctorProfile.value = props.settingOption?.id === '3'
+  isShowPatientFamily.value = props.settingOption?.id === '4'
+  isShowMedicalHistory.value = props.settingOption?.id === '5'
+  isShowPatientProfile.value = props.settingOption?.id === '6'
 })
 
-const formData = reactive({ ...userDetail.value })
+// test
+// const isDoctor = computed(() => {
+//   return userProfileStore?.userDetails?.role === 'DOCTOR'
+// })
+//end test
+
+const formData = reactive({
+  ...userDetail.value,
+  doctorProfile: { ...userDetail.value.doctorProfile },
+  patientFamily: { ...userDetail.value.patientFamily },
+  medicalHistory: { ...userDetail.value.medicalHistory },
+  PatientProfile: { ...userDetail.value.PatientProfile },
+})
+const doctorProfile = ref<any>({
+  education: '',
+  college: '',
+  certification: '',
+  yearOfExp: '',
+  seftDescription: '',
+})
+const patientFamily = ref<any>({
+  name: '',
+  phone: '',
+  email: '',
+  relationship: Rela.Father,
+})
+const medicalHistory = ref<any>({
+  medicalname: [],
+  note: '',
+})
+const PatientProfile = ref<any>({
+  id: '',
+  userId: '',
+  idCardNumber: '',
+  occupation: '',
+})
+// const formDataGetDoctor = reactive({ ...doctorDetail.value })
 const formDataChangePassword = reactive({ ...passwordDetail.value })
 const formDataChangePhoneNumber = reactive({ phoneNumber: '', password: '' })
 const formDataChangePhoneOTP = reactive({ otpCode: '' })
@@ -159,6 +353,54 @@ const isFormHasNotChanged = computed(() => {
   })
 })
 
+const isFormHasNotChangedDoctor = computed(() => {
+  const doctorProfiles = userDetail.value.doctorProfile
+
+  if (!doctorProfiles || typeof doctorProfiles !== 'object') {
+    return false
+  }
+
+  return Object.entries(doctorProfiles).every(([key, value]) => {
+    return doctorProfile.value[key] === value
+  })
+})
+
+const isFormHasNotChangedPatientFamily = computed(() => {
+  const patientFamilies = userDetail.value.patientFamily
+
+  if (!patientFamilies || typeof patientFamilies !== 'object') {
+    return false
+  }
+
+  return Object.entries(patientFamilies).every(([key, value]) => {
+    return patientFamily.value[key] === value
+  })
+})
+
+const isFormHasNotChangedMedicalHistory = computed(() => {
+  const medicalHistories = userDetail.value.medicalHistory
+
+  if (!medicalHistories || typeof medicalHistories !== 'object') {
+    return false
+  }
+
+  return Object.entries(medicalHistories).every(([key, value]) => {
+    return medicalHistory.value[key] === value
+  })
+})
+
+const isFormHasNotChangedPatientProfile = computed(() => {
+  const PatientProfiles = userDetail.value.PatientProfile
+
+  if (!PatientProfiles || typeof PatientProfiles !== 'object') {
+    return false
+  }
+
+  return Object.entries(PatientProfiles).every(([key, value]) => {
+    return PatientProfile.value[key] === value
+  })
+})
+// isDisabled button update profile
 const isDisabledButtonUpdateProfile = computed(() => {
   if (isFormHasNotChanged.value) return true
   else if (!isValid) return true
@@ -172,7 +414,7 @@ const isDisabledButtonUpdateProfile = computed(() => {
   }
   return false
 })
-
+// isDisabled button change password
 const isDisabledButtonChangePassword = computed(() => {
   if (!isValidChangePassword.value) {
     return true
@@ -185,7 +427,64 @@ const isDisabledButtonChangePassword = computed(() => {
   }
   return false
 })
+//isdisabled button change doctor profile
+const isDisabledButtonChangeDoctorProfile = computed(() => {
+  if (isFormHasNotChangedDoctor.value) return true
+  else if (!isValid) return true
+  else if (
+    checkEmptyField(formData.doctorProfile.education) ||
+    checkEmptyField(formData.doctorProfile.college) ||
+    checkEmptyField(formData.doctorProfile.certification) ||
+    checkEmptyField(formData.doctorProfile.yearOfExp) ||
+    checkEmptyField(formData.doctorProfile.seftDescription)
+  ) {
+    return true
+  }
+  return false
+})
 
+const isDisabledButtonChangePatientFamily = computed(() => {
+  if (!isValid) {
+    return true
+  } else if (isFormHasNotChangedPatientFamily.value) {
+    return true
+  } else if (
+    checkEmptyField(formData.patientFamily.name) ||
+    checkEmptyField(formData.patientFamily.phone) ||
+    checkEmptyField(formData.patientFamily.email) ||
+    checkEmptyField(formData.patientFamily.relationship)
+  ) {
+    // get value of relationship
+    return true
+  }
+  return false
+})
+
+const isDisabledButtonChangeMedicalHistory = computed(() => {
+  if (!isValid) {
+    return true
+  } else if (isFormHasNotChangedMedicalHistory.value) {
+    return true
+  } else if (checkEmptyField(formData.medicalHistory.medicalname) || checkEmptyField(formData.medicalHistory.note)) {
+    return true
+  }
+  return false
+})
+
+const isDisabledButtonChangePatientProfile = computed(() => {
+  if (!isValid) {
+    return true
+  } else if (isFormHasNotChangedPatientProfile.value) {
+    return true
+  } else if (
+    checkEmptyField(formData.PatientProfile.idCardNumber) ||
+    checkEmptyField(formData.PatientProfile.occupation)
+  ) {
+    return true
+  }
+  return false
+})
+// isDisabled button change email
 const isDisabledButtonChangeEmail = computed(() => {
   if (
     isInValidField(formDataChangeEmail.email, emailRules) ||
@@ -228,7 +527,7 @@ const getDateFormated = (date: Date) => {
   const day = String(date?.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
-
+//submit user profile
 const submit = async () => {
   if (validate()) {
     const dob: any = formData?.dob
@@ -260,6 +559,188 @@ const submit = async () => {
   }
 }
 
+// submit doctor profile
+
+const submitDoctorProfile = async () => {
+  if (validate()) {
+    const doctorProfileData: DoctorDetailsUpdate = {
+      education: formData.doctorProfile.education ?? null,
+      college: formData.doctorProfile.college ?? null,
+      certification: formData.doctorProfile.certification ?? null,
+      yearOfExp: formData.doctorProfile.yearOfExp ?? null,
+      seftDescription: formData.doctorProfile.certification ?? null,
+    }
+    await userProfileStore
+      .updateDoctorProfile(doctorProfileData)
+      .then(() => {
+        notify({
+          title: t('auth.success'),
+          message: t('auth.updated_doctor_profile_successfully'),
+          color: 'success',
+        })
+        getUserDetail()
+      })
+      .catch((error) => {
+        const message = getErrorMessage(error)
+        notify({
+          title: t('auth.error'),
+          message: message,
+          color: 'danger',
+        })
+      })
+  }
+}
+
+const getRelationShipValue = (value: Rela | undefined) => {
+  return relationshipOptions.find((item) => item.value === value)?.value
+}
+
+// const patientFamilyModal = ref<any>({
+//   isUpdatePatientFamily: true,
+//   patientFamily: {
+//     name: '',
+//     phone: '',
+//     email: '',
+//     relationship: 1,
+//   },
+// })
+
+// submit Patient Family
+const submitPatientFamily = async () => {
+  if (validate()) {
+    // Lấy thông tin từ form
+    const value = formData.patientFamily.relationship
+    console.log('Value:', userDetail.value.PatientProfile?.id)
+    // Dữ liệu cần cập nhật
+    const updatedData: PatientFamilyUpdate = {
+      patientProfileId: userProfileStore?.userDetails ? userProfileStore?.userDetails?.patientProfile?.id : '', // Dùng ID của PatientProfile hoặc User nếu không có
+      isUpdatePatientFamily: true,
+      patientFamily: {
+        name: formData.patientFamily.name ?? '',
+        phone: formData.patientFamily.phone ?? '',
+        email: formData.patientFamily.email ?? '',
+        relationship: getRelationShipValue(value) ?? 1,
+      },
+    }
+
+    console.log('Data will be sent:', updatedData)
+
+    await userProfileStore
+      .updatePatientFamilyProfile(updatedData)
+      .then(() => {
+        notify({
+          title: t('auth.success'),
+          message: t('auth.updated_patient_family_successfully'),
+          color: 'success',
+        })
+        getUserDetail()
+        console.log('Data sent successfully' + updatedData)
+      })
+      .catch((error) => {
+        const message = getErrorMessage(error)
+        notify({
+          title: t('auth.error'),
+          message: message,
+          color: 'danger',
+        })
+      })
+  }
+}
+
+// const medicalHistoryModal = ref<any>({
+// isUpdateMedicalHistory: true,
+//   medicalHistory: {
+//     medicalname: [],
+//     note: '',
+//   },
+// })
+// submit Medical History
+const submitMedicalHistory = async () => {
+  if (validate()) {
+    const updatedMedicalData: MedicalHistoryUpdate = {
+      isUpdateMedicalHistory: true,
+      medicalHistory: {
+        medicalname: formData.medicalHistory.medicalname ?? [],
+        note: formData.medicalHistory.note ?? '',
+      },
+    }
+    await userProfileStore
+      .updateMedicalHistory(updatedMedicalData)
+      .then(() => {
+        notify({
+          title: t('auth.success'),
+          message: t('auth.updated_medical_history_successfully'),
+          color: 'success',
+        })
+        getUserDetail()
+      })
+      .catch((error) => {
+        const message = getErrorMessage(error)
+        notify({
+          title: t('auth.error'),
+          message: message,
+          color: 'danger',
+        })
+      })
+  }
+}
+
+// const PatientProfileModal = ref<any>({
+//   patientProfileId: '',
+//   isUpdatePatientProfile: true,
+//   PatientProfile: {
+//     userId : '',
+//     idCardNumber: '',
+//     occupation: '',
+//   },
+// })
+// submit Patient Profile
+const submitPatientProfile = async () => {
+  if (validate()) {
+    const userId = userProfileStore?.userDetails?.id
+
+    if (!userId) {
+      notify({
+        title: t('auth.error'),
+        message: 'User ID not found',
+        color: 'danger',
+      })
+      return
+    }
+
+    // Lấy ID của patient profile từ bảng patient profile
+    const patientProfileId = userProfileStore?.userDetails?.patientProfile?.id
+
+    const updatePatientProfiledData: PatientProfileUpdate = {
+      patientProfileId: patientProfileId || '', // ID từ bảng patient profile
+      isUpdatePatientProfile: true,
+      Patientprofile: {
+        id: patientProfileId || '', // ID từ bảng patient profile
+        userId: userId, // ID của user
+        idCardNumber: formData.PatientProfile.idCardNumber || '',
+        occupation: formData.PatientProfile.occupation || '',
+      },
+    }
+    await userProfileStore
+      .updatePatientProfile(updatePatientProfiledData)
+      .then(() => {
+        notify({
+          title: t('auth.success'),
+          message: t('auth.updated_patient_profile_successfully'),
+          color: 'success',
+        })
+        getUserDetail()
+      })
+      .catch((error) => {
+        const message = getErrorMessage(error)
+        notify({
+          title: t('auth.error'),
+          message: message,
+          color: 'danger',
+        })
+      })
+  }
+}
 const submitChangePassword = async () => {
   if (validateChangePassword()) {
     const passwordDetailData: PasswordDetailFormData = {
@@ -530,164 +1011,465 @@ const verifyEmail = async () => {
 
 <template>
   <VaInnerLoading :loading="userProfileStore?.isLoading" class="z-50">
-    <VaCard v-if="isShowProfile" class="p-2 ml-1 rounded">
-      <div class="mt-3 mb-10 flex items-center gap-5">
-        <div>
-          <VaBadge v-if="formData?.imageUrl" color="danger" overlap placement="top-right" :offset="[-7, 7]">
-            <template #text>
-              <span class="cursor-pointer" @click="isShowModal.removeAvatar = !isShowModal.removeAvatar">X</span>
-            </template>
-            <VaModal
-              v-model="isShowModal.removeAvatar"
-              :ok-text="t('auth.remove')"
-              size="small"
-              :child-ok-button="{ size: 'small' }"
-              :child-cancel-button="{ size: 'small' }"
-              @ok="handleRemoveAvatar"
-            >
-              <p class="text-lg">{{ t('auth.confirm_remove_avatar') }}</p>
-            </VaModal>
-            <VaAvatar :src="getSrcAvatar()" size="large" />
-          </VaBadge>
-          <VaAvatar v-if="!formData?.imageUrl" color="warning" size="large" class="font-bold">{{
-            shortNameLetter
-          }}</VaAvatar>
-        </div>
-        <div class="relative">
-          <VaFileUpload
-            class="opacity-0 absolute top-0 left-0 w-full h-full z-10 inset-0"
-            type="single"
-            :file-types="typesImage"
-            @fileAdded="handleFileAdded"
-          />
-          <VaButton class="flex items-center" preset="secondary" border-color="primary" size="small">
-            <VaIcon name="upload" class="mr-2" />
-            {{ t('auth.upload') }}
-          </VaButton>
-        </div>
-      </div>
-      <VaForm ref="form" @submit.prevent="submit">
-        <div class="grid md:grid-cols-2 gap-4">
-          <VaField>
-            <VaInput
-              v-model="formData.firstName"
-              :label="t('auth.first_name')"
-              class="mb-3"
-              :rules="[(v: any) => !!v || t('auth.first_name_required')]"
-              :placeholder="t('auth.enter_first_name')"
-            />
-          </VaField>
-
-          <VaField>
-            <VaInput
-              v-model="formData.lastName"
-              :label="t('auth.last_name')"
-              class="mb-3"
-              :rules="[(v: any) => !!v || t('auth.last_name_required')]"
-              :placeholder="t('auth.enter_last_name')"
-            />
-          </VaField>
-
-          <VaField>
-            <VaDateInput
-              v-model="formData.dob"
-              :rules="[(v: any) => !!v || t('auth.birth_date_required')]"
-              class="mb-3"
-              :label="t('auth.birth_date')"
-              :placeholder="t('auth.enter_birth_date')"
-            />
-          </VaField>
-          <VaField>
-            <label class="block uppercase text-primary font-bold" style="font-size: 0.57rem">{{
-              t('auth.gender')
-            }}</label>
-            <VaRadio
-              v-model="formData.gender"
-              :rules="[(v: null | undefined) => (v !== null && v !== undefined) || t('auth.gender_required')]"
-              class="mb-3"
-              value-by="value"
-              name="gender"
-              :label="t('auth.choose_gender')"
-              :options="genderOptions"
-            />
-          </VaField>
-          <VaField>
-            <VaInput
-              v-model="formData.phoneNumber"
-              :placeholder="t('auth.enter_phone_number')"
-              class="mb-3"
-              readonly
-              preset="solid"
-              :label="t('auth.phone_number')"
-            >
-              <template #messages>
-                <div class="flex justify-between">
-                  <p
-                    v-if="!userProfileStore?.userDetails?.phoneNumberConfirmed"
-                    class="font-semibold text-xs text-orange-500 cursor-pointer mt-1"
-                    @click="verifyPhoneNumber"
-                  >
-                    {{ t('auth.verify_phone_number') }}
-                  </p>
-                  <p
-                    class="font-semibold text-xs text-primary cursor-pointer mt-1"
-                    @click="isShowModal.phoneNumber = !isShowModal.phoneNumber"
-                  >
-                    {{ t('auth.change_phone_number') }}
-                  </p>
-                </div>
+    <div :class="{ 'max-w-6xl mx-auto p-10': isPatient }">
+      <VaCard v-if="isShowProfile" class="p-2 ml-1 rounded">
+        <div class="mt-3 mb-10 flex items-center gap-5">
+          <div>
+            <VaBadge v-if="formData?.imageUrl" color="danger" overlap placement="top-right" :offset="[-7, 7]">
+              <template #text>
+                <span class="cursor-pointer" @click="isShowModal.removeAvatar = !isShowModal.removeAvatar">X</span>
               </template>
-            </VaInput>
-          </VaField>
+              <VaModal
+                v-model="isShowModal.removeAvatar"
+                :ok-text="t('auth.remove')"
+                size="small"
+                :child-ok-button="{ size: 'small' }"
+                :child-cancel-button="{ size: 'small' }"
+                @ok="handleRemoveAvatar"
+              >
+                <p class="text-lg">{{ t('auth.confirm_remove_avatar') }}</p>
+              </VaModal>
+              <VaAvatar :src="getSrcAvatar()" size="large" />
+            </VaBadge>
+            <VaAvatar v-if="!formData?.imageUrl" color="warning" size="large" class="font-bold">{{
+              shortNameLetter
+            }}</VaAvatar>
+          </div>
+          <div class="relative">
+            <VaFileUpload
+              class="opacity-0 absolute top-0 left-0 w-full h-full z-10 inset-0"
+              type="single"
+              :file-types="typesImage"
+              @fileAdded="handleFileAdded"
+            />
+            <VaButton class="flex items-center" preset="secondary" border-color="primary" size="small">
+              <VaIcon name="upload" class="mr-2" />
+              {{ t('auth.upload') }}
+            </VaButton>
+          </div>
+        </div>
+        <VaForm ref="form" @submit.prevent="submit">
+          <div class="grid md:grid-cols-2 gap-4 p-3">
+            <VaField>
+              <VaInput
+                v-model="formData.firstName"
+                :label="t('auth.first_name')"
+                class="mb-3"
+                :rules="[(v: any) => !!v || t('auth.first_name_required')]"
+                :placeholder="t('auth.enter_first_name')"
+              />
+            </VaField>
 
+            <VaField>
+              <VaInput
+                v-model="formData.lastName"
+                :label="t('auth.last_name')"
+                class="mb-3"
+                :rules="[(v: any) => !!v || t('auth.last_name_required')]"
+                :placeholder="t('auth.enter_last_name')"
+              />
+            </VaField>
+
+            <VaField>
+              <VaDateInput
+                v-model="formData.dob"
+                :rules="[(v: any) => !!v || t('auth.birth_date_required')]"
+                class="mb-3"
+                :label="t('auth.birth_date')"
+                :placeholder="t('auth.enter_birth_date')"
+              />
+            </VaField>
+            <VaField>
+              <label class="block uppercase text-primary font-bold" style="font-size: 0.57rem">{{
+                t('auth.gender')
+              }}</label>
+              <VaRadio
+                v-model="formData.gender"
+                :rules="[(v: null | undefined) => (v !== null && v !== undefined) || t('auth.gender_required')]"
+                class="mb-3"
+                value-by="value"
+                name="gender"
+                :label="t('auth.choose_gender')"
+                :options="genderOptions"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.phoneNumber"
+                :placeholder="t('auth.enter_phone_number')"
+                class="mb-3"
+                readonly
+                preset="solid"
+                :label="t('auth.phone_number')"
+              >
+                <template #messages>
+                  <div class="flex justify-between">
+                    <p
+                      v-if="!userProfileStore?.userDetails?.phoneNumberConfirmed"
+                      class="font-semibold text-xs text-orange-500 cursor-pointer mt-1"
+                      @click="verifyPhoneNumber"
+                    >
+                      {{ t('auth.verify_phone_number') }}
+                    </p>
+                    <p
+                      class="font-semibold text-xs text-primary cursor-pointer mt-1"
+                      @click="isShowModal.phoneNumber = !isShowModal.phoneNumber"
+                    >
+                      {{ t('auth.change_phone_number') }}
+                    </p>
+                  </div>
+                </template>
+              </VaInput>
+            </VaField>
+
+            <VaField>
+              <VaInput
+                v-model="formData.email"
+                :placeholder="t('auth.enter_email')"
+                readonly
+                preset="solid"
+                class="mb-3"
+                :label="t('auth.email')"
+                type="email"
+              >
+                <template #messages>
+                  <div class="flex justify-between">
+                    <p
+                      v-if="!userProfileStore?.userDetails?.emailConfirmed"
+                      class="font-semibold text-xs text-orange-500 cursor-pointer mt-1"
+                      @click="verifyEmail"
+                    >
+                      {{ t('auth.verify_email') }}
+                    </p>
+                    <p
+                      class="font-semibold text-xs text-primary cursor-pointer mt-1"
+                      @click="isShowModal.email = !isShowModal.email"
+                    >
+                      {{ t('auth.change_email') }}
+                    </p>
+                  </div>
+                </template>
+              </VaInput>
+            </VaField>
+            <!--phần test thử của Tuấn -->
+            <VaField>
+              <VaInput v-model="formData.job" :label="t('auth.Job')" class="mb-3" :placeholder="t('auth.enter_job')" />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.address"
+                :label="t('auth.Address')"
+                class="mb-3"
+                :rules="[(v: any) => !!v || t('auth.address_required')]"
+                :placeholder="t('auth.enter_address')"
+              />
+            </VaField>
+
+            <!--kết phần test thử của Tuấn -->
+          </div>
+          <div class="flex justify-end">
+            <VaButton class="w-fit rounded mb-3" :disabled="isDisabledButtonUpdateProfile" @click="submit">
+              {{ t('auth.update') }}
+            </VaButton>
+          </div>
+        </VaForm>
+      </VaCard>
+
+      <!-- Hiển thị form thông tin doctor khi id === 3 -->
+      <!-- Tab Doctor Fields -->
+      <VaCard v-if="isShowDoctorProfile" class="p-2 ml-1 rounded">
+        <VaForm ref="form" @submit.prevent="submitDoctorProfile">
+          <div class="grid md:grid-cols-2 gap-4">
+            <VaField>
+              <VaInput
+                v-model="formData.doctorProfile.education"
+                :label="t('auth.education')"
+                class="mb-3"
+                :placeholder="t('auth.enter_education')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.doctorProfile.college"
+                :label="t('auth.college')"
+                class="mb-3"
+                :placeholder="t('auth.enter_college')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.doctorProfile.certification"
+                :label="t('auth.certification')"
+                class="mb-3"
+                :placeholder="t('auth.enter_certification')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.doctorProfile.yearOfExp"
+                type="number"
+                :label="t('auth.year_of_experience')"
+                class="mb-3"
+                :placeholder="t('auth.enter_year_of_experience')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.doctorProfile.seftDescription"
+                :label="t('auth.self_description')"
+                class="mb-3"
+                :placeholder="t('auth.enter_self_description')"
+                textarea
+              />
+            </VaField>
+          </div>
+
+          <div class="flex justify-end">
+            <VaButton
+              class="w-fit rounded mb-3"
+              :disabled="isDisabledButtonChangeDoctorProfile"
+              @click="submitDoctorProfile"
+            >
+              {{ t('auth.update') }}
+            </VaButton>
+          </div>
+        </VaForm>
+      </VaCard>
+
+      <!-- Hiển thị form thông tin patienFamily khi id === 4 -->
+      <!-- Tab patientFamily Fields -->
+      <VaCard v-if="isShowPatientFamily" class="p-2 ml-1 rounded">
+        <VaForm ref="form" @submit.prevent="submitPatientFamily">
+          <div class="grid md:grid-cols-2 gap-4">
+            <VaField>
+              <VaInput
+                v-model="formData.patientFamily.name"
+                :label="t('auth.name')"
+                class="mb-3"
+                :placeholder="t('auth.enter_name')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.patientFamily.phone"
+                :label="t('auth.phone')"
+                class="mb-3"
+                :placeholder="t('auth.enter_phone')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.patientFamily.email"
+                :label="t('auth.email')"
+                class="mb-3"
+                :placeholder="t('auth.enter_email')"
+              />
+            </VaField>
+            <VaField>
+              <VaSelect
+                v-model="formData.patientFamily.relationship"
+                :label="t('auth.relationship')"
+                class="mb-3"
+                :placeholder="t('auth.choose_relationship')"
+                :options="relationshipOptions"
+              />
+            </VaField>
+          </div>
+
+          <div class="flex justify-end">
+            <VaButton
+              class="w-fit rounded mb-3"
+              :disabled="isDisabledButtonChangePatientFamily"
+              @click="submitPatientFamily"
+            >
+              {{ t('auth.update') }}
+            </VaButton>
+          </div>
+        </VaForm>
+      </VaCard>
+      <!-- Hiển thị form thông tin patienFamily khi id === 5 -->
+      <!-- Tab MedicalHistory Fields -->
+      <VaCard v-if="isShowMedicalHistory" class="p-2 ml-1 rounded">
+        <VaForm ref="form" @submit.prevent="submitMedicalHistory">
+          <div class="grid md:grid-cols-2 gap-4">
+            <VaField>
+              <VaInput
+                v-model="formData.medicalHistory.medicalname"
+                :label="t('auth.medical_name')"
+                class="mb-3"
+                :placeholder="t('auth.enter_medical_name')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.medicalHistory.note"
+                :label="t('auth.note')"
+                class="mb-3"
+                :placeholder="t('auth.enter_note')"
+                textarea
+              />
+            </VaField>
+          </div>
+
+          <div class="flex justify-end">
+            <VaButton
+              class="w-fit rounded mb-3"
+              :disabled="isDisabledButtonChangeMedicalHistory"
+              @click="submitMedicalHistory"
+            >
+              {{ t('auth.update') }}
+            </VaButton>
+          </div>
+        </VaForm>
+      </VaCard>
+      <!-- Hiển thị form thông tin patienFamily khi id === 6 -->
+      <!-- Tab PatientProfile Fields -->
+      <VaCard v-if="isShowPatientProfile" class="p-2 ml-1 rounded">
+        <VaForm ref="form" @submit.prevent="submitPatientProfile">
+          <div class="grid md:grid-cols-2 gap-4">
+            <VaField>
+              <VaInput
+                v-model="formData.PatientProfile.idCardNumber"
+                :label="t('auth.id_card_number')"
+                class="mb-3"
+                :placeholder="t('auth.enter_id_card_number')"
+              />
+            </VaField>
+            <VaField>
+              <VaInput
+                v-model="formData.PatientProfile.occupation"
+                :label="t('auth.occupation')"
+                class="mb-3"
+                :placeholder="t('auth.enter_occupation')"
+              />
+            </VaField>
+          </div>
+
+          <div class="flex justify-end">
+            <VaButton
+              class="w-fit rounded mb-3"
+              :disabled="isDisabledButtonChangePatientProfile"
+              @click="submitPatientProfile"
+            >
+              {{ t('auth.update') }}
+            </VaButton>
+          </div>
+        </VaForm>
+      </VaCard>
+      <!--Form change password-->
+      <VaCard
+        v-if="
+          !isShowProfile &&
+          !isShowDoctorProfile &&
+          !isShowPatientFamily &&
+          !isShowMedicalHistory &&
+          !isShowPatientProfile
+        "
+        class="p-2 ml-1 rounded"
+      >
+        <VaForm ref="formChangePassword" class="mt-4" @submit.prevent="submitChangePassword">
+          <div class="grid md:grid-cols-3 gap-4">
+            <VaField>
+              <VaValue v-slot="isPasswordVisible" :default-value="false">
+                <VaInput
+                  v-model="formDataChangePassword.password"
+                  :rules="passwordRules"
+                  :type="isPasswordVisible.value ? 'text' : 'password'"
+                  class="mb-4"
+                  :label="t('auth.current_password')"
+                  @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+                >
+                  <template #appendInner>
+                    <VaIcon
+                      :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
+                      class="cursor-pointer"
+                      color="secondary"
+                    />
+                  </template>
+                </VaInput>
+              </VaValue>
+            </VaField>
+
+            <VaField>
+              <VaValue v-slot="isPasswordVisible" :default-value="false">
+                <VaInput
+                  ref="password1"
+                  v-model="formDataChangePassword.newPassword"
+                  :rules="passwordRules"
+                  :type="isPasswordVisible.value ? 'text' : 'password'"
+                  class="mb-4"
+                  :label="t('auth.new_password')"
+                  @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+                >
+                  <template #appendInner>
+                    <VaIcon
+                      :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
+                      class="cursor-pointer"
+                      color="secondary"
+                    />
+                  </template>
+                </VaInput>
+              </VaValue>
+            </VaField>
+            <VaField>
+              <VaValue v-slot="isPasswordVisible" :default-value="false">
+                <VaInput
+                  ref="password2"
+                  v-model="formDataChangePassword.confirmNewPassword"
+                  :rules="[
+                    (v: any) => !!v || t('auth.confirm_password_required'),
+                    (v: string) => v === formDataChangePassword.newPassword || t('auth.passwords_dont_match'),
+                  ]"
+                  :type="isPasswordVisible.value ? 'text' : 'password'"
+                  class="mb-4"
+                  :label="t('auth.confirm_new_password')"
+                  @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+                >
+                  <template #appendInner>
+                    <VaIcon
+                      :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
+                      class="cursor-pointer"
+                      color="secondary"
+                    />
+                  </template>
+                </VaInput>
+              </VaValue>
+            </VaField>
+          </div>
+          <div class="flex justify-end">
+            <VaButton
+              class="w-fit rounded mb-3"
+              :disabled="isDisabledButtonChangePassword"
+              @click="submitChangePassword"
+            >
+              {{ t('auth.update') }}
+            </VaButton>
+          </div>
+        </VaForm>
+      </VaCard>
+
+      <VaModal v-model="isShowModal.email" hide-default-actions size="small">
+        <h3 class="va-h3 text-center">{{ t('auth.email') }}</h3>
+        <VaForm ref="formChangeEmail" @submit.prevent="submitChangeEmail">
           <VaField>
             <VaInput
-              v-model="formData.email"
-              :placeholder="t('auth.enter_email')"
-              readonly
-              preset="solid"
+              v-model="formDataChangeEmail.email"
+              :placeholder="t('auth.enter_new_email')"
+              :rules="emailRules"
               class="mb-3"
               :label="t('auth.email')"
               type="email"
-            >
-              <template #messages>
-                <div class="flex justify-between">
-                  <p
-                    v-if="!userProfileStore?.userDetails?.emailConfirmed"
-                    class="font-semibold text-xs text-orange-500 cursor-pointer mt-1"
-                    @click="verifyEmail"
-                  >
-                    {{ t('auth.verify_email') }}
-                  </p>
-                  <p
-                    class="font-semibold text-xs text-primary cursor-pointer mt-1"
-                    @click="isShowModal.email = !isShowModal.email"
-                  >
-                    {{ t('auth.change_email') }}
-                  </p>
-                </div>
-              </template>
-            </VaInput>
+            />
           </VaField>
-        </div>
-        <div class="flex justify-end">
-          <VaButton class="w-fit rounded mb-3" :disabled="isDisabledButtonUpdateProfile" @click="submit">
-            {{ t('auth.update') }}
-          </VaButton>
-        </div>
-      </VaForm>
-    </VaCard>
-    <VaCard v-if="!isShowProfile" class="p-2 ml-1 rounded">
-      <VaForm ref="formChangePassword" class="mt-4" @submit.prevent="submitChangePassword">
-        <div class="grid md:grid-cols-3 gap-4">
           <VaField>
             <VaValue v-slot="isPasswordVisible" :default-value="false">
               <VaInput
-                v-model="formDataChangePassword.password"
+                v-model="formDataChangeEmail.password"
                 :rules="passwordRules"
                 :type="isPasswordVisible.value ? 'text' : 'password'"
                 class="mb-4"
-                :label="t('auth.current_password')"
+                :placeholder="t('auth.enter_password')"
+                :label="t('auth.password')"
                 @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
               >
                 <template #appendInner>
@@ -700,16 +1482,37 @@ const verifyEmail = async () => {
               </VaInput>
             </VaValue>
           </VaField>
-
+          <VaButton class="w-full rounded mb-3" :disabled="isDisabledButtonChangeEmail" @click="submitChangeEmail">
+            {{ t('auth.confirm') }}
+          </VaButton>
+          <p class="text-primary text-sm text-start cursor-pointer" @click="isShowModal.email = false">
+            &#60; {{ t('auth.back') }}
+          </p>
+        </VaForm>
+      </VaModal>
+      <VaModal v-model="isShowModal.phoneNumber" hide-default-actions size="small">
+        <h3 class="va-h3 text-center">
+          {{ isShowChangePhoneOTP ? t('auth.otp_confirmation') : t('auth.change_phone_number') }}
+        </h3>
+        <VaForm v-if="!isShowChangePhoneOTP" ref="formChangePhone" @submit.prevent="submitChangePhone">
+          <VaField>
+            <VaInput
+              v-model="formDataChangePhoneNumber.phoneNumber"
+              :placeholder="t('auth.enter_new_phone_number')"
+              :rules="phoneNumberRules"
+              class="mb-3"
+              :label="t('auth.new_phone_number')"
+            />
+          </VaField>
           <VaField>
             <VaValue v-slot="isPasswordVisible" :default-value="false">
               <VaInput
-                ref="password1"
-                v-model="formDataChangePassword.newPassword"
+                v-model="formDataChangePhoneNumber.password"
                 :rules="passwordRules"
                 :type="isPasswordVisible.value ? 'text' : 'password'"
                 class="mb-4"
-                :label="t('auth.new_password')"
+                :placeholder="t('auth.enter_password')"
+                :label="t('auth.password')"
                 @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
               >
                 <template #appendInner>
@@ -722,147 +1525,163 @@ const verifyEmail = async () => {
               </VaInput>
             </VaValue>
           </VaField>
-          <VaField>
-            <VaValue v-slot="isPasswordVisible" :default-value="false">
-              <VaInput
-                ref="password2"
-                v-model="formDataChangePassword.confirmNewPassword"
-                :rules="[
-                  (v: any) => !!v || t('auth.confirm_password_required'),
-                  (v: string) => v === formDataChangePassword.newPassword || t('auth.passwords_dont_match'),
-                ]"
-                :type="isPasswordVisible.value ? 'text' : 'password'"
-                class="mb-4"
-                :label="t('auth.confirm_new_password')"
-                @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
-              >
-                <template #appendInner>
-                  <VaIcon
-                    :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
-                    class="cursor-pointer"
-                    color="secondary"
-                  />
-                </template>
-              </VaInput>
-            </VaValue>
-          </VaField>
-        </div>
-        <div class="flex justify-end">
-          <VaButton class="w-fit rounded mb-3" :disabled="isDisabledButtonChangePassword" @click="submitChangePassword">
-            {{ t('auth.update') }}
-          </VaButton>
-        </div>
-      </VaForm>
-    </VaCard>
-
-    <VaModal v-model="isShowModal.email" hide-default-actions size="small">
-      <h3 class="va-h3 text-center">{{ t('auth.email') }}</h3>
-      <VaForm ref="formChangeEmail" @submit.prevent="submitChangeEmail">
-        <VaField>
-          <VaInput
-            v-model="formDataChangeEmail.email"
-            :placeholder="t('auth.enter_new_email')"
-            :rules="emailRules"
-            class="mb-3"
-            :label="t('auth.email')"
-            type="email"
-          />
-        </VaField>
-        <VaField>
-          <VaValue v-slot="isPasswordVisible" :default-value="false">
-            <VaInput
-              v-model="formDataChangeEmail.password"
-              :rules="passwordRules"
-              :type="isPasswordVisible.value ? 'text' : 'password'"
-              class="mb-4"
-              :placeholder="t('auth.enter_password')"
-              :label="t('auth.password')"
-              @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
-            >
-              <template #appendInner>
-                <VaIcon
-                  :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
-                  class="cursor-pointer"
-                  color="secondary"
-                />
-              </template>
-            </VaInput>
-          </VaValue>
-        </VaField>
-        <VaButton class="w-full rounded mb-3" :disabled="isDisabledButtonChangeEmail" @click="submitChangeEmail">
-          {{ t('auth.confirm') }}
-        </VaButton>
-        <p class="text-primary text-sm text-start cursor-pointer" @click="isShowModal.email = false">
-          &#60; {{ t('auth.back') }}
-        </p>
-      </VaForm>
-    </VaModal>
-    <VaModal v-model="isShowModal.phoneNumber" hide-default-actions size="small">
-      <h3 class="va-h3 text-center">
-        {{ isShowChangePhoneOTP ? t('auth.otp_confirmation') : t('auth.change_phone_number') }}
-      </h3>
-      <VaForm v-if="!isShowChangePhoneOTP" ref="formChangePhone" @submit.prevent="submitChangePhone">
-        <VaField>
-          <VaInput
-            v-model="formDataChangePhoneNumber.phoneNumber"
-            :placeholder="t('auth.enter_new_phone_number')"
-            :rules="phoneNumberRules"
-            class="mb-3"
-            :label="t('auth.new_phone_number')"
-          />
-        </VaField>
-        <VaField>
-          <VaValue v-slot="isPasswordVisible" :default-value="false">
-            <VaInput
-              v-model="formDataChangePhoneNumber.password"
-              :rules="passwordRules"
-              :type="isPasswordVisible.value ? 'text' : 'password'"
-              class="mb-4"
-              :placeholder="t('auth.enter_password')"
-              :label="t('auth.password')"
-              @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
-            >
-              <template #appendInner>
-                <VaIcon
-                  :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
-                  class="cursor-pointer"
-                  color="secondary"
-                />
-              </template>
-            </VaInput>
-          </VaValue>
-        </VaField>
-        <VaButton class="w-full rounded mb-3" :disabled="isDisabledButtonChangePhoneNumber" @click="submitChangePhone">
-          {{ t('auth.confirm') }}
-        </VaButton>
-        <p class="text-primary text-sm text-start cursor-pointer" @click="handleCancelChangePhone">
-          &#60; {{ t('auth.back') }}
-        </p>
-      </VaForm>
-      <VaForm v-if="isShowChangePhoneOTP" ref="formChangePhoneOTP" @submit.prevent="submitChangePhoneOTP">
-        <VaField>
-          <VaInput
-            v-model="formDataChangePhoneOTP.otpCode"
-            :placeholder="t('auth.enter_otp_code')"
-            :rules="phoneOtpRules"
-            class="mb-3"
-            :label="t('auth.otp_code')"
-          />
-        </VaField>
-
-        <p class="text-primary text-sm text-start">
-          <span v-if="OTPTime !== 0" class="mr-2">{{ t('auth.remaining') }} {{ OTPTime }}s</span>
-          <span v-if="OTPTime === 0" class="cursor-pointer" @click="verifyPhoneNumber"
-            >&#11118; {{ t('auth.resend') }}</span
+          <VaButton
+            class="w-full rounded mb-3"
+            :disabled="isDisabledButtonChangePhoneNumber"
+            @click="submitChangePhone"
           >
-        </p>
-        <VaButton class="w-full rounded mb-3" :disabled="isDisabledButtonChangePhoneOTP" @click="submitChangePhoneOTP">
-          {{ t('auth.confirm') }}
-        </VaButton>
-        <p class="text-primary text-sm text-start cursor-pointer" @click="handleCancelChangePhone">
-          &#60; {{ t('auth.back') }}
-        </p>
-      </VaForm>
-    </VaModal>
+            {{ t('auth.confirm') }}
+          </VaButton>
+          <p class="text-primary text-sm text-start cursor-pointer" @click="handleCancelChangePhone">
+            &#60; {{ t('auth.back') }}
+          </p>
+        </VaForm>
+        <VaForm v-if="isShowChangePhoneOTP" ref="formChangePhoneOTP" @submit.prevent="submitChangePhoneOTP">
+          <VaField>
+            <VaInput
+              v-model="formDataChangePhoneOTP.otpCode"
+              :placeholder="t('auth.enter_otp_code')"
+              :rules="phoneOtpRules"
+              class="mb-3"
+              :label="t('auth.otp_code')"
+            />
+          </VaField>
+
+          <p class="text-primary text-sm text-start">
+            <span v-if="OTPTime !== 0" class="mr-2">{{ t('auth.remaining') }} {{ OTPTime }}s</span>
+            <span v-if="OTPTime === 0" class="cursor-pointer" @click="verifyPhoneNumber"
+              >&#11118; {{ t('auth.resend') }}</span
+            >
+          </p>
+          <VaButton
+            class="w-full rounded mb-3"
+            :disabled="isDisabledButtonChangePhoneOTP"
+            @click="submitChangePhoneOTP"
+          >
+            {{ t('auth.confirm') }}
+          </VaButton>
+          <p class="text-primary text-sm text-start cursor-pointer" @click="handleCancelChangePhone">
+            &#60; {{ t('auth.back') }}
+          </p>
+        </VaForm>
+      </VaModal>
+      <VaModal v-model="isShowModal.email" hide-default-actions size="small">
+        <h3 class="va-h3 text-center">{{ t('auth.email') }}</h3>
+        <VaForm ref="formChangeEmail" @submit.prevent="submitChangeEmail">
+          <VaField>
+            <VaInput
+              v-model="formDataChangeEmail.email"
+              :placeholder="t('auth.enter_new_email')"
+              :rules="emailRules"
+              class="mb-3"
+              :label="t('auth.email')"
+              type="email"
+            />
+          </VaField>
+          <VaField>
+            <VaValue v-slot="isPasswordVisible" :default-value="false">
+              <VaInput
+                v-model="formDataChangeEmail.password"
+                :rules="passwordRules"
+                :type="isPasswordVisible.value ? 'text' : 'password'"
+                class="mb-4"
+                :placeholder="t('auth.enter_password')"
+                :label="t('auth.password')"
+                @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+              >
+                <template #appendInner>
+                  <VaIcon
+                    :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
+                    class="cursor-pointer"
+                    color="secondary"
+                  />
+                </template>
+              </VaInput>
+            </VaValue>
+          </VaField>
+          <VaButton class="w-full rounded mb-3" :disabled="isDisabledButtonChangeEmail" @click="submitChangeEmail">
+            {{ t('auth.confirm') }}
+          </VaButton>
+          <p class="text-primary text-sm text-start cursor-pointer" @click="isShowModal.email = false">
+            &#60; {{ t('auth.back') }}
+          </p>
+        </VaForm>
+      </VaModal>
+      <VaModal v-model="isShowModal.phoneNumber" hide-default-actions size="small">
+        <h3 class="va-h3 text-center">
+          {{ isShowChangePhoneOTP ? t('auth.otp_confirmation') : t('auth.change_phone_number') }}
+        </h3>
+        <VaForm v-if="!isShowChangePhoneOTP" ref="formChangePhone" @submit.prevent="submitChangePhone">
+          <VaField>
+            <VaInput
+              v-model="formDataChangePhoneNumber.phoneNumber"
+              :placeholder="t('auth.enter_new_phone_number')"
+              :rules="phoneNumberRules"
+              class="mb-3"
+              :label="t('auth.new_phone_number')"
+            />
+          </VaField>
+          <VaField>
+            <VaValue v-slot="isPasswordVisible" :default-value="false">
+              <VaInput
+                v-model="formDataChangePhoneNumber.password"
+                :rules="passwordRules"
+                :type="isPasswordVisible.value ? 'text' : 'password'"
+                class="mb-4"
+                :placeholder="t('auth.enter_password')"
+                :label="t('auth.password')"
+                @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+              >
+                <template #appendInner>
+                  <VaIcon
+                    :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
+                    class="cursor-pointer"
+                    color="secondary"
+                  />
+                </template>
+              </VaInput>
+            </VaValue>
+          </VaField>
+          <VaButton
+            class="w-full rounded mb-3"
+            :disabled="isDisabledButtonChangePhoneNumber"
+            @click="submitChangePhone"
+          >
+            {{ t('auth.confirm') }}
+          </VaButton>
+          <p class="text-primary text-sm text-start cursor-pointer" @click="handleCancelChangePhone">
+            &#60; {{ t('auth.back') }}
+          </p>
+        </VaForm>
+        <VaForm v-if="isShowChangePhoneOTP" ref="formChangePhoneOTP" @submit.prevent="submitChangePhoneOTP">
+          <VaField>
+            <VaInput
+              v-model="formDataChangePhoneOTP.otpCode"
+              :placeholder="t('auth.enter_otp_code')"
+              :rules="phoneOtpRules"
+              class="mb-3"
+              :label="t('auth.otp_code')"
+            />
+          </VaField>
+
+          <p class="text-primary text-sm text-start">
+            <span v-if="OTPTime !== 0" class="mr-2">{{ t('auth.remaining') }} {{ OTPTime }}s</span>
+            <span v-if="OTPTime === 0" class="cursor-pointer" @click="verifyPhoneNumber"
+              >&#11118; {{ t('auth.resend') }}</span
+            >
+          </p>
+          <VaButton
+            class="w-full rounded mb-3"
+            :disabled="isDisabledButtonChangePhoneOTP"
+            @click="submitChangePhoneOTP"
+          >
+            {{ t('auth.confirm') }}
+          </VaButton>
+          <p class="text-primary text-sm text-start cursor-pointer" @click="handleCancelChangePhone">
+            &#60; {{ t('auth.back') }}
+          </p>
+        </VaForm>
+      </VaModal>
+    </div>
   </VaInnerLoading>
 </template>

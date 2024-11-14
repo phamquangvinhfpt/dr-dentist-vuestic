@@ -4,18 +4,21 @@ import NotificationDropdown from './dropdowns/NotificationDropdown.vue'
 import LanguageSwitcher from '@/pages/settings/language-switcher/LanguageSwitcher.vue'
 import ThemeSwitcher from '@/pages/settings/theme-switcher/ThemeSwitcher.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
+import { computed } from 'vue'
+
 defineProps({
   isMobile: { type: Boolean, default: false },
 })
 
 const authStore = useAuthStore()
+const isLogged = computed(() => authStore.user !== null)
 </script>
 <template>
   <div class="app-navbar-actions">
     <ThemeSwitcher class="app-navbar-actions__item" />
     <LanguageSwitcher class="app-navbar-actions__item" />
     <NotificationDropdown ref="notificationDropdownRef" class="app-navbar-actions__item" />
-    <h4 v-if="!isMobile" class="app-navbar-actions__item">
+    <h4 v-if="!isMobile && isLogged" class="app-navbar-actions__item">
       Hello, <b>{{ authStore.user?.fullName }}</b>
     </h4>
     <ProfileDropdown class="app-navbar-actions__item app-navbar-actions__item--profile mr-1" />

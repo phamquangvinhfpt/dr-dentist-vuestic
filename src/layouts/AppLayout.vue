@@ -1,55 +1,65 @@
 <template>
   <VaLayout
     :top="{ fixed: true, order: 2 }"
-    :left="{ fixed: true, absolute: breakpoints.mdDown, order: 1, overlay: breakpoints.mdDown && !isSidebarMinimized }"
+    :left="{
+      fixed: true,
+      absolute: breakpoints.mdDown,
+      order: 1,
+      overlay: breakpoints.mdDown && !isSidebarMinimized && showSidebar,
+      width: sidebarWidth,
+    }"
     @leftOverlayClick="isSidebarMinimized = true"
   >
     <template #top>
-      <AppNavbar ref="navbarRef" :is-mobile="isMobile" />
+      <AppNavbar ref="navbarRef" :is-mobile="isMobile" class="w-full" />
     </template>
 
     <template #left>
-      <AppSidebar :minimized="isSidebarMinimized" :animated="!isMobile" :mobile="isMobile" />
+      <AppSidebar v-if="showSidebar" :minimized="isSidebarMinimized" :animated="!isMobile" :mobile="isMobile" />
     </template>
 
     <template #content>
-      <div :class="{ minimized: isSidebarMinimized }" class="app-layout__sidebar-wrapper">
+      <div class="app-layout__content-wrapper">
         <div v-if="isFullScreenSidebar" class="flex justify-end">
           <VaButton class="px-4 py-4" icon="md_close" preset="plain" @click="onCloseSidebarButtonClick" />
         </div>
+        <AppLayoutNavigation v-if="!isMobile" class="p-4" />
+        <main :class="[isPatientOrGuest ? '' : 'p-4 pt-0', 'w-full max-w-full overflow-x-hidden']">
+          <article>
+            <RouterView v-slot="{ Component }">
+              <component :is="Component" ref="notificationRef" />
+            </RouterView>
+          </article>
+        </main>
       </div>
-      <AppLayoutNavigation v-if="!isMobile" class="p-4" />
-      <main class="p-4 pt-0">
-        <article>
-          <!-- <RouterView /> -->
-          <RouterView v-slot="{ Component }">
-            <component :is="Component" ref="notificationRef" />
-          </RouterView>
-        </article>
-      </main>
     </template>
   </VaLayout>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, computed } from 'vue'
+import { onBeforeUnmount, onMounted, ref, computed, onBeforeMount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { onBeforeRouteUpdate } from 'vue-router'
 import { useBreakpoint } from 'vuestic-ui'
-
+import { useOnlineUsersStore } from '../stores/online-users-store'
 import { useGlobalStore } from '../stores/global-store'
-
+import { useAuthStore } from '@/stores/modules/auth.module'
 import AppLayoutNavigation from '../components/app-layout-navigation/AppLayoutNavigation.vue'
 import AppNavbar from '../components/navbar/AppNavbar.vue'
 import AppSidebar from '../components/sidebar/AppSidebar.vue'
 import signalRService from '@/signalR'
 
 const GlobalStore = useGlobalStore()
-
+const onlineUsersStore = useOnlineUsersStore()
 const breakpoints = useBreakpoint()
+const authStore = useAuthStore()
 
 const sidebarWidth = ref('16rem')
 const sidebarMinimizedWidth = ref(undefined)
+
+const isPatientOrGuest = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)
+const isGuest = computed(() => authStore.user === null)
+const showSidebar = computed(() => !isPatientOrGuest.value || isMobile.value)
 
 const isMobile = ref(false)
 const isTablet = ref(false)
@@ -74,7 +84,6 @@ onBeforeUnmount(() => {
 
 onBeforeRouteUpdate(() => {
   if (breakpoints.mdDown) {
-    // Collapse sidebar after route change for Mobile
     isSidebarMinimized.value = true
   }
 })
@@ -97,24 +106,90 @@ const handleReceiveNotification = (type, notification) => {
     notificationDropdownRef.receiveNotificationFromServer(type, notification)
   }
 }
-onMounted(async () => {
-  const url = import.meta.env.VITE_APP_BASE_URL
-  const url_without_api = url.slice(0, -3)
-  const path = url_without_api + 'notifications'
-  await signalRService.connect(`${path}`)
-  signalRService.on('NotificationFromServer', handleReceiveNotification)
+
+const handleUserIsOnline = (users, staffs) => {
+  // console.log(`Users online: ${users}`)
+  onlineUsersStore.updateOnlineUsers(users, staffs)
+}
+
+const handleReceiveMessage = (message) => {
+  onlineUsersStore.receiveMessage(message)
+}
+
+onBeforeMount(async () => {
+  if (!isGuest.value) {
+    const url = import.meta.env.VITE_APP_BASE_URL
+    const url_without_api = url.slice(0, -3)
+    const notificationPath = url_without_api + 'notifications'
+    const messagePath = url_without_api + 'chat'
+
+    // Kết nối đến hub thông báo
+    await signalRService.connect(notificationPath, 'notificationHub')
+
+    // Kết nối đến hub tin nhắn
+    await signalRService.connect(messagePath, 'messageHub')
+
+    if (signalRService.isConnected('notificationHub') && signalRService.isConnected('messageHub')) {
+      // Đăng ký sự kiện cho hub thông báo
+      signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
+
+      // Đăng ký sự kiện cho hub tin nhắn
+      signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
+      signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
+    } else {
+      //retry connect
+      setTimeout(() => {
+        location.reload()
+      }, 100)
+    }
+  }
 })
 
+// watch for user change
+
 onBeforeUnmount(() => {
-  signalRService.off('receiveNotificationFromServer')
-  signalRService.disconnect()
+  if (!isGuest.value) {
+    signalRService.off('notificationHub', 'NotificationFromServer')
+    signalRService.off('messageHub', 'UpdateOnlineUsers')
+    signalRService.off('messageHub', 'ReceiveMessage')
+    signalRService.disconnect('notificationHub')
+    signalRService.disconnect('messageHub')
+  }
 })
 </script>
 
 <style lang="scss" scoped>
-// Prevent icon jump on animation
-.va-sidebar {
-  width: unset !important;
-  min-width: unset !important;
+.va-layout__left {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 2;
+}
+
+.va-layout__top {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: var(--va-layout-left-width, 0);
+  z-index: 1;
+  transition: left 0.3s ease;
+}
+
+.app-layout__content-wrapper {
+  padding-top: var(--va-navbar-height, 0);
+  margin-left: var(--va-layout-left-width, 0);
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .va-layout__top {
+    left: 0;
+  }
+
+  .app-layout__content-wrapper {
+    margin-left: 0;
+  }
 }
 </style>

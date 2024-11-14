@@ -1,18 +1,26 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-
+import LandingPage from '../layouts/LandingPage.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import AppLayout from '../layouts/AppLayout.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/:pathMatch(.*)*',
-    redirect: { name: 'dashboard' },
+    redirect: { name: '404' },
+  },
+  {
+    name: 'landingPage',
+    path: '/index',
+    meta: {
+      requiresGuest: true,
+    },
+    component: LandingPage,
   },
   {
     name: 'home',
     path: '/',
     component: AppLayout,
-    redirect: { name: 'dashboard' },
+    redirect: { name: 'home-page' },
     children: [
       {
         name: 'dashboard',
@@ -23,6 +31,38 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/home/dashboard/Dashboard.vue'),
       },
       {
+        name: 'home-page',
+        path: 'home',
+        meta: {
+          requiresGuest: true,
+        },
+        component: () => import('../pages/home/dashboard/widgets/Patient-v2.vue'),
+      },
+      {
+        name: 'faq',
+        path: 'faq',
+        meta: {
+          requiresGuest: true,
+        },
+        component: () => import('../pages/home/landingpage/FAQ.vue'),
+      },
+      {
+        name: 'contact',
+        path: 'contact',
+        meta: {
+          requiresGuest: true,
+        },
+        component: () => import('../pages/home/landingpage/Contact.vue'),
+      },
+      {
+        name: 'appointment',
+        path: 'appointment',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/appointment/Appointment.vue'),
+      },
+      {
         name: 'profile',
         path: 'profile',
         meta: {
@@ -30,6 +70,8 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('../pages/user/UserProfile.vue'),
       },
+      // test thôi
+      //end test
       {
         name: 'notifications',
         path: 'notification',
@@ -45,6 +87,65 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: true,
         },
         component: () => import('../pages/audit-logs/AuditLogs.vue'),
+      },
+      {
+        name: 'users-management',
+        path: 'users-management',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/user/UsersManagement.vue'),
+      },
+      {
+        name: 'permission-management',
+        path: 'permission',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/permission/PermissionManagement.vue'),
+      },
+      {
+        name: 'message',
+        path: 'message',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Chat/Message.vue'),
+      },
+      {
+        name: 'doctors-for-users',
+        path: 'find-doctors',
+        meta: {
+          requiresAuth: true,
+          title: 'Our Medical Team',
+        },
+        component: () => import('../pages/Doctor/DoctorListForUser.vue'),
+      },
+      {
+        name: 'doctor-detail',
+        path: 'doctors/:id',
+        component: () => import('../pages/Doctor/DoctorDetail.vue'),
+        meta: {
+          requiresAuth: true,
+          title: 'Doctor Details',
+        },
+      },
+      {
+        path: '/doctors/create',
+        name: 'doctor-create',
+        component: () => import('@/pages/Doctor/AddDoctor.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: '/doctors',
+        name: 'doctors-list',
+        component: () => import('@/pages/Doctor/DoctorsList.vue'),
+        meta: {
+          requiresAuth: true,
+          title: 'Doctors List',
+        },
       },
     ],
   },
