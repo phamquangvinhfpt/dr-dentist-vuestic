@@ -60,7 +60,20 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
         },
-        component: () => import('../pages/appointment/Appointment.vue'),
+        children: [
+          {
+            name: 'create-appointment',
+            path: 'create',
+            meta: {
+              requireAuth: true,
+            },
+            component: () => import('../pages/appointment/CreateAppointment.vue'),
+          },
+          {
+            path: '',
+            component: () => import('../pages/appointment/Appointment.vue'),
+          },
+        ],
       },
       {
         name: 'profile',

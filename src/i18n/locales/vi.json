@@ -347,7 +347,8 @@
     "message": "Tin nhắn",
     "user-management": "Quản lý người dùng",
     "contact": "Liên hệ",
-    "appointment": "Đặt hẹn"
+    "appointment": "Quản lý cuộc hẹn",
+    "create-appointment": "Đặt hẹn"
   },
   "bin": {
     "title": "Thùng rác",

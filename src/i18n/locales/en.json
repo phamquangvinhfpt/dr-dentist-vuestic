@@ -353,7 +353,8 @@
     "message": "Message",
     "user-management": "User Management",
     "contact": "Contact",
-    "appointment": "Appointment"
+    "appointment": "Appointment",
+    "create-appointment": "Booking Appointment"
   },
   "bin": {
     "title": "Trash",

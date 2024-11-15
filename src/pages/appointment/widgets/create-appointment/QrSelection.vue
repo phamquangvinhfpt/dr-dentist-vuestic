@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useToast, VaAlert, VaCard, VaModal } from 'vuestic-ui'
+import { useToast, VaAlert, VaModal, VaSkeleton, VaSkeletonGroup } from 'vuestic-ui'
 
 const props = defineProps<{
   showQrCode: boolean
@@ -21,6 +21,9 @@ const showCopySuccess = ref(false)
 const localShowQrCode = ref(props.showQrCode)
 const endTime = ref<number | null>(null)
 const remainingTime = ref(600)
+const isLoading = ref(true)
+const isImageLoaded = ref(false)
+const imageLoadTime = ref(0)
 
 const copyToClipboard = async (text: any) => {
   try {
@@ -73,6 +76,38 @@ const formattedTime = computed(() => {
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 })
 
+const closeModal = () => {
+  localShowQrCode.value = false
+  emit('update:showQrCode', false)
+  emit('update:closeSubmit', false)
+  stopTimer()
+}
+
+const loadQrCodeImage = () => {
+  const startTime = Date.now()
+  const img = new Image()
+  img.src = props.qrCodeUrl
+  img.addEventListener('load', () => {
+    const endTime = Date.now()
+    imageLoadTime.value = endTime - startTime
+    isImageLoaded.value = true
+    isLoading.value = false
+  })
+}
+
+onMounted(() => {
+  loadQrCodeImage()
+  if (localShowQrCode.value) {
+    startTimer()
+  }
+})
+
+onUnmounted(() => {
+  emit('update:showQrCode', false)
+  emit('update:closeSubmit', false)
+  isImageLoaded.value = false
+  isLoading.value = true
+})
 watch(
   () => props.showQrCode,
   (newVal) => {
@@ -85,23 +120,27 @@ watch(
   },
 )
 
-const closeModal = () => {
-  localShowQrCode.value = false
-  emit('update:showQrCode', false)
-  emit('update:closeSubmit', false)
-  stopTimer()
-}
+watch(
+  () => props.showQrCode,
+  (newVal) => {
+    localShowQrCode.value = newVal
+    if (newVal) {
+      startTimer()
+    } else {
+      stopTimer()
+    }
+  },
+)
 
-onMounted(() => {
-  if (localShowQrCode.value) {
-    startTimer()
-  }
-})
-
-onUnmounted(() => {
-  emit('update:showQrCode', false)
-  emit('update:closeSubmit', false)
-})
+watch(
+  () => [props.bankInfo, props.qrCodeUrl],
+  () => {
+    isLoading.value = true
+    setTimeout(() => {
+      isLoading.value = false
+    }, imageLoadTime.value + 500)
+  },
+)
 </script>
 <template>
   <VaModal v-model="localShowQrCode" size="large" @close="closeModal">
@@ -169,8 +208,13 @@ onUnmounted(() => {
         </div>
 
         <!-- Right Column - QR Code -->
-        <div class="">
-          <div class="p-1">
+        <div :aria-busy="isLoading">
+          <VaSkeletonGroup v-if="isLoading">
+            <VaSkeleton variant="text" class="text-2xl font-bold text-gray-900 dark:text-white mb-3" :lines="1" />
+            <VaSkeleton variant="text" class="text-gray-600 dark:text-gray-300 mb-3" :lines="1" />
+            <VaSkeleton variant="squared" class="sm:w-[412px] w-[311px] sm:h-[488px] h-[368px]" />
+          </VaSkeletonGroup>
+          <div v-else class="p-1">
             <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">QR Code</h3>
             <p class="text-gray-600 dark:text-gray-300 mb-3">Scan the QR code to pay the deposit.</p>
             <div class="flex justify-center">

@@ -1,3 +1,21 @@
+export type Service = {
+  id: string
+  serviceName: string
+  serviceDescription: string
+  isActive: boolean
+  totalPrice: number
+}
+
+export type ServiceResponse = {
+  data: Service[]
+  currentPage: number
+  totalPages: number
+  totalCount: number
+  pageSize: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+}
+
 export type AppointmentForm = {
   patientId: string | undefined
   dentistId?: string | null

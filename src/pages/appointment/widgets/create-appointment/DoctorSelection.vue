@@ -16,7 +16,7 @@ const handleSelect = (practitioner: any) => {
 <template>
   <div>
     <p class="text-xl font-bold text-blue-900 dark:text-blue-100 mb-4">Select a practitioner</p>
-    <div class="h-[240px] overflow-y-auto pr-4 scroll">
+    <div class="h-[234px] overflow-y-auto scroll">
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <div v-for="practitioner in practitioners" :key="practitioner.id" class="relative">
           <input

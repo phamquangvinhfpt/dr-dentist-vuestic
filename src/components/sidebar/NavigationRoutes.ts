@@ -27,6 +27,15 @@ export default {
       meta: {
         icon: 'book_online',
       },
+      children: [
+        {
+          name: 'create-appointment',
+          displayName: 'menu.create-appointment',
+          meta: {
+            icon: 'add',
+          },
+        },
+      ],
     },
     {
       name: 'users-management',

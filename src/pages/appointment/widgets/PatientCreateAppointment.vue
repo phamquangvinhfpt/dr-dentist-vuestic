@@ -3,16 +3,16 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useToast, VaCard, VaInnerLoading } from 'vuestic-ui'
-import ServiceSelection from './widgets/ServiceSelection.vue'
-import DateSelection from './widgets/DateSelection.vue'
-import TimeSelection from './widgets/TimeSelection.vue'
-import DoctorSelection from './widgets/DoctorSelection.vue'
+import ServiceSelection from './create-appointment/ServiceSelection.vue'
+import DateSelection from './create-appointment/DateSelection.vue'
+import TimeSelection from './create-appointment/TimeSelection.vue'
+import DoctorSelection from './create-appointment/DoctorSelection.vue'
 import { getErrorMessage } from '@/services/utils'
-import QrSelection from './widgets/QrSelection.vue'
-import SubmitSelection from './widgets/SubmitSelection.vue'
+import QrSelection from './create-appointment/QrSelection.vue'
+import SubmitSelection from './create-appointment/SubmitSelection.vue'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
-import { AppointmentDepositRequest, AppointmentForm } from './types'
+import { AppointmentDepositRequest, AppointmentForm } from '../types'
 
 const loading = ref(false)
 const serviceStore = useServiceStore()
@@ -422,8 +422,3 @@ defineExpose({
     </VaCard>
   </VaInnerLoading>
 </template>
-<style scoped>
-.scroll {
-  scrollbar-width: none;
-}
-</style>

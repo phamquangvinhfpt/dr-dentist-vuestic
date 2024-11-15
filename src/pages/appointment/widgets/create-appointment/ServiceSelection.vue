@@ -16,7 +16,7 @@ const formatPrice = (price: any) => {
 <template>
   <div>
     <p class="text-xl font-bold text-blue-900 dark:text-blue-100 mb-4">Select a service</p>
-    <div class="h-[325px] overflow-y-auto pr-4 scroll">
+    <div class="h-[440px] sm:h-[325px] overflow-y-auto pr-4 scroll">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="service in services" :key="service.id" class="relative">
           <input
