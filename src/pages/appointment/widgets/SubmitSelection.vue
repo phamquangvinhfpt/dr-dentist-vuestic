@@ -14,6 +14,7 @@ const props = defineProps<{
     lastName: string | null
   } | null
 }>()
+
 const emit = defineEmits<{
   submit: []
   'update:isVisible': [value: boolean]
@@ -31,10 +32,21 @@ const formattedDeposit = computed(() => {
   return new Intl.NumberFormat('vi-VN').format(props.selectedService.totalPrice * 0.3)
 })
 
+const formattedDate = computed(() => {
+  if (!props.selectedDate) return ''
+  return new Intl.DateTimeFormat('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'long',
+  }).format(new Date(props.selectedDate))
+})
+
 onUnmounted(() => {
   emit('update:isVisible', false)
 })
 </script>
+
 <template>
   <VaModal
     ref="modal"
@@ -55,7 +67,7 @@ onUnmounted(() => {
         </div>
         <div class="flex justify-between">
           <span class="font-medium text-gray-700 dark:text-gray-300">Date:</span>
-          <span class="text-gray-900 dark:text-white">{{ selectedDate }}</span>
+          <span class="text-gray-900 dark:text-white">{{ formattedDate }}</span>
         </div>
         <div class="flex justify-between">
           <span class="font-medium text-gray-700 dark:text-gray-300">Time:</span>
@@ -71,7 +83,7 @@ onUnmounted(() => {
         </div>
         <div class="flex justify-between">
           <span class="font-medium text-gray-700 dark:text-gray-300">Deposit:</span>
-          <span class="text-gray-900 dark:text-white">{{ formattedDeposit }}</span>
+          <span class="text-gray-900 dark:text-white">{{ formattedDeposit }} ₫</span>
         </div>
       </div>
     </VaCard>

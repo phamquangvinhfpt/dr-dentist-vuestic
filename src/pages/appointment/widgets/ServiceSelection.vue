@@ -35,7 +35,7 @@ const formatPrice = (price: any) => {
             <div class="flex items-start gap-2 min-h-[50px] relative">
               <span class="font-medium text-base break-words pr-8">{{ service.serviceName }}</span>
               <div
-                class="absolute right-0 top-1 flex-shrink-0 box-content block h-3 w-3 rounded-full border-8 border-gray-300 bg-white peer-checked:border-emerald-400 peer-checked:bg-emerald-600 dark:border-gray-600 dark:peer-checked:border-emerald-400 mt-0"
+                class="absolute right-0 top-1 flex-shrink-0 box-content block h-3 w-3 rounded-full border-8 border-emerald-400 bg-emerald-600 mt-0"
                 :class="{
                   'border-emerald-400 bg-emerald-600': selectedService === service,
                   'border-gray-300 bg-white dark:border-gray-600': selectedService !== service,

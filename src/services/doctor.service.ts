@@ -5,11 +5,10 @@ class DoctorService {
     return apiService
       .post(`/users/get-doctors`, data)
       .then((response) => {
-        console.log('Service response:', response) // Debug log
-        return response.data // Return the data directly
+        return response.data
       })
       .catch((error) => {
-        console.error('Service error:', error) // Debug log
+        console.error('Service error:', error)
         return Promise.reject(error)
       })
   }
