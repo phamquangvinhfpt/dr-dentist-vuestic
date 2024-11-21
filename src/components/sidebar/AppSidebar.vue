@@ -120,6 +120,16 @@ const hasAccess = (route: INavigationRoute) => {
   return true
 }
 
+const hasRole = (route: INavigationRoute) => {
+  if (!route.meta) {
+    return true
+  }
+  if (route.meta.role) {
+    return authStore.musHaveRole(route.meta.role)
+  }
+  return true
+}
+
 const setActiveExpand = () =>
   (value.value = navigationRoutes.routes.map((route: INavigationRoute) => routeHasActiveChild(route)))
 
@@ -135,7 +145,9 @@ const navigationRoutesCanAccess = computed(() => {
       return false
     }
     if (route.children) {
-      route.children = route.children.filter((child: INavigationRoute) => hasAccess(child))
+      route.children = route.children.filter(
+        (child: INavigationRoute) => hasAccess(child) && (child.meta?.role ? hasRole(child) : true),
+      )
       return route.children.length > 0
     }
     return true

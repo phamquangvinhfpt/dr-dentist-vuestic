@@ -14,7 +14,6 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         this.isLoading = true
         const response = await doctorService.getDoctors(data)
         this.isLoading = false
-        console.log(response)
         this.doctors = [...response.data]
         return await Promise.resolve(response)
       } catch (error) {

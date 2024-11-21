@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, defineProps, defineEmits } from 'vue'
-import { VaDropdown, VaDropdownContent } from 'vuestic-ui'
+import { computed, defineProps, defineEmits, ref } from 'vue'
 
 const props = defineProps<{
   availableTimes: string[]
   selectedTime: string | null
   isDoctorSelected: boolean
 }>()
+const isOpen = ref(true)
 
 const emit = defineEmits(['update:selectedTime'])
 
@@ -25,50 +25,65 @@ const displayedTimes = computed(() => {
 })
 
 const selectTime = (time: string) => {
-  emit('update:selectedTime', time)
+  if (props.selectedTime === time) {
+    emit('update:selectedTime', null)
+  } else {
+    emit('update:selectedTime', time)
+    isOpen.value = false
+  }
 }
 
-const clearSelectedTime = () => {
-  emit('update:selectedTime', null)
+const toggleSection = () => {
+  isOpen.value = !isOpen.value
 }
 </script>
 
 <template>
-  <div>
-    <VaDropdown :auto-placement="false" placement="right-center">
-      <template #anchor>
-        <p class="text-xl font-bold text-blue-900 dark:text-blue-100 mb-4">Select a time</p>
-        <span class="material-symbols-outlined"> chevron_right </span>
-      </template>
-      <VaDropdownContent>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 lg:max-w-xl">
-          <button
-            v-for="time in displayedTimes"
-            :key="time"
-            class="rounded-lg px-4 py-2 font-medium text-emerald-900 active:scale-95 dark:text-emerald-100"
-            :class="{
-              'bg-emerald-600 text-white': time === selectedTime,
-              'bg-emerald-100 dark:bg-emerald-800': time !== selectedTime,
-            }"
-            @click="selectTime(time)"
-          >
-            {{ time }}
-          </button>
-        </div>
-      </VaDropdownContent>
-    </VaDropdown>
-
-    <!-- Display selected time as a separate button -->
-    <div v-if="selectedTime" class="mt-4">
-      <button
-        class="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
-        @click="clearSelectedTime"
+  <div class="relative mb-3">
+    <!-- Main Time Selector -->
+    <button
+      class="w-full flex justify-between items-center p-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg border dark:border-gray-700"
+      @click="toggleSection"
+    >
+      <div class="flex flex-col items-start">
+        <p class="text-xl font-bold text-blue-900 dark:text-blue-100">
+          Select time
+          <span v-if="selectedTime" class="text-sm font-normal text-gray-600 dark:text-gray-300">
+            ({{ selectedTime }})
+          </span>
+        </p>
+      </div>
+      <svg
+        class="w-5 h-5 transition-transform duration-200"
+        :class="{ 'rotate-180': isOpen }"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
       >
-        <span>Selected: {{ selectedTime }}</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+
+    <!-- Dropdown Menu -->
+    <div
+      v-if="isOpen"
+      class="absolute z-50 w-full mt-2 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700"
+    >
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <button
+          v-for="time in displayedTimes"
+          :key="time"
+          class="rounded-lg px-4 py-2 font-medium transition-colors duration-200"
+          :class="{
+            'bg-emerald-600 text-white hover:bg-emerald-700': time === selectedTime,
+            'bg-emerald-100 text-emerald-900 hover:bg-emerald-200 dark:bg-emerald-800 dark:text-emerald-100 dark:hover:bg-emerald-700':
+              time !== selectedTime,
+          }"
+          @click="selectTime(time)"
+        >
+          {{ time }}
+        </button>
+      </div>
     </div>
   </div>
 </template>

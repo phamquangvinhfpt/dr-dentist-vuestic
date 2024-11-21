@@ -4,6 +4,7 @@ export interface INavigationRoute {
   meta: {
     icon: string
     permission?: string
+    role?: string
   }
   children?: INavigationRoute[]
 }
@@ -33,6 +34,16 @@ export default {
           displayName: 'menu.create-appointment',
           meta: {
             icon: 'add',
+            permission: 'Appointment.Create',
+            role: 'Patient',
+          },
+        },
+        {
+          name: 'view-appointment',
+          displayName: 'menu.view-appointment',
+          meta: {
+            icon: 'visibility',
+            permission: 'Appointment.View',
           },
         },
       ],
@@ -72,6 +83,7 @@ export default {
       displayName: 'menu.message',
       meta: {
         icon: 'message',
+        permission: 'PatientMessages.View',
       },
     },
   ] as INavigationRoute[],

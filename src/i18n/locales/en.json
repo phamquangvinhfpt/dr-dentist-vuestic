@@ -354,7 +354,8 @@
     "user-management": "User Management",
     "contact": "Contact",
     "appointment": "Appointment",
-    "create-appointment": "Booking Appointment"
+    "create-appointment": "Booking Appointment",
+    "view-appointment": "View Appointment"
   },
   "bin": {
     "title": "Trash",

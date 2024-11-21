@@ -348,7 +348,8 @@
     "user-management": "Quản lý người dùng",
     "contact": "Liên hệ",
     "appointment": "Quản lý cuộc hẹn",
-    "create-appointment": "Đặt hẹn"
+    "create-appointment": "Đặt hẹn",
+    "view-appointment": "Xem lịch hẹn"
   },
   "bin": {
     "title": "Thùng rác",

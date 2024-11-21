@@ -63,13 +63,14 @@ const routes: Array<RouteRecordRaw> = [
         children: [
           {
             name: 'create-appointment',
-            path: 'create',
+            path: 'booking',
             meta: {
               requireAuth: true,
             },
             component: () => import('../pages/appointment/CreateAppointment.vue'),
           },
           {
+            name: 'view-appointment',
             path: '',
             component: () => import('../pages/appointment/Appointment.vue'),
           },
