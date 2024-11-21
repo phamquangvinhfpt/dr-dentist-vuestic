@@ -39,6 +39,8 @@
     "epic-spinners": "^2.0.0",
     "flag-icons": "^6.15.0",
     "ionicons": "^4.6.3",
+    "lodash": "^4.17.21",
+    "lodash-es": "^4.17.21",
     "lucide-vue-next": "^0.460.0",
     "medium-editor": "^5.23.3",
     "pinia": "^2.1.7",

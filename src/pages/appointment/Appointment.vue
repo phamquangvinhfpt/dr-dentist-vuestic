@@ -2,31 +2,34 @@
   <div class="h-screen flex flex-col">
     <header class="border-b p-4 bg-white" :style="{ marginRight: `${scrollbarWidth}px` }">
       <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <VaDateInput
-            v-model="selectedDate"
-            :format="formatDate"
-            :parse="parseDate"
-            manual-input
-            class="px-3 py-1.5"
-            clearable
-          />
-          <div
-            v-if="role?.includes('Staff') || role?.includes('Dentist') || role?.includes('Admin')"
-            class="inline-flex rounded-lg border bg-gray-50 p-1"
-          >
-            <button
-              v-for="type in filteredTypes"
-              :key="type.id"
-              :class="[
-                'px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
-                isAppointment === type.id ? 'bg-white shadow' : 'hover:bg-gray-100',
-              ]"
-              @click="isAppointment = type.id"
+        <div>
+          <div class="flex items-center space-x-4">
+            <VaDateInput
+              v-model="selectedDate"
+              :format="formatDate"
+              :parse="parseDate"
+              manual-input
+              class="px-3 py-1.5"
+              clearable
+            />
+            <div
+              v-if="role?.includes('Staff') || role?.includes('Dentist') || role?.includes('Admin')"
+              class="inline-flex rounded-lg border bg-gray-50 p-1"
             >
-              {{ type.label }}
-            </button>
+              <button
+                v-for="type in filteredTypes"
+                :key="type.id"
+                :class="[
+                  'px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
+                  isAppointment === type.id ? 'bg-white shadow' : 'hover:bg-gray-100',
+                ]"
+                @click="isAppointment = type.id"
+              >
+                {{ type.label }}
+              </button>
+            </div>
           </div>
+          <Phamaceutical></Phamaceutical>
         </div>
 
         <div class="flex items-center space-x-4">
@@ -502,6 +505,7 @@ import { getErrorMessage } from '@/services/utils'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { DateInputModelValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
+import Phamaceutical from './widgets/treatment/Phamaceutical.vue'
 // import { useI18n } from 'vue-i18n'
 
 const selectedDate = ref(new Date())
