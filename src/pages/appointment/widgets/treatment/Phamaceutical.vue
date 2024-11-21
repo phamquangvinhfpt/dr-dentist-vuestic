@@ -25,11 +25,11 @@
 </template>
 
 <script setup lang="ts">
+import { debounce } from 'lodash'
 import { ref, computed, watch } from 'vue'
-import { usePharmaceuticalStore } from '@/stores/modules/pharmaceutical.module'
 import { useToast, VaInput } from 'vuestic-ui'
 import { getErrorMessage, notifications } from '@/services/utils'
-const isLoadingSelect = ref(false)
+import { usePharmaceuticalStore } from '@/stores/modules/pharmaceutical.module'
 
 interface Pharmaceutical {
   sku: string
@@ -39,9 +39,10 @@ interface Pharmaceutical {
   measureUnitName: string
 }
 
+const searchKeyword = ref('')
+const isLoadingSelect = ref(false)
 const { init: notify } = useToast()
 const pharmaceuticals = ref<Pharmaceutical[]>([])
-const searchKeyword = ref('')
 const pharmaceuticalStore = usePharmaceuticalStore()
 
 const dataFilter = computed(() => ({
@@ -78,9 +79,12 @@ const getPharmaceuticals = () => {
     })
 }
 
+const debouncedGetPharmaceuticals = debounce(getPharmaceuticals, 500)
+
 watch(searchKeyword, (newValue) => {
   if (newValue) {
-    getPharmaceuticals()
+    // getPharmaceuticals()
+    debouncedGetPharmaceuticals()
   } else {
     pharmaceuticals.value = []
   }
