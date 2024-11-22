@@ -29,7 +29,6 @@
               </button>
             </div>
           </div>
-          <Phamaceutical></Phamaceutical>
         </div>
 
         <div class="flex items-center space-x-4">
@@ -522,7 +521,6 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <VaSelect
             v-model="patientId"
-            :rules="[(v) => !!v || 'Patient is required']"
             class="col-span-1"
             label="Patient"
             :options="optionsPatients"
@@ -531,7 +529,6 @@
           />
           <VaSelect
             v-model="doctorId"
-            :rules="[(v) => !!v || 'Doctor is required']"
             class="col-span-1"
             label="Doctor"
             :options="optionsDoctors"
@@ -540,7 +537,6 @@
           />
           <VaSelect
             v-model="serviceId"
-            :rules="[(v) => !!v || 'Service is required']"
             class="col-span-1"
             label="Service"
             :options="optionsServices"
@@ -549,7 +545,6 @@
           />
           <VaDateInput
             v-model="date"
-            :rules="[(v) => !!v || 'Date is required']"
             :format="formatDate"
             :parse="parseDate"
             manual-input
@@ -557,13 +552,7 @@
             label="Date"
             clearable
           />
-          <VaSelect
-            v-model="startTime"
-            :rules="[(v) => !!v || 'Time is required']"
-            class="col-span-1"
-            label="Time"
-            :options="optionsStartTimes"
-          />
+          <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
           <VaTextarea v-model="notes" label="Notes" />
         </div>
       </VaCard>
@@ -575,7 +564,6 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <VaDateInput
             v-model="date"
-            :rules="[(v) => !!v || 'Date is required']"
             :format="formatDate"
             :parse="parseDate"
             manual-input
@@ -583,13 +571,7 @@
             label="Date"
             clearable
           />
-          <VaSelect
-            v-model="startTime"
-            :rules="[(v) => !!v || 'Time is required']"
-            class="col-span-1"
-            label="Time"
-            :options="optionsStartTimes"
-          />
+          <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
         </div>
       </VaCard>
     </VaModal>
@@ -642,7 +624,7 @@ import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import { getErrorMessage } from '@/services/utils'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
-import { DateInputModelValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
+import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 import { useUserProfileStore } from '@/stores/modules/user.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useRouter } from 'vue-router'
@@ -949,29 +931,11 @@ const formatDateForm = (date: string | Date): string => {
   return `${year}-${month}-${day}`
 }
 
-const parseDate = (dateStr: any) => {
-  if (!dateStr) return ''
+const parseDate = (dateStr: string): DateInputValue => {
+  if (!dateStr) return null
 
-  try {
-    const date = new Date(dateStr)
-
-    if (!isNaN(date.getTime())) {
-      const month = (date.getMonth() + 1).toString().padStart(2, '0')
-      const day = date.getDate().toString().padStart(2, '0')
-      const year = date.getFullYear()
-
-      return `${month}/${day}/${year}`
-    }
-
-    return ''
-  } catch (error) {
-    init({
-      title: 'error',
-      message: 'Invalid date format',
-      color: 'danger',
-    })
-    return ''
-  }
+  const date = new Date(dateStr)
+  return isNaN(date.getTime()) ? null : date
 }
 
 const generatePastelColor = () => {

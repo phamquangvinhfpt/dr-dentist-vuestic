@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, computed, ref } from 'vue'
-import { useToast } from 'vuestic-ui/web-components'
+import { useToast } from 'vuestic-ui'
+import type { VaDatePicker } from 'vuestic-ui'
+
+type DatePickerModelValue = Date | null
 
 const props = defineProps<{
   selectedDate: string | null
@@ -26,16 +29,21 @@ const isPastDate = (dateString: string): boolean => {
   return selectedDate < today
 }
 
-const date = computed({
-  get: () => props.selectedDate,
-  set: (value: string | null) => {
-    if (value === null) {
+const date = computed<DatePickerModelValue>({
+  get: () => {
+    if (!props.selectedDate) return null
+    return new Date(props.selectedDate)
+  },
+  set: (value: DatePickerModelValue) => {
+    if (!value) {
       emit('update:selectedDate', null)
       isOpen.value = false
       return
     }
 
-    if (!isValidDate(value)) {
+    const dateStr = value.toISOString()
+
+    if (!isValidDate(dateStr)) {
       init({
         title: 'Error',
         message: 'Invalid date format',
@@ -44,7 +52,7 @@ const date = computed({
       return
     }
 
-    if (isPastDate(value)) {
+    if (isPastDate(dateStr)) {
       init({
         title: 'Error',
         message: 'You cannot select a date in the past',
@@ -53,13 +61,12 @@ const date = computed({
       return
     }
 
-    emit('update:selectedDate', value)
+    emit('update:selectedDate', dateStr)
     isOpen.value = false
   },
 })
 
-const getWeekends = (date: Date | null) => {
-  if (!date) return false
+const getWeekends = (date: Date) => {
   return [0, 1, 5, 6].includes(date.getDay())
 }
 
