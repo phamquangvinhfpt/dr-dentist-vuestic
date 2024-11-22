@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { onBeforeMount, onMounted, ref } from 'vue'
-import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle } from 'vuestic-ui'
+import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, VaModal } from 'vuestic-ui'
 import { Doctors } from './types'
 import { useRouter } from 'vue-router'
+import DoctorProfileModal from './DoctorProfileModal.vue'
 
 const loading = ref(true)
 const currentSlide = ref(0)
@@ -12,6 +13,8 @@ const animationKey = ref(0)
 const isLargeScreen = ref(window.innerWidth >= 1024)
 const doctorStore = useDoctorProfileStore()
 const doctors = ref<Doctors[]>([])
+const showModalDoctorProfile = ref(false)
+const doctorProfile = ref<Doctors | null>(null)
 const router = useRouter()
 
 const INTERVAL_TIME = 3000
@@ -37,6 +40,12 @@ const handleGetDoctors = async () => {
     console.error(error)
   }
   loading.value = false
+}
+
+const handleShowDoctorProfile = (doctor: Doctors) => {
+  doctorProfile.value = doctor
+  console.log(doctorProfile.value)
+  showModalDoctorProfile.value = true
 }
 
 onMounted(() => {
@@ -360,7 +369,7 @@ window.addEventListener('resize', () => {
               <div class="absolute bottom-0 left-0 right-0 flex">
                 <button
                   class="flex-1 py-3 bg-blue-500 text-white rounded-bl-lg hover:bg-blue-600 transition-colors duration-300 text-sm"
-                  @click="router.push({ name: 'doctor-profile', params: { id: doctor.id } })"
+                  @click="handleShowDoctorProfile(doctor)"
                 >
                   View Profile
                 </button>
@@ -379,6 +388,12 @@ window.addEventListener('resize', () => {
           <div v-if="!isLargeScreen" class="flex justify-between mt-4"></div>
         </VaCardContent>
       </div>
+
+      <!-- Doctor Modal section -->
+      <VaModal v-model="showModalDoctorProfile" size="large">
+        <DoctorProfileModal :doctor="doctorProfile" />
+      </VaModal>
+
       <!-- About section -->
       <div :class="[isLargeScreen ? 'container mx-auto p-4' : '']">
         <div
