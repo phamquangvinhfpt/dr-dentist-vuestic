@@ -73,5 +73,35 @@ class AppointmentService {
         return Promise.reject(error)
       })
   }
+  async rescheduleAppointment(data: any): Promise<any> {
+    return apiService
+      .post(`/appointment/reschedule`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async cancelAppointment(data: any): Promise<any> {
+    return apiService
+      .post(`/appointment/cancel`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getAppointmentById(appointmentId: string): Promise<any> {
+    return apiService
+      .get(`/appointment/get/${appointmentId}`)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 export default new AppointmentService()

@@ -21,6 +21,7 @@ export const useUserProfileStore = defineStore('userProfile', {
     userList: {} as ListUserPagination,
     userDetails: {} as UserDetail,
     isLoading: false as boolean,
+    patientList: [] as any[],
   }),
   actions: {
     async getUserProfile(): Promise<any> {
@@ -202,6 +203,18 @@ export const useUserProfileStore = defineStore('userProfile', {
       try {
         this.isLoading = true
         const response = await userService.updatePatientProfile(data) // Thay đổi để gọi API riêng cho patient
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getPatients(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.getPatients(data)
+        this.patientList = response.data
         this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {

@@ -49,6 +49,13 @@
               {{ view.label }}
             </button>
           </div>
+          <button
+            v-if="role?.includes('Staff') || role?.includes('Dentist')"
+            class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+            @click="openCreateAppointmentDialog"
+          >
+            Create Appointment
+          </button>
         </div>
       </div>
     </header>
@@ -194,6 +201,37 @@
               {{ getPaymentStatusText(value) }}
             </VaChip>
           </template>
+          <template
+            v-if="role?.includes('Staff') || role?.includes('Admin') || role?.includes('Dentist')"
+            #cell(actions)="{ rowData }"
+          >
+            <div class="space-x-2">
+              <VaButton
+                v-if="rowData.status !== 4"
+                round
+                icon="arrow_forward"
+                color="#b1fadc"
+                icon-color="#812E9E"
+                @click="router.push(`/examination/${rowData.appointmentId}`)"
+              />
+              <VaButton
+                v-if="rowData.status === 2"
+                round
+                icon="sync"
+                color="warning"
+                icon-color="#812E9E"
+                @click="rescheduleModal(rowData)"
+              />
+              <VaButton
+                v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
+                round
+                icon="clear"
+                color="danger"
+                icon-color="#812E9E"
+                @click="cancelModal(rowData)"
+              />
+            </div>
+          </template>
         </VaDataTable>
         <VaPagination
           v-model="paginationA.page"
@@ -246,7 +284,7 @@
             '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
           }"
           sticky-header
-          @row:click="(row) => openAssignListDialog(row.item)"
+          @row:dblclick="(row) => openAssignListDialog(row.item)"
         >
           <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
           <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
@@ -477,13 +515,113 @@
         </div>
       </Dialog>
     </TransitionRoot>
+    <!-- Create Appointment Modal -->
+    <VaModal v-model="showModalAppointment" ok-text="Submit" @ok="submitAppointment">
+      <h3 class="va-h3">Appointment Details</h3>
+      <VaCard>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <VaSelect
+            v-model="patientId"
+            :rules="[(v) => !!v || 'Patient is required']"
+            class="col-span-1"
+            label="Patient"
+            :options="optionsPatients"
+            autocomplete
+            highlight-matched-text
+          />
+          <VaSelect
+            v-model="doctorId"
+            :rules="[(v) => !!v || 'Doctor is required']"
+            class="col-span-1"
+            label="Doctor"
+            :options="optionsDoctors"
+            autocomplete
+            highlight-matched-text
+          />
+          <VaSelect
+            v-model="serviceId"
+            :rules="[(v) => !!v || 'Service is required']"
+            class="col-span-1"
+            label="Service"
+            :options="optionsServices"
+            autocomplete
+            highlight-matched-text
+          />
+          <VaDateInput
+            v-model="date"
+            :rules="[(v) => !!v || 'Date is required']"
+            :format="formatDate"
+            :parse="parseDate"
+            manual-input
+            class="col-span-1"
+            label="Date"
+            clearable
+          />
+          <VaSelect
+            v-model="startTime"
+            :rules="[(v) => !!v || 'Time is required']"
+            class="col-span-1"
+            label="Time"
+            :options="optionsStartTimes"
+          />
+          <VaTextarea v-model="notes" label="Notes" />
+        </div>
+      </VaCard>
+    </VaModal>
+    <!-- Reschedule Appointment Modal -->
+    <VaModal v-model="showModalReschedule" ok-text="Reschedule" @close="handleCloseReschedule" @ok="submitReschedule">
+      <h3 class="va-h3">Reschedule Appointment</h3>
+      <VaCard>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <VaDateInput
+            v-model="date"
+            :rules="[(v) => !!v || 'Date is required']"
+            :format="formatDate"
+            :parse="parseDate"
+            manual-input
+            class="col-span-1"
+            label="Date"
+            clearable
+          />
+          <VaSelect
+            v-model="startTime"
+            :rules="[(v) => !!v || 'Time is required']"
+            class="col-span-1"
+            label="Time"
+            :options="optionsStartTimes"
+          />
+        </div>
+      </VaCard>
+    </VaModal>
+    <!-- Cancel Appointment Modal -->
+    <VaModal v-model="showModalCancel" cancel-text="Cancel" ok-text="Yes" @close="handleCloseCancel" @ok="submitCancel">
+      <h3 class="va-h3">Cancel Appointment</h3>
+      <VaCard>
+        <p>Are you sure you want to cancel this appointment?</p>
+      </VaCard>
+      <VaAlert color="#fdeae7" text-color="#940909" class="mt-4">
+        <p>This action cannot be undone.</p>
+      </VaAlert>
+    </VaModal>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, watch, Ref, nextTick } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import { useToast, VaChip, VaDataTable, VaDateInput, VaPagination } from 'vuestic-ui'
+import {
+  useToast,
+  VaAlert,
+  VaButton,
+  VaCard,
+  VaChip,
+  VaDataTable,
+  VaDateInput,
+  VaModal,
+  VaPagination,
+  VaSelect,
+  VaTextarea,
+} from 'vuestic-ui'
 import {
   Pagination,
   Search,
@@ -505,7 +643,9 @@ import { getErrorMessage } from '@/services/utils'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { DateInputModelValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
-import Phamaceutical from './widgets/treatment/Phamaceutical.vue'
+import { useUserProfileStore } from '@/stores/modules/user.module'
+import { useServiceStore } from '@/stores/modules/service.module'
+import { useRouter } from 'vue-router'
 // import { useI18n } from 'vue-i18n'
 
 const selectedDate = ref(new Date())
@@ -525,11 +665,16 @@ const appointments = ref<Appointment[]>([])
 const followUpAppointments = ref<FollowUpAppointment[]>([])
 const storeAppointments = useAppointmentStore()
 const storeDoctors = useDoctorProfileStore()
+const storeServices = useServiceStore()
 const appointmentSearchRes = ref<SearchResponse | null>(null)
 const followUpAppointmentsSearchRes = ref<SearchResponse | null>(null)
 const nonDoctorAppointments = ref<Appointment[]>([])
 const nonDoctorSearchRes = ref<SearchResponse | null>(null)
+const showModalAppointment = ref(false)
+const showModalReschedule = ref(false)
+const showModalCancel = ref(false)
 const { init } = useToast()
+const router = useRouter()
 // const { t } = useI18n()
 const usersStore = useAuthStore()
 const role = usersStore.user?.roles
@@ -546,6 +691,7 @@ const columns = computed(() => [
   { key: 'servicePrice', label: 'Price', name: 'servicePrice' },
   { key: 'status', label: 'Status', name: 'status' },
   { key: 'paymentStatus', label: 'Payment Status', name: 'paymentStatus' },
+  { key: 'actions', label: 'Actions', name: 'actions' },
 ])
 
 const followColumns = computed(() => [
@@ -578,6 +724,183 @@ const types = [
   { id: 'followup', label: 'Follow-up' },
   { id: 'unassigned', label: 'Unassigned Bookings' },
 ]
+
+interface Options {
+  text: string
+  value: string
+}
+const userId = ref('')
+const appointmentId = ref('')
+const patientId = ref<Options>()
+const doctorId = ref<Options>()
+const serviceId = ref<Options>()
+const date = ref(new Date())
+const startTime = ref('')
+const duration = ref('00:30:00')
+const notes = ref('')
+const optionsPatients = ref<Options[]>([])
+const optionsServices = ref<Options[]>([])
+
+const getServices = () => {
+  storeServices
+    .getAllCustomerServices()
+    .then((response) => {
+      optionsServices.value = response.data.map((service: any) => ({
+        text: service.serviceName,
+        value: service.id,
+      }))
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+}
+const optionsDoctors = computed(() =>
+  doctors.value.map((doctor) => ({ text: `${doctor.firstName} ${doctor.lastName}`, value: doctor.id })),
+)
+const optionsStartTimes = computed(() => {
+  const slots = []
+  for (let hour = 8; hour < 17; hour++) {
+    slots.push(`${hour.toString().padStart(2, '0')}:00`)
+    slots.push(`${hour.toString().padStart(2, '0')}:30`)
+  }
+  return slots
+})
+const users = useUserProfileStore()
+const getPatients = () => {
+  const request = { isActive: true }
+  users
+    .getPatients(request)
+    .then((response) => {
+      console.log(users.patientList)
+      optionsPatients.value = response.data.map((patient: any) => ({
+        text: patient.phoneNumber,
+        value: patient.id,
+      }))
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+}
+
+const submitAppointment = () => {
+  const appointment = {
+    patientId: patientId.value?.value,
+    dentistId: doctorId.value?.value,
+    serviceId: serviceId.value?.value,
+    appointmentDate: formatDateForm(date.value),
+    startTime: startTime.value + ':00',
+    duration: duration.value,
+    notes: notes.value,
+  }
+
+  storeAppointments
+    .createAppointment(appointment)
+    .then(() => {
+      init({
+        title: 'success',
+        message: 'Appointment created successfully!',
+        color: 'success',
+      })
+      showModalAppointment.value = false
+      fetchAppointments(searchValueA.value)
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+}
+
+const rescheduleModal = (appointment: any) => {
+  appointmentId.value = appointment.appointmentId
+  date.value = appointment.appointmentDate
+  showModalReschedule.value = true
+}
+
+const cancelModal = (appointment: any) => {
+  appointmentId.value = appointment.appointmentId
+  userId.value = appointment.patientId
+  showModalCancel.value = true
+}
+
+const handleCloseReschedule = () => {
+  appointmentId.value = ''
+  date.value = new Date()
+  startTime.value = ''
+}
+
+const handleCloseCancel = () => {
+  appointmentId.value = ''
+  userId.value = ''
+}
+
+const submitReschedule = () => {
+  const request = {
+    appointmentID: appointmentId.value,
+    appointmentDate: formatDateForm(date.value),
+    startTime: startTime.value + ':00',
+    duration: duration.value,
+  }
+
+  storeAppointments
+    .rescheduleAppointment(request)
+    .then(() => {
+      init({
+        title: 'success',
+        message: 'Appointment rescheduled successfully!',
+        color: 'success',
+      })
+      showModalReschedule.value = false
+      fetchAppointments(searchValueA.value)
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+}
+
+const submitCancel = () => {
+  const request = {
+    appointmentID: appointmentId.value,
+    userID: userId.value,
+  }
+  storeAppointments
+    .cancelAppointment(request)
+    .then(() => {
+      init({
+        title: 'success',
+        message: 'Appointment canceled successfully!',
+        color: 'success',
+      })
+      showModalCancel.value = false
+      fetchAppointments(searchValueA.value)
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+}
 
 const filteredTypes = computed(() => {
   if (role?.includes('Patient') || role?.includes('Dentist')) {
@@ -816,7 +1139,6 @@ const showTimeSlotUnassignedModal = (time: any, doctorId: any) => {
   contextMenu.value.show = false
   selectedTime.value = time + ':00'
   selectedDoctorId.value = doctorId
-  console.log('selectedDoctorId', selectedDoctorId.value)
   const timeSlotUnassignedBookings = nonDoctorAppointments.value.filter((booking) => booking.startTime === time)
 
   if (timeSlotUnassignedBookings.length > 0) {
@@ -917,7 +1239,6 @@ const handleDragStart = (event: DragEvent, appointment: Appointment | FollowUpAp
 
 const handleDrop = (event: any, time: any, doctorId: any) => {
   const appointmentData = JSON.parse(event.dataTransfer.getData('text/plain'))
-  console.log('appointmentData', appointmentData)
   time = time + ':00'
   // Check if the drop location is already occupied
   const isDuplicate = appointments.value.some(
@@ -1105,6 +1426,27 @@ const closeContextMenuOnClickOutside = (event: Event) => {
   if (contextMenu.value.show && !target.closest('.context-menu')) {
     contextMenu.value.show = false
   }
+}
+
+const openCreateAppointmentDialog = () => {
+  getPatients()
+  getServices()
+  patientId.value = {
+    text: '',
+    value: '',
+  }
+  doctorId.value = {
+    text: '',
+    value: '',
+  }
+  serviceId.value = {
+    text: '',
+    value: '',
+  }
+  date.value = new Date()
+  startTime.value = ''
+  notes.value = ''
+  showModalAppointment.value = true
 }
 
 // Done in the setup function

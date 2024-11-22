@@ -107,6 +107,7 @@ export enum PaymentMethod {
 export type Appointment = {
   appointmentId: string
   patientId: string
+  patientUserID?: string
   patientCode: string | null
   patientName: string | null
   dentistId: string
@@ -160,6 +161,7 @@ export enum AppointmentStatus {
   Confirmed,
   Success,
   Cancelled,
+  Done,
 }
 
 export enum PaymentStatus {
@@ -215,6 +217,12 @@ export const getAppointmentStatusConfig = (status: AppointmentStatus): StatusCon
         text: 'Cancelled',
         bgColor: 'bg-gray-100',
         textColor: 'text-gray-800',
+      }
+    case AppointmentStatus.Done:
+      return {
+        text: 'Done',
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-800',
       }
     default:
       return {
@@ -293,6 +301,11 @@ export const getStatusConfig = (status: string | number): StatusConfig => {
     case AppointmentStatus.Cancelled:
       return {
         text: 'Cancelled',
+        color: '#f01e2c', // red
+      }
+    case AppointmentStatus.Done:
+      return {
+        text: 'Done',
         color: '#7f1f90', // purple
       }
     default:

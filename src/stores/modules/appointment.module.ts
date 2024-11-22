@@ -61,5 +61,38 @@ export const useAppointmentStore = defineStore('appointment', {
         return await Promise.reject(error)
       }
     },
+    async rescheduleAppointment(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await appointmentService.rescheduleAppointment(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async cancelAppointment(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await appointmentService.cancelAppointment(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getAppointmentById(id: string): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await appointmentService.getAppointmentById(id)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

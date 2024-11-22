@@ -77,6 +77,14 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
+        name: 'examination',
+        path: 'examination/:id',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/examination/Examination.vue'),
+      },
+      {
         name: 'profile',
         path: 'profile',
         meta: {
@@ -84,8 +92,6 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('../pages/user/UserProfile.vue'),
       },
-      // test thôi
-      //end test
       {
         name: 'notifications',
         path: 'notification',
