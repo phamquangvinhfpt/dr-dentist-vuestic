@@ -164,7 +164,20 @@
     "description_required": "Vui lòng nhập mô tả bản thân",
     "enter_self_description": "Nhập mô tả về bản thân của bạn"
   },
-
+  "prescriptions": {
+    "prescription": "Đơn thuốc",
+    "note": "Ghi chú",
+    "enter_note": "Nhập ghi chú",
+    "medicine": "Thuốc",
+    "enter_medicine": "Nhập thuốc",
+    "dosage": "Liều lượng",
+    "enter_dosage": "Nhập liều lượng",
+    "frequency": "Tần suất",
+    "enter_frequency": "Nhập tần suất"
+  },
+  "phamarceutials": {
+    "phamarceutial": "Dược phẩm"
+  },
   "settings": {
     "title": "Cài đặt",
     "language": "Ngôn ngữ",

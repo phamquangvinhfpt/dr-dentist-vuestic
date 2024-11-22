@@ -1,0 +1,84 @@
+<template>
+  <div>
+    <VaButton icon="add" @click="doShowPrescriptionFormModal = true">{{ $t('prescriptions.prescription') }}</VaButton>
+  </div>
+  <VaModal
+    v-slot="{ cancel, ok }"
+    v-model="doShowPrescriptionFormModal"
+    size="large"
+    stateful
+    close-button
+    mobile-fullscreen
+    hide-default-actions
+    :before-cancel="beforeEditFormModalClose"
+    @close="doShowPrescriptionFormModal = false"
+  >
+    <VaModalHeader>
+      <h3 class="text-lg font-bold">{{ $t('settings.create') }} {{ $t('prescriptions.prescription') }}</h3>
+    </VaModalHeader>
+    <PrescriptionForm
+      ref="editFormRef"
+      :prescription="prescriptionToEdit"
+      :save-button-label="$t('settings.add')"
+      @close="cancel"
+      @save="
+        (prescription: Prescription) => {
+          onPrescriptionSaved(prescription)
+          ok()
+        }
+      "
+    />
+  </VaModal>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useModal, useToast } from 'vuestic-ui'
+import { getErrorMessage, notifications } from '@/services/utils'
+import { Prescription } from '../types'
+import { usePrescriptionStore } from '@/stores/modules/prescription.module'
+import PrescriptionForm from './PrescriptionForm.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+const editFormRef = ref()
+const { init: notify } = useToast()
+
+const doShowPrescriptionFormModal = ref(false)
+const prescriptionToEdit = ref<Prescription | null>(null)
+const prescriptionStore = usePrescriptionStore()
+const { confirm } = useModal()
+
+const onPrescriptionSaved = async (prescription: Prescription) => {
+  doShowPrescriptionFormModal.value = false
+  prescriptionStore
+    .createPrescription(prescription)
+    .then(() => {
+      notify({
+        message: notifications.createSuccessfully(t('prescriptions.prescription')),
+        color: 'success',
+      })
+    })
+    .catch((error) => {
+      notify({
+        message: notifications.createFailed(t('prescriptions.prescription')) + getErrorMessage(error),
+        color: 'error',
+      })
+    })
+}
+
+const beforeEditFormModalClose = async (hide: () => unknown) => {
+  if (editFormRef.value.isFormHasUnsavedChanges) {
+    const agreed = await confirm({
+      maxWidth: '380px',
+      message: notifications.unsavedChanges,
+      size: 'small',
+    })
+    if (agreed) {
+      hide()
+    }
+  } else {
+    hide()
+  }
+}
+</script>

@@ -7,6 +7,7 @@ import { Appointment, AppointmentStatus } from '../appointment/types'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import Treatment from './widgets/Treatment.vue'
 import { getErrorMessage } from '@/services/utils'
+import Prescription from './widgets/Prescription.vue'
 
 const router = useRoute()
 const loading = ref(false)
@@ -49,6 +50,11 @@ const tabs = [
     name: 'Examination',
     icon: 'assignment',
   },
+  {
+    id: 3,
+    name: 'Prescription',
+    icon: 'receipt_long',
+  },
 ]
 const selectedTab = ref(0)
 const selectSettingOption = (tab: any) => {
@@ -74,4 +80,5 @@ onMounted(() => {
   </div>
   <MedicalRecord v-if="selectedTab === 1 && !loading" v-model:patientId="patientid" />
   <Treatment v-if="selectedTab === 2" :appointment="appointment" />
+  <Prescription v-if="selectedTab === 3" />
 </template>

@@ -71,3 +71,34 @@ export const getStatusClass = (status: TreatmentPlanStatus) => {
 export const getStatusText = (status: TreatmentPlanStatus) => {
   return TreatmentPlanStatus[status]
 }
+
+// Phamaceutical & Prescription
+export type Pharmaceutical = {
+  sku: string
+  webName: string
+  image: string
+  price: number
+  measureUnitName: string
+}
+
+export type Prescription = {
+  treatmentID: string
+  notes: string
+  itemRequests: PrescriptionItem[]
+}
+
+export type PrescriptionResponse = {
+  createDate: string
+  patientID: string
+  patientName: string
+  doctorID: string
+  doctorName: string
+  notes: string
+  items: PrescriptionItem[]
+}
+
+export type PrescriptionItem = {
+  medicineName: string
+  dosage: string
+  frequency: string
+}

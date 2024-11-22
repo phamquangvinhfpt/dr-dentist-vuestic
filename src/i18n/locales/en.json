@@ -168,7 +168,20 @@
     "description_required": "Please enter your professional summary",
     "enter_self_description": "Enter a brief description about yourself"
   },
-
+  "prescriptions": {
+    "prescription": "Prescription",
+    "note": "Note",
+    "enter_note": "Enter note",
+    "medicine": "Medicine",
+    "enter_medicine": "Enter medicine",
+    "dosage": "Dosage",
+    "enter_dosage": "Enter dosage",
+    "frequency": "Frequency",
+    "enter_frequency": "Enter frequency"
+  },
+  "phamarceutials": {
+    "phamarceutial": "Phamarceutial"
+  },
   "settings": {
     "title": "Settings",
     "language": "Language",
