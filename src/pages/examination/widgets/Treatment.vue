@@ -6,6 +6,7 @@ import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { getErrorMessage } from '@/services/utils'
 import { DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
+import Prescription from './Prescription.vue'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -14,8 +15,20 @@ const props = defineProps<{
 
 const { init } = useToast()
 const storeTreatment = useTreatmentStore()
-const showModalAddTreatment = ref(false)
+const showModalTreatment = ref(false)
+const titleModalTreatment = computed(() => {
+  if (selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Pending) {
+    return 'Add Treatment Detail'
+  } else if (
+    selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Active &&
+    !isToday(selectedTreatmentPlan.value?.startDate)
+  ) {
+    return 'Reschedule Treatment'
+  }
+  return 'Treatment Details'
+})
 const selectedTreatmentPlanId = ref('')
+const selectedTreatmentPlan = ref<TreatmentPlanResponse>()
 const date = ref(new Date())
 const startTime = ref('')
 const notes = ref('')
@@ -63,7 +76,15 @@ const parseDate = (dateStr: string): DateInputValue => {
 }
 
 const formatDateOnly = (date: any) => {
-  return date instanceof Date ? date.toISOString().split('T')[0] : date.split('T')[0]
+  if (!date) return ''
+  const dateObj = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(dateObj.getTime())) return ''
+
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+  const day = dateObj.getDate().toString().padStart(2, '0')
+  const year = dateObj.getFullYear()
+
+  return `${year}-${month}-${day}`
 }
 
 const optionsStartTimes = computed(() => {
@@ -110,7 +131,6 @@ const getTreatmentPlans = async () => {
   await storeTreatment
     .getTreatmentList(props.appointment?.appointmentId)
     .then((response) => {
-      console.log('Treatment plans:', response)
       treatmentplans.value = response.sort((a: any, b: any) => a.step - b.step)
     })
     .catch((error) => {
@@ -127,12 +147,10 @@ const getTreatmentPlans = async () => {
 }
 
 const handleTreatmentAction = (item: TreatmentPlanResponse) => {
-  console.log('Treatment action for:', item)
   loading.value = true
   storeTreatment
     .doTreatment(item.treatmentPlanID)
     .then((response) => {
-      console.log('Treatment action response:', response)
       init({
         message: response,
         color: 'success',
@@ -155,15 +173,18 @@ const handleTreatmentAction = (item: TreatmentPlanResponse) => {
 
 const handleTreatmentDetails = (item: TreatmentPlanResponse) => {
   selectedTreatmentPlanId.value = item.treatmentPlanID
-  showModalAddTreatment.value = true
+  selectedTreatmentPlan.value = item
+  showModalTreatment.value = true
 }
 
 const handleTreatmentSchedule = (item: TreatmentPlanResponse) => {
-  console.log('Reschedule treatment for:', item)
+  selectedTreatmentPlanId.value = item.treatmentPlanID
+  selectedTreatmentPlan.value = item
+  showModalTreatment.value = true
 }
 
 const handleCloseTreatmentDetail = () => {
-  showModalAddTreatment.value = false
+  showModalTreatment.value = false
 }
 
 const submitTreatmentDetail = () => {
@@ -176,33 +197,68 @@ const submitTreatmentDetail = () => {
   }
 
   loading.value = true
-  storeTreatment
-    .addTreatmentDetail(request)
-    .then((response) => {
-      console.log('Add treatment detail response:', response)
-      init({
-        message: response,
-        color: 'success',
-        title: 'Success',
+  if (selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Pending) {
+    storeTreatment
+      .addTreatmentDetail(request)
+      .then((response) => {
+        init({
+          message: response,
+          color: 'success',
+          title: 'Success',
+        })
+        getTreatmentPlans()
+        handleCloseTreatmentDetail()
+        date.value = new Date()
+        startTime.value = ''
+        notes.value = ''
+        selectedTreatmentPlanId.value = ''
       })
-      getTreatmentPlans()
-      handleCloseTreatmentDetail()
-      date.value = new Date()
-      startTime.value = ''
-      notes.value = ''
-      selectedTreatmentPlanId.value = ''
-    })
-    .catch((error) => {
-      const errorMessage = getErrorMessage(error)
-      init({
-        message: errorMessage,
-        color: 'warning',
-        title: 'Error',
+      .catch((error) => {
+        const errorMessage = getErrorMessage(error)
+        init({
+          message: errorMessage,
+          color: 'warning',
+          title: 'Error',
+        })
       })
-    })
-    .finally(() => {
-      loading.value = false
-    })
+      .finally(() => {
+        loading.value = false
+      })
+  } else if (
+    selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Active &&
+    !isToday(selectedTreatmentPlan.value?.startDate)
+  ) {
+    storeTreatment
+      .updateTreatmentDetail(request)
+      .then((response) => {
+        init({
+          message: response,
+          color: 'success',
+          title: 'Success',
+        })
+        getTreatmentPlans()
+        handleCloseTreatmentDetail()
+        date.value = new Date()
+        startTime.value = ''
+        notes.value = ''
+        selectedTreatmentPlanId.value = ''
+      })
+      .catch((error) => {
+        const errorMessage = getErrorMessage(error)
+        init({
+          message: errorMessage,
+          color: 'warning',
+          title: 'Error',
+        })
+      })
+      .finally(() => {
+        loading.value = false
+      })
+  }
+}
+
+const fetchTreatment = () => {
+  getTreatmentPlans()
 }
 
 onMounted(() => {
@@ -302,6 +358,11 @@ onMounted(() => {
                   >
                     Details
                   </VaButton>
+                  <Prescription
+                    v-else-if="!rowData.hasPrescription"
+                    :items="rowData"
+                    @update:refresh="fetchTreatment"
+                  />
                 </template>
               </VaDataTable>
 
@@ -327,13 +388,8 @@ onMounted(() => {
     </VaCardContent>
   </VaCard>
   <!-- Add TreatmentDetail modal -->
-  <VaModal
-    v-model="showModalAddTreatment"
-    ok-text="Apply"
-    @close="handleCloseTreatmentDetail"
-    @ok="submitTreatmentDetail"
-  >
-    <h3 class="va-h3">Add Details Treatment</h3>
+  <VaModal v-model="showModalTreatment" ok-text="Apply" @close="handleCloseTreatmentDetail" @ok="submitTreatmentDetail">
+    <h3 class="va-h3">{{ titleModalTreatment }}</h3>
     <VaCard>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <VaDateInput

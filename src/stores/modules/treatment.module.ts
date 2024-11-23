@@ -53,5 +53,38 @@ export const useTreatmentStore = defineStore('treatment', {
         return await Promise.reject(error)
       }
     },
+    async updateTreatmentDetail(data: any) {
+      try {
+        this.isLoading = true
+        const response = await treatmentService.updateTreatmentDetail(data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getRemainingAppointment(id: any) {
+      try {
+        this.isLoading = true
+        const response = await treatmentService.getRemainingAppointment(id)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async sendPayment(data: any) {
+      try {
+        this.isLoading = true
+        const response = await treatmentService.sendPayment(data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

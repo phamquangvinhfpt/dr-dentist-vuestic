@@ -41,6 +41,7 @@ export type TreatmentPlanResponse = {
   planDescription: string
   step: number
   status: TreatmentPlanStatus
+  hasPrescription: boolean
 }
 
 export enum TreatmentPlanStatus {
@@ -101,4 +102,87 @@ export type PrescriptionItem = {
   medicineName: string
   dosage: string
   frequency: string
+}
+
+export type PaymentDetailResponse = {
+  paymentResponse: PaymentResponse
+  details: PaymentDetail[]
+}
+
+export type PaymentResponse = {
+  paymentId: string
+  patientProfileId: string
+  patientName: string
+  patientCode: string
+  appointmentId: string
+  serviceId: string
+  serviceName: string
+  depositAmount: number
+  depositDate: string
+  remainingAmount: number
+  totalAmount: number
+  method: PaymentMethod
+  status: PaymentStatus
+}
+
+export type PaymentDetail = {
+  procedureID: string
+  procedureName: string
+  paymentAmount: number
+  paymentStatus: PaymentStatus
+}
+
+export enum PaymentStatus {
+  Waiting,
+  Incomplete,
+  Completed,
+  Canceled,
+  Failed,
+}
+
+export type PayAppointmentRequest = {
+  key?: string
+  paymentID?: string
+  appointmentId?: string
+  patientCode?: string
+  amount?: number
+  time?: string
+  method?: PaymentMethod
+  isVerify?: boolean
+  isPay?: boolean
+  isCancel?: boolean
+}
+
+export enum PaymentMethod {
+  None,
+  Cash,
+  BankTransfer,
+}
+
+export const getPaymentStatusText = (status: PaymentStatus) => {
+  switch (status) {
+    case PaymentStatus.Completed:
+      return 'Completed'
+    case PaymentStatus.Incomplete:
+      return 'Incomplete'
+    case PaymentStatus.Canceled:
+      return 'Canceled'
+    case PaymentStatus.Failed:
+      return 'Failed'
+    case PaymentStatus.Waiting:
+      return 'Waiting'
+    default:
+      return 'Unknown'
+  }
+}
+
+export const getPaymentMethodLabel = (method: PaymentMethod): string => {
+  switch (method) {
+    case PaymentMethod.Cash:
+      return 'Cash'
+    case PaymentMethod.BankTransfer:
+      return 'Bank Transfer'
+    default:
+      return 'None'
+  }
 }

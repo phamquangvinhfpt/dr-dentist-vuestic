@@ -41,6 +41,36 @@ class TreatmentClass {
         return Promise.reject(error)
       })
   }
+  async updateTreatmentDetail(data: any): Promise<any> {
+    return apiService
+      .post(`/treatmentplan/update-detail`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getRemainingAppointment(id: any): Promise<any> {
+    return apiService
+      .get(`/appointment/payment/${id}`)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async sendPayment(data: any): Promise<any> {
+    return apiService
+      .post(`/appointment/payment/do`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export const treatmentService = new TreatmentClass()

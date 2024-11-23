@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useToast, VaTabs } from 'vuestic-ui'
 import MedicalRecord from './widgets/MedicalRecord.vue'
 import { useRoute } from 'vue-router'
@@ -7,7 +7,8 @@ import { Appointment, AppointmentStatus } from '../appointment/types'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import Treatment from './widgets/Treatment.vue'
 import { getErrorMessage } from '@/services/utils'
-import Prescription from './widgets/Prescription.vue'
+import { useAuthStore } from '@/stores/modules/auth.module'
+import Payment from './widgets/Payment.vue'
 
 const router = useRoute()
 const loading = ref(false)
@@ -17,6 +18,8 @@ const appointmentStatus = ref<AppointmentStatus>()
 const patientid = ref('')
 const appointment = ref<Appointment>()
 const { init } = useToast()
+const user = useAuthStore()
+const isStaff = user.musHaveRole('Staff')
 
 const getAppointmentDetails = async () => {
   loading.value = true
@@ -39,7 +42,7 @@ const getAppointmentDetails = async () => {
       loading.value = false
     })
 }
-const tabs = [
+const allTabs = [
   {
     id: 1,
     name: 'Record',
@@ -52,10 +55,18 @@ const tabs = [
   },
   {
     id: 3,
-    name: 'Prescription',
-    icon: 'receipt_long',
+    name: 'Payment',
+    icon: 'payment',
   },
 ]
+
+const tabs = computed(() => {
+  if (!isStaff) {
+    return allTabs.filter((tab) => tab.id !== 3)
+  }
+  return allTabs
+})
+
 const selectedTab = ref(0)
 const selectSettingOption = (tab: any) => {
   selectedTab.value = tab.id
@@ -63,7 +74,7 @@ const selectSettingOption = (tab: any) => {
 
 onMounted(() => {
   getAppointmentDetails()
-  selectSettingOption(tabs[0])
+  selectSettingOption(tabs.value[0])
 })
 </script>
 <template>
@@ -80,5 +91,5 @@ onMounted(() => {
   </div>
   <MedicalRecord v-if="selectedTab === 1 && !loading" v-model:patientId="patientid" />
   <Treatment v-if="selectedTab === 2" :appointment="appointment" />
-  <Prescription v-if="selectedTab === 3" />
+  <Payment v-if="selectedTab === 3" :appointment="appointment" />
 </template>

@@ -35,7 +35,7 @@
 import { ref } from 'vue'
 import { useModal, useToast } from 'vuestic-ui'
 import { getErrorMessage, notifications } from '@/services/utils'
-import { Prescription } from '../types'
+import { Prescription, TreatmentPlanResponse } from '../types'
 import { usePrescriptionStore } from '@/stores/modules/prescription.module'
 import PrescriptionForm from './PrescriptionForm.vue'
 import { useI18n } from 'vue-i18n'
@@ -49,8 +49,16 @@ const prescriptionToEdit = ref<Prescription | null>(null)
 const prescriptionStore = usePrescriptionStore()
 const { confirm } = useModal()
 
+const props = defineProps<{
+  items: TreatmentPlanResponse
+}>()
+
+// emit
+const emit = defineEmits(['update:refresh'])
+
 const onPrescriptionSaved = async (prescription: Prescription) => {
   doShowPrescriptionFormModal.value = false
+  prescription.treatmentID = props.items.treatmentPlanID
   prescriptionStore
     .createPrescription(prescription)
     .then(() => {
@@ -58,6 +66,7 @@ const onPrescriptionSaved = async (prescription: Prescription) => {
         message: notifications.createSuccessfully(t('prescriptions.prescription')),
         color: 'success',
       })
+      emit('update:refresh', true)
     })
     .catch((error) => {
       notify({

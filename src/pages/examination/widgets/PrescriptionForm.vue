@@ -132,7 +132,7 @@ const removeItem = (rowData: PrescriptionItem) => {
       v-model="searchKeyword"
       class="col-span-1"
       :loading="isLoadingSelect"
-      placeholder="Search pharmaceuticals"
+      placeholder="Find medicine...."
       clearable
     >
       <template #appendInner>
@@ -142,7 +142,7 @@ const removeItem = (rowData: PrescriptionItem) => {
     <div v-if="pharmaceuticals.length">
       <VaList>
         <template v-for="option in pharmaceuticals" :key="option.sku">
-          <VaListItem @click="selectPharmaceutical(option)">
+          <VaListItem class="hover:cursor-pointer" @click="selectPharmaceutical(option)">
             <div class="flex items-center space-x-3 py-2">
               <img :src="option.image" alt="Product image" class="w-12 h-12 object-cover rounded" />
               <div class="flex-1">
