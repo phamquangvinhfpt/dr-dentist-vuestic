@@ -1,170 +1,172 @@
 <template>
-  <div class="h-screen flex flex-col">
-    <header class="border-b p-4 bg-white" :style="{ marginRight: `${scrollbarWidth}px` }">
-      <div class="flex items-center justify-between">
-        <div>
+  <VaInnerLoading :loading="loading">
+    <div class="h-screen flex flex-col">
+      <header class="border-b p-4 bg-white" :style="{ marginRight: `${scrollbarWidth}px` }">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center space-x-4">
+              <VaDateInput
+                v-model="selectedDate"
+                :format="formatDate"
+                :parse="parseDate"
+                manual-input
+                class="px-3 py-1.5"
+                clearable
+              />
+              <div
+                v-if="role?.includes('Staff') || role?.includes('Dentist') || role?.includes('Admin')"
+                class="inline-flex rounded-lg border bg-gray-50 p-1"
+              >
+                <button
+                  v-for="type in filteredTypes"
+                  :key="type.id"
+                  :class="[
+                    'px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
+                    isAppointment === type.id ? 'bg-white shadow' : 'hover:bg-gray-100',
+                  ]"
+                  @click="isAppointment = type.id"
+                >
+                  {{ type.label }}
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="flex items-center space-x-4">
-            <VaDateInput
-              v-model="selectedDate"
-              :format="formatDate"
-              :parse="parseDate"
-              manual-input
-              class="px-3 py-1.5"
-              clearable
-            />
             <div
               v-if="role?.includes('Staff') || role?.includes('Dentist') || role?.includes('Admin')"
               class="inline-flex rounded-lg border bg-gray-50 p-1"
             >
               <button
-                v-for="type in filteredTypes"
-                :key="type.id"
+                v-for="view in views"
+                :key="view.id"
                 :class="[
                   'px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
-                  isAppointment === type.id ? 'bg-white shadow' : 'hover:bg-gray-100',
+                  currentView === view.id ? 'bg-white shadow' : 'hover:bg-gray-100',
                 ]"
-                @click="isAppointment = type.id"
+                @click="currentView = view.id"
               >
-                {{ type.label }}
+                {{ view.label }}
               </button>
             </div>
-          </div>
-        </div>
-
-        <div class="flex items-center space-x-4">
-          <div
-            v-if="role?.includes('Staff') || role?.includes('Dentist') || role?.includes('Admin')"
-            class="inline-flex rounded-lg border bg-gray-50 p-1"
-          >
             <button
-              v-for="view in views"
-              :key="view.id"
-              :class="[
-                'px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
-                currentView === view.id ? 'bg-white shadow' : 'hover:bg-gray-100',
-              ]"
-              @click="currentView = view.id"
+              v-if="role?.includes('Staff') || role?.includes('Dentist')"
+              class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+              @click="openCreateAppointmentDialog"
             >
-              {{ view.label }}
+              Create Appointment
             </button>
           </div>
-          <button
-            v-if="role?.includes('Staff') || role?.includes('Dentist')"
-            class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
-            @click="openCreateAppointmentDialog"
-          >
-            Create Appointment
-          </button>
         </div>
-      </div>
-    </header>
-    <div v-if="currentView === 'calendar'" class="flex-1 grid grid-cols-[auto,1fr] overflow-hidden">
-      <!-- Time slots -->
-      <div class="border-r bg-white w-20 overflow-hidden">
-        <div class="h-16 border-b"></div>
-        <div ref="timeSlotContainer" class="h-[calc(100vh-10rem)] overflow-y-auto" @scroll="handleTimeSlotScroll">
-          <div
-            v-for="time in timeSlots"
-            :key="time"
-            class="h-16 flex items-center justify-end pr-2 text-sm text-gray-500 border-b"
-          >
-            {{ time }}
-          </div>
-        </div>
-      </div>
-      <!-- Calendar grid -->
-      <div
-        ref="calendarContainer"
-        class="overflow-auto"
-        :style="role?.includes('Dentist') ? { marginRight: `${scrollbarWidth}px` } : {}"
-        @scroll="handleCalendarScroll"
-      >
-        <div class="grid" :style="{ gridTemplateColumns: `repeat(${doctors.length}, minmax(200px, 1fr))` }">
-          <!-- Doctor headers -->
-          <div
-            v-for="doctor in doctors"
-            :key="doctor.id"
-            :class="{
-              'h-16 p-4 text-center border-l bg-white sticky top-0 z-10': true,
-              hidden: role?.includes('Dentist'),
-            }"
-          >
-            <div class="flex flex-col items-center">
-              <div class="w-8 h-8 rounded-full bg-gray-200 mb-1"></div>
-              <span class="text-sm font-medium">{{ doctor.name }}</span>
+      </header>
+      <div v-if="currentView === 'calendar'" class="flex-1 grid grid-cols-[auto,1fr] overflow-hidden">
+        <!-- Time slots -->
+        <div class="border-r bg-white w-20 overflow-hidden">
+          <div class="h-16 border-b"></div>
+          <div ref="timeSlotContainer" class="h-[calc(100vh-10rem)] overflow-y-auto" @scroll="handleTimeSlotScroll">
+            <div
+              v-for="time in timeSlots"
+              :key="time"
+              class="h-16 flex items-center justify-end pr-2 text-sm text-gray-500 border-b"
+            >
+              {{ time }}
             </div>
           </div>
-          <!-- Appointment slots -->
-          <div
-            v-for="doctor in doctors"
-            :key="doctor.id"
-            class="border-l relative"
-            :style="{ backgroundColor: `${doctor.color}10` }"
-          >
-            <div class="h-full">
-              <div
-                v-for="time in timeSlots"
-                :key="time"
-                class="h-16 border-b relative group"
-                @contextmenu.prevent="openContextMenu($event, time, doctor.id)"
-                @dragover.prevent
-                @drop="handleDrop($event, time, doctor.id)"
-              >
-                <!-- Appointment slots -->
+        </div>
+        <!-- Calendar grid -->
+        <div
+          ref="calendarContainer"
+          class="overflow-auto"
+          :style="role?.includes('Dentist') ? { marginRight: `${scrollbarWidth}px` } : {}"
+          @scroll="handleCalendarScroll"
+        >
+          <div class="grid" :style="{ gridTemplateColumns: `repeat(${doctors.length}, minmax(200px, 1fr))` }">
+            <!-- Doctor headers -->
+            <div
+              v-for="doctor in doctors"
+              :key="doctor.id"
+              :class="{
+                'h-16 p-4 text-center border-l bg-white sticky top-0 z-10': true,
+                hidden: role?.includes('Dentist'),
+              }"
+            >
+              <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full bg-gray-200 mb-1"></div>
+                <span class="text-sm font-medium">{{ doctor.name }}</span>
+              </div>
+            </div>
+            <!-- Appointment slots -->
+            <div
+              v-for="doctor in doctors"
+              :key="doctor.id"
+              class="border-l relative"
+              :style="{ backgroundColor: `${doctor.color}10` }"
+            >
+              <div class="h-full">
                 <div
-                  v-if="getAppointments(time, doctor.id).length === 1 && isAppointment === 'appointment'"
-                  class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
-                  :style="{
-                    top: '2px',
-                    height: 'calc(100% - 4px)',
-                  }"
-                  draggable="true"
-                  @dragstart="handleDragStart($event, getAppointments(time, doctor.id)[0])"
-                  @mouseenter="showAppointmentDetails(getAppointments(time, doctor.id)[0], $event)"
-                  @mouseleave="hideAppointmentDetails()"
+                  v-for="time in timeSlots"
+                  :key="time"
+                  class="h-16 border-b relative group"
+                  @contextmenu.prevent="openContextMenu($event, time, doctor.id)"
+                  @dragover.prevent
+                  @drop="handleDrop($event, time, doctor.id)"
                 >
-                  <div class="h-full p-2 rounded" :style="{ backgroundColor: `${doctor.color}30` }">
-                    <div class="text-sm font-medium truncate">
-                      {{ getAppointments(time, doctor.id)[0].patientName }}
-                    </div>
-                    <div
-                      class="text-xs"
-                      :class="[
-                        getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).bgColor,
-                        getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).textColor,
-                        'px-2 py-1 rounded-full inline-block',
-                      ]"
-                    >
-                      {{ getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).text }}
+                  <!-- Appointment slots -->
+                  <div
+                    v-if="getAppointments(time, doctor.id).length === 1 && isAppointment === 'appointment'"
+                    class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
+                    :style="{
+                      top: '2px',
+                      height: 'calc(100% - 4px)',
+                    }"
+                    draggable="true"
+                    @dragstart="handleDragStart($event, getAppointments(time, doctor.id)[0])"
+                    @mouseenter="showAppointmentDetails(getAppointments(time, doctor.id)[0], $event)"
+                    @mouseleave="hideAppointmentDetails()"
+                  >
+                    <div class="h-full p-2 rounded" :style="{ backgroundColor: `${doctor.color}30` }">
+                      <div class="text-sm font-medium truncate">
+                        {{ getAppointments(time, doctor.id)[0].patientName }}
+                      </div>
+                      <div
+                        class="text-xs"
+                        :class="[
+                          getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).bgColor,
+                          getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).textColor,
+                          'px-2 py-1 rounded-full inline-block',
+                        ]"
+                      >
+                        {{ getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).text }}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <!-- Follow up -->
-                <div
-                  v-if="getFollowUpAppointments(time, doctor.id).length === 1 && isAppointment === 'followup'"
-                  class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
-                  :style="{
-                    top: '2px',
-                    height: 'calc(100% - 4px)',
-                  }"
-                  draggable="true"
-                  @dragstart="handleDragStart($event, getFollowUpAppointments(time, doctor.id)[0])"
-                  @mouseenter="showFollowUpAppointmentDetails(getFollowUpAppointments(time, doctor.id)[0], $event)"
-                  @mouseleave="hideFollowUpAppointmentDetails()"
-                >
-                  <div class="h-full p-2 rounded" :style="{ backgroundColor: `${doctor.color}30` }">
-                    <div class="text-sm font-medium truncate">
-                      {{ getFollowUpAppointments(time, doctor.id)[0].patientName }}
-                    </div>
-                    <div
-                      class="text-xs"
-                      :class="[
-                        getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).bgColor,
-                        getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).textColor,
-                        'px-2 py-1 rounded-full inline-block',
-                      ]"
-                    >
-                      {{ getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).text }}
+                  <!-- Follow up -->
+                  <div
+                    v-if="getFollowUpAppointments(time, doctor.id).length === 1 && isAppointment === 'followup'"
+                    class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
+                    :style="{
+                      top: '2px',
+                      height: 'calc(100% - 4px)',
+                    }"
+                    draggable="true"
+                    @dragstart="handleDragStart($event, getFollowUpAppointments(time, doctor.id)[0])"
+                    @mouseenter="showFollowUpAppointmentDetails(getFollowUpAppointments(time, doctor.id)[0], $event)"
+                    @mouseleave="hideFollowUpAppointmentDetails()"
+                  >
+                    <div class="h-full p-2 rounded" :style="{ backgroundColor: `${doctor.color}30` }">
+                      <div class="text-sm font-medium truncate">
+                        {{ getFollowUpAppointments(time, doctor.id)[0].patientName }}
+                      </div>
+                      <div
+                        class="text-xs"
+                        :class="[
+                          getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).bgColor,
+                          getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).textColor,
+                          'px-2 py-1 rounded-full inline-block',
+                        ]"
+                      >
+                        {{ getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).text }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -173,423 +175,431 @@
           </div>
         </div>
       </div>
-    </div>
-    <!-- List View -->
-    <div v-else class="flex-1 overflow-auto" :style="{ marginRight: `${scrollbarWidth}px` }">
-      <div v-if="isAppointment === 'appointment'">
-        <VaDataTable
-          :items="items"
-          :columns="columns"
-          hoverable
-          class="my-table va-table--hoverable"
-          :style="{
-            '--va-data-table-thead-background': 'var(--va-background-element)',
-            '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-          }"
-          sticky-header
-        >
-          <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
-          <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
-          <template #cell(status)="{ value }">
-            <VaChip :color="getStatusColor(value)" class="text-sm">
-              {{ getStatusText(value) }}
-            </VaChip>
-          </template>
-          <template #cell(paymentStatus)="{ value }">
-            <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
-              {{ getPaymentStatusText(value) }}
-            </VaChip>
-          </template>
-          <template
-            v-if="role?.includes('Staff') || role?.includes('Admin') || role?.includes('Dentist')"
-            #cell(actions)="{ rowData }"
+      <!-- List View -->
+      <div v-else class="flex-1 overflow-auto" :style="{ marginRight: `${scrollbarWidth}px` }">
+        <div v-if="isAppointment === 'appointment'">
+          <VaDataTable
+            :items="items"
+            :columns="columns"
+            hoverable
+            class="my-table va-table--hoverable"
+            :style="{
+              '--va-data-table-thead-background': 'var(--va-background-element)',
+              '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
+            }"
+            sticky-header
           >
-            <div class="space-x-2">
-              <VaButton
-                v-if="rowData.status !== 4"
-                round
-                icon="arrow_forward"
-                color="#b1fadc"
-                icon-color="#812E9E"
-                @click="router.push(`/examination/${rowData.appointmentId}`)"
-              />
-              <VaButton
-                v-if="rowData.status === 2"
-                round
-                icon="sync"
-                color="warning"
-                icon-color="#812E9E"
-                @click="rescheduleModal(rowData)"
-              />
-              <VaButton
-                v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
-                round
-                icon="clear"
-                color="danger"
-                icon-color="#812E9E"
-                @click="cancelModal(rowData)"
-              />
-            </div>
-          </template>
-        </VaDataTable>
-        <VaPagination
-          v-model="paginationA.page"
-          class="items-center justify-end mt-4"
-          buttons-preset="secondary"
-          :pages="totalPagesA"
-          :visible-pages="5"
-          :boundary-links="true"
-          :direction-links="true"
-        />
-      </div>
-      <div v-if="isAppointment === 'followup'">
-        <VaDataTable
-          :items="followitems"
-          :columns="followColumns"
-          hoverable
-          class="my-table va-table--hoverable"
-          :style="{
-            '--va-data-table-thead-background': 'var(--va-background-element)',
-            '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-          }"
-          sticky-header
-        >
-          <template #cell(date)="{ value }"> {{ formatDate(value) }} </template>
-          <template #cell(status)="{ value }">
-            <VaChip :color="getFollowUpStatusColor(value)" class="text-sm">
-              {{ getFollowUpStatusText(value) }}
-            </VaChip>
-          </template>
-        </VaDataTable>
-        <VaPagination
-          v-model="paginationF.page"
-          class="items-center justify-end mt-4"
-          buttons-preset="secondary"
-          :pages="totalPagesF"
-          :visible-pages="5"
-          :boundary-links="true"
-          :direction-links="true"
-        />
-      </div>
-      <!-- Unassigned -->
-      <div v-if="isAppointment === 'unassigned'">
-        <VaDataTable
-          :items="unassigneditems"
-          :columns="unassignedColumns"
-          hoverable
-          class="my-table va-table--hoverable"
-          :style="{
-            '--va-data-table-thead-background': 'var(--va-background-element)',
-            '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-          }"
-          sticky-header
-          @row:dblclick="(row) => openAssignListDialog(row.item)"
-        >
-          <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
-          <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
-          <template #cell(status)="{ value }">
-            <VaChip :color="getStatusColor(value)" class="text-sm">
-              {{ getStatusText(value) }}
-            </VaChip>
-          </template>
-          <template #cell(paymentStatus)="{ value }">
-            <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
-              {{ getPaymentStatusText(value) }}
-            </VaChip>
-          </template>
-        </VaDataTable>
-        <VaPagination
-          v-model="paginationN.page"
-          class="items-center justify-end mt-4"
-          buttons-preset="secondary"
-          :pages="totalPagesN"
-          :visible-pages="5"
-          :boundary-links="true"
-          :direction-links="true"
-        />
-      </div>
-    </div>
-    <!-- Appointment Details Modal -->
-    <div
-      v-if="showAppointmentModal"
-      class="fixed z-50 bg-white rounded-md shadow-lg p-4"
-      :style="{ top: `${appointmentModalPosition.y}px`, left: `${appointmentModalPosition.x}px` }"
-    >
-      <h3 class="text-lg font-semibold mb-2">
-        {{ selectedAppointment?.patientName }} - {{ selectedAppointment?.patientCode }}
-      </h3>
-      <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
-      <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedAppointment?.dentistId)) }}</p>
-      <p><strong>Service:</strong> {{ selectedAppointment?.serviceName }}</p>
-      <p><strong>Price:</strong> {{ selectedAppointment?.servicePrice }}</p>
-      <p class="flex items-center gap-2">
-        <strong>Status:</strong>
-        <span
-          v-if="selectedAppointment"
-          class="px-2 py-1 text-xs rounded-full"
-          :class="[
-            getAppointmentStatusConfig(selectedAppointment.status).bgColor,
-            getAppointmentStatusConfig(selectedAppointment.status).textColor,
-          ]"
-        >
-          {{ getAppointmentStatusConfig(selectedAppointment.status).text }}
-        </span>
-      </p>
-    </div>
-    <!-- Follow-Up Appointment Details Modal -->
-    <div
-      v-if="showFollowUpAppointmentModal"
-      class="fixed z-50 bg-white rounded-md shadow-lg p-4"
-      :style="{ top: `${followUpModalPosition.y}px`, left: `${followUpModalPosition.x}px` }"
-    >
-      <h3 class="text-lg font-semibold mb-2">
-        {{ selectedFollowUpAppointment?.patientName }} - {{ selectedFollowUpAppointment?.patientCode }}
-      </h3>
-      <p><strong>Date:</strong> {{ selectedFollowUpAppointment?.date }}</p>
-      <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
-      <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedFollowUpAppointment?.doctorProfileID)) }}</p>
-      <p><strong>Service:</strong> {{ selectedFollowUpAppointment?.serviceName }}</p>
-      <p class="flex items-center gap-2">
-        <strong>Status:</strong>
-        <span
-          v-if="selectedFollowUpAppointment"
-          class="px-2 py-1 text-xs rounded-full"
-          :class="[
-            getFollowUpStatusConfig(selectedFollowUpAppointment.status).bgColor,
-            getFollowUpStatusConfig(selectedFollowUpAppointment.status).textColor,
-          ]"
-        >
-          {{ getFollowUpStatusConfig(selectedFollowUpAppointment.status).text }}
-        </span>
-      </p>
-    </div>
-    <!-- Context Menu -->
-    <div
-      v-if="contextMenu.show"
-      :style="{
-        position: 'fixed',
-        top: `${contextMenu.y}px`,
-        left: `${contextMenu.x}px`,
-      }"
-      class="z-50 bg-white rounded-md shadow-lg context-menu"
-    >
-      <div class="py-1">
-        <button
-          class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-          @click="showTimeSlotUnassignedModal(contextMenu.time, contextMenu.doctorId)"
-        >
-          Show Unassigned
-        </button>
-      </div>
-    </div>
-    <!-- Unassigned Bookings Dialog -->
-    <TransitionRoot appear :show="showAllUnassignedModal" as="template">
-      <Dialog as="div" class="relative z-10" @close="showAllUnassignedModal = false">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
-        </TransitionChild>
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
+            <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
+            <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
+            <template #cell(status)="{ value }">
+              <VaChip :color="getStatusColor(value)" class="text-sm">
+                {{ getStatusText(value) }}
+              </VaChip>
+            </template>
+            <template #cell(paymentStatus)="{ value }">
+              <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
+                {{ getPaymentStatusText(value) }}
+              </VaChip>
+            </template>
+            <template
+              v-if="role?.includes('Staff') || role?.includes('Admin') || role?.includes('Dentist')"
+              #cell(actions)="{ rowData }"
             >
-              <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              <div class="space-x-2">
+                <VaButton
+                  v-if="rowData.status !== 4"
+                  round
+                  icon="arrow_forward"
+                  color="#b1fadc"
+                  icon-color="#812E9E"
+                  @click="router.push(`/examination/${rowData.appointmentId}`)"
+                />
+                <VaButton
+                  v-if="rowData.status === 2"
+                  round
+                  icon="sync"
+                  color="warning"
+                  icon-color="#812E9E"
+                  @click="rescheduleModal(rowData)"
+                />
+                <VaButton
+                  v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
+                  round
+                  icon="clear"
+                  color="danger"
+                  icon-color="#812E9E"
+                  @click="cancelModal(rowData)"
+                />
+              </div>
+            </template>
+          </VaDataTable>
+          <VaPagination
+            v-model="paginationA.page"
+            class="items-center justify-end mt-4"
+            buttons-preset="secondary"
+            :pages="totalPagesA"
+            :visible-pages="5"
+            :boundary-links="true"
+            :direction-links="true"
+          />
+        </div>
+        <div v-if="isAppointment === 'followup'">
+          <VaDataTable
+            :items="followitems"
+            :columns="followColumns"
+            hoverable
+            class="my-table va-table--hoverable"
+            :style="{
+              '--va-data-table-thead-background': 'var(--va-background-element)',
+              '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
+            }"
+            sticky-header
+          >
+            <template #cell(date)="{ value }"> {{ formatDate(value) }} </template>
+            <template #cell(status)="{ value }">
+              <VaChip :color="getFollowUpStatusColor(value)" class="text-sm">
+                {{ getFollowUpStatusText(value) }}
+              </VaChip>
+            </template>
+          </VaDataTable>
+          <VaPagination
+            v-model="paginationF.page"
+            class="items-center justify-end mt-4"
+            buttons-preset="secondary"
+            :pages="totalPagesF"
+            :visible-pages="5"
+            :boundary-links="true"
+            :direction-links="true"
+          />
+        </div>
+        <!-- Unassigned -->
+        <div v-if="isAppointment === 'unassigned'">
+          <VaDataTable
+            :items="unassigneditems"
+            :columns="unassignedColumns"
+            hoverable
+            class="my-table va-table--hoverable"
+            :style="{
+              '--va-data-table-thead-background': 'var(--va-background-element)',
+              '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
+            }"
+            sticky-header
+            @row:dblclick="(row) => openAssignListDialog(row.item)"
+          >
+            <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
+            <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
+            <template #cell(status)="{ value }">
+              <VaChip :color="getStatusColor(value)" class="text-sm">
+                {{ getStatusText(value) }}
+              </VaChip>
+            </template>
+            <template #cell(paymentStatus)="{ value }">
+              <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
+                {{ getPaymentStatusText(value) }}
+              </VaChip>
+            </template>
+          </VaDataTable>
+          <VaPagination
+            v-model="paginationN.page"
+            class="items-center justify-end mt-4"
+            buttons-preset="secondary"
+            :pages="totalPagesN"
+            :visible-pages="5"
+            :boundary-links="true"
+            :direction-links="true"
+          />
+        </div>
+      </div>
+      <!-- Appointment Details Modal -->
+      <div
+        v-if="showAppointmentModal"
+        class="fixed z-50 bg-white rounded-md shadow-lg p-4"
+        :style="{ top: `${appointmentModalPosition.y}px`, left: `${appointmentModalPosition.x}px` }"
+      >
+        <h3 class="text-lg font-semibold mb-2">
+          {{ selectedAppointment?.patientName }} - {{ selectedAppointment?.patientCode }}
+        </h3>
+        <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
+        <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedAppointment?.dentistId)) }}</p>
+        <p><strong>Service:</strong> {{ selectedAppointment?.serviceName }}</p>
+        <p><strong>Price:</strong> {{ selectedAppointment?.servicePrice }}</p>
+        <p class="flex items-center gap-2">
+          <strong>Status:</strong>
+          <span
+            v-if="selectedAppointment"
+            class="px-2 py-1 text-xs rounded-full"
+            :class="[
+              getAppointmentStatusConfig(selectedAppointment.status).bgColor,
+              getAppointmentStatusConfig(selectedAppointment.status).textColor,
+            ]"
+          >
+            {{ getAppointmentStatusConfig(selectedAppointment.status).text }}
+          </span>
+        </p>
+      </div>
+      <!-- Follow-Up Appointment Details Modal -->
+      <div
+        v-if="showFollowUpAppointmentModal"
+        class="fixed z-50 bg-white rounded-md shadow-lg p-4"
+        :style="{ top: `${followUpModalPosition.y}px`, left: `${followUpModalPosition.x}px` }"
+      >
+        <h3 class="text-lg font-semibold mb-2">
+          {{ selectedFollowUpAppointment?.patientName }} - {{ selectedFollowUpAppointment?.patientCode }}
+        </h3>
+        <p><strong>Date:</strong> {{ selectedFollowUpAppointment?.date }}</p>
+        <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
+        <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedFollowUpAppointment?.doctorProfileID)) }}</p>
+        <p><strong>Service:</strong> {{ selectedFollowUpAppointment?.serviceName }}</p>
+        <p class="flex items-center gap-2">
+          <strong>Status:</strong>
+          <span
+            v-if="selectedFollowUpAppointment"
+            class="px-2 py-1 text-xs rounded-full"
+            :class="[
+              getFollowUpStatusConfig(selectedFollowUpAppointment.status).bgColor,
+              getFollowUpStatusConfig(selectedFollowUpAppointment.status).textColor,
+            ]"
+          >
+            {{ getFollowUpStatusConfig(selectedFollowUpAppointment.status).text }}
+          </span>
+        </p>
+      </div>
+      <!-- Context Menu -->
+      <div
+        v-if="contextMenu.show"
+        :style="{
+          position: 'fixed',
+          top: `${contextMenu.y}px`,
+          left: `${contextMenu.x}px`,
+        }"
+        class="z-50 bg-white rounded-md shadow-lg context-menu"
+      >
+        <div class="py-1">
+          <button
+            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            @click="showTimeSlotUnassignedModal(contextMenu.time, contextMenu.doctorId)"
+          >
+            Show Unassigned
+          </button>
+        </div>
+      </div>
+      <!-- Unassigned Bookings Dialog -->
+      <TransitionRoot appear :show="showAllUnassignedModal" as="template">
+        <Dialog as="div" class="relative z-10" @close="showAllUnassignedModal = false">
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0"
+            enter-to="opacity-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100"
+            leave-to="opacity-0"
+          >
+            <div class="fixed inset-0 bg-black bg-opacity-25" />
+          </TransitionChild>
+          <div class="fixed inset-0 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+              <TransitionChild
+                as="template"
+                enter="duration-300 ease-out"
+                enter-from="opacity-0 scale-95"
+                enter-to="opacity-100 scale-100"
+                leave="duration-200 ease-in"
+                leave-from="opacity-100 scale-100"
+                leave-to="opacity-0 scale-95"
               >
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                  {{ selectedDate ? formatDate(selectedDate) : 'All' }} Unassigned Bookings at
-                  {{ selectedTime ? `${selectedTime}` : '' }}
-                </DialogTitle>
-                <div class="mt-4">
-                  <div v-if="selectedTime">
-                    <ul v-if="nonDoctorAppointments.filter((b) => b.startTime === selectedTime).length > 0">
-                      <li
-                        v-for="booking in nonDoctorAppointments.filter((b) => b.startTime === selectedTime)"
-                        :key="booking.appointmentId"
-                        class="mb-2"
-                      >
-                        <span>{{ booking.patientName }} - {{ booking.startTime }}</span>
-                        <button
-                          class="ml-2 px-2 py-1 bg-blue-500 text-white rounded-md text-sm"
-                          @click="openAssignDialog(booking)"
+                <DialogPanel
+                  class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                >
+                  <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+                    {{ selectedDate ? formatDate(selectedDate) : 'All' }} Unassigned Bookings at
+                    {{ selectedTime ? `${selectedTime}` : '' }}
+                  </DialogTitle>
+                  <div class="mt-4">
+                    <div v-if="selectedTime">
+                      <ul v-if="nonDoctorAppointments.filter((b) => b.startTime === selectedTime).length > 0">
+                        <li
+                          v-for="booking in nonDoctorAppointments.filter((b) => b.startTime === selectedTime)"
+                          :key="booking.appointmentId"
+                          class="mb-2"
                         >
-                          Assign
-                        </button>
-                      </li>
-                    </ul>
-                    <p v-else class="text-sm text-gray-500 text-center">
-                      No unassigned bookings at {{ selectedTime }}.
-                    </p>
+                          <span>{{ booking.patientName }} - {{ booking.startTime }}</span>
+                          <button
+                            class="ml-2 px-2 py-1 bg-blue-500 text-white rounded-md text-sm"
+                            @click="openAssignDialog(booking)"
+                          >
+                            Assign
+                          </button>
+                        </li>
+                      </ul>
+                      <p v-else class="text-sm text-gray-500 text-center">
+                        No unassigned bookings at {{ selectedTime }}.
+                      </p>
+                    </div>
+                    <p v-else class="text-sm text-gray-500 text-center">No unassigned bookings.</p>
                   </div>
-                  <p v-else class="text-sm text-gray-500 text-center">No unassigned bookings.</p>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-    <!-- Assign Booking Dialog -->
-    <TransitionRoot appear :show="showAssignDialog" as="template">
-      <Dialog as="div" class="relative z-10" @close="showAssignDialog = false">
-        <TransitionChild
-          as="template"
-          enter="duration-300 ease-out"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="duration-200 ease-in"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
-        >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
-        </TransitionChild>
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4 text-center">
-            <TransitionChild
-              as="template"
-              enter="duration-300 ease-out"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="duration-200 ease-in"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+        </Dialog>
+      </TransitionRoot>
+      <!-- Assign Booking Dialog -->
+      <TransitionRoot appear :show="showAssignDialog" as="template">
+        <Dialog as="div" class="relative z-10" @close="showAssignDialog = false">
+          <TransitionChild
+            as="template"
+            enter="duration-300 ease-out"
+            enter-from="opacity-0"
+            enter-to="opacity-100"
+            leave="duration-200 ease-in"
+            leave-from="opacity-100"
+            leave-to="opacity-0"
+          >
+            <div class="fixed inset-0 bg-black bg-opacity-25" />
+          </TransitionChild>
+          <div class="fixed inset-0 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center">
+              <TransitionChild
+                as="template"
+                enter="duration-300 ease-out"
+                enter-from="opacity-0 scale-95"
+                enter-to="opacity-100 scale-100"
+                leave="duration-200 ease-in"
+                leave-from="opacity-100 scale-100"
+                leave-to="opacity-0 scale-95"
               >
-                <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900"> Assign Booking </DialogTitle>
-                <form class="mt-4 space-y-4" @submit.prevent="handleAssignBooking">
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium">Patient: {{ selectedBooking.patientName }}</label>
-                  </div>
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium">Doctor</label>
-                    <select v-model="selectedDoctorId" required class="w-full px-3 py-2 border rounded-md">
-                      <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id">
-                        {{ doctor.name }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="space-y-2">
-                    <label class="text-sm font-medium">Time</label>
-                    <select v-model="selectedTime" required class="w-full px-3 py-2 border rounded-md" disabled>
-                      <option v-for="time in timeSlots" :key="time" :value="time">
-                        {{ time }}
-                      </option>
-                    </select>
-                  </div>
-                  <div class="flex justify-end space-x-2 mt-4">
-                    <button
-                      type="button"
-                      class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                      @click="showAssignDialog = false"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
-                    >
-                      Assign
-                    </button>
-                  </div>
-                </form>
-              </DialogPanel>
-            </TransitionChild>
+                <DialogPanel
+                  class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                >
+                  <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+                    Assign Booking
+                  </DialogTitle>
+                  <form class="mt-4 space-y-4" @submit.prevent="handleAssignBooking">
+                    <div class="space-y-2">
+                      <label class="text-sm font-medium">Patient: {{ selectedBooking.patientName }}</label>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="text-sm font-medium">Doctor</label>
+                      <select v-model="selectedDoctorId" required class="w-full px-3 py-2 border rounded-md">
+                        <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id">
+                          {{ doctor.name }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="text-sm font-medium">Time</label>
+                      <select v-model="selectedTime" required class="w-full px-3 py-2 border rounded-md" disabled>
+                        <option v-for="time in timeSlots" :key="time" :value="time">
+                          {{ time }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="flex justify-end space-x-2 mt-4">
+                      <button
+                        type="button"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                        @click="showAssignDialog = false"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+                      >
+                        Assign
+                      </button>
+                    </div>
+                  </form>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-    <!-- Create Appointment Modal -->
-    <VaModal v-model="showModalAppointment" ok-text="Submit" @ok="submitAppointment">
-      <h3 class="va-h3">Appointment Details</h3>
-      <VaCard>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <VaSelect
-            v-model="patientId"
-            class="col-span-1"
-            label="Patient"
-            :options="optionsPatients"
-            autocomplete
-            highlight-matched-text
-          />
-          <VaSelect
-            v-model="doctorId"
-            class="col-span-1"
-            label="Doctor"
-            :options="optionsDoctors"
-            autocomplete
-            highlight-matched-text
-          />
-          <VaSelect
-            v-model="serviceId"
-            class="col-span-1"
-            label="Service"
-            :options="optionsServices"
-            autocomplete
-            highlight-matched-text
-          />
-          <VaDateInput
-            v-model="date"
-            :format="formatDate"
-            :parse="parseDate"
-            manual-input
-            class="col-span-1"
-            label="Date"
-            clearable
-          />
-          <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
-          <VaTextarea v-model="notes" label="Notes" />
-        </div>
-      </VaCard>
-    </VaModal>
-    <!-- Reschedule Appointment Modal -->
-    <VaModal v-model="showModalReschedule" ok-text="Reschedule" @close="handleCloseReschedule" @ok="submitReschedule">
-      <h3 class="va-h3">Reschedule Appointment</h3>
-      <VaCard>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <VaDateInput
-            v-model="date"
-            :format="formatDate"
-            :parse="parseDate"
-            manual-input
-            class="col-span-1"
-            label="Date"
-            clearable
-          />
-          <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
-        </div>
-      </VaCard>
-    </VaModal>
-    <!-- Cancel Appointment Modal -->
-    <VaModal v-model="showModalCancel" cancel-text="Cancel" ok-text="Yes" @close="handleCloseCancel" @ok="submitCancel">
-      <h3 class="va-h3">Cancel Appointment</h3>
-      <VaCard>
-        <p>Are you sure you want to cancel this appointment?</p>
-      </VaCard>
-      <VaAlert color="#fdeae7" text-color="#940909" class="mt-4">
-        <p>This action cannot be undone.</p>
-      </VaAlert>
-    </VaModal>
-  </div>
+        </Dialog>
+      </TransitionRoot>
+      <!-- Create Appointment Modal -->
+      <VaModal v-model="showModalAppointment" ok-text="Submit" @ok="submitAppointment">
+        <h3 class="va-h3">Appointment Details</h3>
+        <VaCard>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <VaSelect
+              v-model="patientId"
+              class="col-span-1"
+              label="Patient"
+              :options="optionsPatients"
+              autocomplete
+              highlight-matched-text
+            />
+            <VaSelect
+              v-model="doctorId"
+              class="col-span-1"
+              label="Doctor"
+              :options="optionsDoctors"
+              autocomplete
+              highlight-matched-text
+            />
+            <VaSelect
+              v-model="serviceId"
+              class="col-span-1"
+              label="Service"
+              :options="optionsServices"
+              autocomplete
+              highlight-matched-text
+            />
+            <VaDateInput
+              v-model="date"
+              :format="formatDate"
+              :parse="parseDate"
+              manual-input
+              class="col-span-1"
+              label="Date"
+              clearable
+            />
+            <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
+            <VaTextarea v-model="notes" label="Notes" />
+          </div>
+        </VaCard>
+      </VaModal>
+      <!-- Reschedule Appointment Modal -->
+      <VaModal v-model="showModalReschedule" ok-text="Reschedule" @close="handleCloseReschedule" @ok="submitReschedule">
+        <h3 class="va-h3">Reschedule Appointment</h3>
+        <VaCard>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <VaDateInput
+              v-model="date"
+              :format="formatDate"
+              :parse="parseDate"
+              manual-input
+              class="col-span-1"
+              label="Date"
+              clearable
+            />
+            <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
+          </div>
+        </VaCard>
+      </VaModal>
+      <!-- Cancel Appointment Modal -->
+      <VaModal
+        v-model="showModalCancel"
+        cancel-text="Cancel"
+        ok-text="Yes"
+        @close="handleCloseCancel"
+        @ok="submitCancel"
+      >
+        <h3 class="va-h3">Cancel Appointment</h3>
+        <VaCard>
+          <p>Are you sure you want to cancel this appointment?</p>
+        </VaCard>
+        <VaAlert color="#fdeae7" text-color="#940909" class="mt-4">
+          <p>This action cannot be undone.</p>
+        </VaAlert>
+      </VaModal>
+    </div>
+  </VaInnerLoading>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, watch, Ref, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, Ref, nextTick, onBeforeMount } from 'vue'
 import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {
   useToast,
@@ -599,6 +609,7 @@ import {
   VaChip,
   VaDataTable,
   VaDateInput,
+  VaInnerLoading,
   VaModal,
   VaPagination,
   VaSelect,
@@ -1074,7 +1085,7 @@ const searchDoctor = () => {
     })
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   if (role?.includes('Patient')) currentView.value = 'list'
   searchDoctor()
   fetchAppointments(searchValueA.value)

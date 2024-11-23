@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { Appointment } from '@/pages/appointment/types'
 import { onMounted, ref, computed } from 'vue'
-import { useToast, VaInnerLoading, VaCollapse, VaCard, VaCardContent, VaIcon, VaButton, VaCheckbox } from 'vuestic-ui'
-import { getStatusClass, getStatusText, TreatmentPlanResponse } from '../types'
+import { useToast, VaInnerLoading, VaCollapse, VaCard, VaCardContent, VaIcon } from 'vuestic-ui'
+import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { getErrorMessage } from '@/services/utils'
+import { DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -13,26 +14,75 @@ const props = defineProps<{
 
 const { init } = useToast()
 const storeTreatment = useTreatmentStore()
+const showModalAddTreatment = ref(false)
+const selectedTreatmentPlanId = ref('')
+const date = ref(new Date())
+const startTime = ref('')
+const notes = ref('')
 const appointmentStatus = props.appointment?.status
 const treatmentplans = ref<TreatmentPlanResponse[]>([])
+const columns = [
+  { key: 'step', sortable: true, title: 'S.L' },
+  { key: 'procedureName', sortable: true, title: 'Tên thủ thuật' },
+  { key: 'startDate', sortable: true, title: 'Ngày bắt đầu' },
+  { key: 'doctorName', sortable: true, title: 'Bác sĩ' },
+  { key: 'price', sortable: true, title: 'Đơn giá' },
+  { key: 'discountAmount', sortable: true, title: 'Giảm giá (%)' },
+  { key: 'planCost', sortable: true, title: 'Tổng chi phí' },
+  { key: 'status', sortable: true, title: 'Tình trạng' },
+  { key: 'action', title: 'Hành động' },
+]
 
 // Computed properties for totals
-const totalExpectedCost = computed(() => {
-  return Array.isArray(treatmentplans.value) ? treatmentplans.value.reduce((sum, plan) => sum + plan.price, 0) : 0
-})
-
-const totalDiscount = computed(() => {
-  return Array.isArray(treatmentplans.value)
-    ? treatmentplans.value.reduce((sum, plan) => sum + plan.discountAmount, 0)
-    : 0
-})
-
-const totalFinalCost = computed(() => {
-  return totalExpectedCost.value - totalDiscount.value
-})
-
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('vi-VN').format(value)
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+}
+
+const getStatusText = (status: TreatmentPlanStatus) => {
+  return ['Pending', 'Active', 'Completed', 'Cancelled', 'Rescheduled'][status]
+}
+
+const totalExpectedCost = computed(() => treatmentplans.value.reduce((sum, plan) => sum + plan.price, 0))
+
+const totalDiscount = computed(() =>
+  treatmentplans.value.reduce((sum, plan) => sum + plan.price * plan.discountAmount, 0),
+)
+
+const totalFinalCost = computed(() => treatmentplans.value.reduce((sum, plan) => sum + plan.planCost, 0))
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+}
+
+const parseDate = (dateStr: string): DateInputValue => {
+  if (!dateStr) return null
+
+  const date = new Date(dateStr)
+  return isNaN(date.getTime()) ? null : date
+}
+
+const formatDateOnly = (date: any) => {
+  return date instanceof Date ? date.toISOString().split('T')[0] : date.split('T')[0]
+}
+
+const optionsStartTimes = computed(() => {
+  const slots = []
+  for (let hour = 8; hour < 17; hour++) {
+    slots.push(`${hour.toString().padStart(2, '0')}:00`)
+    slots.push(`${hour.toString().padStart(2, '0')}:30`)
+  }
+  return slots
+})
+
+const isToday = (dateString: string) => {
+  const today = new Date()
+  const date = new Date(dateString)
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  )
 }
 
 const toogleAppointmentStatus = async () => {
@@ -40,7 +90,7 @@ const toogleAppointmentStatus = async () => {
   await storeTreatment
     .toogleAppointment(props.appointment?.appointmentId)
     .then((response) => {
-      treatmentplans.value = response
+      treatmentplans.value = response.sort((a: any, b: any) => a.step - b.step)
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)
@@ -60,14 +110,93 @@ const getTreatmentPlans = async () => {
   await storeTreatment
     .getTreatmentList(props.appointment?.appointmentId)
     .then((response) => {
-      console.log(props.appointment?.status)
-      treatmentplans.value = response
+      console.log('Treatment plans:', response)
+      treatmentplans.value = response.sort((a: any, b: any) => a.step - b.step)
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)
       init({
         message: errorMessage,
         color: 'error',
+        title: 'Error',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+const handleTreatmentAction = (item: TreatmentPlanResponse) => {
+  console.log('Treatment action for:', item)
+  loading.value = true
+  storeTreatment
+    .doTreatment(item.treatmentPlanID)
+    .then((response) => {
+      console.log('Treatment action response:', response)
+      init({
+        message: response,
+        color: 'success',
+        title: 'Success',
+      })
+      getTreatmentPlans()
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      init({
+        message: errorMessage,
+        color: 'error',
+        title: 'Error',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+const handleTreatmentDetails = (item: TreatmentPlanResponse) => {
+  selectedTreatmentPlanId.value = item.treatmentPlanID
+  showModalAddTreatment.value = true
+}
+
+const handleTreatmentSchedule = (item: TreatmentPlanResponse) => {
+  console.log('Reschedule treatment for:', item)
+}
+
+const handleCloseTreatmentDetail = () => {
+  showModalAddTreatment.value = false
+}
+
+const submitTreatmentDetail = () => {
+  const request = {
+    appointmentID: props.appointment?.appointmentId,
+    treatmentId: selectedTreatmentPlanId.value,
+    treatmentDate: formatDateOnly(date.value),
+    treatmentTime: `${startTime.value}:00`,
+    note: notes.value,
+  }
+
+  loading.value = true
+  storeTreatment
+    .addTreatmentDetail(request)
+    .then((response) => {
+      console.log('Add treatment detail response:', response)
+      init({
+        message: response,
+        color: 'success',
+        title: 'Success',
+      })
+      getTreatmentPlans()
+      handleCloseTreatmentDetail()
+      date.value = new Date()
+      startTime.value = ''
+      notes.value = ''
+      selectedTreatmentPlanId.value = ''
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      init({
+        message: errorMessage,
+        color: 'warning',
         title: 'Error',
       })
     })
@@ -98,61 +227,83 @@ onMounted(() => {
               <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
               <span class="ml-2 font-medium">KẾ HOẠCH ĐIỀU TRỊ</span>
             </div>
-            <VaButton color="primary"> Thêm kế hoạch điều trị </VaButton>
           </div>
         </template>
 
         <template #default>
           <VaInnerLoading :loading="loading">
             <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-              <!-- Treatment Plans Table -->
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Răng số</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tình trạng răng</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên thủ thuật</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">KH đồng ý</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">S.L</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đơn giá</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thành tiền</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giảm giá (%)</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tiền giảm giá</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng chi phí</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tình trạng</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-200">
-                    <tr v-for="plan in treatmentplans" :key="plan.treatmentPlanID">
-                      <td class="px-6 py-4 whitespace-nowrap">{{ plan.procedureID }}</td>
-                      <td class="px-6 py-4 whitespace-nowrap">-</td>
-                      <td class="px-6 py-4">{{ plan.procedureName }}</td>
-                      <td class="px-6 py-4">
-                        <VaCheckbox readonly />
-                      </td>
-                      <td class="px-6 py-4">{{ plan.step }}</td>
-                      <td class="px-6 py-4">{{ formatCurrency(plan.price) }}</td>
-                      <td class="px-6 py-4">{{ formatCurrency(plan.price * plan.step) }}</td>
-                      <td class="px-6 py-4">{{ ((plan.discountAmount / plan.price) * 100).toFixed(0) }}%</td>
-                      <td class="px-6 py-4">{{ formatCurrency(plan.discountAmount) }}</td>
-                      <td class="px-6 py-4">{{ formatCurrency(plan.planCost) }}</td>
-                      <td class="px-6 py-4">
-                        <span class="px-2 py-1 text-xs rounded-full" :class="getStatusClass(plan.status)">
-                          {{ getStatusText(plan.status) }}
-                        </span>
-                      </td>
-                      <td class="px-6 py-4">
-                        <div class="flex space-x-2">
-                          <VaButton icon="edit" color="primary" small />
-                          <VaButton icon="delete" color="danger" small />
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <VaDataTable
+                :items="treatmentplans"
+                :columns="columns"
+                striped
+                hoverable
+                :items-per-page="10"
+                :search="true"
+              >
+                <template #cell(price)="{ value }">
+                  {{ formatCurrency(value) }}
+                </template>
+                <template #cell(discountAmount)="{ value }"> {{ (value * 100).toFixed(0) }}% </template>
+                <template #cell(planCost)="{ value }">
+                  {{ formatCurrency(value) }}
+                </template>
+                <template #cell(startDate)="{ value, rowData }">
+                  {{ rowData.status === TreatmentPlanStatus.Pending ? 'N/A' : formatDate(value) }}
+                </template>
+                <template #cell(status)="{ value }">
+                  <VaChip
+                    :color="
+                      value === TreatmentPlanStatus.Completed
+                        ? 'success'
+                        : value === TreatmentPlanStatus.Active
+                          ? 'warning'
+                          : value === TreatmentPlanStatus.Cancelled
+                            ? 'danger'
+                            : value === TreatmentPlanStatus.Rescheduled
+                              ? 'info'
+                              : 'gray'
+                    "
+                  >
+                    {{ getStatusText(value) }}
+                  </VaChip>
+                </template>
+                <template #cell(action)="{ rowData }">
+                  <VaButton
+                    v-if="rowData.status === TreatmentPlanStatus.Active && isToday(rowData.startDate)"
+                    preset="primary"
+                    class="mr-6 mb-2"
+                    round
+                    border-color="primary"
+                    size="small"
+                    @click="handleTreatmentAction(rowData)"
+                  >
+                    Điều trị
+                  </VaButton>
+                  <VaButton
+                    v-else-if="rowData.status === TreatmentPlanStatus.Active && !isToday(rowData.startDate)"
+                    preset="primary"
+                    class="mr-6 mb-2"
+                    round
+                    border-color="primary"
+                    size="small"
+                    @click="handleTreatmentSchedule(rowData)"
+                  >
+                    Reschedule
+                  </VaButton>
+                  <VaButton
+                    v-else-if="rowData.status === TreatmentPlanStatus.Pending"
+                    preset="primary"
+                    class="mr-6 mb-2"
+                    round
+                    border-color="primary"
+                    size="small"
+                    @click="handleTreatmentDetails(rowData)"
+                  >
+                    Details
+                  </VaButton>
+                </template>
+              </VaDataTable>
 
               <!-- Summary Section -->
               <div class="mt-6 space-y-2">
@@ -175,24 +326,34 @@ onMounted(() => {
       </VaCollapse>
     </VaCardContent>
   </VaCard>
+  <!-- Add TreatmentDetail modal -->
+  <VaModal
+    v-model="showModalAddTreatment"
+    ok-text="Apply"
+    @close="handleCloseTreatmentDetail"
+    @ok="submitTreatmentDetail"
+  >
+    <h3 class="va-h3">Add Details Treatment</h3>
+    <VaCard>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <VaDateInput
+          v-model="date"
+          :format="formatDate"
+          :parse="parseDate"
+          manual-input
+          class="col-span-1"
+          label="Date"
+          clearable
+        />
+        <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
+        <VaTextarea v-model="notes" class="col-span-2" label="Notes" />
+      </div>
+    </VaCard>
+  </VaModal>
 </template>
 
 <style scoped>
 .va-inner-loading {
   min-height: 200px;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-th,
-td {
-  border: 1px solid var(--va-background-border);
-}
-
-thead {
-  background-color: var(--va-background-secondary);
 }
 </style>
