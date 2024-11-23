@@ -17,9 +17,9 @@ export const lineChartData: TLineChartData = {
   ],
   datasets: [
     {
-      label: 'Monthly Earnings',
+      label: 'Yearly Deposit',
       backgroundColor: 'rgba(75,192,192,0.4)',
-      data: [10, 35, 14, 17, 12, 40, 75, 55, 30, 51, 25, 7], // Random values
+      data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // Random values
     },
   ],
 }

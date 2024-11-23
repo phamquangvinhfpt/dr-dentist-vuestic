@@ -142,24 +142,19 @@
     "enter_occupation": "Nhập nghề nghiệp",
     "occupation_required": "Nghề nghiệp là bắt buộc"
   },
-
   "doctor": {
     "education": "Trình độ học vấn",
     "education_required": "Vui lòng nhập trình độ học vấn",
     "enter_education": "Nhập trình độ học vấn",
-
     "college": "Trường đào tạo",
     "college_required": "Vui lòng nhập trường đào tạo",
     "enter_college": "Nhập tên trường đào tạo",
-
     "certification": "Chứng chỉ",
     "certification_required": "Vui lòng nhập chứng chỉ",
     "enter_certification": "Nhập thông tin chứng chỉ",
-
     "years_of_experience": "Số năm kinh nghiệm",
     "experience_required": "Vui lòng nhập số năm kinh nghiệm",
     "enter_years_of_experience": "Nhập số năm kinh nghiệm",
-
     "self_description": "Mô tả bản thân",
     "description_required": "Vui lòng nhập mô tả bản thân",
     "enter_self_description": "Nhập mô tả về bản thân của bạn"
@@ -325,9 +320,17 @@
     "versions": "Phiên bản",
     "setupRemoteConnections": "Thiết lập kết nối từ xa",
     "currentVisitors": "Khách truy cập hiện tại",
-    "navigationLayout": "bố cục điều hướng",
+    "navigationLayout": "Bố cục điều hướng",
     "topBarButton": "Thanh trên",
-    "sideBarButton": "Thanh bên"
+    "sideBarButton": "Thanh bên",
+    "revenue_report": "Báo cáo doanh thu",
+    "total_earnings": "Tổng thu nhập",
+    "earnings_this_month": "Thu nhập tháng này",
+    "export": "Xuất dữ liệu",
+    "yearly_deposit": "Tiền cọc hàng năm",
+    "yearly_revenue": "Doanh thu hàng năm",
+    "monthly_revenue": "Doanh thu hàng tháng",
+    "last_month": "Tháng trước"
   },
   "language": {
     "english": "Tiếng Anh",

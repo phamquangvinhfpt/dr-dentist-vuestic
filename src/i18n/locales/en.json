@@ -151,19 +151,15 @@
     "education": "Education Level",
     "education_required": "Please enter your education level",
     "enter_education": "Enter your education level",
-
     "college": "Institution",
     "college_required": "Please enter your institution",
     "enter_college": "Enter your institution name",
-
     "certification": "Certification",
     "certification_required": "Please enter your certification",
     "enter_certification": "Enter your certification details",
-
     "years_of_experience": "Years of Experience",
     "experience_required": "Please enter your years of experience",
     "enter_years_of_experience": "Enter your years of experience",
-
     "self_description": "Professional Summary",
     "description_required": "Please enter your professional summary",
     "enter_self_description": "Enter a brief description about yourself"
@@ -331,7 +327,15 @@
     "currentVisitors": "Current Visitors",
     "navigationLayout": "navigation layout",
     "topBarButton": "Top Bar",
-    "sideBarButton": "Side Bar"
+    "sideBarButton": "Side Bar",
+    "revenue_report": "Revenue Report",
+    "total_earnings": "Total earnings",
+    "earnings_this_month": "Earnings this month",
+    "export": "Export",
+    "yearly_deposit": "Yearly Deposit",
+    "yearly_revenue": "Yearly Revenue",
+    "monthly_revenue": "Monthly Revenue",
+    "last_month": "Last Month"
   },
   "language": {
     "brazilian_portuguese": "Português",
