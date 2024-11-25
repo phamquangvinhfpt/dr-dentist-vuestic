@@ -41,5 +41,27 @@ export const useDashboardStore = defineStore('Dashboard', {
         return await Promise.reject(error)
       }
     },
+    async getChartMemberGrowth(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getChartMemberGrowth(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getRateDoctor(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getRateDoctor(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })
