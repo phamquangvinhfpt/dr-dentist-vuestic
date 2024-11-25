@@ -125,9 +125,10 @@ const dashboardMetrics = computed<DashboardMetric[]>(() => [
     iconBackground: getColor('success'),
     iconColor: getColor('on-success'),
   },
+  // Fake data
   {
     id: 'ongoingProjects',
-    title: 'Ongoing project',
+    title: 'Booking services',
     value: '15',
     icon: 'mso-folder_open',
     changeText: '25.36%',
@@ -147,6 +148,7 @@ const dashboardMetrics = computed<DashboardMetric[]>(() => [
     iconBackground: getColor('danger'),
     iconColor: getColor('on-danger'),
   },
+  // Fake data
   {
     id: 'newProfit',
     title: 'New profit',

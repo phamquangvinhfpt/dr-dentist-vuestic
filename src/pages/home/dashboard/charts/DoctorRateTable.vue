@@ -5,6 +5,7 @@ import { useDashboardStore } from '@/stores/modules/dashboard.module'
 const dashboardStore = useDashboardStore()
 
 const columns = defineVaDataTableColumns([
+  { label: 'Avatar', key: 'avatar', sortable: false },
   { label: 'Name', key: 'doctorName', sortable: true },
   { label: 'Rating', key: 'totalRating', sortable: true },
 ])
@@ -41,6 +42,11 @@ const pages = computed(() => Math.ceil(doctorData.value.length / 5))
                 </div>
               </td>
             </tr>
+          </template>
+          <template #cell(avatar)="{ row }">
+            <VaAvatar>
+              {{ row?.rowData?.doctorName?.charAt(0) }}
+            </VaAvatar>
           </template>
         </VaDataTable>
       </div>
