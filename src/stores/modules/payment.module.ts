@@ -17,5 +17,16 @@ export const usePaymentStore = defineStore('payment', {
         return await Promise.reject(error)
       }
     },
+    async getAllPayments(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await paymentService.getAllPayments()
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

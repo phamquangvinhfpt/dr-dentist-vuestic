@@ -209,5 +209,29 @@ export const useUserProfileStore = defineStore('userProfile', {
         return await Promise.reject(error)
       }
     },
+
+    async getAllPatients(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.getAllPatients()
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+
+    async getAllDoctors(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.getAllDoctors()
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

@@ -11,6 +11,14 @@ export type UserDetail = {
   imageUrl: string | null
   birthDate: string | null
   gender: boolean
+  doctorProfile?: {
+    doctorID: string
+    education: string
+    college: string
+    certification: string
+    yearOfExp: string
+    seftDescription: string
+  }
 }
 
 export type SettingProfile = {
@@ -109,7 +117,11 @@ export interface Doctor {
   specialty: string
   experience: string
   image?: string
-  rating?: number
+  rating: number
+  doctorProfile?: {
+    specialty?: string
+    yearOfExp?: number
+  }
 }
 
 export interface DoctorApiResponse {

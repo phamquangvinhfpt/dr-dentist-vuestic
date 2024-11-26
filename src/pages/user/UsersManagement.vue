@@ -12,7 +12,7 @@ const router = useRouter()
 
 const formData = reactive({
   pageNumber: 1,
-  pageSize: 10,
+  pageSize: 7,
   isActive: true,
   orderBy: [],
 })
@@ -55,6 +55,19 @@ const columns = computed(() => [
 onMounted(() => {
   getAllUserPagination()
 })
+
+const updateUser = () => {
+  // Logic to update the user
+}
+
+const deleteUser = () => {
+  // Logic to delete the user
+}
+
+const handlePageChange = (newPage: number) => {
+  formData.pageNumber = newPage // Update the current page number
+  getAllUserPagination() // Fetch users for the new page
+}
 </script>
 <template>
   <!-- <div class="grid sm:grid-cols-2 md:grid-cols-5 gap-6 mb-6">
@@ -128,12 +141,29 @@ onMounted(() => {
       </div>
     </template>
     <template #cell(action)="{ row }">
-      <VaButton
-        color="info"
-        class="mr-6 mb-2 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300"
-        @click="viewDetails(row.rowData.id)"
-        >Detail</VaButton
-      >
+      <div class="flex space-x-2">
+        <VaButton
+          color="info"
+          class="mr-2 transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300"
+          @click="viewDetails(row.rowData.id)"
+        >
+          Detail
+        </VaButton>
+        <VaButton
+          color="warning"
+          class="mr-2 transition ease-in-out delay-150 bg-yellow-500 hover:-translate-y-1 hover:scale-110 hover:bg-yellow-600 duration-300"
+          @click="updateUser()"
+        >
+          Update
+        </VaButton>
+        <VaButton
+          color="danger"
+          class="transition ease-in-out delay-150 bg-red-500 hover:-translate-y-1 hover:scale-110 hover:bg-red-600 duration-300"
+          @click="deleteUser()"
+        >
+          Delete
+        </VaButton>
+      </div>
     </template>
   </VaDataTable>
   <VaCardContent>
@@ -141,16 +171,17 @@ onMounted(() => {
       <div>
         <b>{{ userListResponse.totalCount }} {{ 'Result' }}.</b>
         {{ 'Result per page' }}
-        <VaSelect v-model="formData.pageSize" class="!w-20" :options="[10, 50, 100]" />
+        <VaSelect v-model="formData.pageSize" class="!w-20" :options="[7, 10, 50, 100]" />
       </div>
       <div v-if="userListResponse.totalPages > 1" class="flex">
         <VaPagination
-          v-model="userListResponse.currentPage"
+          v-model="formData.pageNumber"
           buttons-preset="secondary"
           :pages="userListResponse.totalPages"
           :visible-pages="5"
           :boundary-links="true"
           :direction-links="true"
+          @update:modelValue="handlePageChange"
         />
       </div>
     </div>

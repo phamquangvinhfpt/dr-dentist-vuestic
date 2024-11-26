@@ -19,6 +19,7 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false
+        console.error('Store error:', error)
         return await Promise.reject(error)
       }
     },
@@ -27,7 +28,7 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         this.isLoading = true
         const response = await doctorService.getTopDoctors()
         this.isLoading = false
-        this.doctors = [...response.data.data]
+        this.doctors = [...response.data]
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false
@@ -50,6 +51,35 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         this.isLoading = true
         const response = await doctorService.getDoctorDetail(id)
         this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async updateDoctor(id: string, doctorData: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.updateDoctor(id, doctorData)
+        this.isLoading = false
+        // Optionally update the local state with the updated doctor
+        const index = this.doctors.findIndex((doctor) => doctor.id === id)
+        if (index !== -1) {
+          this.doctors[index] = { ...this.doctors[index], ...doctorData }
+        }
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async deleteDoctor(id: string): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.toggleDoctorStatus(id, { isActive: false })
+        this.isLoading = false
+        // Optionally remove the doctor from the local state
+        this.doctors = this.doctors.filter((doctor) => doctor.id !== id)
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false
@@ -84,7 +114,7 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         this.isLoading = true
         const response = await doctorService.createDoctor(doctorData)
         this.isLoading = false
-        await this.getDoctors({})
+        await this.getDoctors(null)
         return response
       } catch (error) {
         this.isLoading = false
