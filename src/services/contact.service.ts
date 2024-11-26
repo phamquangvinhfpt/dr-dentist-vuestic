@@ -11,6 +11,17 @@ class ContactService {
         return Promise.reject(error)
       })
   }
+
+  async getContacts(): Promise<any> {
+    return apiService
+      .get(`/customercontact/get-all`)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new ContactService()

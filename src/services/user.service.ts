@@ -213,5 +213,27 @@ class UserService {
         return Promise.reject(error)
       })
   }
+
+  async getAllPatients(): Promise<any> {
+    return apiService
+      .post(`/users/get-patients`, {})
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  async getAllDoctors(): Promise<any> {
+    return apiService
+      .get(`/users/get-doctors`)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 export default new UserService()

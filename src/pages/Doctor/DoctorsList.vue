@@ -33,7 +33,7 @@ const toggleActionBar = (doctorId: string) => {
 const getAllDoctors = async () => {
   try {
     console.log('Fetching doctors...')
-    const res = await userStore.getDoctors({})
+    const res = await userStore.getDoctors({ isActive: true })
     console.log('Response:', res)
 
     userList.value = Array.isArray(res) ? res : res?.data ?? []
@@ -74,6 +74,30 @@ const paginatedDoctors = computed(() => {
   const end = start + itemsPerPage.value
   return filteredDoctors.value.slice(start, end)
 })
+
+const deleteDoctor = async (id: string, event?: Event) => {
+  if (event) {
+    event.stopPropagation()
+  }
+  try {
+    await userStore.deleteDoctor(id) // Call the delete function from the store
+    console.log(`Doctor with ID ${id} has been deleted.`)
+    // Optionally refresh the doctor list
+    await getAllDoctors()
+  } catch (error) {
+    console.error('Error deleting doctor:', error)
+  }
+}
+
+const updateDoctor = (id: string, event?: Event) => {
+  if (event) {
+    event.stopPropagation()
+  }
+  router.push({
+    name: 'doctor-update',
+    params: { id },
+  })
+}
 
 onMounted(() => {
   getAllDoctors()
@@ -149,7 +173,21 @@ watch(currentPage, () => {
               class="bg-gray-50/80 px-6 py-4 border-t border-gray-200 backdrop-blur-sm shadow-inner relative"
             >
               <div class="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
-              <div class="flex justify-end relative z-10">
+              <div class="flex justify-end gap-3 relative z-10">
+                <VaButton color="danger" @click="deleteDoctor(doctor.id, $event)">
+                  <template #prepend>
+                    <i class="mdi mdi-delete mr-2"></i>
+                  </template>
+                  {{ t('delete') }}
+                </VaButton>
+
+                <VaButton color="warning" @click="updateDoctor(doctor.id, $event)">
+                  <template #prepend>
+                    <i class="mdi mdi-pencil mr-2"></i>
+                  </template>
+                  {{ t('update') }}
+                </VaButton>
+
                 <VaButton color="primary" @click="viewDetails(doctor.id, $event)">
                   <template #prepend>
                     <i class="mdi mdi-open-in-new mr-2"></i>

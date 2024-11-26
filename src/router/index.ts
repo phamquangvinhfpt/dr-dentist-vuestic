@@ -249,6 +249,42 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: () => import('../pages/MedicalRecordForPatient/MedicalRecordForPatient.vue'),
       },
+      {
+        name: 'staff-dashboard',
+        path: 'staff-dashboard',
+        meta: {
+          requiresAuth: true,
+          roles: ['staff', 'admin'],
+        },
+        component: () => import('../pages/home/dashboard/DashboardStaff.vue'),
+      },
+      {
+        name: 'contact-requests',
+        path: 'contact-requests',
+        meta: {
+          requiresAuth: true,
+          roles: ['staff', 'admin'],
+        },
+        component: () => import('../pages/Staff/Contact.vue'),
+      },
+      {
+        name: 'doctors-for-staff',
+        path: 'staff/doctors',
+        meta: {
+          requiresAuth: true,
+          roles: ['staff', 'admin'],
+          title: 'Doctors Management',
+        },
+        component: () => import('../pages/Staff/DoctorListForStaff.vue'),
+      },
+      {
+        path: 'doctor/rating',
+        name: 'ratingDoctor',
+        component: () => import('@/pages/Doctor/RatingDoctor.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
     ],
   },
   {

@@ -28,7 +28,6 @@ interface DoctorForm {
   experience: number
   qualification: string
   consultationFee: number
-  availableTime: string
   description: string
 }
 
@@ -49,11 +48,52 @@ const doctor = reactive<DoctorForm>({
   experience: 0,
   qualification: '',
   consultationFee: 0,
-  availableTime: '',
   description: '',
 })
 
-const errors = reactive<Record<string, string>>({})
+interface ValidationState {
+  error: boolean
+  message: string
+}
+
+interface FormErrors {
+  firstName: ValidationState
+  lastName: ValidationState
+  email: ValidationState
+  password: ValidationState
+  confirmPassword: ValidationState
+  phoneNumber: ValidationState
+  userName: ValidationState
+  birthDate: ValidationState
+  gender: ValidationState
+  description: ValidationState
+  experience: ValidationState
+  address: ValidationState
+  consultationFee: ValidationState
+  specialization: ValidationState
+  qualification: ValidationState
+  // ... add other fields as needed
+}
+
+const errors = reactive<FormErrors>({
+  firstName: { error: false, message: '' },
+  lastName: { error: false, message: '' },
+  email: { error: false, message: '' },
+  password: { error: false, message: '' },
+  confirmPassword: { error: false, message: '' },
+  phoneNumber: { error: false, message: '' },
+  userName: { error: false, message: '' },
+  birthDate: { error: false, message: '' },
+  gender: { error: false, message: '' },
+  description: { error: false, message: '' },
+  experience: { error: false, message: '' },
+  address: { error: false, message: '' },
+  consultationFee: { error: false, message: '' },
+  specialization: { error: false, message: '' },
+  qualification: { error: false, message: '' },
+  // ... initialize other fields
+})
+
 const isSubmitting = ref(false)
 const showConfirmation = ref(false)
 const avatarPreview = ref<string | null>(null)
@@ -72,101 +112,104 @@ const validFields = reactive<Record<string, boolean>>({
 
 const validateEmail = (email: string) => {
   if (!email?.trim()) {
-    errors.email = 'Email is required'
+    errors.email = { error: true, message: 'Email is required' }
     validFields.email = false
     return false
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = 'Invalid email format'
+    errors.email = { error: true, message: 'Invalid email format' }
     validFields.email = false
     return false
   }
-  errors.email = ''
+  errors.email = { error: false, message: '' }
   validFields.email = true
   return true
 }
 
 const validatePassword = (password: string) => {
   if (!password) {
-    errors.password = 'Password is required'
+    errors.password = { error: true, message: 'Password is required' }
     validFields.password = false
     return false
   }
 
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/
   if (!passwordRegex.test(password)) {
-    errors.password =
-      'Password must be at least 8 characters and include: 1 number, 1 lowercase letter, 1 uppercase letter, and 1 special character'
+    errors.password = {
+      error: true,
+      message:
+        'Password must be at least 8 characters and include: 1 number, 1 lowercase letter, 1 uppercase letter, and 1 special character',
+    }
     validFields.password = false
     return false
   }
 
-  errors.password = ''
+  errors.password = { error: false, message: '' }
   validFields.password = true
   return true
 }
 
 const validateConfirmPassword = () => {
   if (!doctor.confirmPassword) {
-    errors.confirmPassword = 'Please confirm your password'
+    errors.confirmPassword = { error: true, message: 'Please confirm your password' }
     validFields.confirmPassword = false
     return false
   }
   if (doctor.password !== doctor.confirmPassword) {
-    errors.confirmPassword = 'Passwords do not match'
+    errors.confirmPassword = { error: true, message: 'Passwords do not match' }
     validFields.confirmPassword = false
     return false
   }
-  errors.confirmPassword = ''
+  errors.confirmPassword = { error: false, message: '' }
   validFields.confirmPassword = true
   return true
 }
 
 const validatePhoneNumber = (phone: string) => {
   if (!phone) {
-    errors.phoneNumber = 'Phone number is required'
+    errors.phoneNumber = { error: true, message: 'Phone number is required' }
     validFields.phoneNumber = false
     return false
   }
   if (!/^\d{10,}$/.test(phone)) {
-    errors.phoneNumber = 'Phone number must contain at least 10 digits only'
+    errors.phoneNumber = { error: true, message: 'Phone number must contain at least 10 digits only' }
     validFields.phoneNumber = false
     return false
   }
-  errors.phoneNumber = ''
+  errors.phoneNumber = { error: false, message: '' }
   validFields.phoneNumber = true
   return true
 }
 
 const validateUserName = (userName: string) => {
   if (!userName) {
-    errors.userName = 'Username is required'
+    errors.userName = { error: true, message: 'Username is required' }
     validFields.userName = false
     return false
   }
-  errors.userName = ''
+  errors.userName = { error: false, message: '' }
   validFields.userName = true
   return true
 }
 
 const validateFirstName = (firstName: string) => {
-  if (!firstName) {
-    errors.firstName = 'First name is required'
+  if (!firstName?.trim()) {
+    errors.firstName = { error: true, message: 'First name is required' }
     validFields.firstName = false
     return false
   }
-  errors.firstName = ''
+  errors.firstName = { error: false, message: '' }
   validFields.firstName = true
   return true
 }
 
 const validateLastName = (lastName: string) => {
-  if (!lastName) {
-    errors.lastName = 'Last name is required'
+  if (!lastName?.trim()) {
+    errors.lastName = { error: true, message: 'Last name is required' }
     validFields.lastName = false
     return false
   }
-  errors.lastName = ''
+  errors.lastName = { error: false, message: '' }
   validFields.lastName = true
   return true
 }
@@ -175,7 +218,7 @@ watch(
   () => doctor.email,
   (newValue) => {
     if (validateEmail(newValue)) {
-      errors.email = ''
+      errors.email = { error: false, message: '' }
     }
   },
 )
@@ -184,7 +227,7 @@ watch(
   () => doctor.password,
   (newValue) => {
     if (validatePassword(newValue)) {
-      errors.password = ''
+      errors.password = { error: false, message: '' }
     }
     if (doctor.confirmPassword) {
       validateConfirmPassword()
@@ -196,7 +239,7 @@ watch(
   () => doctor.confirmPassword,
   () => {
     if (validateConfirmPassword()) {
-      errors.confirmPassword = ''
+      errors.confirmPassword = { error: false, message: '' }
     }
   },
 )
@@ -205,7 +248,7 @@ watch(
   () => doctor.phoneNumber,
   (newValue) => {
     if (validatePhoneNumber(newValue)) {
-      errors.phoneNumber = ''
+      errors.phoneNumber = { error: false, message: '' }
     }
   },
 )
@@ -213,11 +256,7 @@ watch(
 watch(
   () => doctor.birthDate,
   (newValue) => {
-    if (!newValue) {
-      errors.birthDate = 'Birth date is required'
-    } else {
-      errors.birthDate = ''
-    }
+    validateAge(newValue)
   },
 )
 
@@ -225,7 +264,7 @@ watch(
   () => doctor.userName,
   (newValue) => {
     if (validateUserName(newValue)) {
-      errors.userName = ''
+      errors.userName = { error: false, message: '' }
     }
   },
 )
@@ -234,7 +273,7 @@ watch(
   () => doctor.firstName,
   (newValue) => {
     if (validateFirstName(newValue)) {
-      errors.firstName = ''
+      errors.firstName = { error: false, message: '' }
     }
   },
 )
@@ -243,7 +282,7 @@ watch(
   () => doctor.lastName,
   (newValue) => {
     if (validateLastName(newValue)) {
-      errors.lastName = ''
+      errors.lastName = { error: false, message: '' }
     }
   },
 )
@@ -367,21 +406,24 @@ const genderOptions = [
 const validateForm = () => {
   let isValid = true
 
-  // Add validation for required fields
   if (!doctor.userName) {
-    errors.userName = 'Username is required'
+    errors.userName = { error: true, message: 'Username is required' }
     isValid = false
   }
   if (!doctor.birthDate) {
-    errors.birthDate = 'Birth date is required'
+    errors.birthDate = { error: true, message: 'Birth date is required' }
     isValid = false
   }
   if (doctor.gender === null) {
-    errors.gender = 'Please select a gender'
+    errors.gender = { error: true, message: 'Please select a gender' }
     isValid = false
   }
 
-  return isValid && Object.values(errors).every((error) => error === '')
+  if (!validateAge(doctor.birthDate)) {
+    isValid = false
+  }
+
+  return isValid && Object.values(errors).every((error) => !error.error)
 }
 
 // Update watch handlers to trigger on blur
@@ -405,6 +447,47 @@ const handleBlur = (field: string, value: any) => {
     // Add cases for other fields...
   }
 }
+
+// Add this validation function
+const validateAge = (birthDate: string): boolean => {
+  if (!birthDate) {
+    errors.birthDate = { error: true, message: 'Birth date is required' }
+    return false
+  }
+
+  const today = new Date()
+  const birth = new Date(birthDate)
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+
+  if (age < 25) {
+    errors.birthDate = { error: true, message: 'Doctor must be at least 25 years old' }
+    return false
+  }
+
+  errors.birthDate = { error: false, message: '' }
+  return true
+}
+
+const validateSpecialization = (specialization: string) => {
+  if (!specialization?.trim()) {
+    errors.specialization = { error: true, message: 'Specialization is required' }
+    return false
+  }
+  errors.specialization = { error: false, message: '' }
+  return true
+}
+
+watch(
+  () => doctor.specialization,
+  (newValue) => {
+    validateSpecialization(newValue)
+  },
+)
 </script>
 
 <template>
@@ -440,17 +523,11 @@ const handleBlur = (field: string, value: any) => {
             <VaInput
               v-model="doctor.firstName"
               label="First Name"
-              :error="errors.firstName"
-              :success="!errors.firstName && validFields.firstName"
-              :class="{
-                'input-success': !errors.firstName && validFields.firstName,
-                'input-error': errors.firstName,
-              }"
+              :error="errors.firstName.error"
+              :error-messages="errors.firstName.message"
+              :success="validFields.firstName"
               @blur="validateFirstName(doctor.firstName)"
             />
-            <div v-if="errors.firstName" class="error-message">
-              {{ errors.firstName }}
-            </div>
           </div>
 
           <!-- Last Name Input -->
@@ -458,17 +535,11 @@ const handleBlur = (field: string, value: any) => {
             <VaInput
               v-model="doctor.lastName"
               label="Last Name"
-              :error="errors.lastName"
-              :success="!errors.lastName && validFields.lastName"
-              :class="{
-                'input-success': !errors.lastName && validFields.lastName,
-                'input-error': errors.lastName,
-              }"
+              :error="errors.lastName.error"
+              :error-messages="errors.lastName.message"
+              :success="validFields.lastName"
               @blur="validateLastName(doctor.lastName)"
             />
-            <div v-if="errors.lastName" class="error-message">
-              {{ errors.lastName }}
-            </div>
           </div>
 
           <!-- Username Input -->
@@ -476,30 +547,22 @@ const handleBlur = (field: string, value: any) => {
             <VaInput
               v-model="doctor.userName"
               label="Username"
-              :error="errors.userName"
-              :success="!errors.userName && validFields.userName"
-              :class="{
-                'input-success': !errors.userName && validFields.userName,
-                'input-error': errors.userName,
-              }"
+              :error="errors.userName.error"
+              :error-messages="errors.userName.message"
+              :success="validFields.userName"
               @blur="validateUserName(doctor.userName)"
             />
-            <div v-if="errors.userName" class="error-message">
-              {{ errors.userName }}
-            </div>
           </div>
 
           <div class="input-group">
             <VaInput
               v-model="doctor.email"
               label="Email"
-              :error="errors.email"
-              :success="!errors.email && validFields.email"
-              @blur="handleBlur('email', doctor.email)"
+              :error="errors.email.error"
+              :error-messages="errors.email.message"
+              :success="validFields.email"
+              @blur="validateEmail(doctor.email)"
             />
-            <div v-if="errors.email" class="error-message">
-              {{ errors.email }}
-            </div>
           </div>
 
           <div class="input-group">
@@ -507,13 +570,11 @@ const handleBlur = (field: string, value: any) => {
               v-model="doctor.password"
               label="Password"
               type="password"
-              :error="errors.password"
-              :success="!errors.password && validFields.password"
+              :error="errors.password.error"
+              :error-messages="errors.password.message"
+              :success="validFields.password"
               @blur="handleBlur('password', doctor.password)"
             />
-            <div v-if="errors.password" class="error-message">
-              {{ errors.password }}
-            </div>
           </div>
 
           <div class="input-group">
@@ -521,13 +582,11 @@ const handleBlur = (field: string, value: any) => {
               v-model="doctor.confirmPassword"
               label="Confirm Password"
               type="password"
-              :error="errors.confirmPassword"
-              :success="!errors.confirmPassword && validFields.confirmPassword"
+              :error="errors.confirmPassword.error"
+              :error-messages="errors.confirmPassword.message"
+              :success="validFields.confirmPassword"
               @blur="validateConfirmPassword"
             />
-            <div v-if="errors.confirmPassword" class="error-message">
-              {{ errors.confirmPassword }}
-            </div>
           </div>
 
           <!-- Phone Number Input -->
@@ -535,20 +594,14 @@ const handleBlur = (field: string, value: any) => {
             <VaInput
               v-model="doctor.phoneNumber"
               label="Phone Number"
-              :error="errors.phoneNumber"
-              :success="!errors.phoneNumber && validFields.phoneNumber"
-              :class="{
-                'input-success': !errors.phoneNumber && validFields.phoneNumber,
-                'input-error': errors.phoneNumber,
-              }"
+              :error="errors.phoneNumber.error"
+              :error-messages="errors.phoneNumber.message"
+              :success="validFields.phoneNumber"
               @blur="validatePhoneNumber(doctor.phoneNumber)"
             />
-            <div v-if="errors.phoneNumber" class="error-message">
-              {{ errors.phoneNumber }}
-            </div>
           </div>
 
-          <VaInput v-model="doctor.address" label="Address" :error="errors.address" />
+          <VaInput v-model="doctor.address" label="Address" :error="errors.address.error" />
 
           <div class="va-input">
             <label
@@ -560,17 +613,18 @@ const handleBlur = (field: string, value: any) => {
               v-model="doctor.birthDate"
               type="date"
               class="va-input__input w-full px-3 py-2 border rounded-md"
-              :max="new Date().toISOString().split('T')[0]"
+              :max="new Date(new Date().setFullYear(new Date().getFullYear() - 25)).toISOString().split('T')[0]"
               style="height: 40px; color: var(--va-text-primary); background-color: var(--va-background-primary)"
             />
-            <span v-if="errors.birthDate" class="va-input__error">{{ errors.birthDate }}</span>
+            <span v-if="errors.birthDate.error" class="va-input__error">{{ errors.birthDate.message }}</span>
           </div>
 
           <VaSelect
             v-model="doctor.gender"
             label="Gender"
             :options="genderOptions"
-            :error="errors.gender"
+            :error="errors.gender.error"
+            :error-messages="errors.gender.message"
             @update:modelValue="validateForm"
           />
         </div>
@@ -579,34 +633,39 @@ const handleBlur = (field: string, value: any) => {
         <div class="space-y-4">
           <h3 class="text-lg font-semibold mb-4">Professional Information</h3>
 
-          <VaInput v-model="doctor.specialization" label="Specialization" :error="errors.specialization" />
+          <VaInput
+            v-model="doctor.specialization"
+            label="Specialization"
+            :error="errors.specialization.error"
+            :error-messages="errors.specialization.message"
+            @blur="validateSpecialization(doctor.specialization)"
+          />
 
           <VaInput
             v-model.number="doctor.experience"
             label="Years of Experience"
             type="number"
             min="0"
-            :error="errors.experience"
+            :error="errors.experience.error"
           />
 
-          <VaInput v-model="doctor.qualification" label="Qualification" :error="errors.qualification" />
+          <VaInput v-model="doctor.qualification" label="Qualification" :error="errors.qualification.error" />
 
           <VaInput
             v-model.number="doctor.consultationFee"
             label="Consultation Fee"
             type="number"
             min="0"
-            :error="errors.consultationFee"
+            :error="errors.consultationFee.error"
           />
 
-          <VaInput
-            v-model="doctor.availableTime"
-            label="Available Time"
-            placeholder="e.g., Mon-Fri 9:00-17:00"
-            :error="errors.availableTime"
+          <VaTextarea
+            v-model="doctor.description"
+            label="Description"
+            :error="errors.description.error"
+            :error-messages="errors.description.message"
+            rows="4"
           />
-
-          <VaTextarea v-model="doctor.description" label="Description" :error="errors.description" rows="4" />
         </div>
       </div>
 

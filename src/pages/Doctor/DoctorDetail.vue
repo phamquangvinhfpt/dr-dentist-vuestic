@@ -59,27 +59,30 @@
         <dl class="sm:divide-y sm:divide-gray-200">
           <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Education</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile?.education }}</dd>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile.education }}</dd>
           </div>
           <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">College</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile?.college }}</dd>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile.college }}</dd>
           </div>
           <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Certification</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile?.certification }}</dd>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile.certification }}</dd>
           </div>
           <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Years of Experience</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile?.yearOfExp }}</dd>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ doctor.doctorProfile.yearOfExp }}</dd>
           </div>
           <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Self Description</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {{ doctor.doctorProfile?.seftDescription }}
+              {{ doctor.doctorProfile.seftDescription || 'No description available.' }}
             </dd>
           </div>
         </dl>
+      </div>
+      <div v-else class="border-t border-gray-200 px-4 py-5 sm:p-0">
+        <p class="text-gray-500">No profile information available for this doctor.</p>
       </div>
 
       <div v-if="doctor.medicalHistory?.medicalName?.length" class="px-4 py-5 sm:px-6">
@@ -127,6 +130,11 @@ onMounted(async () => {
     const id = route.params.id as string
     const response = await doctorStore.getDoctorDetail(id)
     doctor.value = response
+    if (response.doctorProfile) {
+      console.log('Doctor Profile:', response.doctorProfile)
+    } else {
+      console.warn('Doctor Profile not found in response')
+    }
   } catch (error) {
     console.error('Error fetching doctor data:', error)
   }

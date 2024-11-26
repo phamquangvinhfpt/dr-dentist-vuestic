@@ -12,21 +12,33 @@
           :alt="doctor.name"
           class="w-full h-48 object-cover object-center"
         />
-        <div
-          v-if="doctor.rating"
-          class="absolute top-2 right-2 bg-white rounded-full px-2 py-1 text-sm font-medium text-gray-700"
-        >
-          <div class="flex items-center">
-            <span class="ml-1">{{ doctor.rating }}</span>
-          </div>
-        </div>
       </div>
-      <div class="p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ doctor.name }}</h2>
-        <p class="text-gray-600 mb-2">{{ doctor.specialty }}</p>
-        <div class="flex items-center mb-2">
-          <span class="text-gray-600">Experience:</span>
-          <span class="ml-2 font-medium">{{ doctor.experience }}</span>
+      <div class="flex">
+        <!-- Left side -->
+        <div class="p-4 flex-1">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ doctor.name }}</h2>
+          <p class="text-gray-600 mb-2">{{ doctor.specialty }}</p>
+        </div>
+
+        <!-- Right side -->
+        <div class="p-4 flex-1 border-l">
+          <div class="flex items-center mb-2">
+            <div class="flex items-center">
+              <span v-for="i in 5" :key="i" class="text-xl">
+                <span
+                  class="material-symbols-outlined"
+                  :class="i <= Math.round(doctor.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
+                >
+                  star
+                </span>
+              </span>
+            </div>
+          </div>
+          <p class="text-lg font-semibold text-gray-700">{{ (doctor.rating ?? 0).toFixed(1) }}</p>
+          <div class="flex items-center">
+            <span class="text-gray-600">Experience:</span>
+            <span class="ml-2 font-medium">{{ doctor.experience }}</span>
+          </div>
         </div>
       </div>
     </div>

@@ -17,5 +17,16 @@ export const useContactStore = defineStore('contact', {
         return await Promise.reject(error)
       }
     },
+    async getContacts(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await contactService.getContacts()
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })
