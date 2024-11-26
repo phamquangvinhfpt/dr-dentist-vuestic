@@ -4,20 +4,22 @@
       <h1 class="card-title text-tag text-secondary font-bold uppercase">{{ t('dashboard.monthly_revenue') }}</h1>
     </VaCardTitle>
     <VaCardContent>
-      <div class="p-1 bg-black rounded absolute right-4 top-4">
-        <VaIcon name="mso-attach_money" color="#fff" size="large" />
-      </div>
-      <section>
-        <div class="text-xl font-bold mb-2">{{ formatMoney(total) }}</div>
-        <p class="text-xs text-success">
-          <VaIcon name="arrow_upward" />
-          {{ percentage }}%
-          <span class="text-secondary"> {{ t('dashboard.last_month') }}</span>
-        </p>
-      </section>
-      <div class="w-full flex items-center">
-        <VaChart :data="chartData" class="h-24" type="line" :options="options" />
-      </div>
+      <VaInnerLoading :loading="!dataReady">
+        <div class="p-1 bg-black rounded absolute right-4 top-4">
+          <VaIcon name="mso-attach_money" color="#fff" size="large" />
+        </div>
+        <section>
+          <div class="text-xl font-bold mb-2">{{ formatMoney(total) }}</div>
+          <p class="text-xs text-success">
+            <VaIcon name="arrow_upward" />
+            {{ percentage }}%
+            <span class="text-secondary"> {{ t('dashboard.last_month') }}</span>
+          </p>
+        </section>
+        <div class="w-full flex items-center">
+          <VaChart :data="chartData" class="h-24" type="line" :options="options" />
+        </div>
+      </VaInnerLoading>
     </VaCardContent>
   </VaCard>
 </template>
@@ -80,18 +82,19 @@ const chartData = ref<TLineChartData>(chartDataA.value)
 // compared to last month
 const percentage = ref(0)
 const total = ref(0)
+const dataReady = ref(false)
 
 dashboardStore.getChartRevenue({ start: startYear, end: endYear }).then((res) => {
   const data = res as DataEntry[]
   chartData.value.datasets = transformData(data).datasets
   chartData.value.labels = transformData(data).labels
-  console.log(chartData)
   // calculate percentage
   const currentDayNumber = new Date().getDate()
   const currentDayTotal = chartData.value.datasets[0].data[currentDayNumber - 1]
   const lastDayTotal = chartData.value.datasets[0].data[currentDayNumber - 2]
   total.value = currentDayTotal
   percentage.value = ((currentDayTotal - lastDayTotal) / lastDayTotal) * 100 || 0
+  dataReady.value = true
 })
 
 const options: ChartOptions<'line'> = {

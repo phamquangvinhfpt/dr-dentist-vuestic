@@ -6,10 +6,12 @@ import RevenueUpdates from './charts/RevenueReport.vue'
 import YearlyBreakup from './charts/YearlyBreakup.vue'
 import MonthlyEarnings from './charts/MonthlyEarnings.vue'
 import ServiceReport from './charts/ServiceReport.vue'
+import DataSection from './DataSection.vue'
+import DoctorRateTable from './charts/DoctorRateTable.vue'
+import BookingAna from './charts/BookingAna.vue'
 
 const authStore = useAuthStore()
 const isPatient = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)
-console.log('isPatient', isPatient)
 </script>
 
 <template>
@@ -25,6 +27,11 @@ console.log('isPatient', isPatient)
           <YearlyBreakup class="h-full" />
           <MonthlyEarnings />
         </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-6 gap-4">
+        <DataSection class="col-span-2" />
+        <BookingAna class="col-span-2" />
+        <DoctorRateTable class="col-span-2" />
       </div>
       <ServiceReport class="w-full" />
     </section>

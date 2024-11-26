@@ -19,9 +19,11 @@
     <!-- Nội dung của card -->
     <VaCardContent class="flex flex-col-reverse md:flex-row md:items-center justify-between gap-5 h-full">
       <!-- Phần biểu đồ -->
-      <div class="flex justify-center w-full h-[400px] overflow-hidden relative">
-        <Bar :data="barChartData" class="h-40" type="bar" :options="options" />
-      </div>
+      <VaInnerLoading :loading="!dataReady">
+        <div class="flex justify-center w-full h-[400px] overflow-hidden relative">
+          <Bar :data="barChartData" class="h-40" type="bar" :options="options" />
+        </div>
+      </VaInnerLoading>
     </VaCardContent>
   </VaCard>
 </template>
@@ -102,9 +104,19 @@ const options = ref<ChartOptions<'bar'>>({
       stacked: true,
       ticks: {
         maxRotation: 45,
-        callback: function (value) {
-          const label = this.getLabelForValue(Number(value))
-          return label.split(' ')
+        callback: function (value: string | number) {
+          const label: string = this.getLabelForValue(Number(value)) // Ép kiểu rõ ràng
+          const words: string[] = label.split(' ') // Định nghĩa kiểu cho mảng
+
+          const groupedWords = words.reduce<string[]>((acc, word, index) => {
+            if (index % 2 === 0) {
+              acc.push(word)
+            } else {
+              acc[acc.length - 1] += ' ' + word
+            }
+            return acc
+          }, []) // Đảm bảo giá trị ban đầu là mảng chuỗi
+          return groupedWords
         },
       },
     },
@@ -124,6 +136,8 @@ const options = ref<ChartOptions<'bar'>>({
   },
 })
 
+const dataReady = ref(false)
+
 // Hàm fetch dữ liệu theo năm
 const fetchDataByYear = (year: string) => {
   const startYear = `${year}-01-01`
@@ -131,6 +145,7 @@ const fetchDataByYear = (year: string) => {
 
   dashboardStore.getRevenueServices({ start: startYear, end: endYear }).then((data) => {
     barChartData.value = convertToBarChartData(data)
+    dataReady.value = true
   })
 }
 

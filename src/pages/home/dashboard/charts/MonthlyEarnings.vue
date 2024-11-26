@@ -4,20 +4,22 @@
       <h1 class="card-title text-tag text-secondary font-bold uppercase">{{ t('dashboard.yearly_deposit') }}</h1>
     </VaCardTitle>
     <VaCardContent>
-      <div class="p-1 bg-black rounded absolute right-4 top-4">
-        <VaIcon name="mso-attach_money" color="#fff" size="large" />
-      </div>
-      <section>
-        <div class="text-xl font-bold mb-2">{{ formatMoney(total) }}</div>
-        <p class="text-xs text-success">
-          <VaIcon name="arrow_upward" />
-          {{ percentage }}%
-          <span class="text-secondary"> {{ t('dashboard.last_month') }}</span>
-        </p>
-      </section>
-      <div class="w-full flex items-center">
-        <VaChart :data="chartData" class="h-24" type="line" :options="options" />
-      </div>
+      <VaInnerLoading :loading="!dataReady">
+        <div class="p-1 bg-black rounded absolute right-4 top-4">
+          <VaIcon name="mso-attach_money" color="#fff" size="large" />
+        </div>
+        <section>
+          <div class="text-xl font-bold mb-2">{{ formatMoney(total) }}</div>
+          <p class="text-xs text-success">
+            <VaIcon name="arrow_upward" />
+            {{ percentage }}%
+            <span class="text-secondary"> {{ t('dashboard.last_month') }}</span>
+          </p>
+        </section>
+        <div class="w-full flex items-center">
+          <VaChart :data="chartData" class="h-24" type="line" :options="options" />
+        </div>
+      </VaInnerLoading>
     </VaCardContent>
   </VaCard>
 </template>
@@ -87,6 +89,7 @@ const chartData = ref<TLineChartData>(chartDataA.value)
 // compared to last month
 const percentage = ref(0)
 const total = ref(0)
+const dataReady = ref(false)
 
 dashboardStore.getChartDeposit({ start: startYear, end: endYear }).then((res) => {
   const data = res as DataEntry[]
@@ -98,6 +101,7 @@ dashboardStore.getChartDeposit({ start: startYear, end: endYear }).then((res) =>
   percentage.value = lastMonthTotal === 0 ? 100 : ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100
   // calculate total
   total.value = chartData.value.datasets[0].data.reduce((acc: any, val: any) => acc + val, 0)
+  dataReady.value = true
 })
 
 const options: ChartOptions<'line'> = {

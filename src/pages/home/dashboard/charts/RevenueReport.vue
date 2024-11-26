@@ -14,23 +14,27 @@
     <VaCardContent class="flex flex-col-reverse md:flex-row md:items-center justify-between gap-5 h-full">
       <!-- Phần thông tin thu nhập -->
       <section class="flex flex-col items-start w-full sm:w-1/3 md:w-2/5 lg:w-1/4 gap-2 md:gap-8 pl-4">
-        <div>
-          <p class="text-xl font-semibold">{{ formatMoney(totalEarnings) }}</p>
-          <p class="whitespace-nowrap mt-2">{{ t('dashboard.total_earnings') }}</p>
-        </div>
-        <div class="flex flex-col sm:flex-col gap-2 md:gap-8 w-full">
+        <VaInnerLoading :loading="!dataReady">
           <div>
-            <div class="flex items-center">
-              <span class="inline-block w-2 h-2 mr-2 -ml-4" :style="{ backgroundColor: earningsColor }"></span>
-              <span class="text-secondary">{{ t('dashboard.earnings_this_month') }}</span>
-            </div>
-            <div class="mt-2 text-xl font-semibold">{{ formatMoney(earningsForSelectedMonth.earning) }}</div>
+            <p class="text-xl font-semibold">{{ formatMoney(totalEarnings) }}</p>
+            <p class="whitespace-nowrap mt-2">{{ t('dashboard.total_earnings') }}</p>
           </div>
-        </div>
+          <div class="flex flex-col sm:flex-col gap-2 md:gap-8 w-full">
+            <div>
+              <div class="flex items-center">
+                <span class="inline-block w-2 h-2 mr-2 -ml-4" :style="{ backgroundColor: earningsColor }"></span>
+                <span class="text-secondary">{{ t('dashboard.earnings_this_month') }}</span>
+              </div>
+              <div class="mt-2 text-xl font-semibold">{{ formatMoney(earningsForSelectedMonth.earning) }}</div>
+            </div>
+          </div>
+        </VaInnerLoading>
       </section>
       <!-- Phần biểu đồ -->
       <div class="flex justify-center w-full h-full overflow-hidden relative">
-        <canvas ref="canvas" style="max-width: 100%"></canvas>
+        <VaInnerLoading :loading="!dataReady">
+          <canvas ref="canvas" style="max-width: 100%"></canvas>
+        </VaInnerLoading>
       </div>
     </VaCardContent>
   </VaCard>
