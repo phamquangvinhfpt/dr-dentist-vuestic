@@ -437,7 +437,9 @@
     "service-management": "Quản lý dịch vụ",
     "procedure-management": "Quản lý thủ thuật",
     "contact-info-for-staff": "Liên hệ nhân viên",
-    "payment": "Thanh toán"
+    "payment": "Thanh toán",
+    "doctor-management": "Quản lý bác sĩ",
+    "my-contacts": "Liên hệ"
   },
   "bin": {
     "title": "Thùng rác",

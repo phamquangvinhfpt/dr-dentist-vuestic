@@ -445,7 +445,9 @@
     "service-management": "Service MG",
     "procedure-management": "Procedure MG",
     "contact-info-for-staff": "Contact MG",
-    "payment": "Payment"
+    "payment": "Payment",
+    "doctor-management": "Doctor MG",
+    "my-contacts": "Contacts"
   },
   "bin": {
     "title": "Trash",

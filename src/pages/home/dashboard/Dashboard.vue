@@ -9,17 +9,26 @@ import ServiceReport from './charts/ServiceReport.vue'
 import DataSection from './DataSection.vue'
 import DoctorRateTable from './charts/DoctorRateTable.vue'
 import BookingAna from './charts/BookingAna.vue'
+import DashboardStaff from './DashboardStaff.vue'
+import Appointment from '@/pages/appointment/Appointment.vue'
 
 const authStore = useAuthStore()
 const isPatient = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)
+const isDoctor = computed(() => authStore.musHaveRole('Dentist'))
+const isStaff = computed(() => authStore.musHaveRole('Staff'))
 </script>
 
 <template>
   <div v-if="isPatient">
     <Patient />
   </div>
+  <div v-else-if="isStaff">
+    <DashboardStaff />
+  </div>
+  <div v-else-if="isDoctor">
+    <Appointment />
+  </div>
   <div v-else>
-    <h1 class="page-title font-bold">Dashboard</h1>
     <section class="flex flex-col gap-4">
       <div class="flex flex-col sm:flex-row gap-4">
         <RevenueUpdates class="w-full sm:w-[70%]" />

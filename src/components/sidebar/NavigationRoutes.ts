@@ -55,6 +55,16 @@ export default {
       meta: {
         icon: 'vuestic-iconset-user',
         permission: 'Users.View',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'doctors-list',
+      displayName: 'menu.doctor-management',
+      meta: {
+        icon: 'person',
+        permission: 'Users.View',
+        roles: ['Admin'],
       },
     },
     {
@@ -66,74 +76,48 @@ export default {
       },
     },
     {
+      name: 'service-management',
+      displayName: 'menu.service-management',
+      meta: {
+        icon: 'medical_services',
+        permission: 'Service.View',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'procedure-management',
+      displayName: 'menu.procedure-management',
+      meta: {
+        icon: 'healing',
+        permission: 'Procedure.View',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'contact-info-for-staff',
+      displayName: 'menu.contact-info-for-staff',
+      meta: {
+        icon: 'contact_support',
+        permission: 'ContactInformation.View',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'my-contacts',
+      displayName: 'menu.my-contacts',
+      meta: {
+        icon: 'contact_support',
+        permission: 'ContactInformation.View',
+        roles: ['Staff'],
+      },
+    },
+    {
       name: 'message',
       displayName: 'menu.message',
       meta: {
         icon: 'message',
         permission: 'PatientMessages.View',
-      },
-    },
-    {
-      name: 'service-management',
-      displayName: 'menu.service-management',
-      meta: {
-        icon: 'medical_services',
-        permission: 'Service.View',
-        roles: ['Admin'],
-      },
-    },
-    {
-      name: 'procedure-management',
-      displayName: 'menu.procedure-management',
-      meta: {
-        icon: 'healing',
-        permission: 'Procedure.View',
-        roles: ['Admin'],
-      },
-    },
-    {
-      name: 'contact-info-for-staff',
-      displayName: 'menu.contact-info-for-staff',
-      meta: {
-        icon: 'contact_support',
-        permission: 'ContactInformation.View',
-        roles: ['Admin'],
-      },
-    },
-    {
-      name: 'payment-management',
-      displayName: 'menu.payment',
-      meta: {
-        icon: 'payments',
-        permission: 'Payment.View',
-        roles: ['Admin'],
-      },
-    },
-    {
-      name: 'service-management',
-      displayName: 'menu.service-management',
-      meta: {
-        icon: 'medical_services',
-        permission: 'Service.View',
-        roles: ['Admin'],
-      },
-    },
-    {
-      name: 'procedure-management',
-      displayName: 'menu.procedure-management',
-      meta: {
-        icon: 'healing',
-        permission: 'Procedure.View',
-        roles: ['Admin'],
-      },
-    },
-    {
-      name: 'contact-info-for-staff',
-      displayName: 'menu.contact-info-for-staff',
-      meta: {
-        icon: 'contact_support',
-        permission: 'ContactInformation.View',
-        roles: ['Admin'],
+        roles: ['Patient', 'Staff'],
       },
     },
     {

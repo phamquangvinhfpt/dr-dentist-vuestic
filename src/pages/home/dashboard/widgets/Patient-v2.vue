@@ -384,13 +384,18 @@ window.addEventListener('resize', () => {
       <div :class="[isLargeScreen ? 'w-full max-w-4xl md:max-w-screen-xl mx-auto mt-16 mb-6' : '']">
         <div v-if="!isLargeScreen" class="flex justify-between items-center mt-4 m-3">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white">Top Doctors</h2>
-          <a href="#" class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400">See All</a>
+          <a href="/find-doctors" class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
+            >See All</a
+          >
         </div>
         <VaCardTitle
           v-else
           class="flex justify-center text-center text-9xl mb-2 font-semibold text-gray-900 dark:text-white hover:text-blue-800 dark:hover:text-blue-300 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
         >
-          <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer">
+          <h5
+            class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer"
+            @click="router.push({ name: 'doctors-for-users' })"
+          >
             TOP DOCTORS
           </h5>
         </VaCardTitle>
@@ -448,7 +453,7 @@ window.addEventListener('resize', () => {
               <div class="absolute bottom-0 left-0 right-0 flex">
                 <button
                   class="flex-1 py-3 bg-blue-500 text-white rounded-bl-lg hover:bg-blue-600 transition-colors duration-300 text-sm"
-                  @click="router.push({ name: 'doctor-profile', params: { id: doctor.id } })"
+                  @click="router.push({ name: 'doctor-detail', params: { id: doctor.id } })"
                 >
                   View Profile
                 </button>

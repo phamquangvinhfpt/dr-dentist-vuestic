@@ -44,7 +44,7 @@
               </button>
             </div>
             <button
-              v-if="role?.includes('Staff') || role?.includes('Dentist')"
+              v-if="role?.includes('Staff') || role?.includes('Admin')"
               class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
               @click="openCreateAppointmentDialog"
             >
@@ -761,7 +761,7 @@ const getPatients = () => {
   users
     .getPatients(request)
     .then((response) => {
-      console.log(users.patientList)
+      console.log('patients list', response)
       optionsPatients.value = response.data.map((patient: any) => ({
         text: patient.phoneNumber,
         value: patient.id,
