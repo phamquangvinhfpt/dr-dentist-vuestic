@@ -4,6 +4,7 @@ export interface INavigationRoute {
   meta: {
     icon: string
     permission?: string
+    roles?: string[]
   }
   children?: INavigationRoute[]
 }
@@ -63,6 +64,42 @@ export default {
       displayName: 'menu.message',
       meta: {
         icon: 'message',
+      },
+    },
+    {
+      name: 'service-management',
+      displayName: 'menu.service-management',
+      meta: {
+        icon: 'medical_services',
+        permission: 'Service.View',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'procedure-management',
+      displayName: 'menu.procedure-management',
+      meta: {
+        icon: 'healing',
+        permission: 'Procedure.View',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'contact-info-for-staff',
+      displayName: 'menu.contact-info-for-staff',
+      meta: {
+        icon: 'contact_support',
+        permission: 'ContactInformation.View',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'payment-management',
+      displayName: 'menu.payment',
+      meta: {
+        icon: 'payments',
+        permission: 'Payment.View',
+        roles: ['Admin'],
       },
     },
   ] as INavigationRoute[],

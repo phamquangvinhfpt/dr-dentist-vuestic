@@ -37,7 +37,6 @@ const relationshipOptions = [
   { text: t('auth.sister'), value: Rela.Sister, id: 3 },
   { text: t('auth.brother'), value: Rela.Brother, id: 4 },
 ]
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { init: notify } = useToast()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -91,7 +90,7 @@ const userDetail = ref<UserDetailFormData>({
     relationship: Rela.Father,
   },
   medicalHistory: {
-    medicalname: [],
+    medicalName: [],
     note: '',
   },
   PatientProfile: {
@@ -115,6 +114,29 @@ const passwordDetail = ref<PasswordDetailFormData>({
 //   seftDescription: '',
 // })
 const fileUploaded = ref(null)
+
+const selectedMedicalItems = reactive<Record<string, boolean>>({})
+
+const updateMedicalName = () => {
+  const selectedNames = Object.entries(selectedMedicalItems)
+    .filter(([, checked]) => checked)
+    .map(([value]) => value)
+
+  // Đảm bảo medicalHistory và medicalName tồn tại
+  if (!formData.medicalHistory) {
+    formData.medicalHistory = {
+      medicalName: [],
+      note: '',
+    }
+  }
+  formData.medicalHistory.medicalName = selectedNames
+}
+
+const initializeMedicalItems = () => {
+  medicalHistoryOptions.forEach((option) => {
+    selectedMedicalItems[option.value] = formData.medicalHistory?.medicalName?.includes(option.value) || false
+  })
+}
 
 const getUserDetail = async () => {
   try {
@@ -144,7 +166,7 @@ const getUserDetail = async () => {
         relationship: userProfileStore?.userDetails?.patientFamily?.relationship || Rela.Father,
       },
       medicalHistory: {
-        medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalname || [],
+        medicalName: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
         note: userProfileStore?.userDetails?.medicalHistory?.note || '',
       },
       PatientProfile: {
@@ -170,7 +192,7 @@ const getUserDetail = async () => {
       relationship: userProfileStore?.userDetails?.patientFamily?.relationship,
     }
     medicalHistory.value = {
-      medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalname,
+      medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
       note: userProfileStore?.userDetails?.medicalHistory?.note,
     }
     PatientProfile.value = {
@@ -179,6 +201,7 @@ const getUserDetail = async () => {
       idCardNumber: userProfileStore?.userDetails?.patientProfile?.idCardNumber,
       occupation: userProfileStore?.userDetails?.patientProfile?.occupation,
     }
+    initializeMedicalItems()
   } catch (error) {
     console.error(error)
   }
@@ -460,15 +483,26 @@ const isDisabledButtonChangePatientFamily = computed(() => {
   return false
 })
 
+const validateMedicalName = computed(() => {
+  const selectedCount = Object.values(selectedMedicalItems).filter((value) => value === true).length
+  return selectedCount > 0
+})
+
 const isDisabledButtonChangeMedicalHistory = computed(() => {
-  if (!isValid) {
-    return true
-  } else if (isFormHasNotChangedMedicalHistory.value) {
-    return true
-  } else if (checkEmptyField(formData.medicalHistory.medicalname) || checkEmptyField(formData.medicalHistory.note)) {
-    return true
-  }
-  return false
+  // Kiểm tra form có thay đổi không
+  const hasChanges = !isFormHasNotChangedMedicalHistory.value
+
+  // Kiểm tra có ít nhất 1 medical name được chọn
+  const hasMedicalNames = validateMedicalName.value
+
+  // Kiểm tra note không được để trống
+  const hasNote = !checkEmptyField(formData.medicalHistory.note)
+
+  // Button sẽ enable khi:
+  // 1. Form có sự thay đổi
+  // 2. Có ít nhất 1 medical name được chọn
+  // 3. Note không để trống
+  return !(hasChanges && hasMedicalNames && hasNote)
 })
 
 const isDisabledButtonChangePatientProfile = computed(() => {
@@ -657,31 +691,47 @@ const submitPatientFamily = async () => {
 // submit Medical History
 const submitMedicalHistory = async () => {
   if (validate()) {
+    // Cập nhật medicalName từ selectedMedicalItems trước khi submit
+    updateMedicalName()
+
+    // Đảm bảo medicalName là một mảng
+    const medicalNames = formData.medicalHistory?.medicalName || []
+
+    // Kiểm tra lại sau khi đã cập nhật
+    if (medicalNames.length === 0) {
+      notify({
+        title: t('auth.error'),
+        message: t('auth.medical_name_required'),
+        color: 'danger',
+      })
+      return
+    }
+
     const updatedMedicalData: MedicalHistoryUpdate = {
+      patientProfileId: userProfileStore?.userDetails?.patientProfile?.id || '',
       isUpdateMedicalHistory: true,
       medicalHistory: {
-        medicalname: formData.medicalHistory.medicalname ?? [],
-        note: formData.medicalHistory.note ?? '',
+        medicalName: medicalNames, // Sử dụng mảng đã kiểm tra
+        note: formData.medicalHistory?.note || '',
       },
     }
-    await userProfileStore
-      .updateMedicalHistory(updatedMedicalData)
-      .then(() => {
-        notify({
-          title: t('auth.success'),
-          message: t('auth.updated_medical_history_successfully'),
-          color: 'success',
-        })
-        getUserDetail()
+
+    try {
+      await userProfileStore.updateMedicalHistory(updatedMedicalData)
+      notify({
+        title: t('auth.success'),
+        message: t('settings.medical_history_updated_successfully'),
+        color: 'success',
       })
-      .catch((error) => {
-        const message = getErrorMessage(error)
-        notify({
-          title: t('auth.error'),
-          message: message,
-          color: 'danger',
-        })
+      getUserDetail()
+    } catch (error) {
+      const message = getErrorMessage(error)
+      notify({
+        title: t('auth.error'),
+        message: message,
+        color: 'danger',
       })
+    }
   }
 }
 
@@ -708,7 +758,7 @@ const submitPatientProfile = async () => {
       return
     }
 
-    // Lấy ID của patient profile từ bảng patient profile
+    // Lấy ID của patient profile t bng patient profile
     const patientProfileId = userProfileStore?.userDetails?.patientProfile?.id
 
     const updatePatientProfiledData: PatientProfileUpdate = {
@@ -1007,6 +1057,76 @@ const verifyEmail = async () => {
       })
     })
 }
+
+// Constants for checkboxes
+const medicalHistoryOptions = [
+  { value: 'Gingivitis', text: t('auth.gingivitis') }, // Viêm nướu
+  { value: 'Periodontitis', text: t('auth.periodontitis') }, // Viêm nha chu
+  { value: 'Gum_Recession', text: t('auth.gum_recession') }, // Tụt nướu
+  { value: 'Bleeding_Gums', text: t('auth.bleeding_gums') }, // Chảy máu nướu
+  { value: 'Gum_Abscess', text: t('auth.gum_abscess') }, // Áp xe nướu
+
+  // Bệnh về răng
+  { value: 'Dental_Caries', text: t('auth.dental_caries') }, // Sâu răng
+  { value: 'Tooth_Decay', text: t('auth.tooth_decay') }, // Mục răng
+  { value: 'Tooth_Abscess', text: t('auth.tooth_abscess') }, // Áp xe răng
+  { value: 'Tooth_Sensitivity', text: t('auth.tooth_sensitivity') }, // Ê buốt răng
+  { value: 'Cracked_Tooth', text: t('auth.cracked_tooth') }, // Răng nứt
+  { value: 'Broken_Tooth', text: t('auth.broken_tooth') }, // Răng vỡ
+  { value: 'Tooth_Erosion', text: t('auth.tooth_erosion') }, // Mòn răng
+  { value: 'Tooth_Wear', text: t('auth.tooth_wear') }, // Mài mòn răng
+  { value: 'Tooth_Discoloration', text: t('auth.tooth_discoloration') }, // Đổi màu răng
+  { value: 'Tooth_Loss', text: t('auth.tooth_loss') }, // Mất răng
+
+  // Bệnh về tủy răng
+  { value: 'Pulpitis', text: t('auth.pulpitis') }, // Viêm tủy
+  { value: 'Root_Canal_Infection', text: t('auth.root_canal_infection') }, // Nhiễm trùng ống tủy
+  { value: 'Dental_Pulp_Necrosis', text: t('auth.dental_pulp_necrosis') }, // Hoại tử tủy răng
+  { value: 'Periapical_Abscess', text: t('auth.periapical_abscess') }, // Áp xe chân răng
+  { value: 'Dental_Granuloma', text: t('auth.dental_granuloma') }, // U hạt răng
+
+  // Bệnh về khớp cắn
+  { value: 'Malocclusion', text: t('auth.malocclusion') }, // Sai khớp cắn
+  { value: 'Crossbite', text: t('auth.crossbite') }, // Cắn chéo
+  { value: 'Overbite', text: t('auth.overbite') }, // Cắn sâu
+  { value: 'Underbite', text: t('auth.underbite') }, // Cắn ngược
+  { value: 'Open_Bite', text: t('auth.open_bite') }, // Cắn hở
+
+  // Bệnh về khớp thái dương hàm
+  { value: 'TMJ_Disorders', text: t('auth.tmj_disorders') }, // Rối loạn khớp thái dương hàm
+  { value: 'Bruxism', text: t('auth.bruxism') }, // Nghiến răng
+  { value: 'Jaw_Pain', text: t('auth.jaw_pain') }, // Đau hàm
+  { value: 'Clicking_Jaw', text: t('auth.clicking_jaw') }, // Hàm kêu lục cục
+  { value: 'Limited_Jaw_Movement', text: t('auth.limited_jaw_movement') }, // Hạn chế vận động hàm
+
+  // Bệnh về niêm mạc miệng
+  { value: 'Oral_Thrush', text: t('auth.oral_thrush') }, // Nhiễm nấm miệng
+  { value: 'Oral_Ulcers', text: t('auth.oral_ulcers') }, // Loét miệng
+  { value: 'Oral_Lichen_Planus', text: t('auth.oral_lichen_planus') }, // Bệnh lichen phẳng miệng
+  { value: 'Leukoplakia', text: t('auth.leukoplakia') }, // Bạch sản
+  { value: 'Oral_Cancer', text: t('auth.oral_cancer') }, // Ung thư miệng
+
+  // Bệnh về răng mọc
+  { value: 'Impacted_Teeth', text: t('auth.impacted_teeth') }, // Răng mọc ngầm
+  { value: 'Wisdom_Teeth_Problems', text: t('auth.wisdom_teeth_problems') }, // Vấn đề răng khôn
+  { value: 'Dental_Crowding', text: t('auth.dental_crowding') }, // Chen chúc răng
+  { value: 'Tooth_Eruption_Issues', text: t('auth.tooth_eruption_issues') }, // Rối loạn mọc răng
+  { value: 'Supernumerary_Teeth', text: t('auth.supernumerary_teeth') }, // Răng thừa
+
+  // Bệnh về xương hàm
+  { value: 'Jaw_Bone_Loss', text: t('auth.jaw_bone_loss') }, // Tiêu xương hàm
+  { value: 'Osteonecrosis', text: t('auth.osteonecrosis') }, // Hoại tử xương hàm
+  { value: 'Jaw_Cysts', text: t('auth.jaw_cysts') }, // U nang xương hàm
+  { value: 'Jaw_Tumors', text: t('auth.jaw_tumors') }, // U xương hàm
+  { value: 'Jaw_Fractures', text: t('auth.jaw_fractures') }, // Gãy xương hàm
+
+  // Các vấn đề khác
+  { value: 'Bad_Breath', text: t('auth.bad_breath') }, // Hôi miệng
+  { value: 'Dry_Mouth', text: t('auth.dry_mouth') }, // Khô miệng
+  { value: 'Teeth_Grinding', text: t('auth.teeth_grinding') }, // Nghiến răng
+  { value: 'Geographic_Tongue', text: t('auth.geographic_tongue') }, // Lưỡi địa lý
+  { value: 'Burning_Mouth_Syndrome', text: t('auth.burning_mouth_syndrome') }, // Hội chứng bỏng rát miệng
+]
 </script>
 
 <template>
@@ -1287,38 +1407,42 @@ const verifyEmail = async () => {
           </div>
         </VaForm>
       </VaCard>
-      <!-- Hiển thị form thông tin patienFamily khi id === 5 -->
+      <!-- Hiển th form thông tin patienFamily khi id === 5 -->
       <!-- Tab MedicalHistory Fields -->
       <VaCard v-if="isShowMedicalHistory" class="p-2 ml-1 rounded">
         <VaForm ref="form" @submit.prevent="submitMedicalHistory">
-          <div class="grid md:grid-cols-2 gap-4">
-            <VaField>
-              <VaInput
-                v-model="formData.medicalHistory.medicalname"
-                :label="t('auth.medical_name')"
-                class="mb-3"
-                :placeholder="t('auth.enter_medical_name')"
-              />
-            </VaField>
+          <div class="p-4">
+            <h3 class="text-lg font-semibold mb-4">{{ t('auth.please_check_items') }}</h3>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <div v-for="option in medicalHistoryOptions" :key="option.value">
+                <VaCheckbox
+                  v-model="selectedMedicalItems[option.value]"
+                  :label="option.text"
+                  @change="updateMedicalName"
+                />
+              </div>
+            </div>
+
             <VaField>
               <VaInput
                 v-model="formData.medicalHistory.note"
-                :label="t('auth.note')"
+                :label="t('auth.family_history')"
                 class="mb-3"
-                :placeholder="t('auth.enter_note')"
+                :placeholder="t('auth.enter_family_history')"
                 textarea
               />
             </VaField>
-          </div>
 
-          <div class="flex justify-end">
-            <VaButton
-              class="w-fit rounded mb-3"
-              :disabled="isDisabledButtonChangeMedicalHistory"
-              @click="submitMedicalHistory"
-            >
-              {{ t('auth.update') }}
-            </VaButton>
+            <div class="flex justify-end">
+              <VaButton
+                class="w-fit rounded mb-3"
+                :disabled="isDisabledButtonChangeMedicalHistory"
+                @click="submitMedicalHistory"
+              >
+                {{ t('auth.update') }}
+              </VaButton>
+            </div>
           </div>
         </VaForm>
       </VaCard>

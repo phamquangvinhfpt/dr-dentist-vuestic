@@ -63,7 +63,7 @@ type PatientFamilyInfor = {
 }
 
 type MedicalHistoryInfor = {
-  medicalname: string[]
+  medicalName: string[]
   note: string
 }
 
@@ -222,6 +222,7 @@ export type PatientFamilyUpdate = {
 }
 //update medical history
 export type MedicalHistoryUpdate = {
+  patientProfileId: string | undefined
   isUpdateMedicalHistory: boolean
   medicalHistory: MedicalHistoryInfor
 }
