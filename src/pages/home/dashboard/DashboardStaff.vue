@@ -156,9 +156,10 @@ const formatWeeklySchedule = (appointments: any) => {
 onMounted(async () => {
   // Fetch appointments
   try {
-    const response = await appointmentService.listAppointments()
-    const appointments = response?.data || response || []
-    totalAppointments.value = Array.isArray(appointments) ? appointments.length : 0
+    const appointments = await appointmentService.listAppointments() // Đây đã là mảng
+    console.log('Appointments:', appointments) // Kiểm tra xem appointments có dữ liệu không
+
+    totalAppointments.value = Array.isArray(appointments) ? appointments.length : 0 // Đảm bảo là mảng
     weekDays.value = formatWeeklySchedule(appointments)
   } catch (error) {
     console.error('Error fetching appointments:', error)
@@ -190,13 +191,19 @@ onMounted(async () => {
     totalPatients.value = 0
   }
 
-  // Fetch pending payments
+  // Fetch pending payments with filter, page, limit, and date range
   try {
-    const payments = await paymentStore.getAllPayments()
-    pendingPayments.value = payments.length || 0
+    const filter = { page: 1, limit: 500 } // Example pagination filter, adjust as needed
+    const startDate = '2024-01-01' // Start date for payments filter (example)
+    const endDate = '2024-12-31' // End date for payments filter
+    // Adjusted filter to match PaginationFilter type
+    const adjustedFilter = { pageNumber: filter.page, pageSize: filter.limit }
+    // Call store action with adjusted filter, startDate, and endDate
+    const response = await paymentStore.getAllPayments(adjustedFilter, startDate, endDate)
+    pendingPayments.value = response.data.length || 0
   } catch (error) {
     console.error('Error fetching payments:', error)
-    pendingPayments.value = 0
+    pendingPayments.value = 0 // Default value in case of error
   }
 })
 </script>
