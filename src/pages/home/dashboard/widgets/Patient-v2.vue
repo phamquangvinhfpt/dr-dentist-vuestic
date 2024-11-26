@@ -7,6 +7,12 @@ import { useRouter } from 'vue-router'
 import { getErrorMessage } from '@/services/utils'
 import Contact from '../../landingpage/Contact.vue'
 
+import { useServiceStore } from '@/stores/modules/service.module'
+
+import { formatMoney } from '../../../../data/charts/revenueChartData'
+
+const serviceStore = useServiceStore()
+
 const loading = ref(true)
 const currentSlide = ref(0)
 const showContent = ref(true)
@@ -19,6 +25,8 @@ const { init } = useToast()
 
 const INTERVAL_TIME = 3000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
+
+const showModalServiceList = ref(false)
 
 const startContentAnimation = () => {
   setInterval(() => {
@@ -67,6 +75,24 @@ const faqs = ref([
       "It's generally recommended to visit your dentist for a check-up and cleaning every six months. However, your dentist may suggest more frequent visits based on your individual oral health needs.",
   },
 ])
+
+interface ServiceA {
+  id: number
+  serviceName: string
+  serviceDescription: string
+  totalPrice: number
+  children: ServiceA[]
+}
+
+const services = ref<ServiceA[]>([])
+
+serviceStore.getAllCustomerServices().then((res) => {
+  services.value = res.data
+  console.log('services', services.value)
+  services.value.forEach((service) => {
+    console.log('service', service)
+  })
+})
 
 onMounted(() => {
   const handleResize = () => {
@@ -161,7 +187,12 @@ window.addEventListener('resize', () => {
       <div v-if="!isLargeScreen" :class="[isLargeScreen ? 'container mx-auto p-4' : '']">
         <div v-if="!isLargeScreen" class="flex justify-between items-center mt-4 m-3">
           <h2 class="text-xl font-bold text-gray-900 dark:text-white">Our Category</h2>
-          <a href="#" class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400">See All</a>
+          <a
+            href="#"
+            class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
+            @click="showModalServiceList = true"
+            >See All</a
+          >
         </div>
         <div class="grid grid-cols-3 gap-4 lg:gap-16 mt-8 lg:-mt-16 place-content-center lg:relative lg:px-4 z-10 m-3">
           <!-- Service 1-->
@@ -258,7 +289,10 @@ window.addEventListener('resize', () => {
         id="services"
         class="px-4 py-10 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24"
       >
-        <h5 class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer">
+        <h5
+          class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer"
+          @click="showModalServiceList = true"
+        >
           OUR SERVICES
         </h5>
         <div class="grid row-gap-8 sm:row-gap-0 sm:grid-cols-2 lg:grid-cols-3">
@@ -325,6 +359,26 @@ window.addEventListener('resize', () => {
         </div>
       </div>
       <!-- ====== Services Section End -->
+
+      <!-- Service Modal List -->
+      <VaModal v-model="showModalServiceList" size="large">
+        <h3 class="va-h3">List of Services</h3>
+        <VaTreeView :nodes="services" class="customizable-content">
+          <template #content="service">
+            <div class="flex items-center">
+              <div class="mr-2">
+                <b v-if="service.serviceName" class="display-6">{{ service.serviceName }}</b>
+                <p v-if="service.serviceDescription" class="va-text-secondary mb-0">
+                  {{ service.serviceDescription }}
+                </p>
+              </div>
+              <VaButton preset="secondary" icon="" size="small" class="ml-auto">{{
+                formatMoney(service.totalPrice)
+              }}</VaButton>
+            </div>
+          </template>
+        </VaTreeView>
+      </VaModal>
 
       <!-- Doctors section-->
       <div :class="[isLargeScreen ? 'w-full max-w-4xl md:max-w-screen-xl mx-auto mt-16 mb-6' : '']">
