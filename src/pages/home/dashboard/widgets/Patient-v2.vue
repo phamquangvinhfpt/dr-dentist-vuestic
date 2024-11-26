@@ -66,16 +66,6 @@ const faqs = ref([
     answer:
       "It's generally recommended to visit your dentist for a check-up and cleaning every six months. However, your dentist may suggest more frequent visits based on your individual oral health needs.",
   },
-  {
-    question: 'What is the best way to whiten my teeth?',
-    answer:
-      'The best way to keep your teeth white are: carefully brushing your teeth twice a day; Limiting foods that stain your teeth; Avoid Smoking; Regular checkups and cleanings from your dentist.',
-  },
-  {
-    question: 'What if I need to reschedule?',
-    answer:
-      'If you wish to reschedule your appointment, then you first must cancel your first schedule 2 days’ prior the scheduled appointment and repeat the step you did when you scheduled your first appointment.',
-  },
 ])
 
 onMounted(() => {
@@ -540,7 +530,7 @@ window.addEventListener('resize', () => {
               v-if="true"
               class="fun-fact-one__single text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
             >
-              <i class="material-icons text-blue-500 text-5xl">stethoscope</i>
+              <i class="material-symbols-outlined text-blue-500 text-5xl">stethoscope</i>
               <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">230+</h3>
               <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Regular Doctors</p>
             </div>
@@ -569,29 +559,37 @@ window.addEventListener('resize', () => {
       </div>
 
       <!--- Start of Frequently Asked Questions -->
-      <section class="bg-gradient-to-br from-teal-500 to-sky-700 dark:from-teal-700 dark:to-sky-900 py-16">
-        <div class="container mx-auto px-4">
-          <h2 class="text-3xl md:text-5xl font-bold text-center text-white mb-12">FREQUENTLY ASKED QUESTIONS</h2>
+      <section>
+        <div class="z-20 w-full bg-gradient-to-br from-teal-500 to-sky-700 dark:from-teal-700 dark:to-sky-900">
+          <div class="max-w-4xl px-4 py-10 mx-auto sm:px-6 lg:px-8 faqs">
+            <h5 class="mb-10 text-3xl md:text-5xl font-bold text-center text-white">FREQUENTLY ASKED QUESTIONS</h5>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- FAQ Column -->
-            <div class="space-y-6">
-              <div
-                v-for="(faq, index) in faqs"
-                :key="index"
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <h3 class="font-medium text-gray-900 dark:text-gray-100 mb-2">{{ faq.question }}</h3>
-                <p class="text-gray-500 dark:text-gray-300">
-                  <span class="text-xl">&ldquo;</span>
-                  {{ faq.answer }}
-                  <span class="text-xl">&rdquo;</span>
-                </p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div class="space-y-6">
+                <blockquote
+                  v-for="(faq, index) in faqs"
+                  :key="index"
+                  class="p-8 transition-colors duration-200 ease-in-out bg-white rounded shadow-lg hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                >
+                  <div class="flex items-center">
+                    <div class="ml-4 text-sm">
+                      <p class="font-medium text-gray-900 dark:text-gray-100">
+                        {{ faq.question }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p class="mt-4 text-gray-500 dark:text-gray-300">
+                    <span class="text-xl">&ldquo;</span>
+                    {{ faq.answer }}
+                    <span class="text-xl">&rdquo;</span>
+                  </p>
+                </blockquote>
               </div>
-            </div>
-            <!-- ContactInfo Column -->
-            <div class="mt-12 lg:mt-0">
-              <Contact />
+              <!-- ContactInfo Column -->
+              <div class="mt-12 lg:mt-0">
+                <Contact />
+              </div>
             </div>
           </div>
         </div>

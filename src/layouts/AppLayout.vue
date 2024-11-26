@@ -24,7 +24,7 @@
           <VaButton class="px-4 py-4" icon="md_close" preset="plain" @click="onCloseSidebarButtonClick" />
         </div>
         <AppLayoutNavigation v-if="!isMobile" class="p-4" />
-        <main :class="[isPatientOrGuest ? '' : 'p-4 pt-0', 'w-full max-w-full overflow-x-hidden']">
+        <main :class="[isPatientOrGuest ? '' : 'pt-0', 'w-full max-w-full overflow-x-hidden']">
           <article>
             <RouterView v-slot="{ Component }">
               <component :is="Component" ref="notificationRef" />

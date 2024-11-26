@@ -295,6 +295,7 @@ defineExpose({
               :qr-code-url="qrCodeUrl"
               :show-qr-code="showQrCode"
               :is-mobile="isMobile"
+              :final-payment="false"
               @update:showQrCode="handleShowQrCode"
               @update:closeSubmit="handleCloseSubmit"
             />

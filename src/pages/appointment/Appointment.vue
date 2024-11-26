@@ -1,10 +1,10 @@
 <template>
   <VaInnerLoading :loading="loading">
-    <div class="h-screen flex flex-col">
-      <header class="border-b p-4 bg-white" :style="{ marginRight: `${scrollbarWidth}px` }">
-        <div class="flex items-center justify-between">
+    <div class="h-screen grid grid-cols-1 md:flex md:flex-col">
+      <header class="border-b p-4 bg-white" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
+        <div class="grid md:flex items-center justify-between">
           <div>
-            <div class="flex items-center space-x-4">
+            <div class="grid md:flex items-center md:space-x-4 space-y-4">
               <VaDateInput
                 v-model="selectedDate"
                 :format="formatDate"
@@ -29,7 +29,7 @@
             </div>
           </div>
 
-          <div class="flex items-center space-x-4">
+          <div class="grid md:flex items-center space-x-4" :class="isMobile ? 'hidden' : ''">
             <div class="inline-flex rounded-lg border bg-gray-50 p-1">
               <button
                 v-for="view in views"
@@ -53,7 +53,7 @@
           </div>
         </div>
       </header>
-      <div v-if="currentView === 'calendar'" class="flex-1 grid grid-cols-[auto,1fr] overflow-hidden">
+      <div v-if="currentView === 'calendar' && !isMobile" class="flex-1 grid grid-cols-[auto,1fr] overflow-hidden">
         <!-- Time slots -->
         <div class="border-r bg-white w-20 overflow-hidden">
           <div class="h-16 border-b"></div>
@@ -170,7 +170,7 @@
         </div>
       </div>
       <!-- List View -->
-      <div v-else class="flex-1 overflow-auto" :style="{ marginRight: `${scrollbarWidth}px` }">
+      <div v-else class="flex-1 overflow-auto" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
         <div v-if="isAppointment === 'appointment'">
           <VaDataTable
             :items="items"
@@ -657,6 +657,7 @@ const nonDoctorSearchRes = ref<SearchResponse | null>(null)
 const showModalAppointment = ref(false)
 const showModalReschedule = ref(false)
 const showModalCancel = ref(false)
+const isMobile = computed(() => window.innerWidth < 768)
 const { init } = useToast()
 const router = useRouter()
 // const { t } = useI18n()
@@ -1077,6 +1078,9 @@ const searchDoctor = () => {
 }
 
 onBeforeMount(() => {
+  if (isMobile.value) {
+    currentView.value = 'list'
+  }
   searchDoctor()
   fetchAppointments(searchValueA.value)
   fetchFollowUpAppointments(searchValueF.value)

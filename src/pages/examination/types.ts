@@ -70,7 +70,14 @@ export const getStatusClass = (status: TreatmentPlanStatus) => {
 }
 
 export const getStatusText = (status: TreatmentPlanStatus) => {
-  return TreatmentPlanStatus[status]
+  const statusMap = {
+    [TreatmentPlanStatus.Pending]: 'Pending',
+    [TreatmentPlanStatus.Active]: 'Active',
+    [TreatmentPlanStatus.Completed]: 'Completed',
+    [TreatmentPlanStatus.Cancelled]: 'Cancelled',
+    [TreatmentPlanStatus.Rescheduled]: 'Rescheduled',
+  }
+  return statusMap[status]
 }
 
 // Phamaceutical & Prescription

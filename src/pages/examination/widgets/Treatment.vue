@@ -5,7 +5,7 @@ import { useToast, VaInnerLoading, VaCollapse, VaCard, VaCardContent, VaIcon, Va
 import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { getErrorMessage } from '@/services/utils'
-import { DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
+import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 import Prescription from './Prescription.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
@@ -99,9 +99,25 @@ const totalExpectedCost = computed(() => treatmentplans.value.reduce((sum, plan)
 
 const totalFinalCost = computed(() => treatmentplans.value.reduce((sum, plan) => sum + plan.planCost, 0))
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString)
-  return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`
+const formatDate = (date: DateInputModelValue): string => {
+  if (date === null || date === undefined) return ''
+
+  const dateObj =
+    date instanceof Date
+      ? date
+      : typeof date === 'string'
+        ? new Date(date)
+        : date instanceof Number
+          ? new Date(Number(date))
+          : new Date()
+
+  if (isNaN(dateObj.getTime())) return ''
+
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+  const day = dateObj.getDate().toString().padStart(2, '0')
+  const year = dateObj.getFullYear()
+
+  return `${day}/${month}/${year}`
 }
 
 const parseDate = (dateStr: string): DateInputValue => {
@@ -418,10 +434,10 @@ onMounted(() => {
                 :search="true"
               >
                 <template #cell(price)="{ value }">
-                  {{ formatCurrency(value) }}
+                  {{ formatCurrency(Number(value)) }}
                 </template>
                 <template #cell(planCost)="{ value }">
-                  {{ formatCurrency(value) }}
+                  {{ formatCurrency(Number(value)) }}
                 </template>
                 <template #cell(startDate)="{ value, rowData }">
                   {{ rowData.status === TreatmentPlanStatus.Pending ? 'N/A' : formatDate(value) }}
@@ -429,18 +445,18 @@ onMounted(() => {
                 <template #cell(status)="{ value }">
                   <VaChip
                     :color="
-                      value === TreatmentPlanStatus.Completed
+                      (value as unknown as number) === TreatmentPlanStatus.Completed
                         ? 'success'
-                        : value === TreatmentPlanStatus.Active
+                        : (value as unknown as number) === TreatmentPlanStatus.Active
                           ? 'warning'
-                          : value === TreatmentPlanStatus.Cancelled
+                          : (value as unknown as number) === TreatmentPlanStatus.Cancelled
                             ? 'danger'
-                            : value === TreatmentPlanStatus.Rescheduled
+                            : (value as unknown as number) === TreatmentPlanStatus.Rescheduled
                               ? 'info'
                               : 'gray'
                     "
                   >
-                    {{ getStatusText(value) }}
+                    {{ getStatusText(Number(value)) }}
                   </VaChip>
                 </template>
                 <template #cell(action)="{ rowData }">
@@ -451,7 +467,7 @@ onMounted(() => {
                     round
                     border-color="primary"
                     size="small"
-                    @click="handleTreatmentAction(rowData)"
+                    @click="handleTreatmentAction(rowData as TreatmentPlanResponse)"
                   >
                     Điều trị
                   </VaButton>
@@ -462,7 +478,7 @@ onMounted(() => {
                     round
                     border-color="primary"
                     size="small"
-                    @click="handleTreatmentSchedule(rowData)"
+                    @click="handleTreatmentSchedule(rowData as TreatmentPlanResponse)"
                   >
                     Reschedule
                   </VaButton>
@@ -473,13 +489,13 @@ onMounted(() => {
                     round
                     border-color="primary"
                     size="small"
-                    @click="handleTreatmentDetails(rowData)"
+                    @click="handleTreatmentDetails(rowData as TreatmentPlanResponse)"
                   >
                     Details
                   </VaButton>
                   <Prescription
                     v-else-if="!rowData.hasPrescription"
-                    :items="rowData"
+                    :items="rowData as TreatmentPlanResponse"
                     @update:refresh="fetchTreatment"
                   />
                 </template>
