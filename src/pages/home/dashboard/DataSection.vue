@@ -42,8 +42,6 @@ interface DashboardMetric {
 const { getColor } = useColors()
 
 const calculateChange = (current: number, previous: number) => {
-  console.log('current', current)
-  console.log('previous', previous)
   if (previous === 0) return 100 // Avoid division by zero error
   const change = ((current - previous) / previous) * 100
   return change.toFixed(2)
@@ -105,9 +103,6 @@ dashboardStore.getChartMemberGrowth(null).then((res) => {
   } else {
     previousMonthMemberGrowth.value = mdata[0].data[currentMonth - 1]
   }
-
-  console.log('currentMonthMemberGrowth', currentMonthMemberGrowth.value)
-  console.log('previousMonthMemberGrowth', previousMonthMemberGrowth.value)
 })
 
 const dashboardMetrics = computed<DashboardMetric[]>(() => [

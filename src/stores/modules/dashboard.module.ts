@@ -63,5 +63,16 @@ export const useDashboardStore = defineStore('Dashboard', {
         return await Promise.reject(error)
       }
     },
+    async getAnalyticBooking(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getAnalyticBooking(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

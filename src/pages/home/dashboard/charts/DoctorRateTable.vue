@@ -23,18 +23,18 @@ dashboardStore.getRateDoctor(null).then((data) => {
 })
 
 const currentPage = ref(1)
-const pages = computed(() => Math.ceil(doctorData.value.length / 5))
+const pages = computed(() => Math.ceil(doctorData.value.length / 3))
 </script>
 
 <template>
-  <VaCard>
+  <VaCard class="h-[400px]">
     <VaCardTitle class="flex items-start justify-between">
       <h1 class="card-title text-secondary font-bold uppercase">Doctor Rate</h1>
     </VaCardTitle>
     <VaCardContent>
       <div v-if="doctorData.length > 0">
-        <VaDataTable :items="doctorData" :columns="columns" :per-page="5" :current-page="currentPage">
-          <template #bodyAppend>
+        <VaDataTable :items="doctorData" :columns="columns" :per-page="3" :current-page="currentPage">
+          <template #footer>
             <tr>
               <td colspan="6">
                 <div class="flex justify-center mt-4">
@@ -47,6 +47,9 @@ const pages = computed(() => Math.ceil(doctorData.value.length / 5))
             <VaAvatar>
               {{ row?.rowData?.doctorName?.charAt(0) }}
             </VaAvatar>
+          </template>
+          <template #cell(totalRating)="{ row }">
+            {{ row?.rowData?.totalRating }} <VaIcon name="star" class="text-warning" />
           </template>
         </VaDataTable>
       </div>

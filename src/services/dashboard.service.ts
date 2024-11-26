@@ -95,6 +95,25 @@ class DashboardService {
         return Promise.reject(error)
       })
   }
+  // /v1/dashboard/analytic/booking?start=2021-01-01&end=2025-12-31
+  async getAnalyticBooking(data: any): Promise<any> {
+    let url
+    if (!data || !data.start || !data.end) {
+      url = `/v1/dashboard/analytic/booking`
+    } else {
+      url = `/v1/dashboard/analytic/booking?start=${data.start}&end=${data.end}`
+    }
+
+    return apiService
+      .get(url)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        console.error('Service error:', error)
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new DashboardService()
