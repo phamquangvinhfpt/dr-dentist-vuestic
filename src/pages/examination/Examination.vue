@@ -19,7 +19,7 @@ const patientid = ref('')
 const appointment = ref<Appointment>()
 const { init } = useToast()
 const user = useAuthStore()
-const isStaff = user.musHaveRole('Staff')
+const isStaffOrAdmin = user.musHaveRole('Staff') || user.musHaveRole('Admin')
 
 const getAppointmentDetails = async () => {
   loading.value = true
@@ -61,7 +61,7 @@ const allTabs = [
 ]
 
 const tabs = computed(() => {
-  if (!isStaff) {
+  if (!isStaffOrAdmin) {
     return allTabs.filter((tab) => tab.id !== 3)
   }
   return allTabs
@@ -90,6 +90,6 @@ onMounted(() => {
     <p class="text-center text-2xl">Medical Record:</p>
   </div>
   <MedicalRecord v-if="selectedTab === 1 && !loading" v-model:patientId="patientid" />
-  <Treatment v-if="selectedTab === 2" :appointment="appointment" />
+  <Treatment v-if="selectedTab === 2" :appointment="appointment" @update:appointment="appointment = $event" />
   <Payment v-if="selectedTab === 3" :appointment="appointment" />
 </template>

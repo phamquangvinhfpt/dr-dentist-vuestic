@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useToast, VaAlert, VaModal, VaSkeleton, VaSkeletonGroup } from 'vuestic-ui'
 
@@ -13,7 +14,9 @@ const props = defineProps<{
   }
   qrCodeUrl: string
   isMobile: boolean
+  finalPayment: boolean
 }>()
+
 const emit = defineEmits(['update:showQrCode', 'update:closeSubmit'])
 const { init } = useToast()
 
@@ -24,6 +27,7 @@ const remainingTime = ref(600)
 const isLoading = ref(true)
 const isImageLoaded = ref(false)
 const imageLoadTime = ref(0)
+const storeTreatment = useTreatmentStore()
 
 const copyToClipboard = async (text: any) => {
   try {
@@ -61,6 +65,25 @@ const updateRemainingTime = () => {
   }
 }
 
+const cancelPayment = () => {
+  storeTreatment
+    .cancelPayment(props.bankInfo.description)
+    .then(() => {
+      init({
+        title: 'Payment canceled!',
+        message: 'The payment has been canceled successfully.',
+        color: 'success',
+      })
+    })
+    .catch((error) => {
+      init({
+        title: 'Failed to cancel payment!',
+        message: 'An error occurred while canceling the payment: ' + error,
+        color: 'danger',
+      })
+    })
+}
+
 const startTimer = () => {
   endTime.value = Date.now() + 600000 // 10 minutes
   updateRemainingTime()
@@ -81,6 +104,9 @@ const closeModal = () => {
   emit('update:showQrCode', false)
   emit('update:closeSubmit', false)
   stopTimer()
+  if (props.finalPayment) {
+    cancelPayment()
+  }
 }
 
 const loadQrCodeImage = () => {

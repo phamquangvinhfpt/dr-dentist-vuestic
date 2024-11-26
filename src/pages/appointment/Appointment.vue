@@ -13,10 +13,7 @@
                 class="px-3 py-1.5"
                 clearable
               />
-              <div
-                v-if="role?.includes('Staff') || role?.includes('Dentist') || role?.includes('Admin')"
-                class="inline-flex rounded-lg border bg-gray-50 p-1"
-              >
+              <div class="inline-flex rounded-lg border bg-gray-50 p-1">
                 <button
                   v-for="type in filteredTypes"
                   :key="type.id"
@@ -33,10 +30,7 @@
           </div>
 
           <div class="flex items-center space-x-4">
-            <div
-              v-if="role?.includes('Staff') || role?.includes('Dentist') || role?.includes('Admin')"
-              class="inline-flex rounded-lg border bg-gray-50 p-1"
-            >
+            <div class="inline-flex rounded-lg border bg-gray-50 p-1">
               <button
                 v-for="view in views"
                 :key="view.id"
@@ -201,10 +195,7 @@
                 {{ getPaymentStatusText(value) }}
               </VaChip>
             </template>
-            <template
-              v-if="role?.includes('Staff') || role?.includes('Admin') || role?.includes('Dentist')"
-              #cell(actions)="{ rowData }"
-            >
+            <template #cell(actions)="{ rowData }">
               <div class="space-x-2">
                 <VaButton
                   v-if="rowData.status !== 4"
@@ -757,7 +748,7 @@ const optionsDoctors = computed(() =>
 )
 const optionsStartTimes = computed(() => {
   const slots = []
-  for (let hour = 8; hour < 17; hour++) {
+  for (let hour = 8; hour < 20; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`)
     slots.push(`${hour.toString().padStart(2, '0')}:30`)
   }
@@ -1086,7 +1077,6 @@ const searchDoctor = () => {
 }
 
 onBeforeMount(() => {
-  if (role?.includes('Patient')) currentView.value = 'list'
   searchDoctor()
   fetchAppointments(searchValueA.value)
   fetchFollowUpAppointments(searchValueF.value)
@@ -1095,7 +1085,7 @@ onBeforeMount(() => {
 
 const timeSlots = computed(() => {
   const slots = []
-  for (let hour = 8; hour < 17; hour++) {
+  for (let hour = 8; hour < 20; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`)
     slots.push(`${hour.toString().padStart(2, '0')}:30`)
   }

@@ -5,6 +5,7 @@ import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useTo
 import { Doctors } from './types'
 import { useRouter } from 'vue-router'
 import { getErrorMessage } from '@/services/utils'
+import Contact from '../../landingpage/Contact.vue'
 
 const loading = ref(true)
 const currentSlide = ref(0)
@@ -48,6 +49,34 @@ const handleGetDoctors = async () => {
       loading.value = false
     })
 }
+
+const faqs = ref([
+  {
+    question: 'Do I need to arrive early for my first appointment?',
+    answer:
+      'Yes, at least 15 minutes early to fill out essential paperwork and give the staff time to get you all set up.',
+  },
+  {
+    question: 'What are early signs of dental trouble?',
+    answer:
+      'The possible early signs of dental trouble are: Toothache; Sensitive Teeth; Bleeding or Sore Gums; Bad Breath; Cavities; Jaw Pain; Mouth Sores; Dry Mouth; Broken, Cracked, Chipped, Lost.',
+  },
+  {
+    question: 'How often should I visit the dentist?',
+    answer:
+      "It's generally recommended to visit your dentist for a check-up and cleaning every six months. However, your dentist may suggest more frequent visits based on your individual oral health needs.",
+  },
+  {
+    question: 'What is the best way to whiten my teeth?',
+    answer:
+      'The best way to keep your teeth white are: carefully brushing your teeth twice a day; Limiting foods that stain your teeth; Avoid Smoking; Regular checkups and cleanings from your dentist.',
+  },
+  {
+    question: 'What if I need to reschedule?',
+    answer:
+      'If you wish to reschedule your appointment, then you first must cancel your first schedule 2 days’ prior the scheduled appointment and repeat the step you did when you scheduled your first appointment.',
+  },
+])
 
 onMounted(() => {
   const handleResize = () => {
@@ -540,68 +569,29 @@ window.addEventListener('resize', () => {
       </div>
 
       <!--- Start of Frequently Asked Questions -->
-      <section>
-        <div class="z-20 w-full bg-gradient-to-br from-teal-500 to-sky-700 dark:from-teal-700 dark:to-sky-900">
-          <div class="max-w-4xl px-4 py-10 mx-auto sm:px-6 lg:px-8 faqs">
-            <h5 class="mb-10 text-3xl md:text-5xl font-bold text-center text-white">FREQUENTLY ASKED QUESTIONS</h5>
+      <section class="bg-gradient-to-br from-teal-500 to-sky-700 dark:from-teal-700 dark:to-sky-900 py-16">
+        <div class="container mx-auto px-4">
+          <h2 class="text-3xl md:text-5xl font-bold text-center text-white mb-12">FREQUENTLY ASKED QUESTIONS</h2>
 
-            <blockquote
-              class="p-8 transition-colors duration-200 ease-in-out bg-white rounded shadow-lg hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-              <div class="flex items-center">
-                <div class="ml-4 text-sm">
-                  <p class="font-medium text-gray-900 dark:text-gray-100">
-                    Do I need to arrive early for my first appointment?
-                  </p>
-                </div>
-              </div>
-
-              <p class="mt-4 text-gray-500 dark:text-gray-300">
-                <span class="text-xl">&ldquo;</span>
-                Yes, at least 15 minutes early to fill out essential paperwork and give the staff time to get you all
-                set up.
-                <span class="text-xl">&rdquo;</span>
-              </p>
-            </blockquote>
-
-            <blockquote
-              class="p-8 mt-4 transition-colors duration-200 ease-in-out bg-white rounded shadow-lg hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-              <div class="flex items-center">
-                <div class="ml-4 text-sm">
-                  <p class="font-medium text-gray-900 dark:text-gray-100">What are early signs of dental trouble?</p>
-                </div>
-              </div>
-              <p class="mt-4 text-gray-500 dark:text-gray-300">
-                <span class="text-xl">&ldquo;</span>
-                The possible early signs of dental trouble are: Toothache; Sensitive Teeth; Bleeding or Sore Gums; Bad
-                Breath; Cavities; Jaw Pain; Mouth Sores; Dry Mouth; Broken, Cracked, Chipped, Lost.
-                <span class="text-xl">&rdquo;</span>
-              </p>
-            </blockquote>
-
-            <blockquote
-              class="p-8 mt-4 transition-colors duration-200 ease-in-out bg-white rounded shadow-lg hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-              <div class="flex items-center">
-                <div class="ml-4 text-sm">
-                  <p class="font-medium text-gray-900 dark:text-gray-100">What are early signs of dental trouble?</p>
-                </div>
-              </div>
-              <p class="mt-4 text-gray-500 dark:text-gray-300">
-                <span class="text-xl">&ldquo;</span>
-                The possible early signs of dental trouble are: Toothache; Sensitive Teeth; Bleeding or Sore Gums; Bad
-                Breath; Cavities; Jaw Pain; Mouth Sores; Dry Mouth; Broken, Cracked, Chipped, Lost.
-                <span class="text-xl">&rdquo;</span>
-              </p>
-            </blockquote>
-
-            <div class="flex justify-center">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- FAQ Column -->
+            <div class="space-y-6">
               <div
-                class="w-56 px-4 py-4 mt-10 text-center transition ease-in-out delay-150 bg-white hover:-translate-y-1 hover:scale-110 hover:bg-sky-500 hover:text-white text-sky-700 rounded-md duration-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:hover:text-white"
+                v-for="(faq, index) in faqs"
+                :key="index"
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700"
               >
-                <button @click="router.push({ name: 'faq' })">View More</button>
+                <h3 class="font-medium text-gray-900 dark:text-gray-100 mb-2">{{ faq.question }}</h3>
+                <p class="text-gray-500 dark:text-gray-300">
+                  <span class="text-xl">&ldquo;</span>
+                  {{ faq.answer }}
+                  <span class="text-xl">&rdquo;</span>
+                </p>
               </div>
+            </div>
+            <!-- ContactInfo Column -->
+            <div class="mt-12 lg:mt-0">
+              <Contact />
             </div>
           </div>
         </div>
@@ -615,7 +605,7 @@ window.addEventListener('resize', () => {
             <p
               class="inline-block px-3 py-px mb-4 text-sm font-semibold tracking-wider uppercase rounded-full text-sky-700 bg-teal-accent-400"
             >
-              LFI DENTAL CLINIC
+              DCMS DENTAL CLINIC
             </p>
           </div>
           <h2
@@ -726,7 +716,7 @@ window.addEventListener('resize', () => {
             <h6 class="mb-2 text-2xl font-extrabold">Done.</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
               View your scheduled appointments in the
-              <span class="border-b border-sky-700"> My Appointments </span>
+              <span class="border-b border-sky-700"> My Appointments</span>
               page.
             </p>
             <div

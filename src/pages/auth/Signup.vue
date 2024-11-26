@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useForm, useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
@@ -19,12 +19,27 @@ const isLoading = ref(false)
 const formData = reactive({
   firstName: '',
   lastName: '',
-  username: '',
   email: '',
+  isMale: {
+    value: true,
+    text: '',
+  },
+  birthDay: '',
+  username: '',
   password: '',
-  phoneNumber: '',
   repeatPassword: '',
+  phoneNumber: '',
+  job: '',
+  address: '',
+  role: 'Patient',
 })
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${date.getFullYear()}-${month}-${day}`
+}
 
 const submit = () => {
   if (validate()) {
@@ -36,6 +51,11 @@ const submit = () => {
       password: formData.password,
       confirmPassword: formData.repeatPassword,
       phoneNumber: formData.phoneNumber,
+      isMale: formData.isMale.value,
+      birthDay: formatDate(formData.birthDay),
+      job: formData.job,
+      address: formData.address,
+      role: formData.role,
     }
 
     isLoading.value = true
@@ -90,6 +110,42 @@ const emailRules = [
   (v: any) => !!v || t('validation.email.required'),
   (v: any) => /.+@.+\..+/.test(v) || t('validation.email.pattern'),
 ]
+
+const jobRules = [
+  (v: any) => !!v || t('validation.job.required'),
+  (v: any) => (v && v.length >= 2) || t('validation.job.minLength'),
+  (v: any) => (v && v.length <= 20) || t('validation.job.maxLength'),
+]
+
+const addressRules = [
+  (v: any) => !!v || t('validation.address.required'),
+  (v: any) => (v && v.length >= 5) || t('validation.address.minLength'),
+  (v: any) => (v && v.length <= 200) || t('validation.address.maxLength'),
+]
+
+const genderOptions = [
+  { value: true, text: t('auth.male') },
+  { value: false, text: t('auth.female') },
+]
+
+const checkBirthDayValid = (date: Date): boolean => {
+  if (!date) return false
+
+  const today = new Date()
+  const birthDate = new Date(date)
+  let yearDiff = today.getFullYear() - birthDate.getFullYear()
+  const monthDiff = today.getMonth() - birthDate.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    yearDiff--
+  }
+
+  return yearDiff >= 18
+}
+
+const birthDayRules = computed(() => [
+  (v: any) => !!v || t('validation.birthDay.required'),
+  (v: any) => checkBirthDayValid(v) || t('validation.birthDay.invalid'),
+])
 </script>
 
 <template>
@@ -157,6 +213,26 @@ const emailRules = [
           </template>
         </VaInput>
       </VaValue>
+
+      <div class="mb-4">
+        <VaRadio
+          v-model="formData.isMale"
+          :options="genderOptions"
+          class="flex gap-4"
+          :rules="[(v: any) => !!v || t('auth.gender_required')]"
+        />
+      </div>
+
+      <VaDateInput
+        v-model="formData.birthDay"
+        :rules="birthDayRules"
+        class="w-full"
+        :label="t('auth.birthDay')"
+        clearable
+      />
+
+      <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
+      <VaTextarea v-model="formData.address" :rules="addressRules" class="mb-4 w-full" :label="t('auth.address')" />
 
       <div class="flex justify-center mt-4">
         <VaButton class="w-full" @click="submit">{{ t('auth.create_account') }}</VaButton>

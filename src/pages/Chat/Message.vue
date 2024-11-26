@@ -199,7 +199,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, onBeforeMount, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, watchEffect, onBeforeMount, onBeforeUnmount, onMounted } from 'vue'
 import { chatService } from '@/services/chatService'
 import { useAuthStore } from '@modules/auth.module'
 import { getErrorMessage } from '@/services/utils'
@@ -295,15 +295,15 @@ const scrollToBottom = () => {
 const sendMessage = async () => {
   if (newMessage.value.trim() || selectedUser.value) {
     await chatService.sendMessage(selectedUser.value?.id.toString() || '', newMessage.value)
-    messages.value.push({
-      id: messages.value.length + 1,
-      content: newMessage.value,
-      sender: 'me',
-      name: authStore.user?.fullName,
-      imageUrl: getSrcAvatar(authStore.user?.avatarUrl),
-      originalTime: new Date().toISOString(),
-      time: convertDateTimeToTime(new Date().toISOString()),
-    })
+    // messages.value.push({
+    //   id: messages.value.length + 1,
+    //   content: newMessage.value,
+    //   sender: 'me',
+    //   name: authStore.user?.fullName,
+    //   imageUrl: getSrcAvatar(authStore.user?.avatarUrl),
+    //   originalTime: new Date().toISOString(),
+    //   time: convertDateTimeToTime(new Date().toISOString()),
+    // })
     newMessage.value = ''
     await loadUsers()
     scrollToBottom()
@@ -465,16 +465,7 @@ watch(
   receivedMessage,
   () => {
     console.log('receivedMessage', receivedMessage.value)
-    messages.value.push({
-      id: receivedMessage.value.id,
-      content: receivedMessage.value?.message,
-      sender: receivedMessage.value.senderId === authStore.user?.id ? 'me' : 'other',
-      name: receivedMessage.value.senderName,
-      imageUrl: getSrcAvatar(receivedMessage.value.imageUrl),
-      originalTime: receivedMessage.value.createdOn,
-      time: convertDateTimeToTime(receivedMessage.value.createdOn),
-    })
-
+    getUserConversion(selectedUser.value?.id.toString() || '')
     loadUsers()
     handleUserOnline()
     scrollToBottom()
@@ -487,6 +478,10 @@ watchEffect(() => {
 })
 
 onBeforeMount(() => {
+  loadUsers()
+})
+
+onMounted(() => {
   loadUsers()
 })
 

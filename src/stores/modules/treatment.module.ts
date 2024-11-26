@@ -86,5 +86,16 @@ export const useTreatmentStore = defineStore('treatment', {
         return await Promise.reject(error)
       }
     },
+    async cancelPayment(code: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await treatmentService.cancelPayment(code)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

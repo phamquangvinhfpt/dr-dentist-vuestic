@@ -15,11 +15,10 @@ const displayedTimes = computed(() => {
     return props.availableTimes
   } else {
     const times = []
-    for (let i = 8; i < 17; i++) {
+    for (let i = 8; i < 20; i++) {
       times.push(`${i < 10 ? '0' + i : i}:00:00`)
       times.push(`${i < 10 ? '0' + i : i}:30:00`)
     }
-    times.push('17:00')
     return times
   }
 })

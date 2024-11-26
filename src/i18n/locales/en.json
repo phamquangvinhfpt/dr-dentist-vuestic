@@ -145,7 +145,10 @@
     "id_card_number_length": "ID Card Number must be 9 characters long",
     "occupation": "Occupation",
     "enter_occupation": "Enter occupation",
-    "occupation_required": "Occupation field is required"
+    "occupation_required": "Occupation field is required",
+    "job": "Job",
+    "address": "Address",
+    "birthDay": "Birthday"
   },
   "doctor": {
     "education": "Education Level",
@@ -310,6 +313,20 @@
     "email": {
       "required": "Email field is required",
       "pattern": "Email should be valid"
+    },
+    "job": {
+      "required": "Job field is required",
+      "minLength": "Job must be at least 2 characters long",
+      "maxLength": "Job must be at most 20 characters long"
+    },
+    "address": {
+      "required": "Address field is required",
+      "minLength": "Address must be at least 5 characters long",
+      "maxLength": "Address must be at most 200 characters long"
+    },
+    "birthDay": {
+      "required": "Birthday field is required",
+      "invalid": "Invalid date"
     }
   },
   "404": {

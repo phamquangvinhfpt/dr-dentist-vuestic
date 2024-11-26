@@ -57,20 +57,6 @@ export default {
       },
     },
     {
-      name: 'faq',
-      displayName: 'menu.faq',
-      meta: {
-        icon: 'quiz',
-      },
-    },
-    {
-      name: 'contact',
-      displayName: 'menu.contact',
-      meta: {
-        icon: 'contact_support',
-      },
-    },
-    {
       name: 'audit logs',
       displayName: 'menu.audit-logs',
       meta: {

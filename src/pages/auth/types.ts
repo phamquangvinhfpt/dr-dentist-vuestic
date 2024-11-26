@@ -4,8 +4,12 @@ export type Register = {
   email: string
   userName: string
   password: string
+  isMale: boolean
+  job: string
+  birthDay: string
   confirmPassword: string
   phoneNumber: string
+  address: string
   role?: string
 }
 

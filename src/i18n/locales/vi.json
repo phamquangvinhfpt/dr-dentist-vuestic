@@ -140,7 +140,10 @@
     "id_card_number_length": "Số CMND phải có 9 hoặc 12 ký tự",
     "occupation": "Nghề nghiệp",
     "enter_occupation": "Nhập nghề nghiệp",
-    "occupation_required": "Nghề nghiệp là bắt buộc"
+    "occupation_required": "Nghề nghiệp là bắt buộc",
+    "job": "Công việc",
+    "address": "Địa chỉ",
+    "birthDay": "Ngày sinh"
   },
   "doctor": {
     "education": "Trình độ học vấn",
@@ -305,6 +308,20 @@
     "email": {
       "required": "Trường email là bắt buộc",
       "pattern": "Email phải hợp lệ"
+    },
+    "job": {
+      "required": "Trường Job field là bắt buộc",
+      "minLength": "Trường Job phải có ít nhất 2 ký tự",
+      "maxLength": "Trường Job phải có tối đa 20 ký tự"
+    },
+    "address": {
+      "required": "Địa chỉ là bắt buộc",
+      "minLength": "Địa chỉ phải có ít nhất 5 ký tự",
+      "maxLength": "Địa chỉ có tối đa 200 characters long"
+    },
+    "birthDay": {
+      "required": "Ngày sinh là bắt buộc",
+      "invalid": "Ngày sinh không hợp lệ"
     }
   },
   "404": {

@@ -71,6 +71,16 @@ class TreatmentClass {
         return Promise.reject(error)
       })
   }
+  async cancelPayment(code: any): Promise<any> {
+    return apiService
+      .delete(`/appointment/payment/cancel/${code}`)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export const treatmentService = new TreatmentClass()

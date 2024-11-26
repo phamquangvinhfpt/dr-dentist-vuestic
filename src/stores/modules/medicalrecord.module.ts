@@ -17,5 +17,16 @@ export const useMedicalRecordStore = defineStore('medicalRecord', {
         return await Promise.reject(error)
       }
     },
+    async createMedicalRecord(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await medicalrecordService.createMedicalRecord(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

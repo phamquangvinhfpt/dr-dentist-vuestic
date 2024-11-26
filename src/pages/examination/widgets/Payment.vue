@@ -2,14 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { Appointment } from '@/pages/appointment/types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
-import { useToast, VaInnerLoading, VaCard, VaButton, VaRadio, VaDivider, VaDataTable, VaChip } from 'vuestic-ui'
-import {
-  getPaymentMethodLabel,
-  getPaymentStatusText,
-  PaymentDetailResponse,
-  PaymentMethod,
-  PaymentStatus,
-} from '../types'
+import { useToast, VaInnerLoading, VaCard, VaButton, VaRadio, VaDivider, VaDataTable } from 'vuestic-ui'
+import { getPaymentMethodLabel, PaymentDetailResponse, PaymentMethod } from '../types'
 import { getErrorMessage } from '@/services/utils'
 import QrSelection from '@/pages/appointment/widgets/create-appointment/QrSelection.vue'
 
@@ -69,9 +63,8 @@ const formatCurrency = (value: number | string) => {
 }
 
 const paymentDetailsColumns = [
-  { key: 'procedureName', title: 'Procedure Name' },
-  { key: 'paymentAmount', title: 'Amount' },
-  { key: 'paymentStatus', title: 'Status' },
+  { key: 'procedureName', label: 'Procedure Name' },
+  { key: 'paymentAmount', label: 'Amount' },
 ]
 
 const proceduresColumns = [
@@ -196,7 +189,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="container mx-auto max-w-8xl px-4 m-10">
+  <div class="container mx-auto max-w-5xl px-4 m-10">
     <VaInnerLoading :loading="loading">
       <VaCard v-if="paymentDetailResponse" class="w-full p-4">
         <h2 class="text-2xl font-bold mb-4 text-center">Payment Bill</h2>
@@ -217,7 +210,7 @@ defineExpose({
           <template #cell(paymentAmount)="{ value }">
             {{ formatCurrency(Number(value)) }}
           </template>
-          <template #cell(paymentStatus)="{ value }">
+          <!-- <template #cell(paymentStatus)="{ value }">
             <VaChip
               :color="
                 Number(value) === PaymentStatus.Completed
@@ -233,7 +226,7 @@ defineExpose({
             >
               {{ getPaymentStatusText(Number(value)) }}
             </VaChip>
-          </template>
+          </template> -->
         </VaDataTable>
 
         <VaDivider />
@@ -244,8 +237,13 @@ defineExpose({
 
         <VaDivider />
 
-        <div class="mt-4 flex justify-between items-center">
+        <div class="mt-4 grid grid-rows-3 text-right">
           <div><strong>Total Amount:</strong> {{ formatCurrency(Number(totalAmount)) }}</div>
+          <div>
+            <strong>Deposit Amount:</strong>
+            {{ formatCurrency(Number(paymentDetailResponse.paymentResponse.depositAmount)) }}
+          </div>
+          <VaDivider />
           <div>
             <strong>Remaining Amount:</strong>
             {{ formatCurrency(Number(paymentDetailResponse.paymentResponse.remainingAmount)) }}
@@ -281,6 +279,7 @@ defineExpose({
         :qr-code-url="qrCodeUrl"
         :show-qr-code="showQrCode"
         :is-mobile="isMobile"
+        :final-payment="true"
         @update:showQrCode="handleShowQrCode"
         @update:closeSubmit="handleCloseSubmit"
       />
