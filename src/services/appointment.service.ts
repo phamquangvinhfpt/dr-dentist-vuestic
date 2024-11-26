@@ -16,7 +16,7 @@ class AppointmentService {
     return apiService
       .post('/appointment/get-all', {}) // Adjust the endpoint as needed and add an empty object as the second argument
       .then((response) => {
-        return Promise.resolve(response.data) // Return the list of appointments
+        return Promise.resolve(response.data.data) // Return the list of appointments
       })
       .catch((error) => {
         return Promise.reject(error)

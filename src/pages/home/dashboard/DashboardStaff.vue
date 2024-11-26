@@ -82,12 +82,13 @@ import appointmentService from '@/services/appointment.service'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { usePaymentStore } from '@/stores/modules/payment.module'
 import { useUserProfileStore } from '@/stores/modules/user.module'
+import { useContactStore } from '@/stores/modules/contact.module'
 
 // Create an instance of the store
 const doctorStore = useDoctorProfileStore()
 const paymentStore = usePaymentStore()
 const userStore = useUserProfileStore()
-
+const newcontact = useContactStore()
 // Define interfaces for the data
 interface Appointment {
   id: number
@@ -157,8 +158,11 @@ onMounted(async () => {
   // Fetch appointments
   try {
     const response = await appointmentService.listAppointments()
-    const appointments = response?.data || response || []
-    totalAppointments.value = Array.isArray(appointments) ? appointments.length : 0
+    console.log('Appointments Response:', response)
+    const appointments = Array.isArray(response) ? response : []
+
+    totalAppointments.value = appointments.length
+    console.log('Total Appointments:', totalAppointments.value)
     weekDays.value = formatWeeklySchedule(appointments)
   } catch (error) {
     console.error('Error fetching appointments:', error)
@@ -174,8 +178,14 @@ onMounted(async () => {
 
   // Fetch total doctors
   try {
-    const doctors = await doctorStore.getDoctors({ isActive: true })
-    totalDoctors.value = doctors.length || 0
+    const response = await doctorStore.getDoctors({ isActive: true })
+    console.log('Doctors Response:', response)
+
+    // Access the nested data array
+    const doctors = response?.data || []
+    totalDoctors.value = doctors.length
+
+    console.log('Total Doctors:', totalDoctors.value) // Should now log the correct count
   } catch (error) {
     console.error('Error fetching doctors:', error)
     totalDoctors.value = 0
@@ -183,17 +193,54 @@ onMounted(async () => {
 
   // Fetch total patients
   try {
-    const patients = await userStore.getAllPatients()
-    totalPatients.value = patients.length || 0
+    const response = await userStore.getAllPatients()
+    console.log('Patients Response:', response)
+
+    // Check if the response has a data array and set totalPatients accordingly
+    const patients = response?.data || []
+    totalPatients.value = patients.length // This will be 0 if patients array is empty
+
+    console.log('Total Patients:', totalPatients.value) // Should now log the correct count
   } catch (error) {
     console.error('Error fetching patients:', error)
     totalPatients.value = 0
   }
+  try {
+    const response = await newcontact.getContacts() // Assuming `getContacts` is defined in the store
+    console.log('Contacts Response:', response)
 
+    // Extract contacts array from the response
+    const contacts = Array.isArray(response?.data) ? response.data : []
+
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0]
+
+    // Filter contacts created today
+    const todayContacts = contacts.filter((contact: any) => {
+      const contactDate = new Date(contact.creationDate).toISOString().split('T')[0]
+      return contactDate === today
+    })
+
+    // Set the count of today's contacts
+    newContacts.value = todayContacts.length
+    console.log('New Contacts:', newContacts.value)
+  } catch (error) {
+    console.error('Error fetching contacts:', error)
+    newContacts.value = 0 // Default value in case of an error
+  }
   // Fetch pending payments
   try {
-    const payments = await paymentStore.getAllPayments()
-    pendingPayments.value = payments.length || 0
+    const response = await paymentStore.getAllPayments()
+    console.log('Payments Response:', response)
+
+    // Extract payments array from the nested response structure
+    const payments = Array.isArray(response?.data?.data)
+      ? response.data.data // Access the nested 'data' array
+      : []
+
+    // Set the count of pending payments
+    pendingPayments.value = payments.length
+    console.log('Pending Payments:', pendingPayments.value)
   } catch (error) {
     console.error('Error fetching payments:', error)
     pendingPayments.value = 0

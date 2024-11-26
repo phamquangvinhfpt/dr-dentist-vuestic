@@ -472,6 +472,22 @@ const validateAge = (birthDate: string): boolean => {
   errors.birthDate = { error: false, message: '' }
   return true
 }
+
+const validateSpecialization = (specialization: string) => {
+  if (!specialization?.trim()) {
+    errors.specialization = { error: true, message: 'Specialization is required' }
+    return false
+  }
+  errors.specialization = { error: false, message: '' }
+  return true
+}
+
+watch(
+  () => doctor.specialization,
+  (newValue) => {
+    validateSpecialization(newValue)
+  },
+)
 </script>
 
 <template>
@@ -585,7 +601,7 @@ const validateAge = (birthDate: string): boolean => {
             />
           </div>
 
-          <VaInput v-model="doctor.address" label="Address" :error="errors.address" />
+          <VaInput v-model="doctor.address" label="Address" :error="errors.address.error" />
 
           <div class="va-input">
             <label
@@ -617,7 +633,13 @@ const validateAge = (birthDate: string): boolean => {
         <div class="space-y-4">
           <h3 class="text-lg font-semibold mb-4">Professional Information</h3>
 
-          <VaInput v-model="doctor.specialization" label="Specialization" :error="errors.specialization" />
+          <VaInput
+            v-model="doctor.specialization"
+            label="Specialization"
+            :error="errors.specialization.error"
+            :error-messages="errors.specialization.message"
+            @blur="validateSpecialization(doctor.specialization)"
+          />
 
           <VaInput
             v-model.number="doctor.experience"

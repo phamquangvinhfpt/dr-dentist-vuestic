@@ -14,7 +14,7 @@ class ContactService {
 
   async getContacts(): Promise<any> {
     return apiService
-      .get(`/customercontact/get-all`)
+      .post(`/customercontact/get-all`, {})
       .then((response) => {
         return Promise.resolve(response.data)
       })
