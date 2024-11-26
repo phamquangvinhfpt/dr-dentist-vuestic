@@ -133,8 +133,9 @@ window.addEventListener('resize', () => {
                 <VaButton
                   class="bg-transparent lg:px-4 lg:py-4 text-sm font-semibold shadow-lg hover:shadow-xl md:float-right"
                   color="info"
+                  @click="router.push({ name: 'create-appointment' })"
                 >
-                  Get Started
+                  Book an Appointment
                   <svg
                     class="ml-2 w-4 h-4 fill-current"
                     xmlns="http://www.w3.org/2000/svg"
