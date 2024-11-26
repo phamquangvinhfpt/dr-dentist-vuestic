@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import LandingPage from '../layouts/LandingPage.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import AppLayout from '../layouts/AppLayout.vue'
+import { useAuthStore } from '@/stores/modules/auth.module'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -167,6 +168,87 @@ const routes: Array<RouteRecordRaw> = [
           title: 'Doctors List',
         },
       },
+      {
+        name: 'service-management',
+        path: 'service-management',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/servipage-procedure/ServiceManagement.vue'),
+      },
+      {
+        name: 'procedure-management',
+        path: 'procedure-management',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/servipage-procedure/ProcedureManagement.vue'),
+      },
+      {
+        name: 'deleted-service-management',
+        path: 'deleted-service-management',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/servipage-procedure/DeletedServiceManagement.vue'),
+      },
+      {
+        path: '/procedures/:id',
+        name: 'ServiceProcedures',
+        component: () => import('../pages/servipage-procedure/ServiceProcedures.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        name: 'contact-info-for-staff',
+        path: 'contact-info-for-staff',
+        component: () => import('../pages/Contact-Info/ContactInforForStaff.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        name: 'contact-request',
+        path: 'contact-request',
+        meta: {
+          requiresGuest: true,
+        },
+        component: () => import('../pages/Contact-Info/CreateContactRequest.vue'),
+      },
+      {
+        name: 'my-contacts',
+        path: 'my-contacts',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Contact-Info/MyContacts.vue'),
+      },
+      {
+        path: '/payment-management',
+        name: 'payment-management',
+        meta: {
+          requiresAuth: true,
+        },
+        redirect: () => {
+          const today = new Date().toISOString().split('T')[0]
+          return `/payment-management/${today}/${today}`
+        },
+        children: [
+          {
+            path: ':startDate/:endDate',
+            component: () => import('../pages/PaymentPages/PaymentManagement.vue'),
+          },
+        ],
+      },
+      {
+        name: 'medical-record-for-patient',
+        path: 'medical-record-for-patient',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/MedicalRecordForPatient/MedicalRecordForPatient.vue'),
+      },
     ],
   },
   {
@@ -260,6 +342,17 @@ const router = createRouter({
     }
   },
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+
+  // Check if route requires authentication
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: 'login' })
+    return
+  }
+  next()
 })
 
 export default router
