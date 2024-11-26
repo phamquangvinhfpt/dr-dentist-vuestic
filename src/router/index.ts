@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import LandingPage from '../layouts/LandingPage.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import AppLayout from '../layouts/AppLayout.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
@@ -8,14 +7,6 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/:pathMatch(.*)*',
     redirect: { name: '404' },
-  },
-  {
-    name: 'landingPage',
-    path: '/index',
-    meta: {
-      requiresGuest: true,
-    },
-    component: LandingPage,
   },
   {
     name: 'home',

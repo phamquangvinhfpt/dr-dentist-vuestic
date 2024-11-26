@@ -1,6 +1,6 @@
 <template>
   <VaInnerLoading :loading="loading">
-    <div class="h-screen grid grid-cols-1 md:flex md:flex-col">
+    <div class="md:h-screen grid grid-cols-1 md:flex md:flex-col">
       <header class="border-b p-4 bg-white" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
         <div class="grid md:flex items-center justify-between">
           <div>
@@ -13,7 +13,7 @@
                 class="px-3 py-1.5"
                 clearable
               />
-              <div class="inline-flex rounded-lg border bg-gray-50 p-1">
+              <div class="inline-flex rounded-lg border bg-gray-50 p-1 w-fit ml-3">
                 <button
                   v-for="type in filteredTypes"
                   :key="type.id"

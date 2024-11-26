@@ -228,6 +228,7 @@ export const useUserProfileStore = defineStore('userProfile', {
         this.isLoading = true
         const response = await userService.getAllPatients()
         this.isLoading = false
+        console.log('API Response:', response) // Log the response
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false

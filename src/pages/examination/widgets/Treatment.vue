@@ -408,7 +408,7 @@ onMounted(() => {
               </div>
             </div>
             <VaButton
-              v-if="isDoctor"
+              v-if="isDoctor && isToday(props.appointment?.appointmentDate as string)"
               preset="primary"
               icon-right="add"
               class="p-2"

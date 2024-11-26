@@ -196,33 +196,6 @@ onMounted(() => {
                                 />
                               </div>
                             </div>
-
-                            <!-- Preview Section -->
-                            <div
-                              v-if="record.indication.indicationType.includes('Ảnh (int)')"
-                              class="mt-6 border border-dashed border-gray-300 p-4 rounded"
-                            >
-                              <div class="text-center text-sm text-gray-500 mb-2">Ảnh (int) (1)</div>
-                              <img
-                                src="/placeholder.svg?height=300&width=400"
-                                alt="X-ray preview"
-                                class="w-full h-auto"
-                              />
-                            </div>
-
-                            <div
-                              v-if="record.indication.indicationType.includes('Xét nghiệm huyết học')"
-                              class="mt-6 border border-dashed border-gray-300 p-4 rounded"
-                            >
-                              <div class="text-center text-sm text-gray-500 mb-2">
-                                Xét nghiệm huyết học (Tải mẫu xét nghiệm)
-                              </div>
-                              <img
-                                src="/placeholder.svg?height=300&width=400"
-                                alt="Blood test form"
-                                class="w-full h-auto"
-                              />
-                            </div>
                           </div>
                         </template>
                       </VaCollapse>
