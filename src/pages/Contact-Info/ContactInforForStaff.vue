@@ -89,10 +89,15 @@
 
       <template #cell(actions)="{ row }">
         <div class="flex gap-2">
-          <VaButton small color="primary" :disabled="!!row.rowData.staffId" @click="handleAssignStaff(row.rowData)">
+          <VaButton
+            small
+            color="primary"
+            :disabled="!!(row.rowData as ContactInfo).staffId"
+            @click="handleAssignStaff(row.rowData as ContactInfo)"
+          >
             <i class="va-icon material-icons">person_add</i>
           </VaButton>
-          <VaButton small color="info" @click="handleViewDetails(row.rowData)">
+          <VaButton small color="info" @click="handleViewDetails(row.rowData as ContactInfo)">
             <i class="va-icon material-icons">visibility</i>
           </VaButton>
         </div>

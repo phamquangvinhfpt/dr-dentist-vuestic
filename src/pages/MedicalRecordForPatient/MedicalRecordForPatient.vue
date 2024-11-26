@@ -110,7 +110,7 @@ onMounted(() => {
                 class="view-button"
                 preset="primary"
                 round
-                @click="viewRecord(rowData)"
+                @click="viewRecord(rowData as MedicalRecordDTO)"
               >
                 <VaIcon name="visibility" />
               </VaButton>

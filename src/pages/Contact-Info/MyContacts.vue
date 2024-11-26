@@ -72,7 +72,7 @@
 
       <template #cell(actions)="{ row }">
         <div class="flex gap-2">
-          <VaButton small color="info" @click="handleViewDetails(row.rowData)">
+          <VaButton small color="info" @click="handleViewDetails(row.rowData as ContactInfo)">
             <i class="va-icon material-icons">visibility</i>
           </VaButton>
         </div>

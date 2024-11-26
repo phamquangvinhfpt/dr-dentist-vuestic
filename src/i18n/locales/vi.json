@@ -191,7 +191,7 @@
     "teeth_grinding": "Nghiến răng",
     "geographic_tongue": "Lưỡi địa lý",
     "burning_mouth_syndrome": "Hội chứng bỏng rát miệng",
-    "please_check_items" : "Vui lòng kiểm tra các mục"
+    "please_check_items": "Vui lòng kiểm tra các mục"
   },
 
   "doctor": {
@@ -669,7 +669,7 @@
     "description": "Mô Tả",
     "price": "Giá",
     "status": "Trạng Thái",
-    "deleteConfirmMessage" : "Bạn có chắc chắn muốn xóa dịch vụ này không?"
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa dịch vụ này không?"
   },
   "procedure": {
     "id": "Mã",

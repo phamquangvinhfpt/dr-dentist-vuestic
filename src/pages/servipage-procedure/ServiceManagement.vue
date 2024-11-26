@@ -101,7 +101,7 @@
                   :disabled="isToggling"
                   :loading="isToggling"
                   round
-                  @click="handleToggleStatus(row.rowData)"
+                  @click="handleToggleStatus(row.rowData as ServiceDTO)"
                 >
                   <VaIcon :name="row.rowData.isActive ? 'toggle_off' : 'toggle_on'" />
                 </VaButton>
@@ -110,7 +110,7 @@
                   size="small"
                   class="action-button-circle"
                   round
-                  @click="confirmDelete(row.rowData)"
+                  @click="confirmDelete(row.rowData as ServiceDTO)"
                 >
                   <VaIcon name="delete" />
                 </VaButton>
@@ -121,7 +121,7 @@
                   size="small"
                   class="action-button-circle"
                   round
-                  @click="handleRestore(row.rowData)"
+                  @click="handleRestore(row.rowData as ServiceDTO)"
                 >
                   <VaIcon name="restore" />
                 </VaButton>
@@ -263,17 +263,17 @@ const getAllServicesPagination = async () => {
   try {
     const res = showBin.value
       ? await serviceStore.getDeletedServices({
-        pageNumber: currentPage.value,
-        pageSize: formData.pageSize,
-        orderBy: formData.orderBy,
-        isActive: false,
-      })
+          pageNumber: currentPage.value,
+          pageSize: formData.pageSize,
+          orderBy: formData.orderBy,
+          isActive: false,
+        })
       : await serviceStore.getAllServices({
-        pageNumber: currentPage.value,
-        pageSize: formData.pageSize,
-        isActive: formData.isActive,
-        orderBy: formData.orderBy,
-      })
+          pageNumber: currentPage.value,
+          pageSize: formData.pageSize,
+          isActive: formData.isActive,
+          orderBy: formData.orderBy,
+        })
 
     serviceListResponse.value = {
       data: res.data || [],

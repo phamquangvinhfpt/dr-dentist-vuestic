@@ -22,6 +22,7 @@ export const useServiceStore = defineStore('service', {
     procedureList: {} as ListProcedurePagination,
     serviceProcedures: [] as ServiceProcedureDetail[],
     serviceDetail: null as ServiceDTO | null,
+    services: [],
     isLoading: false,
   }),
 
@@ -281,6 +282,18 @@ export const useServiceStore = defineStore('service', {
         return await serviceService.toggleServiceStatus(data)
       } finally {
         this.isLoading = false
+      }
+    },
+    async getAllCustomerServices() {
+      try {
+        this.isLoading = true
+        const response = await serviceService.getAllCustomerServices()
+        this.services = response.data
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
       }
     },
   },

@@ -59,15 +59,15 @@
     <template #cell(actions)="{ row }">
       <div class="flex gap-2">
         <template v-if="!showBin">
-          <VaButton small color="primary" @click="handleEdit(row.rowData)">
+          <VaButton small color="primary" @click="handleEdit(row.rowData as ProcedureDTO)">
             <i class="va-icon material-icons">edit</i>
           </VaButton>
-          <VaButton small color="danger" @click="confirmDelete(row.rowData)">
+          <VaButton small color="danger" @click="confirmDelete(row.rowData as ProcedureDTO)">
             <i class="va-icon material-icons">delete</i>
           </VaButton>
         </template>
         <template v-else>
-          <VaButton small color="success" @click="handleRestore(row.rowData)">
+          <VaButton small color="success" @click="handleRestore(row.rowData as ProcedureDTO)">
             <i class="va-icon material-icons">restore</i>
           </VaButton>
         </template>
