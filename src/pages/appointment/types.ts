@@ -7,9 +7,9 @@ export type Pagination = {
 }
 
 export type Service = {
-  id: string
-  serviceName: string
-  serviceDescription: string
+  serviceID: string
+  name: string
+  description: string
   isActive: boolean
   totalPrice: number
 }

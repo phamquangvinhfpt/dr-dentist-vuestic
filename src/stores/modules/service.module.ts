@@ -307,5 +307,15 @@ export const useServiceStore = defineStore('service', {
           return Promise.reject(error)
         })
     },
+    async getServiceType(data: any): Promise<any> {
+      return serviceService
+        .getServiceType(data)
+        .then((response) => {
+          return Promise.resolve(response)
+        })
+        .catch((error) => {
+          return Promise.reject(error)
+        })
+    },
   },
 })

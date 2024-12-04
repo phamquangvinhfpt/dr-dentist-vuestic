@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref, computed, onBeforeMount } from 'vue'
+import { onBeforeUnmount, onMounted, ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { onBeforeRouteUpdate } from 'vue-router'
 import { useBreakpoint } from 'vuestic-ui'
@@ -48,6 +48,7 @@ import AppLayoutNavigation from '../components/app-layout-navigation/AppLayoutNa
 import AppNavbar from '../components/navbar/AppNavbar.vue'
 import AppSidebar from '../components/sidebar/AppSidebar.vue'
 import signalRService from '@/signalR'
+import { LocalNotifications } from '@capacitor/local-notifications'
 
 const GlobalStore = useGlobalStore()
 const onlineUsersStore = useOnlineUsersStore()
@@ -108,52 +109,49 @@ const handleReceiveNotification = (type, notification) => {
 }
 
 const handleUserIsOnline = (users, staffs) => {
-  // console.log(`Users online: ${users}`)
+  console.log(`Users online: ${users}`)
   onlineUsersStore.updateOnlineUsers(users, staffs)
 }
 
 const handleReceiveMessage = (message) => {
   onlineUsersStore.receiveMessage(message)
+  if (isMobile.value) {
+    const random_id = Math.ceil(Math.random() * 1000000)
+    const options = {
+      notifications: [
+        {
+          id: random_id,
+          title: `${message?.senderName} sent you a message`,
+          body: message?.message,
+          largeIcon: 'res://drawable/icon_msg96.png',
+          smallIcon: 'res://drawable/icon_msg48.png',
+        },
+      ],
+    }
+    LocalNotifications.schedule(options)
+  }
 }
 
-onBeforeMount(async () => {
+onMounted(async () => {
   if (!isGuest.value) {
     const url = import.meta.env.VITE_APP_BASE_URL
     const url_without_api = url.slice(0, -3)
-    const notificationPath = url_without_api + 'notifications'
-    const messagePath = url_without_api + 'chat'
-
-    // Kết nối đến hub thông báo
-    await signalRService.connect(notificationPath, 'notificationHub')
-
-    // Kết nối đến hub tin nhắn
-    await signalRService.connect(messagePath, 'messageHub')
-
-    if (signalRService.isConnected('notificationHub') && signalRService.isConnected('messageHub')) {
-      // Đăng ký sự kiện cho hub thông báo
-      signalRService.on('notificationHub', 'NotificationFromServer', handleReceiveNotification)
-
-      // Đăng ký sự kiện cho hub tin nhắn
-      signalRService.on('messageHub', 'UpdateOnlineUsers', handleUserIsOnline)
-      signalRService.on('messageHub', 'ReceiveMessage', handleReceiveMessage)
-    } else {
-      //retry connect
-      setTimeout(() => {
-        location.reload()
-      }, 100)
+    const path = url_without_api + 'notifications'
+    await signalRService.connect(`${path}`)
+    if (signalRService.isConnected()) {
+      signalRService.on('NotificationFromServer', handleReceiveNotification)
+      signalRService.on('UpdateOnlineUsers', handleUserIsOnline)
+      signalRService.on('ReceiveMessage', handleReceiveMessage)
     }
   }
 })
 
-// watch for user change
-
 onBeforeUnmount(() => {
   if (!isGuest.value) {
-    signalRService.off('notificationHub', 'NotificationFromServer')
-    signalRService.off('messageHub', 'UpdateOnlineUsers')
-    signalRService.off('messageHub', 'ReceiveMessage')
-    signalRService.disconnect('notificationHub')
-    signalRService.disconnect('messageHub')
+    signalRService.off('NotificationFromServer')
+    signalRService.off('UpdateOnlineUsers')
+    signalRService.off('ReceiveMessage')
+    signalRService.disconnect()
   }
 })
 </script>

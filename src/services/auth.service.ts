@@ -49,6 +49,17 @@ class AuthService {
       })
   }
 
+  async address(query: any, sessionToken: any): Promise<any> {
+    return apiService
+      .get(`/tokens/address?input=${query}&sessionToken=${sessionToken}`)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
   async confirmEmail(tenant: string, userId: string, code: string): Promise<any> {
     return apiService
       .request({

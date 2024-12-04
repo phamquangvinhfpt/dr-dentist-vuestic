@@ -93,7 +93,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/notification/Notification.vue'),
       },
       {
-        name: 'audit logs',
+        name: 'audit-logs',
         path: 'audit-logs',
         meta: {
           requiresAuth: true,
@@ -122,7 +122,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
         },
-        component: () => import('../pages/Chat/Message.vue'),
+        component: () => import('../pages/message/Message.vue'),
       },
       {
         name: 'doctors-for-users',
@@ -151,8 +151,8 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: '/doctors',
-        name: 'doctors-list',
+        path: 'doctors',
+        name: 'doctors',
         component: () => import('@/pages/Doctor/DoctorsList.vue'),
         meta: {
           requiresAuth: true,
@@ -216,7 +216,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/Contact-Info/MyContacts.vue'),
       },
       {
-        path: '/payment-management',
+        path: 'payment-management',
         name: 'payment-management',
         meta: {
           requiresAuth: true,
@@ -272,6 +272,14 @@ const routes: Array<RouteRecordRaw> = [
         path: 'doctor/rating',
         name: 'ratingDoctor',
         component: () => import('@/pages/Doctor/RatingDoctor.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: 'working-calendar',
+        name: 'working-calendar',
+        component: () => import('@/pages/working-calendar/WorkingManager.vue'),
         meta: {
           requiresAuth: true,
         },

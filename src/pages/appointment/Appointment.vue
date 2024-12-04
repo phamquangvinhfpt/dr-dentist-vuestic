@@ -3,29 +3,27 @@
     <div class="md:h-screen grid grid-cols-1 md:flex md:flex-col">
       <header class="border-b p-4 bg-white" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
         <div class="grid md:flex items-center justify-between">
-          <div>
-            <div class="grid md:flex items-center md:space-x-4 space-y-4">
-              <VaDateInput
-                v-model="selectedDate"
-                :format="formatDate"
-                :parse="parseDate"
-                manual-input
-                class="px-3 py-1.5"
-                clearable
-              />
-              <div class="inline-flex rounded-lg border bg-gray-50 p-1 w-fit ml-3">
-                <button
-                  v-for="type in filteredTypes"
-                  :key="type.id"
-                  :class="[
-                    'px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
-                    isAppointment === type.id ? 'bg-white shadow' : 'hover:bg-gray-100',
-                  ]"
-                  @click="isAppointment = type.id"
-                >
-                  {{ type.label }}
-                </button>
-              </div>
+          <div class="grid grid-cols-1 md:flex md:items-center md:space-x-4 gap-4">
+            <VaDateInput
+              v-model="selectedDate"
+              :format="formatDate"
+              :parse="parseDate"
+              manual-input
+              class="w-full px-3 py-1.5"
+              clearable
+            />
+            <div class="w-full inline-flex rounded-lg border bg-gray-50 p-1">
+              <button
+                v-for="type in filteredTypes"
+                :key="type.id"
+                :class="[
+                  'w-full px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
+                  isAppointment === type.id ? 'bg-white shadow' : 'hover:bg-gray-100',
+                ]"
+                @click="isAppointment = type.id"
+              >
+                {{ type.label }}
+              </button>
             </div>
           </div>
 

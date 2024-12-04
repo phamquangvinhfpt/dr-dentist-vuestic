@@ -59,7 +59,7 @@ export default {
       },
     },
     {
-      name: 'doctors-list',
+      name: 'doctors',
       displayName: 'menu.doctor-management',
       meta: {
         icon: 'person',
@@ -68,7 +68,14 @@ export default {
       },
     },
     {
-      name: 'audit logs',
+      name: 'working-calendar',
+      displayName: 'menu.working-calendar',
+      meta: {
+        icon: 'calendar_month',
+      },
+    },
+    {
+      name: 'audit-logs',
       displayName: 'menu.audit-logs',
       meta: {
         icon: 'list_alt',

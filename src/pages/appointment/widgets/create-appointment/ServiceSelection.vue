@@ -62,7 +62,7 @@ const searchService = (search: Search) => {
 
 const handleServiceSelect = (service: Service) => {
   currentSelectedService.value = service
-  selectedServiceId.value = service.id
+  selectedServiceId.value = service.serviceID
   emit('update:selectedService', service)
   isOpen.value = false
 }
@@ -115,7 +115,7 @@ watch(
   () => services.value,
   (newServices) => {
     if (selectedServiceId.value && newServices.length) {
-      const selectedService = newServices.find((s) => s.id === selectedServiceId.value)
+      const selectedService = newServices.find((s) => s.serviceID === selectedServiceId.value)
       if (selectedService) {
         currentSelectedService.value = selectedService
       }
@@ -135,7 +135,7 @@ watch(
         <p class="text-xl font-bold text-blue-900 dark:text-blue-100">
           Select a service
           <span v-if="currentSelectedService" class="text-sm font-normal text-gray-600 dark:text-gray-300">
-            ({{ currentSelectedService.serviceName }})
+            ({{ currentSelectedService.name }})
           </span>
         </p>
         <svg
@@ -162,9 +162,9 @@ watch(
           />
           <div class="h-[440px] md:h-[300px] lg:h-[325px] overflow-y-auto pr-4 scroll">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div v-for="service in services" :key="service.id" class="relative">
+              <div v-for="service in services" :key="service.serviceID" class="relative">
                 <input
-                  :id="`service_${service.id}`"
+                  :id="`service_${service.serviceID}`"
                   :value="service"
                   type="radio"
                   name="service"
@@ -173,11 +173,11 @@ watch(
                   @change="handleServiceSelect(service)"
                 />
                 <label
-                  :for="`service_${service.id}`"
+                  :for="`service_${service.serviceID}`"
                   class="relative flex h-full cursor-pointer flex-col rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow bg-white dark:bg-gray-700 peer-checked:bg-emerald-600 peer-checked:text-white dark:peer-checked:bg-emerald-700"
                 >
                   <div class="flex items-start gap-2 min-h-[50px] relative">
-                    <span class="font-medium text-base break-words pr-8">{{ service.serviceName }}</span>
+                    <span class="font-medium text-base break-words pr-8">{{ service.name }}</span>
                     <div
                       class="absolute right-0 top-1 flex-shrink-0 box-content block h-3 w-3 rounded-full border-8"
                       :class="{
@@ -186,7 +186,7 @@ watch(
                       }"
                     ></div>
                   </div>
-                  <span class="text-sm mb-3">{{ service.serviceDescription }}</span>
+                  <span class="text-sm mb-3">{{ service.description }}</span>
                   <span class="absolute bottom-0 left-4 text-lg font-bold"
                     >{{ formatPrice(service.totalPrice) }} VND</span
                   >

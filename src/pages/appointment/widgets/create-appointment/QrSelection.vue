@@ -2,6 +2,7 @@
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useToast, VaAlert, VaModal, VaSkeleton, VaSkeletonGroup } from 'vuestic-ui'
+import { Clipboard } from '@capacitor/clipboard'
 
 const props = defineProps<{
   showQrCode: boolean
@@ -44,6 +45,19 @@ const copyToClipboard = async (text: any) => {
   } catch (err) {
     console.error('Failed to copy text: ', err)
   }
+}
+
+const writeToClipboard = async (text: string) => {
+  await Clipboard.write({
+    string: text,
+  })
+  checkClipboard
+}
+
+const checkClipboard = async () => {
+  const { type, value } = await Clipboard.read()
+
+  console.log(`Got ${type} from clipboard: ${value}`)
 }
 
 const updateRemainingTime = () => {
@@ -224,7 +238,7 @@ watch(
                 <p class="text-base font-medium dark:text-gray-300">Description</p>
                 <button
                   class="mt-3 px-4 py-2 bg-[#F1FAFF] hover:bg-[#009ef7] hover:text-white text-[#55A0F7] rounded transition-colors duration-200 ease-in-out text-base font-sans font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#009ef7] text-left"
-                  @click="copyToClipboard(bankInfo.description)"
+                  @click="isMobile ? writeToClipboard(bankInfo.description) : copyToClipboard(bankInfo.description)"
                 >
                   {{ bankInfo.description }}
                 </button>
@@ -282,7 +296,7 @@ watch(
                 <p class="text-sm text-gray-500 dark:text-gray-400">Description</p>
                 <button
                   class="mt-3 px-4 py-2 bg-[#F1FAFF] hover:bg-[#009ef7] hover:text-white text-[#55A0F7] rounded transition-colors duration-200 ease-in-out text-base font-sans font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#009ef7] text-left"
-                  @click="copyToClipboard(bankInfo.description)"
+                  @click="isMobile ? writeToClipboard(bankInfo.description) : copyToClipboard(bankInfo.description)"
                 >
                   {{ bankInfo.description }}
                 </button>

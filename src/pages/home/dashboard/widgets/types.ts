@@ -18,3 +18,9 @@ export type Doctors = {
   rating: number
   doctorProfile: DoctorProfile
 }
+
+export type TypeService = {
+  id: string
+  typeName: string
+  typeDescription: string
+}

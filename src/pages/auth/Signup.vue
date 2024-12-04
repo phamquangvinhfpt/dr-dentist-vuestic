@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/modules/auth.module'
 import { Register } from './types'
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
+import AddressAutocomplete from './AddressAutocomplete.vue'
 
 const { t } = useI18n()
 
@@ -232,7 +233,7 @@ const birthDayRules = computed(() => [
       />
 
       <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
-      <VaTextarea v-model="formData.address" :rules="addressRules" class="mb-4 w-full" :label="t('auth.address')" />
+      <AddressAutocomplete :rules="addressRules" />
 
       <div class="flex justify-center mt-4">
         <VaButton class="w-full" @click="submit">{{ t('auth.create_account') }}</VaButton>

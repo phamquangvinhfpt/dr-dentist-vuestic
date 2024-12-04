@@ -216,6 +216,17 @@ class ServiceService {
         return Promise.reject(error)
       })
   }
+
+  async getServiceType(data: any): Promise<any> {
+    return apiService
+      .post('/service/type', data)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new ServiceService()

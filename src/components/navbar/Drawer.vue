@@ -1,0 +1,116 @@
+<template>
+  <Teleport to="body">
+    <!-- Overlay -->
+    <Transition name="overlay">
+      <div v-if="isOpen" class="fixed inset-0 bg-black/50 dark:bg-black/70 z-40" @click="closeDrawer"></div>
+    </Transition>
+
+    <!-- Drawer Panel -->
+    <Transition :name="side">
+      <VaCard
+        v-if="isOpen"
+        class="fixed top-0 w-80 h-full bg-white dark:bg-[#111827] shadow-xl z-50 overflow-y-auto"
+        :class="[side === 'right' ? 'right-0' : 'left-0', 'transform transition-transform duration-300 ease-in-out']"
+        :style="{ width }"
+      >
+        <!-- Drawer Header -->
+        <VaCard class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ title }}</h2>
+          <button
+            class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white p-2 transition-colors duration-200"
+            @click="closeDrawer"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </VaCard>
+
+        <!-- Drawer Content -->
+        <div class="p-4 text-gray-800 dark:text-gray-200">
+          <slot></slot>
+        </div>
+      </VaCard>
+    </Transition>
+  </Teleport>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { VaCard } from 'vuestic-ui/web-components'
+
+// Define props interface
+interface DrawerProps {
+  title?: string
+  side?: 'left' | 'right'
+  width?: string
+}
+
+// Define props with defaults
+export interface DrawerInstance {
+  openDrawer: () => void
+  closeDrawer: () => void
+}
+
+withDefaults(defineProps<DrawerProps>(), {
+  title: 'Drawer',
+  side: 'left',
+  width: '320px',
+})
+
+// Reactive state for drawer
+const isOpen = ref(false)
+
+// Methods to control drawer
+const openDrawer = () => {
+  isOpen.value = true
+}
+
+const closeDrawer = () => {
+  isOpen.value = false
+}
+
+// Expose methods for parent component
+defineExpose<DrawerInstance>({
+  openDrawer,
+  closeDrawer,
+})
+</script>
+
+<style scoped>
+/* Overlay Transition */
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: opacity 0.3s ease;
+}
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
+}
+
+/* Right Drawer Transition */
+.right-enter-from,
+.right-leave-to {
+  transform: translateX(100%);
+}
+.right-enter-active,
+.right-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Left Drawer Transition */
+.left-enter-from,
+.left-leave-to {
+  transform: translateX(-100%);
+}
+.left-enter-active,
+.left-leave-active {
+  transition: transform 0.3s ease-in-out;
+}
+</style>

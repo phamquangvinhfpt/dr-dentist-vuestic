@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">vuestic-admin</string>
-    <string name="title_activity_main">vuestic-admin</string>
+    <string name="app_name">Dr. Dentist</string>
+    <string name="title_activity_main">Dr. Dentist</string>
     <string name="package_name">vuestic.admin</string>
     <string name="custom_url_scheme">vuestic.admin</string>
 </resources>

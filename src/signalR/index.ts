@@ -2,7 +2,7 @@ import jwtService from '@/services/jwt.service'
 import { HubConnection, HubConnectionBuilder, IHttpConnectionOptions } from '@microsoft/signalr'
 
 class SignalRService {
-  private connections: Map<string, HubConnection> = new Map()
+  private connection: HubConnection | null = null
   private token: string | null = jwtService.getToken()
 
   private getAccessToken = (): string | Promise<string> => {
@@ -12,9 +12,9 @@ class SignalRService {
     return this.token
   }
 
-  async connect(url: string, hubName: string) {
-    if (this.connections.has(hubName) && this.connections.get(hubName)?.state === 'Connected') {
-      console.log(`Already connected to ${hubName} hub.`)
+  async connect(url: string) {
+    if (this.connection && this.connection.state === 'Connected') {
+      console.log('Already connected to SignalR.')
       return
     }
 
@@ -22,77 +22,49 @@ class SignalRService {
       const option: IHttpConnectionOptions = {
         accessTokenFactory: () => this.getAccessToken(),
       }
-      const connection = new HubConnectionBuilder().withUrl(url, option).withAutomaticReconnect().build()
+      this.connection = new HubConnectionBuilder().withUrl(url, option).withAutomaticReconnect().build()
       try {
-        await connection.start()
-        this.connections.set(hubName, connection)
-        console.log(`Connected to ${hubName} hub.`)
+        await this.connection.start()
       } catch (error) {
-        console.error(`Error connecting to ${hubName} hub:`, error)
+        console.error('Error connecting to SignalR:', error)
       }
     }
   }
 
-  async disconnect(hubName: string) {
-    const connection = this.connections.get(hubName)
-    if (connection) {
-      await connection.stop()
-      this.connections.delete(hubName)
-      console.log(`Disconnected from ${hubName} hub.`)
+  async disconnect() {
+    if (this.connection) {
+      await this.connection.stop()
     }
   }
 
-  on(hubName: string, eventName: string, callback: (...args: any[]) => void) {
-    const connection = this.connections.get(hubName)
-    if (connection) {
-      connection.on(eventName, callback)
-    } else {
-      console.error(`No connection found for hub: ${hubName}`)
-      // reconnect
-      this.reconnect(hubName)
-      this.connect('', hubName)
+  on(eventName: any, callback: any) {
+    if (this.connection) {
+      this.connection.on(eventName, callback)
     }
   }
 
-  off(hubName: string, eventName: string) {
-    const connection = this.connections.get(hubName)
-    if (connection) {
-      connection.off(eventName)
-    } else {
-      console.error(`No connection found for hub: ${hubName}`)
+  off(eventName: any) {
+    if (this.connection) {
+      this.connection.off(eventName)
     }
   }
 
-  async invoke(hubName: string, methodName: string, ...args: any[]) {
-    const connection = this.connections.get(hubName)
-    if (connection) {
+  async invoke(methodName: any, ...args: any) {
+    if (this.connection) {
       try {
-        return await connection.invoke(methodName, ...args)
+        return await this.connection.invoke(methodName, ...args)
       } catch (err) {
-        console.error(`Error invoking method ${methodName} on hub ${hubName}:`, err)
+        console.error(`Error invoking method ${methodName}:`, err)
       }
-    } else {
-      console.error(`No connection found for hub: ${hubName}`)
     }
   }
 
-  isConnected(hubName: string): boolean {
-    const connection = this.connections.get(hubName)
-    return connection?.state === 'Connected'
-  }
-
-  reconnect(hubName: string) {
-    const connection = this.connections.get(hubName)
-    if (connection) {
-      try {
-        connection.start()
-        console.log(`Reconnected to ${hubName} hub.`)
-      } catch (error) {
-        console.error(`Error reconnecting to ${hubName} hub:`, error)
-      }
+  isConnected() {
+    if (this.connection) {
+      return this.connection.state === 'Connected'
     }
+    return false
   }
 }
-
 const signalRService = new SignalRService()
 export default signalRService

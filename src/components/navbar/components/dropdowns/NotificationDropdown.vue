@@ -112,6 +112,7 @@ import { useToast } from 'vuestic-ui/web-components'
 import { IconColor, IconType, LabelType } from '@/pages/notification/Notification.enum'
 import { useNotificationStore } from '@/stores/modules/notification.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
+import { LocalNotifications, ScheduleOptions } from '@capacitor/local-notifications'
 
 const { t, locale } = useI18n()
 const userStore = useAuthStore()
@@ -130,6 +131,7 @@ const pagination = ref<PagingNotification>({
   currentPages: 0,
   hasNextPage: true,
 })
+const isMobile = computed(() => window.innerWidth < 768)
 const notifications = ref<NotificationType[]>([])
 
 const getNotifications = async (data: QueryGetNotification, isSeeMore: boolean) => {
@@ -347,6 +349,44 @@ const showToastNotification = (type: string, notification: any) => {
       position: 'bottom-right',
       onClick: () => handleClickToNotificationItem(notification?.url, notification?.id, notification?.isRead),
     })
+    if (isMobile.value) {
+      const random_id = Math.ceil(Math.random() * 1000000)
+      const options: ScheduleOptions = {
+        notifications: [
+          {
+            id: random_id,
+            title: notification?.title,
+            body: notification?.message,
+            largeIcon: 'res://drawable/icon_noti64.png',
+            smallIcon: 'res://drawable/icon_bel48.png',
+          },
+        ],
+      }
+      LocalNotifications.schedule(options)
+    }
+  } else {
+    if (isMobile.value) {
+      const random_id = Math.ceil(Math.random() * 1000000)
+      const options: ScheduleOptions = {
+        notifications: [
+          {
+            id: random_id,
+            title: notification?.title,
+            body: notification?.message,
+            largeBody:
+              'Lịch hẹn nha khoa của bạn đã được xác nhận thành công. Chi tiết lịch hẹn đã được gửi vào email đăng ký.',
+            summaryText: 'Đặt lịch khám nha khoa thành công',
+            largeIcon: 'res://drawable/icon_noti64.png',
+            smallIcon: 'res://drawable/icon_bel48.png',
+          },
+        ],
+      }
+      try {
+        LocalNotifications.schedule(options)
+      } catch (error) {
+        console.log(error)
+      }
+    }
   }
 }
 

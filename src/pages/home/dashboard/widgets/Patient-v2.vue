@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { onBeforeMount, onMounted, ref } from 'vue'
-import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useToast } from 'vuestic-ui'
-import { Doctors } from './types'
+import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useToast, VaCardActions } from 'vuestic-ui'
+import { Doctors, TypeService } from './types'
 import { useRouter } from 'vue-router'
 import { getErrorMessage } from '@/services/utils'
 import Contact from '../../landingpage/Contact.vue'
@@ -22,6 +22,7 @@ const doctorStore = useDoctorProfileStore()
 const doctors = ref<Doctors[]>([])
 const router = useRouter()
 const { init } = useToast()
+const serviceType = ref<TypeService[]>()
 
 const INTERVAL_TIME = 3000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
@@ -94,6 +95,24 @@ serviceStore.getAllCustomerServices().then((res) => {
   })
 })
 
+const handleGetServiceType = async () => {
+  const request = {}
+  serviceStore
+    .getServiceType(request)
+    .then((res) => {
+      serviceType.value = res.data
+      console.log('serviceType', serviceType.value)
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'Error',
+        message: message,
+        color: 'danger',
+      })
+    })
+}
+
 onMounted(() => {
   const handleResize = () => {
     isLargeScreen.value = window.innerWidth >= 768
@@ -105,6 +124,7 @@ onMounted(() => {
 onMounted(() => {
   loading.value = false
   startContentAnimation()
+  handleGetServiceType()
 })
 
 onBeforeMount(() => {
@@ -210,7 +230,7 @@ window.addEventListener('resize', () => {
               <h3
                 class="text-sm lg:text-xl font-semibold mb-4 text-center text-blue-800 dark:text-blue-300 group-hover:text-white transition-colors duration-300"
               >
-                Tooth Extraction
+                Chỉnh Nha
               </h3>
               <p
                 :class="[
@@ -239,7 +259,7 @@ window.addEventListener('resize', () => {
               <h3
                 class="text-sm lg:text-xl font-semibold mb-4 text-center text-blue-800 dark:text-blue-300 group-hover:text-white transition-colors duration-300"
               >
-                Cavity Fillings
+                Thẩm Mỹ
               </h3>
               <p
                 :class="[
@@ -268,7 +288,7 @@ window.addEventListener('resize', () => {
               <h3
                 class="text-sm lg:text-xl font-semibold mb-4 text-center text-blue-800 dark:text-blue-300 group-hover:text-white transition-colors duration-300"
               >
-                Fracture Repairs
+                Phục ình
               </h3>
               <p
                 :class="[
@@ -295,67 +315,25 @@ window.addEventListener('resize', () => {
         >
           OUR SERVICES
         </h5>
-        <div class="grid row-gap-8 sm:row-gap-0 sm:grid-cols-2 lg:grid-cols-3">
-          <div class="p-8">
-            <div class="max-w-md text-center">
-              <div
-                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
+        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <VaCard v-for="(type, index) in serviceType" :key="index" class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <VaCardTitle>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ type.typeName }}</h3>
+            </VaCardTitle>
+            <VaCardContent>
+              <p class="text-gray-600 dark:text-gray-300">{{ type.typeDescription }}</p>
+            </VaCardContent>
+            <VaCardActions align="center">
+              <VaButton
+                preset="secondary"
+                icon=""
+                size="small"
+                @click="router.push({ name: 'services', params: { id: type.id } })"
               >
-                <img lazy src="/services/general_dentistry.ico" />
-              </div>
-              <h1 class="mb-2 text-2xl font-semibold leading-5">GENERAL DENTISTRY</h1>
-            </div>
-          </div>
-          <div class="p-8">
-            <div class="max-w-md text-center">
-              <div
-                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
-              >
-                <img lazy src="/services/cosmetic_dentistry.ico" />
-              </div>
-              <h1 class="mb-2 text-2xl font-semibold leading-5">COSMETICS SURGERY</h1>
-            </div>
-          </div>
-          <div class="p-8">
-            <div class="max-w-md text-center">
-              <div
-                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
-              >
-                <img lazy src="/services/oral_surgery.ico" />
-              </div>
-              <h1 class="mb-2 text-2xl font-semibold leading-5">ORAL SURGERY</h1>
-            </div>
-          </div>
-          <div class="p-8">
-            <div class="max-w-md text-center">
-              <div
-                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
-              >
-                <img lazy src="/services/orthodontics.ico" />
-              </div>
-              <h1 class="mb-2 text-2xl font-semibold leading-5">ORTHODONTICS</h1>
-            </div>
-          </div>
-          <div class="p-8">
-            <div class="max-w-md text-center">
-              <div
-                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
-              >
-                <img lazy src="/services/pediatric_dentistry.ico" />
-              </div>
-              <h1 class="mb-2 text-2xl font-semibold leading-5">PEDIATRIC DENTISTRY</h1>
-            </div>
-          </div>
-          <div class="p-8">
-            <div class="max-w-md text-center">
-              <div
-                class="flex items-center justify-center w-40 h-40 mx-auto mb-10 transition-colors duration-200 ease-in-out bg-teal-100 rounded-full hover:bg-teal-300 sm:w-40 sm:h-40 hover:scale-110"
-              >
-                <img lazy src="/services/prosthodontics.ico" />
-              </div>
-              <h1 class="mb-2 text-2xl font-semibold leading-5">PROSTHODONTICS</h1>
-            </div>
-          </div>
+                View Services
+              </VaButton>
+            </VaCardActions>
+          </VaCard>
         </div>
       </div>
       <!-- ====== Services Section End -->

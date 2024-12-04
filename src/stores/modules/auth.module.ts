@@ -3,6 +3,7 @@ import authService from '@services/auth.service'
 import jwtService from '@services/jwt.service'
 import { Register, ResetPassword } from '@/pages/auth/types'
 import { UserDetail } from '@/pages/user/types'
+// import signalRService from '@/signalR'
 
 export type User = {
   id: string
@@ -130,6 +131,14 @@ export const useAuthStore = defineStore('auth', {
         return await Promise.reject(error)
       }
     },
+    async address(query: any, sessionToken: any): Promise<any> {
+      try {
+        const response = await authService.address(query, sessionToken)
+        return await Promise.resolve(response)
+      } catch (error) {
+        return await Promise.reject(error)
+      }
+    },
     async confirmEmail(tenant: string, userId: string, code: string): Promise<any> {
       try {
         const response = await authService.confirmEmail(tenant, userId, code)
@@ -182,6 +191,9 @@ export const useAuthStore = defineStore('auth', {
         })
     },
     logout() {
+      // if (signalRService.isConnected()) {
+      //   signalRService.disconnect()
+      // }
       this.isAuthenticated = false
       this.user = null
       jwtService.destroyToken()
