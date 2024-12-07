@@ -30,6 +30,17 @@ export const useCalendarStore = defineStore('calendar', {
         return await Promise.reject(error)
       }
     },
+    async registerPartTime(doctorId: any, data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.registerFullTime(doctorId, data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
     async getWorkingCalendar(start: any, end: any, filter: any): Promise<any> {
       try {
         this.isLoading = true
@@ -67,6 +78,17 @@ export const useCalendarStore = defineStore('calendar', {
       try {
         this.isLoading = true
         const response = await calendarService.updateWorkingCalendar(doctorId, data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async createWorkingCalendar(doctorId: any, data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.createWorkingCalendar(doctorId, data)
         this.isLoading = false
         return await Promise.resolve(response.data)
       } catch (error) {

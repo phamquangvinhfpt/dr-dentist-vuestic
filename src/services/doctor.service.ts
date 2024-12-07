@@ -95,6 +95,16 @@ class DoctorService {
       .then((response) => Promise.resolve(response.data))
       .catch((error) => Promise.reject(error))
   }
+  async getAvailableDoctors(data: any): Promise<any> {
+    return apiService
+      .post(`/appointment/doctor/available`, data)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new DoctorService()

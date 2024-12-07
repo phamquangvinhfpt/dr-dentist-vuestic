@@ -17,7 +17,6 @@ const loading = ref(false)
 const doctorStore = useDoctorProfileStore()
 const appointmentStore = useAppointmentStore()
 const userStore = useAuthStore()
-const practitioners = ref<any[]>([])
 const selectedService = ref<any | null>(null)
 const selectedDate = ref<string | null>(null)
 const selectedTime = ref<string | null>(null)
@@ -103,13 +102,6 @@ const toggleDoctorsList = () => {
   }
 }
 
-const handleSelectDoctor = (doctor: any) => {
-  selectedPractitioner.value = doctor
-  console.log('Selected Doctor:', selectedPractitioner.value)
-  isDoctorSelected.value = true
-  handleGetAvailableTimes()
-}
-
 const handleUpdateSelectedTime = (time: string) => {
   selectedTime.value = time
   defaultTimeSelection.value = availableTimes.value
@@ -151,7 +143,7 @@ const parseDate = (date: Date | string | null) => {
 
 const handleSubmit = async () => {
   try {
-    appointmentForm.value.serviceId = selectedService.value.id
+    appointmentForm.value.serviceId = selectedService.value.serviceID
     appointmentForm.value.appointmentDate = parseDate(selectedDate.value || '')
     appointmentForm.value.startTime = selectedTime.value
     appointmentForm.value.dentistId = selectedPractitioner.value ? selectedPractitioner.value.id : null
@@ -267,8 +259,9 @@ defineExpose({
               <DoctorSelection
                 v-if="showDoctorsList"
                 v-model:selectedPractitioner="selectedPractitioner"
-                :practitioners="practitioners"
-                @practitionerSelected="handleSelectDoctor"
+                :service="selectedService"
+                :date="selectedDate"
+                :time="selectedTime"
               />
             </div>
 

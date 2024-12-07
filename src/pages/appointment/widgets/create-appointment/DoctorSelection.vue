@@ -1,46 +1,48 @@
 <script setup lang="ts">
-import { defineEmits, ref, computed, watch } from 'vue'
-import { Doctor, Pagination, Search, SearchResponse } from '../../types'
+import { defineEmits, onMounted, ref } from 'vue'
+import { Doctor } from '../../types'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { getErrorMessage } from '@/services/utils'
 import { useToast } from 'vuestic-ui/web-components'
-import { watchDebounced } from '@vueuse/core'
 
 const { init } = useToast()
 const storeDoctor = useDoctorProfileStore()
-const isMobile = computed(() => window.innerWidth < 768)
 const loading = ref(false)
 const doctors = ref<Doctor[]>([])
-const doctorSearchRes = ref<SearchResponse | null>(null)
 const selectedPractitioner = ref<Doctor | null>(null)
 const selectedDoctorId = ref<string | null>(null)
 const isOpen = ref(true)
 
-const pagination = ref<Pagination>({
-  page: 1,
-  perPage: isMobile.value ? 3 : 6,
-  total: 0,
-})
+const props = defineProps<{
+  service: any
+  date: any
+  time: any
+}>()
 
-const searchValue = ref<Search>({
-  pageNumber: 1,
-  pageSize: pagination.value.perPage,
-  keyword: '',
-  isActive: true,
-})
+const getAvailableDoctors = () => {
+  const date = props.date.split('T')[0]
+  const [hours, minutes, seconds] = props.time.split(':')
+  let newMinutes = parseInt(minutes) + 30
+  let newHours = parseInt(hours)
 
-const filters = ref({
-  keyword: '',
-})
+  if (newMinutes >= 60) {
+    newHours += 1
+    newMinutes -= 60
+  }
+  const endTime = `${newHours.toString().padStart(2, '0')}:${newMinutes.toString().padStart(2, '0')}:${seconds}`
 
-const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.perPage))
-const searchDoctor = (search: Search) => {
+  const request = {
+    serviceID: props.service.serviceID,
+    date: date,
+    startTime: props.time,
+    endTime: endTime,
+  }
   loading.value = true
   storeDoctor
-    .getDoctors(search)
+    .getAvailableDoctors(request)
     .then((response) => {
-      doctors.value = response.data
-      doctorSearchRes.value = response
+      doctors.value = response
+      console.log(response)
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -55,10 +57,10 @@ const searchDoctor = (search: Search) => {
     })
 }
 
-const emit = defineEmits(['update:selectedPractitioner', 'practitionerSelected'])
+const emit = defineEmits(['update:selectedPractitioner'])
 
 const handleSelect = (practitioner: any) => {
-  emit('practitionerSelected', practitioner)
+  emit('update:selectedPractitioner', practitioner)
   selectedPractitioner.value = practitioner
   selectedDoctorId.value = practitioner.id
   isOpen.value = false
@@ -68,60 +70,9 @@ const toggleSection = () => {
   isOpen.value = !isOpen.value
 }
 
-// watchers for search
-watchDebounced(
-  filters.value,
-  () => {
-    pagination.value.page = 1
-    searchValue.value.keyword = filters.value.keyword
-    searchDoctor(searchValue.value)
-  },
-  { debounce: 500, maxWait: 1000 },
-)
-
-// watchers for pagination
-watch(
-  () => pagination.value.page,
-  () => {
-    searchValue.value.pageNumber = pagination.value.page
-    searchValue.value.pageSize = pagination.value.perPage
-    searchDoctor(searchValue.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => pagination.value.perPage,
-  () => {
-    searchValue.value.pageNumber = 1
-    searchValue.value.pageSize = pagination.value.perPage
-    searchDoctor(searchValue.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => doctorSearchRes.value,
-  () => {
-    if (doctorSearchRes.value) {
-      pagination.value.total = doctorSearchRes.value.totalCount
-    }
-  },
-  { immediate: true },
-)
-
-//end watchers for pagination
-watch(
-  () => doctors.value,
-  (newDoctors) => {
-    if (selectedDoctorId.value && newDoctors.length) {
-      const selectedDoctor = newDoctors.find((s) => s.id === selectedDoctorId.value)
-      if (selectedDoctor) {
-        selectedPractitioner.value = selectedDoctor
-      }
-    }
-  },
-)
+onMounted(() => {
+  getAvailableDoctors()
+})
 </script>
 
 <template>
@@ -152,14 +103,6 @@ watch(
       <!-- Accordion content -->
       <div v-show="isOpen" class="transition-all duration-200">
         <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-          <VaInput
-            v-model="filters.keyword"
-            placeholder="find doctors"
-            icon="search"
-            class="mb-4"
-            clearable
-            @clear="filters.keyword = ''"
-          />
           <div class="h-[440px] md:h-[300px] lg:h-[325px] overflow-y-auto pr-4 scroll">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div v-for="practitioner in doctors" :key="practitioner.id" class="relative">
@@ -193,15 +136,6 @@ watch(
               </div>
             </div>
           </div>
-          <VaPagination
-            v-model="pagination.page"
-            class="items-center justify-end mt-4"
-            buttons-preset="secondary"
-            :pages="totalPages"
-            :visible-pages="5"
-            :boundary-links="true"
-            :direction-links="true"
-          />
         </div>
       </div>
     </div>

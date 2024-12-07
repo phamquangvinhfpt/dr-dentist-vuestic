@@ -14,6 +14,7 @@ export type User = {
   tenant: string
   roles: string
   permission?: string[]
+  type?: string
 }
 
 export const Action = {
@@ -81,6 +82,7 @@ export const useAuthStore = defineStore('auth', {
           roles: userParse['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
           tenant: userParse.tenant,
           permission: userParse.permission,
+          type: userParse.type,
         }
         this.avatarUrl = userParse.image_url
       } else {

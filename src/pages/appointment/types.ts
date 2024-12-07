@@ -22,6 +22,7 @@ export type Search = {
   isActive?: boolean | null | undefined
   date?: string | null | undefined
   time?: string | null | undefined
+  advancedSearch?: any
 }
 
 export type SearchResponse = {

@@ -124,7 +124,6 @@ export default {
       meta: {
         icon: 'message',
         permission: 'PatientMessages.View',
-        roles: ['Patient', 'Staff'],
       },
     },
     {

@@ -7,8 +7,21 @@
         <div class="flex items-center gap-4">
           <div class="flex items-center gap-2">
             <div
+              v-if="
+                auth.musHaveRole('Admin') ||
+                auth.musHaveRole('Staff') ||
+                (auth.musHaveRole('Dentist') && typeDoctor === 'PartTime')
+              "
               class="relative rounded-full w-10 h-10 bg-blue-500 hover:cursor-pointer hover:bg-blue-600"
-              @click="props.regist, $emit('update:regist')"
+              @click="
+                () => {
+                  if (auth.musHaveRole('Admin') || auth.musHaveRole('Staff')) {
+                    showModalSizeLarge = true
+                  } else if (auth.musHaveRole('Dentist') && typeDoctor === 'PartTime') {
+                    showAddModal = true
+                  }
+                }
+              "
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -37,7 +50,7 @@
               </option>
             </select>
             <select v-model="currentMonth" class="border rounded px-3 py-1.5">
-              <option v-for="(month, index) in months" :key="index" :value="index">
+              <option v-for="(month, index) in months" :key="month" :value="index">
                 {{ month }}
               </option>
             </select>
@@ -46,9 +59,10 @@
       </div>
       <div class="grid gap-6">
         <div class="grid gap-6 lg:grid-cols-3">
-          <div>
+          <div v-if="!hideSwitcher">
             <div class="mb-4">
               <VaButtonToggle
+                v-if="!hideSwitcher"
                 v-model="switcher"
                 preset="secondary"
                 class="mb-3"
@@ -56,8 +70,11 @@
                 :options="options"
               />
               <ul>
-                <li v-for="dentist in dentists?.data" :key="dentist.dentistUserID">
-                  <div class="flex items-center justify-between gap-2 hover:cursor-pointer" @click="show = !show">
+                <li v-for="(dentist, index) in dentists?.data" :key="dentist.dentistUserID">
+                  <div
+                    class="flex items-center justify-between gap-2 hover:cursor-pointer mb-3"
+                    @click="toggleDentistDetails(index)"
+                  >
                     <div class="grid grid-cols-2 gap-2">
                       <VaAvatar
                         :src="getSrcAvatar(dentist.dentistImage)"
@@ -71,28 +88,33 @@
                       </div>
                     </div>
                     <div class="flex items-end justify-end cursor-pointer">
-                      <VaButton preset="primary" class="mr-3"> Primary </VaButton>
                       <VaIcon
                         name="chevron_right"
                         color="primary"
                         class="transform transition-transform duration-300 ease-in-out"
-                        :class="{ 'rotate-90': show }"
+                        :class="{ 'rotate-90': openDentistIndex === index }"
                       />
                     </div>
                   </div>
                   <VaScrollContainer
-                    v-if="show"
+                    v-if="openDentistIndex === index"
                     class="mt-2 space-y-2 md:min-h-[calc(100vh-435px)] lg:max-h-[calc(100vh-635px)] overflow-y-auto"
                     vertical
                     color="focus"
                   >
                     <div
-                      v-for="item in dentist.calendarDetails"
+                      v-for="(item, indexs) in dentist.calendarDetails"
                       :key="item.dentistUserID"
-                      class="bg-white shadow-sm rounded-lg p-3 border border-gray-200 hover:bg-gray-50 transition-colors duration-200 hover:cursor-move mb-3"
+                      :class="[
+                        'shadow-sm rounded-lg p-3 border transition-colors duration-200 hover:cursor-move mb-3',
+                        selectedCalendarIndex.includes(indexs)
+                          ? '!bg-[#dcf5ff] !border-blue-500 !text-white'
+                          : 'bg-white border-gray-200',
+                      ]"
                       draggable="true"
-                      @dragstart="handleDragStart($event, dentist, item)"
+                      @dragstart="handleDragStart($event, dentist, item, selectedCalendarIndex)"
                       @dragend="handleDragEnd"
+                      @click="selectedCalendar(item, indexs)"
                     >
                       <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
@@ -148,7 +170,7 @@
             </div>
           </div>
 
-          <div class="lg:col-span-2">
+          <div :class="[!hideSwitcher ? 'lg:col-span-2' : 'lg:col-span-3']">
             <!-- Calendar Grid -->
             <div class="relative border rounded-lg shadow">
               <!-- Days Header -->
@@ -184,7 +206,15 @@
                       @mouseleave="hideEventDetails"
                     >
                       <div :class="getEventDotClass(event.type)" class="w-2 h-2 rounded-full flex-shrink-0"></div>
-                      <span class="truncate">{{ event.title }}</span>
+                      <span v-if="isStaffOrAdmin" class="truncate"
+                        >{{ event.roomName ? event.roomName : '' }} {{ event.dentistName }}</span
+                      >
+                      <span v-else class="truncate">
+                        <span v-for="item in event.times" :key="item.timeID" class="flex m-2">
+                          {{ event.roomName ? event.roomName : '' }} {{ formatTime(item.startTime) }} -
+                          {{ formatTime(item.endTime) }}
+                        </span>
+                      </span>
                     </div>
                   </div>
 
@@ -211,7 +241,7 @@
             >
               <div class="py-1">
                 <button class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  Show Unassigned
+                  Register Calendar
                 </button>
               </div>
             </div>
@@ -242,13 +272,59 @@
                 </button>
                 <h2 class="text-2xl font-bold mb-4">Doctor's Working Hours</h2>
                 <div class="schedule-inputs flex space-x-4 mb-4">
-                  <VaOptionList
-                    v-model="listValue"
-                    :options="optionsTimes"
-                    value-by="altValue"
-                    disabled-by="altDisabled"
-                    :text-by="(option: any) => option.altText"
-                  />
+                  <div v-if="isStaffOrAdmin">
+                    <VaOptionList
+                      v-if="multiDrag === null"
+                      v-model="listValue"
+                      :options="optionsTimes"
+                      value-by="altValue"
+                      disabled-by="altDisabled"
+                      :text-by="(option: any) => option.altText"
+                    />
+                    <div v-else class="flex flex-row gap-4">
+                      <div v-for="item in multiDrag.items" :key="item.date" class="flex space-x-4">
+                        <div class="flex flex-col space-y-2">
+                          <span class="text-sm font-semibold">{{ formatDate(item.date) }}</span>
+                          <VaOptionList
+                            :model-value="getListValueForDate(item.date)"
+                            :options="optionsTimes"
+                            value-by="altValue"
+                            disabled-by="altDisabled"
+                            :text-by="(option: any) => option.altText"
+                            @update:modelValue="(newValue: any) => updateListValueForDate(item.date, newValue)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else-if="auth.musHaveRole('Dentist') && typeDoctor === 'PartTime'">
+                    <div class="flex flex-col space-y-2">
+                      <VaDateInput v-model="newScheduleDate" label="Select Date" />
+                      <VaOptionList
+                        v-model="newScheduleTime"
+                        :options="optionsTimes"
+                        value-by="altValue"
+                        disabled-by="altDisabled"
+                        :text-by="(option: any) => option.altText"
+                        class="flex-grow"
+                      />
+                      <VaButton preset="primary" :disabled="!canAddSchedule" @click="addPartTimeSchedule">
+                        Add Schedule
+                      </VaButton>
+                    </div>
+                    <div v-if="partTimeSchedules.length" class="mt-4">
+                      <div
+                        v-for="(schedule, index) in partTimeSchedules"
+                        :key="index"
+                        class="flex justify-between items-center p-2 border rounded mb-2"
+                      >
+                        <span>{{ formatDate(schedule.date) }} - {{ schedule.time }}</span>
+                        <VaButton preset="secondary" size="small" @click="removePartTimeSchedule(index)">
+                          Remove
+                        </VaButton>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="schedule-actions flex space-x-4 justify-end">
                   <VaButton preset="primary" @click="saveSchedule"> Save Schedule </VaButton>
@@ -256,58 +332,201 @@
               </div>
             </div>
 
-            <!-- Event Details Modal -->
+            <!-- Calendar Details Modal -->
             <div
               v-if="showDetailsModal"
-              class="fixed z-50 bg-white rounded-lg shadow-xl p-4 min-w-[250px]"
+              class="fixed z-50 bg-white rounded-lg shadow-xl p-6 min-w-[300px] max-w-md"
               :style="detailsModalStyle"
             >
-              <h4 class="font-semibold">{{ selectedEvent?.title }}</h4>
-              <p class="text-sm text-gray-600 mt-1">{{ selectedEvent?.type }} event</p>
+              <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-600" @click="hideEventDetails">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <h3 class="text-lg font-semibold text-gray-800 mb-2">Calendar Details</h3>
+              <div class="space-y-3">
+                <div class="flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-blue-500 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="text-sm font-medium text-gray-600">{{ formatDate(selectedEvent?.date) }}</span>
+                </div>
+                <div class="flex items-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-green-500 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="text-sm font-medium text-gray-600"
+                    >Working Status: {{ workingStatusLabel(selectedEvent?.workingStatus) }}</span
+                  >
+                </div>
+                <div v-if="selectedEvent?.note" class="flex items-start">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 text-yellow-500 mr-2 mt-0.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="text-sm text-gray-600">{{ selectedEvent.note }}</span>
+                </div>
+                <div class="mt-4">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-2">Working Hours</h4>
+                  <div class="space-y-2">
+                    <div
+                      v-for="time in selectedEvent?.times"
+                      :key="time.timeID"
+                      class="flex items-center justify-between bg-gray-50 rounded-md p-2"
+                    >
+                      <div class="flex items-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-4 w-4 text-indigo-500 mr-2"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                            clip-rule="evenodd"
+                          />
+                        </svg>
+                        <span class="text-sm text-gray-600"
+                          >{{ formatTime(time.startTime) }} - {{ formatTime(time.endTime) }}</span
+                        >
+                      </div>
+                      <span
+                        :class="[
+                          'text-xs font-medium px-2 py-1 rounded-full',
+                          time.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+                        ]"
+                      >
+                        {{ time.isActive ? 'Active' : 'Inactive' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </main>
   </VaCard>
+  <VaModal v-model="showModalSizeLarge" size="large" hide-default-actions="true">
+    <h3 class="va-h3">Party Hard</h3>
+
+    <p class="va-text">Select users to go to a party.</p>
+
+    <VaDataTable
+      :items="listDoctors"
+      :columns="[
+        { key: 'imageUrl', name: 'imageUrl', label: 'Avatar' },
+        { key: 'firstName', name: 'firstName', label: 'First Name' },
+        { key: 'lastName', name: 'lastName', label: 'Last Name' },
+        { key: 'phoneNumber', name: 'phoneNumber', label: 'Phone' },
+        { key: 'gender', name: 'gender', label: 'Gender' },
+        { key: 'actions', name: 'actions', label: 'Action', width: 80 },
+      ]"
+      :item-size="5"
+      virtual-scroller
+      :wrapper-size="500"
+      height="500"
+    >
+      <template #cell(imageUrl)="{ row }">
+        <VaAvatar :src="getSrcAvatar(row.imageUrl)" class="w-14 h-14 font-bold" :color="avatarColor(row.userName)" />
+      </template>
+      <template #cell(gender)="{ value }">
+        {{ value ? 'Nam' : 'Nữ' }}
+      </template>
+      <template #cell(actions)="{ rowData }">
+        <VaIcon
+          class="text-6xl text-green-500 hover:cursor-pointer"
+          name="schedule"
+          size="2rem"
+          @click="props.regist(rowData.id, current_date)"
+        />
+      </template>
+    </VaDataTable>
+  </VaModal>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { SearchResponse } from '../types'
-import { avatarColor } from '@/services/utils'
+import { ref, computed, onMounted } from 'vue'
+import { CalendarDay, PartTimeSchedule, SearchResponse } from '../types'
+import { avatarColor, getErrorMessage } from '@/services/utils'
 import { watch } from 'vue'
+import { useAuthStore } from '@/stores/modules/auth.module'
+import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
+import { useToast } from 'vuestic-ui/web-components'
 
-interface Event {
-  id: number
-  title: string
-  type: 'warning' | 'usual' | 'error'
-  date: Date
-}
-
-interface CalendarDay {
-  date: number
-  isCurrentMonth: boolean
-  events: Event[]
-}
-
-const currentYear = computed(() => new Date().getFullYear())
-const currentMonth = ref(1) // February
+const auth = useAuthStore()
+const storeDoctor = useDoctorProfileStore()
+const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
+const currentYear = ref(new Date().getFullYear())
+const currentMonth = ref(new Date().getMonth())
+const current_date = new Date().toISOString().split('T')[0]
 const showAddModal = ref(false)
+const hideSwitcher = ref(false)
+const showModalSizeLarge = ref(false)
+const newScheduleDate = ref<Date | null>(null)
+const newScheduleTime = ref<string | null>(null)
+const partTimeSchedules = ref<PartTimeSchedule[]>([])
 const closeAddModal = () => {
   showAddModal.value = false
+  selectedDate.value = null
+  draggedItem.value = null
+  selectedDentistId.value = ''
+  listValue.value = []
+  multiDrag.value = null
+  multiselectedDate.value = null
 }
+const { notify } = useToast()
+const listDoctors = ref<any>()
+const typeDoctor = computed(() => auth.user?.type)
 const showDetailsModal = ref(false)
 const modalPosition = ref({ x: 0, y: 0 })
 const selectedDate = ref<Date | null>(null)
-const selectedEvent = ref<Event | null>(null)
+const multiselectedDate = ref<Date[] | null>(null)
+const selectedEvent = ref<any | null>(null)
 const selectedDentistId = ref('')
 const switcher = ref('full-time')
-const show = ref(false)
 const draggedItem = ref(null)
+const multiDrag = ref<any>(null)
 const isDragging = ref(false)
 const showModal = ref(false)
 const listValue = ref([])
+const multiDragValues = ref<Record<string, string[]>>({})
+const openDentistIndex = ref(null)
+const selectedCalendarIndex = ref<number[]>([])
 const optionsTimes = [
   {
     text: '8:00 AM - 12:00 PM',
@@ -344,9 +563,9 @@ const options = [
   { value: 'part-time', label: 'Part-time' },
 ]
 const dentists = computed(() => (switcher.value === 'full-time' ? props.fullTimeNon : props.partTimeNon))
-
 const props = defineProps<{
-  regist: () => void
+  regist: (id: any, date: any) => void
+  workingCalendar: SearchResponse | null
   fullTimeNon: SearchResponse | null
   partTimeNon: SearchResponse | null
 }>()
@@ -355,59 +574,6 @@ const emit = defineEmits(['update:updateWorkingCalendar', 'update:regist'])
 const years = Array.from({ length: 10 }, (_, i) => currentYear.value - 5 + i)
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
-
-// const newEvent = ref({
-//   title: '',
-//   type: 'usual' as const,
-// })
-// Sample events data
-const events = ref<Event[]>([
-  // Day 8 events
-  {
-    id: 1,
-    title: 'This is warning event.',
-    type: 'warning',
-    date: new Date(2024, 1, 8),
-  },
-  {
-    id: 2,
-    title: 'This is usual event.',
-    type: 'usual',
-    date: new Date(2024, 1, 8),
-  },
-  // Day 15 events
-  {
-    id: 3,
-    title: 'This is warning event',
-    type: 'warning',
-    date: new Date(2024, 1, 15),
-  },
-  {
-    id: 4,
-    title: 'This is very long usual event......',
-    type: 'usual',
-    date: new Date(2024, 1, 15),
-  },
-  {
-    id: 5,
-    title: 'This is error event 1.',
-    type: 'error',
-    date: new Date(2024, 1, 15),
-  },
-  // Additional events for testing scroll
-  {
-    id: 6,
-    title: 'Fourth event',
-    type: 'usual',
-    date: new Date(2024, 1, 15),
-  },
-  {
-    id: 7,
-    title: 'Fifth event',
-    type: 'warning',
-    date: new Date(2024, 1, 15),
-  },
-])
 
 const calendarDays = computed(() => {
   const firstDay = new Date(currentYear.value, currentMonth.value, 1)
@@ -427,13 +593,43 @@ const calendarDays = computed(() => {
 
   // Current month days
   for (let date = 1; date <= lastDay.getDate(); date++) {
-    const dayEvents = events.value.filter((event) => {
-      return (
-        event.date.getDate() === date &&
-        event.date.getMonth() === currentMonth.value &&
-        event.date.getFullYear() === currentYear.value
-      )
-    })
+    const dayEvents = [
+      ...(props.workingCalendar?.data.flatMap((dentist) =>
+        dentist.calendarDetails
+          .filter((detail: any) => {
+            const detailDate = new Date(detail.date)
+            return (
+              detailDate.getDate() === date &&
+              detailDate.getMonth() === currentMonth.value &&
+              detailDate.getFullYear() === currentYear.value
+            )
+          })
+          .map((detail: any) => ({
+            ...detail,
+            dentistName: dentist.dentistName,
+            dentistUserID: dentist.dentistUserID,
+            type: dentist.workingType === 1 ? 'warning' : 'usual',
+          })),
+      ) || []),
+      ...(props.partTimeNon?.data.flatMap((dentist) =>
+        dentist.calendarDetails
+          .filter((detail: any) => {
+            const detailDate = new Date(detail.date)
+            return (
+              detailDate.getDate() === date &&
+              detailDate.getMonth() === currentMonth.value &&
+              detailDate.getFullYear() === currentYear.value
+            )
+          })
+          .map((detail: any) => ({
+            ...detail,
+            dentistName: dentist.dentistName,
+            dentistUserID: dentist.dentistUserID,
+            type: detail.workingStatus === 0 ? 'error' : 'warning',
+          })),
+      ) || []),
+    ]
+
     days.push({
       date,
       isCurrentMonth: true,
@@ -454,6 +650,23 @@ const calendarDays = computed(() => {
   return days
 })
 
+const getAllDoctors = (): any => {
+  storeDoctor
+    .getDoctors({ isActive: true })
+    .then((response) => {
+      listDoctors.value = response.data
+      console.log(response)
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      notify({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+}
+
 const modalStyle = computed(() => ({
   left: modalPosition.value.x ? `${modalPosition.value.x}px` : '50%',
   top: modalPosition.value.y ? `${modalPosition.value.y}px` : '50%',
@@ -466,6 +679,10 @@ const detailsModalStyle = computed(() => ({
 }))
 
 function openAddEventModal(event: MouseEvent, day: CalendarDay) {
+  console.log(auth.user?.type)
+  if (auth.user?.type !== 'PartTime') {
+    return
+  }
   if (showAddModal.value) {
     showAddModal.value = false
   }
@@ -476,29 +693,6 @@ function openAddEventModal(event: MouseEvent, day: CalendarDay) {
   selectedDate.value = new Date(currentYear.value, currentMonth.value, day.date)
   showAddModal.value = true
 }
-
-// function openGlobalAddEventModal() {
-//   modalPosition.value = {
-//     x: 0,
-//     y: 0,
-//   }
-//   selectedDate.value = new Date(currentYear.value, currentMonth.value, 1)
-//   showAddModal.value = true
-// }
-
-// function addEvent() {
-//   if (selectedDate.value && newEvent.value.title) {
-//     events.value.push({
-//       id: Date.now(),
-//       title: newEvent.value.title,
-//       type: newEvent.value.type,
-//       date: selectedDate.value,
-//     })
-//     showAddModal.value = false
-//     newEvent.value.title = ''
-//     newEvent.value.type = 'usual'
-//   }
-// }
 
 function showEventDetails(event: Event, e: MouseEvent) {
   modalPosition.value = {
@@ -511,6 +705,10 @@ function showEventDetails(event: Event, e: MouseEvent) {
 
 function hideEventDetails() {
   showDetailsModal.value = false
+  modalPosition.value = {
+    x: 0,
+    y: 0,
+  }
 }
 
 function getEventClass(type: Event['type']) {
@@ -527,6 +725,29 @@ function getEventDotClass(type: Event['type']) {
     usual: 'bg-green-500',
     error: 'bg-red-500',
   }[type]
+}
+
+function toggleDentistDetails(index: any) {
+  openDentistIndex.value = openDentistIndex.value === index ? null : index
+}
+
+function selectedCalendar(item: any, index: number) {
+  if (selectedCalendarIndex.value.includes(index)) {
+    selectedCalendarIndex.value = selectedCalendarIndex.value.filter((i) => i !== index)
+  } else {
+    selectedCalendarIndex.value.push(index)
+    console.log(selectedCalendarIndex.value)
+  }
+}
+
+function getListValueForDate(date: any) {
+  return multiDragValues.value[date] || []
+}
+
+function updateListValueForDate(date: any, newValue: string[]) {
+  console.log(date, newValue)
+  multiDragValues.value[date] = newValue
+  console.log(multiDragValues.value)
 }
 
 const formatDate = (date: any): string => {
@@ -550,6 +771,11 @@ const formatDate = (date: any): string => {
   return `${day}/${month}/${year}`
 }
 
+const formatTime = (time: string): string => {
+  const [hours, minutes] = time.split(':')
+  return `${hours}:${minutes}`
+}
+
 function getSrcAvatar(img: any) {
   const url = import.meta.env.VITE_APP_BASE_URL as string
   const url_without_api = url.slice(0, -3)
@@ -557,16 +783,29 @@ function getSrcAvatar(img: any) {
   return ''
 }
 
-function handleDragStart(event: DragEvent, dentist: any, item: any) {
-  const request = {
-    ...dentist,
-    item,
-  }
-  draggedItem.value = request
-  isDragging.value = true
-  if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = 'move'
-    event.dataTransfer.setData('text/plain', JSON.stringify(request))
+function handleDragStart(event: DragEvent, dentist: any, item: any, selectedCalendarIndex: any) {
+  if (selectedCalendarIndex === null || selectedCalendarIndex.length === 0) {
+    const request = {
+      ...dentist,
+      item,
+    }
+    draggedItem.value = request
+    isDragging.value = true
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('text/plain', JSON.stringify(request))
+    }
+  } else {
+    const request = {
+      dentist,
+      items: selectedCalendarIndex.map((index: number) => dentist.calendarDetails[index]),
+    }
+    multiDrag.value = request
+    isDragging.value = true
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move'
+      event.dataTransfer.setData('text/plain', JSON.stringify(request))
+    }
   }
 }
 
@@ -581,6 +820,11 @@ function handleDrop(event: DragEvent) {
     const item = JSON.parse(event.dataTransfer?.getData('text/plain') || '')
     selectedDentistId.value = item.dentistUserID
     selectedDate.value = item.item.date
+  } else if (multiDrag.value) {
+    const item = JSON.parse(event.dataTransfer?.getData('text/plain') || '')
+    selectedDentistId.value = item.dentist.dentistUserID
+    multiselectedDate.value = item.items.map((item: any) => item.date)
+    console.log(multiselectedDate.value)
   }
   showAddModal.value = true
 }
@@ -601,25 +845,126 @@ function workingStatusLabel(status: number) {
 }
 
 const saveSchedule = () => {
-  console.log('listValue.value:', listValue.value)
-  emit('update:updateWorkingCalendar', selectedDentistId.value, [
-    {
-      date: selectedDate.value,
-      timeWorkings: listValue.value.map((timeRange: string) => {
-        const [startTime, endTime] = timeRange.split('-')
-        return {
-          startTime,
-          endTime,
-        }
-      }),
-    },
-  ])
-  showModal.value = true
-  showAddModal.value = false
-  selectedDate.value = null
-  draggedItem.value = null
-  selectedDentistId.value = ''
-  listValue.value = []
+  if (auth.musHaveRole('Staff') || auth.musHaveRole('Admin')) {
+    if (multiDrag.value === null) {
+      emit('update:updateWorkingCalendar', selectedDentistId.value, [
+        {
+          date: selectedDate.value,
+          timeWorkings: listValue.value.map((timeRange: string) => {
+            const [startTime, endTime] = timeRange.split('-')
+            return {
+              startTime,
+              endTime,
+            }
+          }),
+        },
+      ])
+    } else {
+      emit(
+        'update:updateWorkingCalendar',
+        selectedDentistId.value,
+        multiselectedDate.value?.map((date: any) => ({
+          date,
+          timeWorkings: multiDragValues.value[date].map((timeRange: string) => {
+            const [startTime, endTime] = timeRange.split('-')
+            return {
+              startTime,
+              endTime,
+            }
+          }),
+        })),
+      )
+    }
+    showModal.value = true
+    showAddModal.value = false
+    selectedDate.value = null
+    draggedItem.value = null
+    selectedDentistId.value = ''
+    listValue.value = []
+    multiDrag.value = null
+    multiselectedDate.value = null
+    selectedCalendarIndex.value = []
+  } else if (auth.musHaveRole('Dentist') && typeDoctor.value === 'PartTime') {
+    emit(
+      'update:updateWorkingCalendar',
+      auth.user?.id,
+      partTimeSchedules.value.map((schedule) => ({
+        date: formatDateSend(schedule.date),
+        timeWorkings: (() => {
+          const timeString = Array.isArray(schedule.time)
+            ? schedule.time[0] // Take first element if it's an array
+            : schedule.time // Use as-is if it's already a string
+
+          const [startTime, endTime] = timeString.split('-')
+          return [
+            {
+              startTime,
+              endTime,
+            },
+          ]
+        })(),
+      })),
+    )
+    showAddModal.value = false
+    selectedDate.value = null
+    listValue.value = []
+  }
+}
+
+const canAddSchedule = computed(() => {
+  return newScheduleDate.value && newScheduleTime.value
+})
+
+function formatDateSend(date: any) {
+  if (date === null || date === undefined) return ''
+
+  const dateObj =
+    date instanceof Date
+      ? date
+      : typeof date === 'string'
+        ? new Date(date)
+        : date instanceof Number
+          ? new Date(Number(date))
+          : new Date()
+
+  if (isNaN(dateObj.getTime())) return ''
+
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+  const day = dateObj.getDate().toString().padStart(2, '0')
+  const year = dateObj.getFullYear()
+
+  return `${year}-${month}-${day}`
+}
+
+// Method to add part-time schedule
+const addPartTimeSchedule = () => {
+  if (newScheduleDate.value && newScheduleTime.value) {
+    // Check for duplicate schedules
+    const isDuplicate = partTimeSchedules.value.some(
+      (schedule) =>
+        schedule.date.toDateString() === newScheduleDate.value?.toDateString() &&
+        schedule.time === newScheduleTime.value,
+    )
+
+    if (!isDuplicate) {
+      partTimeSchedules.value.push({
+        date: newScheduleDate.value,
+        time: newScheduleTime.value,
+      })
+
+      // Reset inputs after adding
+      newScheduleDate.value = null
+      newScheduleTime.value = null
+    } else {
+      // Optional: Show a toast or error message about duplicate schedule
+      console.warn('This schedule already exists')
+    }
+  }
+}
+
+// Method to remove a part-time schedule
+const removePartTimeSchedule = (index: number) => {
+  partTimeSchedules.value.splice(index, 1)
 }
 
 watch(
@@ -640,6 +985,23 @@ watch(
     }
   },
 )
+
+onMounted(() => {
+  if (typeDoctor.value === 'FullTime') {
+    switcher.value = 'full-time'
+  } else if (typeDoctor.value === 'PartTime') {
+    switcher.value = 'part-time'
+  } else {
+    switcher.value = 'full-time'
+  }
+  const auth = useAuthStore()
+  if (auth.musHaveRole('Admin') || auth.musHaveRole('Staff')) {
+    hideSwitcher.value = false
+  } else {
+    hideSwitcher.value = true
+  }
+  getAllDoctors()
+})
 </script>
 
 <style scoped>

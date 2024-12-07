@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineEmits, ref, computed, watch } from 'vue'
+import { defineEmits, ref, computed, watch, onMounted } from 'vue'
 import { Pagination, Search, Service, SearchResponse } from '../../types'
 import { useToast, VaInput, VaPagination } from 'vuestic-ui'
 import { watchDebounced } from '@vueuse/core'
@@ -14,12 +14,25 @@ const serviceSearchRes = ref<SearchResponse | null>(null)
 const services = ref<Service[]>([])
 const isOpen = ref(true)
 const selectedServiceId = ref<string | null>(null)
+const resourceType = ref<any[]>([])
 
 const emit = defineEmits(['update:selectedService'])
 const isMobile = computed(() => window.innerWidth < 768)
 
 const formatPrice = (price: any) => {
   return new Intl.NumberFormat('vi-VN').format(price)
+}
+
+const getResourceType = async () => {
+  await storesService.getServiceType({}).then((response) => {
+    console.log(response.data)
+    const optionsResource = response?.data?.map((item: any) => ({
+      label: item.typeName,
+      value: item.id,
+    }))
+    optionsResource.unshift({ label: 'All', value: '' })
+    resourceType.value = [...(optionsResource || [])]
+  })
 }
 
 const pagination = ref<Pagination>({
@@ -32,10 +45,17 @@ const searchValue = ref<Search>({
   pageNumber: 1,
   pageSize: pagination.value.perPage,
   keyword: '',
+  advancedSearch: {
+    fields: ['TypeServiceID'],
+    keyword: '',
+  },
 })
 
 const filters = ref({
   keyword: '',
+  advancedSearch: {
+    keyword: '',
+  },
 })
 
 const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.perPage))
@@ -71,11 +91,18 @@ const toggleSection = () => {
   isOpen.value = !isOpen.value
 }
 
+const handleChangeResource = () => {
+  searchValue.value.keyword = filters.value.keyword
+  searchValue.value.advancedSearch.keyword = filters.value.advancedSearch.keyword
+  searchService(searchValue.value)
+}
+
 watchDebounced(
   filters.value,
   () => {
     pagination.value.page = 1
     searchValue.value.keyword = filters.value.keyword
+    searchValue.value.advancedSearch.keyword = filters.value.advancedSearch.keyword
     searchService(searchValue.value)
   },
   { debounce: 500, maxWait: 1000 },
@@ -122,6 +149,11 @@ watch(
     }
   },
 )
+
+onMounted(() => {
+  getResourceType()
+  searchService(searchValue.value)
+})
 </script>
 
 <template>
@@ -152,14 +184,26 @@ watch(
       <!-- Accordion content -->
       <div v-show="isOpen" class="transition-all duration-200">
         <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-          <VaInput
-            v-model="filters.keyword"
-            placeholder="Search service"
-            icon="search"
-            class="mb-4"
-            clearable
-            @clear="filters.keyword = ''"
-          />
+          <div class="flex flex-row gap-4">
+            <VaInput
+              v-model="filters.keyword"
+              placeholder="Search service"
+              icon="search"
+              class="mb-4"
+              clearable
+              label="Search"
+              @clear="filters.keyword = ''"
+            />
+            <VaSelect
+              v-model="filters.advancedSearch.keyword"
+              class="w-2/4"
+              :options="resourceType"
+              text-by="label"
+              value-by="value"
+              label="Service type"
+              @update:modelValue="handleChangeResource"
+            />
+          </div>
           <div class="h-[440px] md:h-[300px] lg:h-[325px] overflow-y-auto pr-4 scroll">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div v-for="service in services" :key="service.serviceID" class="relative">

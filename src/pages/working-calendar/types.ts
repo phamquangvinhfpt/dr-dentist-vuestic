@@ -23,3 +23,14 @@ export type SearchResponse = {
   hasPreviousPage: boolean
   hasNextPage: boolean
 }
+
+export type CalendarDay = {
+  date: number
+  isCurrentMonth: boolean
+  events: any[]
+}
+
+export type PartTimeSchedule = {
+  date: Date
+  time: string
+}

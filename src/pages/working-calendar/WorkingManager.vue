@@ -1,40 +1,47 @@
 <template>
   <Calendar
+    v-model:working-calendar="workingCalendar"
     v-model:full-time-non="fullTimeNonAccpet"
     v-model:part-time-non="partTimeNonAccpet"
-    :regist="registerCalendar"
+    v-model:regist="registerCalendar"
     @update:updateWorkingCalendar="updateWorkingCalendar"
     @update:regist="fetch"
   />
 </template>
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import Calendar from './widgets/Calendar.vue'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
-import { useAuthStore } from '@/stores/modules/auth.module'
 import { useToast } from 'vuestic-ui'
 import { getErrorMessage } from '@/services/utils'
 import { Search, SearchResponse } from './types'
+import { useAuthStore } from '@/stores/modules/auth.module'
 
 const loading = ref(false)
 const storeCalendar = useCalendarStore()
-const storeAuth = useAuthStore()
 const { init } = useToast()
-const current_user = storeAuth.user
+const { notify } = useToast()
+const auth = useAuthStore()
+const typeDoctor = computed(() => auth.user?.type)
 const workingCalendar = ref<SearchResponse | null>(null)
 const fullTimeNonAccpet = ref<SearchResponse | null>(null)
 const partTimeNonAccpet = ref<SearchResponse | null>(null)
-const current_date = new Date().toISOString().split('T')[0]
 const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 2).toISOString().split('T')[0]
 const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split('T')[0]
 
-const registerCalendar = () => {
+const registerCalendar = (id: any, date: any) => {
+  console.log(id, date)
   loading.value = true
   storeCalendar
-    .registerFullTime(current_user?.id, current_date)
-    .then((response) => {
+    .registerFullTime(id, date)
+    .then(() => {
       loading.value = false
-      console.log(response)
+      init({
+        title: 'success',
+        message: 'Đăng ký làm việc thành công!',
+        color: 'success',
+      })
+      fetch()
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)
@@ -46,17 +53,9 @@ const registerCalendar = () => {
     })
 }
 
-// const pagination = ref<Pagination>({
-//   page: 1,
-//   perPage: 10,
-//   total: 0,
-// })
-
 const searchValue = ref<Search>({
   keyword: '',
 })
-
-// const totalPages = computed(() => Math.ceil(pagination.value.total / pagination.value.perPage))
 
 const getWorkingCalendar = () => {
   loading.value = true
@@ -114,27 +113,51 @@ const getPartTimeNonAcceptWorkingCalendar = () => {
 
 const updateWorkingCalendar = (id: string, data: any) => {
   loading.value = true
-  storeCalendar
-    .updateWorkingCalendar(id, data)
-    .then(() => {
-      getWorkingCalendar()
-      getFullTimeNonAcceptWorkingCalendar()
-      getPartTimeNonAcceptWorkingCalendar()
-      loading.value = false
-      init({
-        title: 'success',
-        message: 'Bác sĩ đã được sắp giờ làm việc thành công!',
-        color: 'success',
+  if (auth.musHaveRole('Staff') || auth.musHaveRole('Admin')) {
+    storeCalendar
+      .updateWorkingCalendar(id, data)
+      .then(() => {
+        getWorkingCalendar()
+        getFullTimeNonAcceptWorkingCalendar()
+        getPartTimeNonAcceptWorkingCalendar()
+        loading.value = false
+        init({
+          title: 'success',
+          message: 'Bác sĩ đã được sắp giờ làm việc thành công!',
+          color: 'success',
+        })
       })
-    })
-    .catch((error) => {
-      const errorMessage = getErrorMessage(error)
-      init({
-        title: 'error',
-        message: errorMessage,
-        color: 'danger',
+      .catch((error) => {
+        const errorMessage = getErrorMessage(error)
+        init({
+          title: 'error',
+          message: errorMessage,
+          color: 'danger',
+        })
       })
-    })
+  } else if (auth.musHaveRole('Dentist') && typeDoctor.value === 'PartTime') {
+    storeCalendar
+      .createWorkingCalendar(id, data)
+      .then(() => {
+        getWorkingCalendar()
+        getFullTimeNonAcceptWorkingCalendar()
+        getPartTimeNonAcceptWorkingCalendar()
+        loading.value = false
+        notify({
+          title: 'success',
+          message: 'Bạn đã đăng ký lịch làm việc thành công! Vui lòng chờ xét duyệt!',
+          color: 'success',
+        })
+      })
+      .catch((error) => {
+        const errorMessage = getErrorMessage(error)
+        init({
+          title: 'error',
+          message: errorMessage,
+          color: 'danger',
+        })
+      })
+  }
 }
 
 const fetch = () => {
@@ -143,36 +166,7 @@ const fetch = () => {
   getPartTimeNonAcceptWorkingCalendar()
 }
 
-// watch(
-//   () => pagination.value.page,
-//   () => {
-//     searchValue.value.pageNumber = pagination.value.page
-//     searchValue.value.pageSize = pagination.value.perPage
-//   },
-//   { immediate: true },
-// )
-
-// watch(
-//   () => pagination.value.perPage,
-//   () => {
-//     searchValue.value.pageNumber = 1
-//     searchValue.value.pageSize = pagination.value.perPage
-//   },
-//   { immediate: true },
-// )
-
-// watch(
-//   () => searchRes.value,
-//   () => {
-//     if (searchRes.value) {
-//       pagination.value.total = searchRes.value.totalCount
-//     }
-//   },
-//   { immediate: true },
-// )
-
 onMounted(() => {
-  // registerCalendar()
   getWorkingCalendar()
   getFullTimeNonAcceptWorkingCalendar()
   getPartTimeNonAcceptWorkingCalendar()

@@ -120,5 +120,15 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         return Promise.reject(error)
       }
     },
+    async getAvailableDoctors(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.getAvailableDoctors(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        return await Promise.reject(error)
+      }
+    },
   },
 })

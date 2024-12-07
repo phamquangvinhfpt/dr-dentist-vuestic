@@ -21,6 +21,16 @@ class CalendarService {
         return Promise.reject(error)
       })
   }
+  async registerPartTime(doctorId: any, data: any): Promise<any> {
+    return apiService
+      .post(`/workingcalendar/create-parttime?doctorId=${doctorId}`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
   async getWorkingCalendar(start: any, end: any, filter: any): Promise<any> {
     return apiService
       .post(`/workingcalendar/working-calendar?startDate=${start}&endDate=${end}`, filter)
@@ -54,6 +64,16 @@ class CalendarService {
   async updateWorkingCalendar(doctorId: any, data: any): Promise<any> {
     return apiService
       .put(`/workingcalendar/update?doctorId=${doctorId}`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async createWorkingCalendar(doctorId: any, data: any): Promise<any> {
+    return apiService
+      .post(`/workingcalendar/create-parttime?doctorId=${doctorId}`, data)
       .then((response) => {
         return Promise.resolve(response)
       })
