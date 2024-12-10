@@ -275,7 +275,8 @@
     "title": "Audit Logs",
     "form": {
       "actionType": "Action Type",
-      "resourceType": "Resource Type"
+      "resourceType": "Resource Type",
+      "export": "Export"
     },
     "table": {
       "buttonDetails": "View details",

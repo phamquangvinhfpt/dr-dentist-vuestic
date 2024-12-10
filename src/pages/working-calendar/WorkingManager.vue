@@ -4,6 +4,9 @@
     v-model:full-time-non="fullTimeNonAccpet"
     v-model:part-time-non="partTimeNonAccpet"
     v-model:regist="registerCalendar"
+    :get-working-calendar="getWorkingCalendar"
+    :get-full-time-non="getFullTimeNonAcceptWorkingCalendar"
+    :get-part-time-non="getPartTimeNonAcceptWorkingCalendar"
     @update:updateWorkingCalendar="updateWorkingCalendar"
     @update:regist="fetch"
   />
@@ -26,8 +29,8 @@ const typeDoctor = computed(() => auth.user?.type)
 const workingCalendar = ref<SearchResponse | null>(null)
 const fullTimeNonAccpet = ref<SearchResponse | null>(null)
 const partTimeNonAccpet = ref<SearchResponse | null>(null)
-const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 2).toISOString().split('T')[0]
-const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split('T')[0]
+let firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 2).toISOString().split('T')[0]
+let lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split('T')[0]
 
 const registerCalendar = (id: any, date: any) => {
   console.log(id, date)
@@ -57,7 +60,9 @@ const searchValue = ref<Search>({
   keyword: '',
 })
 
-const getWorkingCalendar = () => {
+const getWorkingCalendar = (newfirst?: any, newlast?: any) => {
+  firstDay = newfirst ? newfirst : firstDay
+  lastDay = newlast ? newlast : lastDay
   loading.value = true
   storeCalendar
     .getWorkingCalendar(firstDay, lastDay, searchValue.value)
@@ -75,7 +80,9 @@ const getWorkingCalendar = () => {
     })
 }
 
-const getFullTimeNonAcceptWorkingCalendar = () => {
+const getFullTimeNonAcceptWorkingCalendar = (newfirst?: any, newlast?: any) => {
+  firstDay = newfirst ? newfirst : firstDay
+  lastDay = newlast ? newlast : lastDay
   loading.value = true
   storeCalendar
     .getFullTimeNonAcceptWorkingCalendar(firstDay, lastDay, searchValue.value)
@@ -93,7 +100,9 @@ const getFullTimeNonAcceptWorkingCalendar = () => {
     })
 }
 
-const getPartTimeNonAcceptWorkingCalendar = () => {
+const getPartTimeNonAcceptWorkingCalendar = (newfirst?: any, newlast?: any) => {
+  firstDay = newfirst ? newfirst : firstDay
+  lastDay = newlast ? newlast : lastDay
   loading.value = true
   storeCalendar
     .getPartTimeNonAcceptWorkingCalendar(firstDay, lastDay, searchValue.value)

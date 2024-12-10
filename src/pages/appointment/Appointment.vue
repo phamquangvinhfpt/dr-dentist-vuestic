@@ -308,10 +308,11 @@
         <h3 class="text-lg font-semibold mb-2">
           {{ selectedAppointment?.patientName }} - {{ selectedAppointment?.patientCode }}
         </h3>
+        <p><strong>Room:</strong> {{ selectedAppointment?.roomName }}</p>
         <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
         <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedAppointment?.dentistId)) }}</p>
         <p><strong>Service:</strong> {{ selectedAppointment?.serviceName }}</p>
-        <p><strong>Price:</strong> {{ selectedAppointment?.servicePrice }}</p>
+        <p><strong>Price:</strong> {{ formatPrice(selectedAppointment?.servicePrice) }}</p>
         <p class="flex items-center gap-2">
           <strong>Status:</strong>
           <span
@@ -335,6 +336,8 @@
         <h3 class="text-lg font-semibold mb-2">
           {{ selectedFollowUpAppointment?.patientName }} - {{ selectedFollowUpAppointment?.patientCode }}
         </h3>
+        <p><strong>Room:</strong> {{ selectedAppointment?.roomName }}</p>
+        <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
         <p><strong>Date:</strong> {{ selectedFollowUpAppointment?.date }}</p>
         <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
         <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedFollowUpAppointment?.doctorProfileID)) }}</p>
@@ -667,6 +670,7 @@ const unassigneditems = ref<Appointment[]>([])
 
 const columns = computed(() => [
   { key: 'appointmentDate', label: 'Date', name: 'appointmentDate' },
+  { key: 'roomName', label: 'Room', name: 'roomName' },
   { key: 'startTime', label: 'Time', name: 'startTime' },
   { key: 'patientName', label: 'Patient', name: 'patientName' },
   { key: 'dentistName', label: 'Doctor', name: 'dentistName' },
@@ -679,11 +683,13 @@ const columns = computed(() => [
 
 const followColumns = computed(() => [
   { key: 'date', label: 'Date', name: 'date' },
+  { key: 'roomName', label: 'Room', name: 'roomName' },
   { key: 'startTime', label: 'Time', name: 'startTime' },
   { key: 'patientName', label: 'Patient', name: 'patientName' },
   { key: 'doctorName', label: 'Doctor', name: 'doctorName' },
+  { key: 'step', label: 'Step', name: 'step' },
   { key: 'serviceName', label: 'Service', name: 'serviceName' },
-  { key: 'procedureName', label: 'Price', name: 'procedureName' },
+  { key: 'procedureName', label: 'Procedure', name: 'procedureName' },
   { key: 'status', label: 'Status', name: 'status' },
 ])
 
@@ -1121,6 +1127,7 @@ const selectedBooking = ref<Appointment>({
   patientId: '',
   patientCode: '',
   patientName: '',
+  patientPhone: '',
   dentistId: '',
   dentistName: '',
   serviceId: '',
@@ -1135,6 +1142,8 @@ const selectedBooking = ref<Appointment>({
   servicePrice: 0,
   canFeedback: false,
   isFeedback: false,
+  roomID: '',
+  roomName: '',
 })
 const selectedDoctorId = ref('')
 const selectedTime = ref('')
@@ -1378,14 +1387,35 @@ const getDoctorName = (doctorId: any) => {
   return doctor ? doctor.name : 'Unassigned'
 }
 
+const addMinutesToTime = (time: string, minutesToAdd: number): string => {
+  const [hours, mins, seconds] = time.split(':').map(Number)
+  const date = new Date()
+  date.setHours(hours, mins, seconds)
+  date.setMinutes(date.getMinutes() + minutesToAdd)
+
+  return date.toTimeString().slice(0, 8)
+}
+
+const isTimeInRange = (checkTime: string, startTime: string, endTime: string): boolean => {
+  return checkTime >= startTime && checkTime <= endTime
+}
+
 const getAppointments = (time: any, doctorId: any) => {
-  time = time + ':00'
-  return appointments.value.filter((a) => a.startTime === time && getDoctorId(a.dentistId) === doctorId)
+  const startTime = time + ':00'
+  const endTime = addMinutesToTime(startTime, 30)
+
+  return appointments.value.filter(
+    (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.dentistId) === doctorId,
+  )
 }
 
 const getFollowUpAppointments = (time: any, doctorId: any) => {
-  time = time + ':00'
-  return followUpAppointments.value.filter((a) => a.startTime === time && getDoctorId(a.doctorProfileID) === doctorId)
+  const startTime = time + ':00'
+  const endTime = addMinutesToTime(startTime, 30)
+
+  return followUpAppointments.value.filter(
+    (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.doctorProfileID) === doctorId,
+  )
 }
 
 const closeContextMenuOnClickOutside = (event: Event) => {

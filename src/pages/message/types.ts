@@ -14,6 +14,7 @@ export type User = {
   lastMessage?: string
   imageUrl?: string
   isOnline?: boolean
+  createdOn?: string
 }
 
 export type Message = {

@@ -15,6 +15,16 @@ class FileService {
       })
   }
 
+  async exportAuditLogs(data: any): Promise<any> {
+    return ApiService.post('/v1/files/export-audit-logs', data)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
   //   async deleteFile(id: string): Promise<any> {
   //     return ApiService.delete(`/v1/files/delete-multiple/${id}`)
   //       .then((response) => {

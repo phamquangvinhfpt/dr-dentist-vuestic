@@ -84,6 +84,7 @@ export enum AppointmentType {
   None,
   Appointment,
   FollowUp,
+  ReExamination,
 }
 
 export type AppointmentDepositRequest = {
@@ -111,6 +112,7 @@ export type Appointment = {
   patientUserID?: string
   patientCode: string | null
   patientName: string | null
+  patientPhone: string | null
   dentistId: string
   dentistName: string | null
   serviceId: string
@@ -125,9 +127,13 @@ export type Appointment = {
   servicePrice: number
   canFeedback: boolean
   isFeedback: boolean
+  roomID: string
+  roomName: string
 }
 
 export type FollowUpAppointment = {
+  roomID: string
+  roomName: string
   calendarID: string
   patientName: string
   patientCode: string
@@ -160,7 +166,7 @@ export enum AppointmentStatus {
   Failed,
   Pending,
   Confirmed,
-  Success,
+  Come,
   Cancelled,
   Done,
 }
@@ -207,9 +213,9 @@ export const getAppointmentStatusConfig = (status: AppointmentStatus): StatusCon
         bgColor: 'bg-blue-100',
         textColor: 'text-blue-800',
       }
-    case AppointmentStatus.Success:
+    case AppointmentStatus.Come:
       return {
-        text: 'Success',
+        text: 'Come',
         bgColor: 'bg-green-100',
         textColor: 'text-green-800',
       }
@@ -294,9 +300,9 @@ export const getStatusConfig = (status: string | number): StatusConfig => {
         text: 'Confirmed',
         color: 'primary', // blue
       }
-    case AppointmentStatus.Success:
+    case AppointmentStatus.Come:
       return {
-        text: 'Success',
+        text: 'Come',
         color: 'success', // green
       }
     case AppointmentStatus.Cancelled:

@@ -13,7 +13,11 @@
             <div class="p-4 animate-pulse">
               <VaInput v-model="keyword" type="text" placeholder="Search Messenger" label="Search" :change="search()" />
             </div>
-            <VaScrollContainer vertical :color="currentColor" class="overflow-y-auto h-[calc(100vh-68px)]">
+            <VaScrollContainer
+              vertical
+              :color="currentColor"
+              class="overflow-y-auto h-[calc(100vh-68px)] md:h-[calc(100vh-158px)] lg:md:h-[calc(100vh-200px)]"
+            >
               <VaList class="flex flex-col space-y-2">
                 <VaSidebarItem
                   v-for="user in users"
@@ -42,7 +46,10 @@
                   </div>
                   <div class="ml-3 flex-grow overflow-hidden">
                     <div class="font-semibold truncate">{{ user.name }}</div>
-                    <div class="text-sm font-thin truncate">{{ user.lastMessage }}</div>
+                    <div class="flex justify-between items-center">
+                      <div class="text-sm font-thin truncate">{{ user.lastMessage }}</div>
+                      <div class="text-xs">{{ user.createdOn ? convertDateTimeToTime(user.createdOn) : '' }}</div>
+                    </div>
                   </div>
                 </VaSidebarItem>
               </VaList>
@@ -673,6 +680,7 @@ const loadUsers = async () => {
         name: message.senderName,
         lastMessage: message.latestMessage,
         imageUrl: getSrcAvatar(message.imageUrl),
+        createdOn: message.createdOn,
       }))
     }
     handleUserOnline()

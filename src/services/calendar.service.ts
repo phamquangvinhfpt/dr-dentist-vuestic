@@ -81,6 +81,26 @@ class CalendarService {
         return Promise.reject(error)
       })
   }
+  async getAllRoom(data: any): Promise<any> {
+    return apiService
+      .post(`/workingcalendar/room/get-all`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async addRoom(data: any): Promise<any> {
+    return apiService
+      .post(`/workingcalendar/add-room`, data)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new CalendarService()

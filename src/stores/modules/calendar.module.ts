@@ -96,5 +96,27 @@ export const useCalendarStore = defineStore('calendar', {
         return await Promise.reject(error)
       }
     },
+    async getAllRoom(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.getAllRoom(data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async addRoom(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.addRoom(data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

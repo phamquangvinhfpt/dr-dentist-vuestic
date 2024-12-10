@@ -1,21 +1,26 @@
 <template>
-  <VaForm class="grid md:grid-cols-4 gap-4 my-5">
-    <VaSelect
-      v-model="formData.resource"
-      :options="resourceType"
-      text-by="label"
-      value-by="value"
-      :label="t('auditLogs.form.resourceType')"
-      @update:modelValue="handleChangeResource"
-    />
-    <VaSelect
-      v-model="formData.action"
-      :options="optionsAction"
-      text-by="label"
-      value-by="value"
-      :label="t('auditLogs.form.actionType')"
-      @update:modelValue="handleChangeAction"
-    />
+  <VaForm class="flex flex-row justify-between items-center">
+    <div class="flex flex-row gap-4">
+      <VaSelect
+        v-model="formData.resource"
+        :options="resourceType"
+        text-by="label"
+        value-by="value"
+        :label="t('auditLogs.form.resourceType')"
+        @update:modelValue="handleChangeResource"
+      />
+      <VaSelect
+        v-model="formData.action"
+        :options="optionsAction"
+        text-by="label"
+        value-by="value"
+        :label="t('auditLogs.form.actionType')"
+        @update:modelValue="handleChangeAction"
+      />
+    </div>
+    <VaButton class="col-strart-4" preset="primary">
+      {{ t('auditLogs.form.export') }}
+    </VaButton>
   </VaForm>
 </template>
 
