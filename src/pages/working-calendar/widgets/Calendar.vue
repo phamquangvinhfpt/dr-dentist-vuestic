@@ -175,9 +175,9 @@
                             </svg>
                             {{ item.note || 'No additional notes' }}
                           </div>
-                          <VaButton preset="secondary" size="small" class="mt-2" @click="addPartTimeSchedule">
+                          <!-- <VaButton preset="secondary" size="small" class="mt-2" @click="addPartTimeSchedule">
                             Accpect!
-                          </VaButton>
+                          </VaButton> -->
                         </div>
                       </div>
                     </VaScrollContainer>
@@ -286,7 +286,7 @@
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                   </button>
-                  <h2 class="text-2xl font-bold mb-4">Doctor's Working Hours</h2>
+                  <!-- <h2 class="text-2xl font-bold mb-4">Doctor's Working Hours</h2> -->
                   <div class="schedule-inputs flex space-x-4 mb-4">
                     <div v-if="isStaffOrAdmin">
                       <VaOptionList
@@ -324,9 +324,9 @@
                           :text-by="(option: any) => option.altText"
                           class="flex-grow"
                         />
-                        <VaButton preset="primary" :disabled="!canAddSchedule" @click="addPartTimeSchedule">
+                        <!-- <VaButton preset="primary" :disabled="!canAddSchedule" @click="addPartTimeSchedule">
                           Add Schedule
-                        </VaButton>
+                        </VaButton> -->
                       </div>
                       <div v-if="partTimeSchedules.length" class="mt-4">
                         <div
@@ -334,7 +334,7 @@
                           :key="index"
                           class="flex justify-between items-center p-2 border rounded mb-2"
                         >
-                          <span>{{ formatDate(schedule.date) }} - {{ schedule.time }}</span>
+                          <span>{{ formatDate(schedule.date) }} - {{ formatScheduleTime(schedule.time) }}</span>
                           <VaButton preset="secondary" size="small" @click="removePartTimeSchedule(index)">
                             Remove
                           </VaButton>
@@ -458,10 +458,6 @@
       </main>
     </VaCard>
     <VaModal v-model="showModalSizeLarge" size="large" hide-default-actions>
-      <h3 class="va-h3">Party Hard</h3>
-
-      <p class="va-text">Select users to go to a party.</p>
-
       <VaDataTable
         :items="listDoctors"
         :columns="[
@@ -599,7 +595,7 @@ const props = defineProps<{
 }>()
 const emit = defineEmits(['update:updateWorkingCalendar', 'update:regist'])
 
-const years = Array.from({ length: 10 }, (_, i) => currentYear.value - 5 + i)
+const years = Array.from({ length: 10 }, (_, i) => currentYear.value - 3 + i)
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
@@ -804,6 +800,14 @@ const formatDate = (date: any): string => {
   return `${day}/${month}/${year}`
 }
 
+const formatScheduleTime = (time: any): string => {
+  if (Array.isArray(time) && time.length > 0) {
+    return time[0]
+  }
+
+  return ''
+}
+
 const formatTime = (time: string): string => {
   const [hours, minutes] = time.split(':')
   return `${hours}:${minutes}`
@@ -939,14 +943,14 @@ const saveSchedule = () => {
       })),
     )
     showAddModal.value = false
-    selectedDate.value = null
-    listValue.value = []
+    newScheduleDate.value = null
+    newScheduleTime.value = null
   }
 }
 
-const canAddSchedule = computed(() => {
-  return newScheduleDate.value && newScheduleTime.value
-})
+// const canAddSchedule = computed(() => {
+//   return newScheduleDate.value && newScheduleTime.value
+// })
 
 function formatDateSend(date: any) {
   if (date === null || date === undefined) return ''
@@ -1009,86 +1013,29 @@ function getAllRoom() {
 
 async function AutoSetRoomForPartTime(calendars: any) {
   loading.value = true
-  const remainingCalendars = calendars.map((calendar: any) => {
-    const availableRooms = getAllRooms.value.filter((room: any) => room.id !== calendar.roomID)
-
-    // Nếu không có phòng thay thế, sử dụng toàn bộ phòng
-    const roomsToChooseFrom = availableRooms.length > 0 ? availableRooms : getAllRooms.value
-
-    if (roomsToChooseFrom.length === 0) {
-      console.error('Không có phòng nào khả dụng')
-      return calendar
-    }
-
-    const randomRoom = roomsToChooseFrom[Math.floor(Math.random() * roomsToChooseFrom.length)]
-    return {
-      ...calendar,
-      roomID: randomRoom.id,
-    }
-  })
-
-  async function tryAddRooms(calendarsToAdd: any[]): Promise<void> {
-    // Lấy toàn bộ danh sách phòng
-    const allRooms = getAllRooms.value
-
-    try {
-      const roomAssignments = calendarsToAdd.map((calendar: any) => ({
-        calendarID: calendar.calendarID,
-        roomID: calendar.roomID,
-      }))
-
-      await calendarStore.addRoom(roomAssignments)
+  const roomAssignments = calendars.map((calendar: any) => calendar.calendarID)
+  await calendarStore
+    .addRoom(roomAssignments)
+    .then(() => {
       notify({
         title: 'Thành công',
         message: 'Phân lịch thành công!',
         color: 'success',
       })
       loading.value = false
-      emit('update:regist')
-    } catch (error) {
-      console.error('Lỗi khi phân lịch:', error)
-
-      // Kiểm tra nếu đã gần hết phòng để phân
-      const usedRoomIds = new Set(calendarsToAdd.map((calendar) => calendar.roomID))
-      const remainingRooms = allRooms.filter((room: any) => !usedRoomIds.has(room.id))
-
-      // Nếu chỉ còn lại 1 hoặc 2 phòng chưa được sử dụng, dừng thử
-      if (remainingRooms.length <= 2) {
-        notify({
-          title: 'Lỗi',
-          message: 'Không thể phân lịch. Hầu hết các phòng đã được sử dụng.',
-          color: 'error',
-        })
-        return
-      }
-
-      // Tạo lại các lịch với phòng mới
-      const retryCalendars = calendarsToAdd.map((calendar: any) => {
-        const availableRooms = allRooms.filter((room: any) => !usedRoomIds.has(room.id) && room.id !== calendar.roomID)
-
-        // Nếu không còn phòng mới, sử dụng toàn bộ phòng
-        const roomsToChooseFrom = availableRooms.length > 0 ? availableRooms : allRooms
-
-        if (roomsToChooseFrom.length === 0) {
-          console.error('Không có phòng nào khả dụng')
-          return calendar
-        }
-
-        // Chọn một phòng khác ngẫu nhiên
-        const randomRoom = roomsToChooseFrom[Math.floor(Math.random() * roomsToChooseFrom.length)]
-        return {
-          ...calendar,
-          roomID: randomRoom.id,
-        }
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      notify({
+        title: 'error',
+        message: errorMessage,
+        color: 'danger',
       })
-
-      // Thử lại với các phòng mới
-      await tryAddRooms(retryCalendars)
-    }
-  }
-
-  // Bắt đầu quá trình thử lại
-  await tryAddRooms(remainingCalendars)
+      loading.value = false
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 watch(
@@ -1108,6 +1055,33 @@ watch(
       })
     }
   },
+)
+
+watch(
+  [() => newScheduleTime.value, () => newScheduleDate.value],
+  ([time, date]) => {
+    // Reset disabled states when either time or date changes
+    optionsTimes.forEach((option) => {
+      if (time?.length === 1) {
+        if (option.altValue !== time[0]) {
+          option.disabled = true
+          option.altDisabled = true
+        } else {
+          option.disabled = false
+          option.altDisabled = false
+        }
+      } else {
+        option.disabled = false
+        option.altDisabled = false
+      }
+    })
+
+    // Only call addPartTimeSchedule when BOTH time and date are set
+    if (time && date) {
+      addPartTimeSchedule()
+    }
+  },
+  { immediate: false }, // Prevents running on initial load
 )
 
 watch(
@@ -1140,6 +1114,7 @@ onMounted(() => {
   }
   getAllDoctors()
   getAllRoom()
+  console.log(auth.musHaveRole('Dentist'), auth.user?.type)
 })
 </script>
 

@@ -270,7 +270,7 @@
     "form": {
       "actionType": "Loại Hành Động",
       "resourceType": "Loại Tài Nguyên",
-      "export":"Xuất dữ liệu"
+      "export": "Xuất dữ liệu"
     },
     "table": {
       "buttonDetails": "Xem chi tiết",

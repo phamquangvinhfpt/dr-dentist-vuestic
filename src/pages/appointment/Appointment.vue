@@ -196,7 +196,15 @@
             <template #cell(actions)="{ rowData }">
               <div class="space-x-2">
                 <VaButton
-                  v-if="rowData.status !== 4"
+                  v-if="rowData.status === 2"
+                  round
+                  icon="check"
+                  color="#b1fadc"
+                  icon-color="#812E9E"
+                  @click="checkedAppointment(rowData.appointmentId)"
+                />
+                <VaButton
+                  v-if="rowData.status !== 4 && rowData.status !== 2"
                   round
                   icon="arrow_forward"
                   color="#b1fadc"
@@ -308,6 +316,7 @@
         <h3 class="text-lg font-semibold mb-2">
           {{ selectedAppointment?.patientName }} - {{ selectedAppointment?.patientCode }}
         </h3>
+        <p><strong>Contact:</strong> {{ selectedAppointment?.patientPhone }}</p>
         <p><strong>Room:</strong> {{ selectedAppointment?.roomName }}</p>
         <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
         <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedAppointment?.dentistId)) }}</p>
@@ -336,9 +345,8 @@
         <h3 class="text-lg font-semibold mb-2">
           {{ selectedFollowUpAppointment?.patientName }} - {{ selectedFollowUpAppointment?.patientCode }}
         </h3>
-        <p><strong>Room:</strong> {{ selectedAppointment?.roomName }}</p>
-        <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
-        <p><strong>Date:</strong> {{ selectedFollowUpAppointment?.date }}</p>
+        <p><strong>Room:</strong> {{ selectedFollowUpAppointment?.roomName }}</p>
+        <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
         <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
         <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedFollowUpAppointment?.doctorProfileID)) }}</p>
         <p><strong>Service:</strong> {{ selectedFollowUpAppointment?.serviceName }}</p>
@@ -631,6 +639,7 @@ import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/compo
 import { useUserProfileStore } from '@/stores/modules/user.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useRouter } from 'vue-router'
+import { useTreatmentStore } from '@/stores/modules/treatment.module'
 // import { useI18n } from 'vue-i18n'
 
 const selectedDate = ref(new Date())
@@ -651,6 +660,7 @@ const followUpAppointments = ref<FollowUpAppointment[]>([])
 const storeAppointments = useAppointmentStore()
 const storeDoctors = useDoctorProfileStore()
 const storeServices = useServiceStore()
+const storeTreatment = useTreatmentStore()
 const appointmentSearchRes = ref<SearchResponse | null>(null)
 const followUpAppointmentsSearchRes = ref<SearchResponse | null>(null)
 const nonDoctorAppointments = ref<Appointment[]>([])
@@ -673,6 +683,7 @@ const columns = computed(() => [
   { key: 'roomName', label: 'Room', name: 'roomName' },
   { key: 'startTime', label: 'Time', name: 'startTime' },
   { key: 'patientName', label: 'Patient', name: 'patientName' },
+  { key: 'patientPhone', label: 'Phone', name: 'patientPhone' },
   { key: 'dentistName', label: 'Doctor', name: 'dentistName' },
   { key: 'serviceName', label: 'Service', name: 'serviceName' },
   { key: 'servicePrice', label: 'Price', name: 'servicePrice' },
@@ -753,7 +764,7 @@ const optionsDoctors = computed(() =>
 )
 const optionsStartTimes = computed(() => {
   const slots = []
-  for (let hour = 8; hour < 20; hour++) {
+  for (let hour = 8; hour < 22; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`)
     slots.push(`${hour.toString().padStart(2, '0')}:30`)
   }
@@ -810,6 +821,30 @@ const submitAppointment = () => {
         message: message,
         color: 'danger',
       })
+    })
+}
+
+const checkedAppointment = async (appointmentId: any) => {
+  loading.value = true
+  await storeTreatment
+    .toogleAppointment(appointmentId)
+    .then(() => {
+      init({
+        title: 'success',
+        color: 'success',
+        message: 'Bệnh nhân đã đến khám!',
+      })
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      init({
+        message: errorMessage,
+        color: 'error',
+        title: 'Error',
+      })
+    })
+    .finally(() => {
+      loading.value = false
     })
 }
 
@@ -1093,7 +1128,7 @@ onBeforeMount(() => {
 
 const timeSlots = computed(() => {
   const slots = []
-  for (let hour = 8; hour < 20; hour++) {
+  for (let hour = 8; hour < 22; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`)
     slots.push(`${hour.toString().padStart(2, '0')}:30`)
   }

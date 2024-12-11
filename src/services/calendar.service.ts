@@ -93,7 +93,7 @@ class CalendarService {
   }
   async addRoom(data: any): Promise<any> {
     return apiService
-      .post(`/workingcalendar/add-room`, data)
+      .post(`/workingcalendar/add-room/auto`, data)
       .then((response) => {
         return Promise.resolve(response)
       })

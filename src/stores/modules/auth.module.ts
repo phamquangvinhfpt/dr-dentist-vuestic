@@ -109,6 +109,7 @@ export const useAuthStore = defineStore('auth', {
             roles: userParse['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
             tenant: userParse.tenant,
             permission: userParse.permission,
+            type: userParse.type,
           }
           this.avatarUrl = userParse.image_url
           if (!keepLogin) {
@@ -180,6 +181,7 @@ export const useAuthStore = defineStore('auth', {
             roles: userParse['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
             tenant: userParse.tenant,
             permission: userParse.permission,
+            type: userParse.type,
           }
           this.avatarUrl = userParse.image_url
           return response.data.token
@@ -193,9 +195,6 @@ export const useAuthStore = defineStore('auth', {
         })
     },
     logout() {
-      // if (signalRService.isConnected()) {
-      //   signalRService.disconnect()
-      // }
       this.isAuthenticated = false
       this.user = null
       jwtService.destroyToken()
