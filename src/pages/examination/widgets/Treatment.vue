@@ -1,7 +1,22 @@
 <script lang="ts" setup>
 import { Appointment } from '@/pages/appointment/types'
 import { onMounted, ref, computed, reactive } from 'vue'
-import { useToast, VaInnerLoading, VaCollapse, VaCard, VaCardContent, VaIcon, VaButton } from 'vuestic-ui'
+import {
+  useToast,
+  VaInnerLoading,
+  VaCollapse,
+  VaCard,
+  VaCardContent,
+  VaIcon,
+  VaButton,
+  VaModal,
+  VaDateInput,
+  VaSelect,
+  VaTextarea,
+  VaCheckbox,
+  VaChip,
+  VaDataTable,
+} from 'vuestic-ui'
 import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { getErrorMessage } from '@/services/utils'
@@ -9,6 +24,7 @@ import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/compo
 import Prescription from './Prescription.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
+import DentalChart from './DentalChart.vue'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -21,6 +37,7 @@ const { init } = useToast()
 const storeTreatment = useTreatmentStore()
 const storeMedicalRecord = useMedicalRecordStore()
 const showModalTreatment = ref(false)
+const prevent = ref(false)
 const titleModalTreatment = computed(() => {
   if (selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Pending) {
     return 'Add Treatment Detail'
@@ -169,7 +186,7 @@ const toogleAppointmentStatus = async () => {
       const errorMessage = getErrorMessage(error)
       init({
         message: errorMessage,
-        color: 'error',
+        color: 'danger',
         title: 'Error',
       })
     })
@@ -189,7 +206,7 @@ const getTreatmentPlans = async () => {
       const errorMessage = getErrorMessage(error)
       init({
         message: errorMessage,
-        color: 'error',
+        color: 'danger',
         title: 'Error',
       })
     })
@@ -214,7 +231,7 @@ const handleTreatmentAction = (item: TreatmentPlanResponse) => {
       const errorMessage = getErrorMessage(error)
       init({
         message: errorMessage,
-        color: 'error',
+        color: 'danger',
         title: 'Error',
       })
     })
@@ -314,51 +331,113 @@ const fetchTreatment = () => {
 }
 
 const formData = reactive({
-  appointmentId: props.appointment?.appointmentId,
-  basicExamination: {
-    examinationContent: '',
-    treatmentPlanNote: '',
+  AppointmentId: props.appointment?.appointmentId,
+  BasicExamination: {
+    ExaminationContent: '',
+    TreatmentPlanNote: '',
   },
-  diagnosis: {
-    toothNumber: '',
-    teethConditions: [] as string[],
+  Diagnosis: [] as Array<{
+    toothNumber: number
+    teethConditions: string[]
+  }>,
+  Indication: {
+    IndicationType: [] as string[],
+    Description: '',
   },
-  indication: {
-    indicationType: [] as string[],
-    description: '',
-  },
+  IndicationImages: [] as Array<{
+    images: File
+    imageType: string
+    imageUrl?: string
+  }>,
 })
+
+// const resetForm = () => {
+//   formData.BasicExamination.ExaminationContent = ''
+//   formData.BasicExamination.TreatmentPlanNote = ''
+//   formData.Diagnosis = []
+//   formData.Indication.IndicationType = []
+//   formData.Indication.Description = ''
+//   formData.IndicationImages = []
+// }
 
 const closeModal = () => {
   showModalCreateRecord.value = false
+  // resetForm()
 }
 
 const updateTeethConditions = (code: string, checked: boolean) => {
-  if (checked) {
-    formData.diagnosis.teethConditions.push(code)
-  } else {
-    const index = formData.diagnosis.teethConditions.indexOf(code)
-    if (index > -1) {
-      formData.diagnosis.teethConditions.splice(index, 1)
+  // Find the diagnosis for the current tooth
+  const currentDiagnosis = formData.Diagnosis.find((diagnosis: any) => diagnosis.toothNumber === current_tooth.value)
+
+  if (currentDiagnosis) {
+    if (checked) {
+      // Add condition if it doesn't already exist
+      if (!currentDiagnosis.teethConditions.includes(code)) {
+        currentDiagnosis.teethConditions.push(code)
+      }
+    } else {
+      // Remove condition if it exists
+      const index = currentDiagnosis.teethConditions.indexOf(code)
+      if (index > -1) {
+        currentDiagnosis.teethConditions.splice(index, 1)
+      }
     }
+
+    // Update tooth conditions in dental chart for the current tooth
+    dentalChartRef.value.updateToothConditions(current_tooth.value, currentDiagnosis.teethConditions)
   }
 }
 
 const updateIndicationType = (code: string, checked: boolean) => {
   if (checked) {
-    formData.indication.indicationType.push(code)
+    if (!formData.Indication.IndicationType.includes(code)) {
+      formData.Indication.IndicationType.push(code)
+      uploadImage(code)
+    }
   } else {
-    const index = formData.indication.indicationType.indexOf(code)
+    const index = formData.Indication.IndicationType.indexOf(code)
     if (index > -1) {
-      formData.indication.indicationType.splice(index, 1)
+      formData.Indication.IndicationType.splice(index, 1)
+      removeImage(code, index)
     }
   }
 }
 
+const validateForm = () => {}
+
 const createMedicalRecord = async () => {
   loading.value = true
+  const form = new FormData()
+  form.append('AppointmentId', formData.AppointmentId || '')
+
+  // Phẳng hóa BasicExamination
+  form.append('BasicExamination.ExaminationContent', formData.BasicExamination.ExaminationContent)
+  form.append('BasicExamination.TreatmentPlanNote', formData.BasicExamination.TreatmentPlanNote)
+
+  // Xử lý Diagnosis
+  formData.Diagnosis.forEach((diagnosis, index) => {
+    form.append(`Diagnosis[${index}].toothNumber`, diagnosis.toothNumber.toString())
+    diagnosis.teethConditions.forEach((condition, conditionIndex) => {
+      form.append(`Diagnosis[${index}].teethConditions[${conditionIndex}]`, condition)
+    })
+  })
+
+  // Xử lý Indication
+  formData.Indication.IndicationType.forEach((type, index) => {
+    form.append(`Indication.IndicationType[${index}]`, type)
+  })
+  form.append('Indication.Description', formData.Indication.Description)
+
+  // Xử lý IndicationImages
+  formData.IndicationImages.forEach((image, index) => {
+    form.append(`IndicationImages[${index}].images`, image.images)
+    form.append(`IndicationImages[${index}].imageType`, image.imageType)
+  })
+
+  console.log(formData)
+
   await storeMedicalRecord
-    .createMedicalRecord(formData)
+    .createMedicalRecord(form)
     .then((response) => {
       init({
         message: response,
@@ -378,6 +457,124 @@ const createMedicalRecord = async () => {
     .finally(() => {
       loading.value = false
     })
+}
+
+const current_tooth = ref<number>()
+const handleSelectedTeeth = (teeth: number[]) => {
+  // Lọc ra các răng không còn được chọn
+  const teethToRemove = formData.Diagnosis.filter((d) => !teeth.map(Number).includes(d.toothNumber)).map(
+    (d) => d.toothNumber,
+  )
+
+  // Xóa các răng không còn được chọn
+  teethToRemove.forEach((tooth) => {
+    const indexToRemove = formData.Diagnosis.findIndex((item) => item.toothNumber === tooth)
+    if (indexToRemove > -1) {
+      formData.Diagnosis.splice(indexToRemove, 1)
+      dentalChartRef.value.updateToothConditions(tooth, []) // Xóa tình trạng răng khi bỏ chọn
+    }
+  })
+
+  // Thêm các răng mới chưa tồn tại
+  teeth.forEach((tooth) => {
+    const existingToothIndex = formData.Diagnosis.findIndex((item) => item.toothNumber === tooth)
+    if (existingToothIndex === -1) {
+      formData.Diagnosis.push({
+        toothNumber: tooth,
+        teethConditions: [], // Đảm bảo tình trạng mới là rỗng khi thêm răng
+      })
+    }
+  })
+
+  current_tooth.value = teeth[teeth.length - 1]
+}
+
+const dentalChartRef = ref()
+const hoveredTooth = ref<number | null>(null)
+const popupStyle = ref({})
+
+const handleToothHover = ({
+  toothNumber,
+  event,
+  isHovered,
+}: {
+  toothNumber: number
+  event: MouseEvent | null
+  isHovered: boolean
+}) => {
+  if (isHovered && event) {
+    hoveredTooth.value = toothNumber
+    popupStyle.value = {
+      position: 'fixed',
+      left: `${event.clientX}px`,
+      top: `${event.clientY + 10}px`,
+    }
+  } else {
+    hoveredTooth.value = null
+  }
+}
+
+const getToothConditions = (toothNumber: number) => {
+  const diagnosis = formData.Diagnosis.find((d) => d.toothNumber === toothNumber)
+  return diagnosis ? diagnosis.teethConditions : []
+}
+
+const isRemoving = ref(false)
+
+const uploadImage = (type?: string) => {
+  if (prevent.value || isRemoving.value) {
+    return
+  }
+  const fileInput = document.createElement('input')
+  fileInput.type = 'file'
+  fileInput.accept = 'image/*'
+  fileInput.style.display = 'none'
+  document.body.appendChild(fileInput)
+
+  fileInput.onchange = (event) => {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (file) {
+      handleFileUpload(file, type || 'Unknown')
+    }
+    document.body.removeChild(fileInput)
+  }
+
+  fileInput.click()
+}
+
+const handleFileUpload = (file: File, type: any) => {
+  // Logic xử lý file upload
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    // Thêm ảnh vào mảng IndicationImages
+    formData.IndicationImages.push({
+      images: file,
+      imageType: type,
+      imageUrl: e.target?.result as string,
+    })
+  }
+  reader.readAsDataURL(file)
+  reader.onerror = (error) => {
+    console.error('Error reading file:', error)
+    init({
+      message: 'Có lỗi xảy ra khi đọc file. Vui lòng thử lại.',
+      color: 'danger',
+      title: 'Lỗi',
+    })
+  }
+}
+
+const removeImage = (type: any, index: number) => {
+  isRemoving.value = true
+  formData.Indication.IndicationType = formData.Indication.IndicationType.filter(
+    (types: any, key: number) => !(types === type && index === key),
+  )
+  formData.IndicationImages = formData.IndicationImages.filter(
+    (value: any, key: number) => !(value.imageType === type && index === key),
+  )
+  setTimeout(() => {
+    isRemoving.value = false
+  }, 0)
 }
 
 onMounted(() => {
@@ -408,7 +605,7 @@ onMounted(() => {
               </div>
             </div>
             <VaButton
-              v-if="isDoctor && isToday(props.appointment?.appointmentDate as string)"
+              v-if="isDoctor"
               preset="primary"
               icon-right="add"
               class="p-2"
@@ -538,32 +735,70 @@ onMounted(() => {
     </VaCard>
   </VaModal>
   <!-- Create Medical Record -->
-  <VaModal v-model="showModalCreateRecord" close-button size="large" @close="closeModal" @ok="createMedicalRecord">
+  <VaModal
+    v-model="showModalCreateRecord"
+    close-button
+    size="large"
+    @close="closeModal"
+    @beforeOk="validateForm"
+    @ok="createMedicalRecord"
+  >
     <VaCard>
       <VaCardContent>
-        <h2 class="text-2xl font-bold mb-6">Create Medical Record</h2>
+        <!-- <h2 class="text-2xl font-bold mb-6">Create Medical Record</h2> -->
 
         <!-- General Examination Section -->
         <div class="mb-6">
           <h3 class="text-xl font-semibold mb-4">KHÁM TỔNG QUÁT</h3>
           <div class="grid grid-cols-2 gap-4">
-            <VaTextarea v-model="formData.basicExamination.examinationContent" label="Nội dung khám" class="mt-4" />
-            <VaTextarea v-model="formData.basicExamination.treatmentPlanNote" label="Kế hoạch điều trị" class="mt-4" />
+            <VaTextarea
+              v-model="formData.BasicExamination.ExaminationContent"
+              label="Nội dung khám"
+              class="mt-4"
+              :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+            />
+            <VaTextarea
+              v-model="formData.BasicExamination.TreatmentPlanNote"
+              label="Kế hoạch điều trị"
+              class="mt-4"
+              :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+            />
           </div>
         </div>
 
         <!-- Tooth Conditions Section -->
         <div class="mb-6">
           <h3 class="text-xl font-semibold mb-4">TÌNH TRẠNG RĂNG</h3>
-          <VaInput v-model="formData.diagnosis.toothNumber" label="Số răng" type="number" class="mb-4 w-[60px]" />
           <div class="grid grid-cols-2 gap-4">
-            <VaCheckbox
-              v-for="condition in toothConditions"
-              :key="condition.code"
-              :model-value="formData.diagnosis.teethConditions.includes(condition.code)"
-              :label="condition.label"
-              @update:modelValue="updateTeethConditions(condition.code, $event)"
-            />
+            <div class="relative">
+              <DentalChart ref="dentalChartRef" @toothNumber="handleSelectedTeeth" @toothHover="handleToothHover" />
+              <div
+                v-if="hoveredTooth && getToothConditions(hoveredTooth).length > 0"
+                class="tooth-popup"
+                :style="popupStyle"
+              >
+                <h4 class="font-bold mb-2">Tooth {{ hoveredTooth }}</h4>
+                <div v-if="getToothConditions(hoveredTooth).length > 0">
+                  <p v-for="condition in getToothConditions(hoveredTooth)" :key="condition">
+                    {{ condition }}
+                  </p>
+                </div>
+                <p v-else>No conditions</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 place-content-center gap-8">
+              <VaCheckbox
+                v-for="condition in toothConditions"
+                :key="condition.code"
+                :model-value="
+                  formData.Diagnosis.some(
+                    (d) => d.teethConditions.includes(condition.code) && d.toothNumber === current_tooth,
+                  )
+                "
+                :label="condition.label"
+                @update:modelValue="updateTeethConditions(condition.code, $event)"
+              />
+            </div>
           </div>
         </div>
 
@@ -574,18 +809,40 @@ onMounted(() => {
             <VaCheckbox
               v-for="indication in indicationTypes"
               :key="indication.code"
-              :model-value="formData.indication.indicationType.includes(indication.code)"
+              :model-value="formData.Indication.IndicationType.includes(indication.code)"
               :label="indication.label"
               @update:modelValue="updateIndicationType(indication.code, $event)"
             />
           </div>
+          <div class="grid grid-cols-3 gap-4 mt-4">
+            <div v-for="(image, index) in formData.IndicationImages" :key="image.imageType" class="relative">
+              <img
+                :src="image.imageUrl"
+                :alt="image.imageType"
+                class="w-full h-64 object-cover border-2 border-dashed"
+              />
+              <button
+                class="absolute top-0 right-0 transform scale-75 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                @click.stop="removeImage(image.imageType, index)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
           <VaTextarea
-            v-model="formData.indication.description"
+            v-model="formData.Indication.Description"
             label="Mô tả"
             class="mt-4 w-full"
             counter
             required-mark
-            :rules="[(v: any) => (v && v.length > 0) || 'Required', (v: any) => v && v.length < 125]"
           />
         </div>
       </VaCardContent>
@@ -596,5 +853,15 @@ onMounted(() => {
 <style scoped>
 .va-inner-loading {
   min-height: 200px;
+}
+
+.tooth-popup {
+  position: fixed;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 }
 </style>

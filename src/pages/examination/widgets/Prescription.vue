@@ -71,7 +71,7 @@ const onPrescriptionSaved = async (prescription: Prescription) => {
     .catch((error) => {
       notify({
         message: notifications.createFailed(t('prescriptions.prescription')) + getErrorMessage(error),
-        color: 'error',
+        color: 'danger',
       })
     })
 }

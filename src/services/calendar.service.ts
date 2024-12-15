@@ -101,6 +101,16 @@ class CalendarService {
         return Promise.reject(error)
       })
   }
+  async getDoctorHasNoCalendar(data: any): Promise<any> {
+    return apiService
+      .get(`/workingcalendar/get/non-calendar?date=${data}`)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new CalendarService()

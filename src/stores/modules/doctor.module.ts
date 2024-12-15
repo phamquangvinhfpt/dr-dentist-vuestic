@@ -9,10 +9,10 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
     doctorId: '' as string,
   }),
   actions: {
-    async getDoctors(data: any): Promise<any> {
+    async getDoctors(data: any, date?: any): Promise<any> {
       try {
         this.isLoading = true
-        const response = await doctorService.getDoctors(data)
+        const response = await doctorService.getDoctors(data, date)
         this.isLoading = false
         this.doctors = [...response.data]
         return await Promise.resolve(response)

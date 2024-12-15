@@ -54,6 +54,7 @@ export type Doctor = {
   phoneNumber: string
   imageUrl: string
   rating: number
+  isWorked: boolean
   doctorProfile: DoctorDetail
   color?: string
   name?: string
@@ -191,6 +192,11 @@ export type FollowUpStatusConfig = {
   bgColor?: string
   textColor?: string
   color?: string
+}
+
+export type AppointmentTypeConfig = {
+  text?: string
+  bgColor?: string
 }
 
 export const getAppointmentStatusConfig = (status: AppointmentStatus): StatusConfig => {
@@ -416,6 +422,26 @@ export const formatStatus = computed(() => (value: string | number) => {
       return 'Cancelled'
     default:
       return 'Unknown'
+  }
+})
+
+export const getAppointmentType = computed(() => (type: AppointmentType): AppointmentTypeConfig => {
+  switch (type) {
+    case AppointmentType.Appointment:
+      return {
+        text: 'Appointment',
+        bgColor: 'bg-green-100',
+      }
+    case AppointmentType.FollowUp:
+      return {
+        text: 'FollowUp',
+        bgColor: 'bg-yellow-100',
+      }
+    default:
+      return {
+        text: 'Unknown',
+        bgColor: 'bg-gray-100',
+      }
   }
 })
 

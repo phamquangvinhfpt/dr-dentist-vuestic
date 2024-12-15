@@ -28,7 +28,7 @@
           </div>
 
           <div class="grid md:flex items-center space-x-4" :class="isMobile ? 'hidden' : ''">
-            <div class="inline-flex rounded-lg border bg-gray-50 p-1">
+            <div v-if="!role?.includes('Patient')" class="inline-flex rounded-lg border bg-gray-50 p-1">
               <button
                 v-for="view in views"
                 :key="view.id"
@@ -38,7 +38,7 @@
                 ]"
                 @click="currentView = view.id"
               >
-                {{ view.label }}
+                <span class="material-symbols-outlined"> {{ view.label }} </span>
               </button>
             </div>
             <button
@@ -72,7 +72,12 @@
           :style="role?.includes('Dentist') ? { marginRight: `${scrollbarWidth}px` } : {}"
           @scroll="handleCalendarScroll"
         >
-          <div class="grid" :style="{ gridTemplateColumns: `repeat(${doctors.length}, minmax(200px, 1fr))` }">
+          <div
+            class="grid"
+            :style="{
+              gridTemplateColumns: `repeat(${role?.includes('Dentist') ? 7 : doctors.length}, minmax(200px, 1fr))`,
+            }"
+          >
             <!-- Doctor headers -->
             <div
               v-for="doctor in doctors"
@@ -84,80 +89,253 @@
             >
               <div class="flex flex-col items-center">
                 <div class="w-8 h-8 rounded-full bg-gray-200 mb-1"></div>
-                <span class="text-sm font-medium">{{ doctor.name }}</span>
+                <div class="flex relative">
+                  <span class="text-sm font-medium">{{ doctor.name }}</span>
+                  <div
+                    :class="getEventDotClass(doctor.isWorked)"
+                    class="w-2 h-2 rounded-full flex-shrink-0 absolute -right-3 bottom-2"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <!-- WeekDays headers -->
+            <div
+              v-for="(day, index) in weekDays"
+              :key="index"
+              :class="{
+                'h-16 p-4 text-center border-l bg-white sticky top-0 z-10': true,
+                hidden: !role?.includes('Dentist'),
+              }"
+            >
+              <div class="flex flex-col items-center">
+                <span class="text-sm font-medium">{{ day }}</span>
               </div>
             </div>
             <!-- Appointment slots -->
             <div
-              v-for="doctor in doctors"
-              :key="doctor.id"
+              v-for="(column, columnIndex) in role?.includes('Dentist') ? 7 : doctors.length"
+              :key="columnIndex"
               class="border-l relative"
-              :style="{ backgroundColor: `${doctor.color}10` }"
+              :style="{ backgroundColor: role?.includes('Dentist') ? '' : `${doctors[columnIndex].color}10` }"
             >
               <div class="h-full">
                 <div
                   v-for="time in timeSlots"
                   :key="time"
                   class="h-16 border-b relative group"
-                  @contextmenu.prevent="openContextMenu($event, time, doctor.id)"
+                  @contextmenu.prevent="
+                    openContextMenu(
+                      $event,
+                      time,
+                      role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                    )
+                  "
                   @dragover.prevent
-                  @drop="handleDrop($event, time, doctor.id)"
+                  @drop="
+                    handleDrop(
+                      $event,
+                      time,
+                      role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                    )
+                  "
                 >
                   <!-- Appointment slots -->
                   <div
-                    v-if="getAppointments(time, doctor.id).length === 1 && isAppointment === 'appointment'"
+                    v-if="
+                      getAppointments(
+                        time,
+                        role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                      ).length === 1
+                    "
                     class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
                     :style="{
                       top: '2px',
                       height: 'calc(100% - 4px)',
                     }"
                     draggable="true"
-                    @dragstart="handleDragStart($event, getAppointments(time, doctor.id)[0])"
-                    @mouseenter="showAppointmentDetails(getAppointments(time, doctor.id)[0], $event)"
+                    @dragstart="
+                      handleDragStart(
+                        $event,
+                        getAppointments(
+                          time,
+                          role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                        )[0],
+                      )
+                    "
+                    @mouseenter="
+                      showAppointmentDetails(
+                        getAppointments(
+                          time,
+                          role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                        )[0],
+                        $event,
+                      )
+                    "
                     @mouseleave="hideAppointmentDetails()"
                   >
-                    <div class="h-full p-2 rounded" :style="{ backgroundColor: `${doctor.color}30` }">
-                      <div class="text-sm font-medium truncate">
-                        {{ getAppointments(time, doctor.id)[0].patientName }}
+                    <div
+                      class="h-full p-2 rounded"
+                      :style="{
+                        backgroundColor: `${role?.includes('Dentist') ? '#E5E7EB' : doctors[columnIndex].color}30`,
+                      }"
+                    >
+                      <div class="flex justify-between items-center">
+                        <div class="text-sm font-medium truncate">
+                          {{
+                            getAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].patientName
+                          }}
+                        </div>
+                        <div
+                          class="text-xs"
+                          :class="[
+                            getAppointmentType(
+                              getAppointments(
+                                time,
+                                role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                              )[0].type,
+                            ).bgColor,
+                            'px-2 py-1 rounded-full inline-block',
+                          ]"
+                        >
+                          {{
+                            getAppointmentType(
+                              getAppointments(
+                                time,
+                                role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                              )[0].type,
+                            ).text
+                          }}
+                        </div>
                       </div>
                       <div
                         class="text-xs"
                         :class="[
-                          getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).bgColor,
-                          getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).textColor,
+                          getAppointmentStatusConfig(
+                            getAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].status,
+                          ).bgColor,
+                          getAppointmentStatusConfig(
+                            getAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].status,
+                          ).textColor,
                           'px-2 py-1 rounded-full inline-block',
                         ]"
                       >
-                        {{ getAppointmentStatusConfig(getAppointments(time, doctor.id)[0].status).text }}
+                        {{
+                          getAppointmentStatusConfig(
+                            getAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].status,
+                          ).text
+                        }}
                       </div>
                     </div>
                   </div>
                   <!-- Follow up -->
                   <div
-                    v-if="getFollowUpAppointments(time, doctor.id).length === 1 && isAppointment === 'followup'"
+                    v-if="
+                      getFollowUpAppointments(
+                        time,
+                        role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                      ).length === 1
+                    "
                     class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
                     :style="{
                       top: '2px',
                       height: 'calc(100% - 4px)',
                     }"
                     draggable="true"
-                    @dragstart="handleDragStart($event, getFollowUpAppointments(time, doctor.id)[0])"
-                    @mouseenter="showFollowUpAppointmentDetails(getFollowUpAppointments(time, doctor.id)[0], $event)"
+                    @dragstart="
+                      handleDragStart(
+                        $event,
+                        getFollowUpAppointments(
+                          time,
+                          role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                        )[0],
+                      )
+                    "
+                    @mouseenter="
+                      showFollowUpAppointmentDetails(
+                        getFollowUpAppointments(
+                          time,
+                          role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                        )[0],
+                        $event,
+                      )
+                    "
                     @mouseleave="hideFollowUpAppointmentDetails()"
                   >
-                    <div class="h-full p-2 rounded" :style="{ backgroundColor: `${doctor.color}30` }">
-                      <div class="text-sm font-medium truncate">
-                        {{ getFollowUpAppointments(time, doctor.id)[0].patientName }}
+                    <div
+                      class="h-full p-2 rounded"
+                      :style="{
+                        backgroundColor: `${role?.includes('Dentist') ? '#E5E7EB' : doctors[columnIndex].color}30`,
+                      }"
+                    >
+                      <div class="flex justify-between items-center">
+                        <div class="text-sm font-medium truncate">
+                          {{
+                            getFollowUpAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].patientName
+                          }}
+                        </div>
+                        <div
+                          class="text-xs"
+                          :class="[
+                            getAppointmentType(
+                              getFollowUpAppointments(
+                                time,
+                                role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                              )[0].appointmentType,
+                            ).bgColor,
+                            'px-2 py-1 rounded-full inline-block',
+                          ]"
+                        >
+                          {{
+                            getAppointmentType(
+                              getFollowUpAppointments(
+                                time,
+                                role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                              )[0].appointmentType,
+                            ).text
+                          }}
+                        </div>
                       </div>
                       <div
                         class="text-xs"
                         :class="[
-                          getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).bgColor,
-                          getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).textColor,
+                          getFollowUpStatusConfig(
+                            getFollowUpAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].status,
+                          ).bgColor,
+                          getFollowUpStatusConfig(
+                            getFollowUpAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].status,
+                          ).textColor,
                           'px-2 py-1 rounded-full inline-block',
                         ]"
                       >
-                        {{ getFollowUpStatusConfig(getFollowUpAppointments(time, doctor.id)[0].status).text }}
+                        {{
+                          getFollowUpStatusConfig(
+                            getFollowUpAppointments(
+                              time,
+                              role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                            )[0].status,
+                          ).text
+                        }}
                       </div>
                     </div>
                   </div>
@@ -177,8 +355,10 @@
             class="my-table va-table--hoverable"
             :style="{
               '--va-data-table-thead-background': 'var(--va-background-element)',
+              '--va-data-table-grid-tbody-gap': '0.15rem',
               '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
             }"
+            :class="['small-text']"
             sticky-header
           >
             <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
@@ -196,7 +376,7 @@
             <template #cell(actions)="{ rowData }">
               <div class="space-x-2">
                 <VaButton
-                  v-if="rowData.status === 2"
+                  v-if="rowData.status === 2 && role?.includes('Staff')"
                   round
                   icon="check"
                   color="#b1fadc"
@@ -251,12 +431,18 @@
               '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
             }"
             sticky-header
+            :class="['small-text']"
           >
             <template #cell(date)="{ value }"> {{ formatDate(value) }} </template>
             <template #cell(status)="{ value }">
               <VaChip :color="getFollowUpStatusColor(value)" class="text-sm">
                 {{ getFollowUpStatusText(value) }}
               </VaChip>
+            </template>
+            <template #cell(actions)="{ rowData }">
+              <div class="space-x-2">
+                <VaButton round icon="sync" color="warning" icon-color="#812E9E" @click="rescheduleModal(rowData)" />
+              </div>
             </template>
           </VaDataTable>
           <VaPagination
@@ -281,6 +467,7 @@
               '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
             }"
             sticky-header
+            :class="['small-text']"
             @row:dblclick="(row) => openAssignListDialog(row.item)"
           >
             <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
@@ -294,6 +481,26 @@
               <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
                 {{ getPaymentStatusText(value) }}
               </VaChip>
+            </template>
+            <template #cell(actions)="{ rowData }">
+              <div class="space-x-2">
+                <VaButton
+                  v-if="rowData.status === 2"
+                  round
+                  icon="sync"
+                  color="warning"
+                  icon-color="#812E9E"
+                  @click="rescheduleModal(rowData)"
+                />
+                <VaButton
+                  v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
+                  round
+                  icon="clear"
+                  color="danger"
+                  icon-color="#812E9E"
+                  @click="cancelModal(rowData)"
+                />
+              </div>
             </template>
           </VaDataTable>
           <VaPagination
@@ -319,6 +526,7 @@
         <p><strong>Contact:</strong> {{ selectedAppointment?.patientPhone }}</p>
         <p><strong>Room:</strong> {{ selectedAppointment?.roomName }}</p>
         <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
+        <p><strong>Date:</strong> {{ selectedAppointment?.appointmentDate }}</p>
         <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedAppointment?.dentistId)) }}</p>
         <p><strong>Service:</strong> {{ selectedAppointment?.serviceName }}</p>
         <p><strong>Price:</strong> {{ formatPrice(selectedAppointment?.servicePrice) }}</p>
@@ -347,7 +555,7 @@
         </h3>
         <p><strong>Room:</strong> {{ selectedFollowUpAppointment?.roomName }}</p>
         <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
-        <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
+        <p><strong>Date:</strong> {{ selectedFollowUpAppointment?.date }}</p>
         <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedFollowUpAppointment?.doctorProfileID)) }}</p>
         <p><strong>Service:</strong> {{ selectedFollowUpAppointment?.serviceName }}</p>
         <p class="flex items-center gap-2">
@@ -482,7 +690,7 @@
                     <div class="space-y-2">
                       <label class="text-sm font-medium">Doctor</label>
                       <select v-model="selectedDoctorId" required class="w-full px-3 py-2 border rounded-md">
-                        <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id">
+                        <option v-for="doctor in activeDoctors" :key="doctor.id" :value="doctor.id">
                           {{ doctor.name }}
                         </option>
                       </select>
@@ -630,6 +838,7 @@ import {
   getFollowUpStatusColor,
   getPaymentStatusColor,
   getPaymentStatusText,
+  getAppointmentType,
 } from './types'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import { getErrorMessage } from '@/services/utils'
@@ -640,7 +849,7 @@ import { useUserProfileStore } from '@/stores/modules/user.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useRouter } from 'vue-router'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
-// import { useI18n } from 'vue-i18n'
+import { startOfWeek, addDays, format } from 'date-fns'
 
 const selectedDate = ref(new Date())
 const showAllUnassignedModal = ref(false)
@@ -671,12 +880,13 @@ const showModalCancel = ref(false)
 const isMobile = computed(() => window.innerWidth < 768)
 const { init } = useToast()
 const router = useRouter()
-// const { t } = useI18n()
 const usersStore = useAuthStore()
 const role = usersStore.user?.roles
 const items = ref<Appointment[]>([])
 const followitems = ref<FollowUpAppointment[]>([])
 const unassigneditems = ref<Appointment[]>([])
+
+const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 const columns = computed(() => [
   { key: 'appointmentDate', label: 'Date', name: 'appointmentDate' },
@@ -702,6 +912,7 @@ const followColumns = computed(() => [
   { key: 'serviceName', label: 'Service', name: 'serviceName' },
   { key: 'procedureName', label: 'Procedure', name: 'procedureName' },
   { key: 'status', label: 'Status', name: 'status' },
+  { key: 'actions', label: 'Actions', name: 'actions' },
 ])
 
 const unassignedColumns = computed(() => [
@@ -712,10 +923,11 @@ const unassignedColumns = computed(() => [
   { key: 'servicePrice', label: 'Price', name: 'servicePrice' },
   { key: 'status', label: 'Status', name: 'status' },
   { key: 'paymentStatus', label: 'Payment Status', name: 'paymentStatus' },
+  { key: 'actions', label: 'Actions', name: 'actions' },
 ])
-// setup function
+
 const views = [
-  { id: 'calendar', label: 'Calendar' },
+  { id: 'calendar', label: 'event_note' },
   { id: 'list', label: 'List' },
 ]
 
@@ -834,12 +1046,13 @@ const checkedAppointment = async (appointmentId: any) => {
         color: 'success',
         message: 'Bệnh nhân đã đến khám!',
       })
+      fetchAppointments(searchValueA.value)
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)
       init({
         message: errorMessage,
-        color: 'error',
+        color: 'danger',
         title: 'Error',
       })
     })
@@ -928,9 +1141,9 @@ const submitCancel = () => {
 
 const filteredTypes = computed(() => {
   if (role?.includes('Patient') || role?.includes('Dentist')) {
-    return types.filter((type) => type.id !== 'unassigned')
+    return currentView.value === 'list' ? types.filter((type) => type.id !== 'unassigned') : []
   }
-  return currentView.value === 'list' ? types : types.filter((type) => type.id !== 'unassigned')
+  return currentView.value === 'list' ? types : []
 })
 
 const formatPrice = (price: any) => {
@@ -987,6 +1200,7 @@ const generatePastelColor = () => {
 }
 
 const doctors = ref<Doctor[]>([])
+const activeDoctors = computed(() => doctors.value.filter((doctor: any) => doctor.isWorked))
 
 const paginationA = ref<Pagination>({
   page: 1,
@@ -1095,7 +1309,7 @@ const searchDoctor = () => {
   loading.value = true
   const request = { isActive: true }
   storeDoctors
-    .getDoctors(request)
+    .getDoctors(request, formatDateForm(selectedDate.value))
     .then((response) => {
       doctors.value = response.data
       doctors.value.forEach((doctor) => {
@@ -1117,7 +1331,7 @@ const searchDoctor = () => {
 }
 
 onBeforeMount(() => {
-  if (isMobile.value) {
+  if (isMobile.value || role?.includes('Patient')) {
     currentView.value = 'list'
   }
   searchDoctor()
@@ -1239,6 +1453,7 @@ const handleAssignBooking = () => {
           message: message,
           color: 'danger',
         })
+        selectedTime.value = selectedTime.value.slice(0, 5)
       })
   }
 }
@@ -1248,24 +1463,35 @@ const handleDragStart = (event: DragEvent, appointment: Appointment | FollowUpAp
   hideAppointmentDetails()
 }
 
-const handleDrop = (event: any, time: any, doctorId: any) => {
+const handleDrop = (event: any, time: any, identifier: any) => {
   const appointmentData = JSON.parse(event.dataTransfer.getData('text/plain'))
   time = time + ':00'
+
   // Check if the drop location is already occupied
-  const isDuplicate = appointments.value.some(
-    (a) =>
-      a.startTime === time &&
-      getDoctorId(a.dentistId) === doctorId &&
-      getDoctorId(a.dentistId) !== getDoctorId(appointmentData.dentistId),
-  )
-  const isDuplicateFollowUp = followUpAppointments.value.some(
-    (a) =>
-      a.startTime === time &&
-      getDoctorId(a.doctorProfileID) === doctorId &&
-      getDoctorId(a.doctorProfileID) !== getDoctorId(appointmentData.doctorProfileID),
-  )
+  const isDuplicate = role?.includes('Dentist')
+    ? appointments.value.some(
+        (a) =>
+          a.appointmentDate === identifier && a.startTime === time && a.appointmentId !== appointmentData.appointmentId,
+      )
+    : appointments.value.some(
+        (a) =>
+          a.startTime === time &&
+          getDoctorId(a.dentistId) === identifier &&
+          getDoctorId(a.dentistId) !== getDoctorId(appointmentData.dentistId),
+      )
 
-  if (isDuplicate) {
+  const isDuplicateFollowUp = role?.includes('Dentist')
+    ? followUpAppointments.value.some(
+        (a) => a.date === identifier && a.startTime === time && a.appointmentId !== appointmentData.appointmentId,
+      )
+    : followUpAppointments.value.some(
+        (a) =>
+          a.startTime === time &&
+          getDoctorId(a.doctorProfileID) === identifier &&
+          getDoctorId(a.doctorProfileID) !== getDoctorId(appointmentData.doctorProfileID),
+      )
+
+  if (isDuplicate || isDuplicateFollowUp) {
     init({
       title: 'error',
       message: 'Cannot assign booking. Time slot is already occupied.',
@@ -1274,31 +1500,69 @@ const handleDrop = (event: any, time: any, doctorId: any) => {
     return
   }
 
-  if (isDuplicateFollowUp) {
-    init({
-      title: 'error',
-      message: 'Cannot assign booking. Time slot is already occupied.',
-      color: 'danger',
-    })
-    return
-  }
-  const index = appointments.value.findIndex((a) => a.appointmentId === appointmentData.appointmentId)
-  if (index !== -1) {
-    doctorId = getDoctorProfileId(doctorId)
-    appointments.value[index] = {
-      ...appointmentData,
-      startTime: time,
-      dentistId: doctorId,
+  if ('dentistId' in appointmentData) {
+    // Regular appointment
+    const index = appointments.value.findIndex((a) => a.appointmentId === appointmentData.appointmentId)
+    if (index !== -1) {
+      const updatedAppointment = {
+        ...appointmentData,
+        startTime: time,
+        dentistId: role?.includes('Dentist') ? appointmentData.dentistId : getDoctorProfileId(identifier),
+        appointmentDate: role?.includes('Dentist') ? identifier : appointmentData.appointmentDate,
+      }
+      appointments.value[index] = updatedAppointment
+
+      // Call API to update appointment
+      // storeAppointments
+      //   .updateAppointment(updatedAppointment)
+      //   .then(() => {
+      //     init({
+      //       title: 'success',
+      //       message: 'Appointment updated successfully',
+      //       color: 'success',
+      //     })
+      //     fetchAppointments(searchValueA.value)
+      //   })
+      //   .catch((error) => {
+      //     const message = getErrorMessage(error)
+      //     init({
+      //       title: 'error',
+      //       message: message,
+      //       color: 'danger',
+      //     })
+      //   })
     }
-  }
+  } else if ('doctorProfileID' in appointmentData) {
+    // Follow-up appointment
+    const followUpIndex = followUpAppointments.value.findIndex((a) => a.appointmentId === appointmentData.appointmentId)
+    if (followUpIndex !== -1) {
+      const updatedFollowUp = {
+        ...appointmentData,
+        startTime: time,
+        doctorProfileID: role?.includes('Dentist') ? appointmentData.doctorProfileID : getDoctorProfileId(identifier),
+        date: role?.includes('Dentist') ? identifier : appointmentData.date,
+      }
+      followUpAppointments.value[followUpIndex] = updatedFollowUp
 
-  const followUpIndex = followUpAppointments.value.findIndex((a) => a.appointmentId === appointmentData.appointmentId)
-  if (followUpIndex !== -1) {
-    doctorId = getDoctorProfileId(doctorId)
-    followUpAppointments.value[followUpIndex] = {
-      ...appointmentData,
-      startTime: time,
-      doctorProfileID: doctorId,
+      // Call API to update follow-up appointment
+      // storeAppointments
+      //   .updateFollowUpAppointment(updatedFollowUp)
+      //   .then(() => {
+      //     init({
+      //       title: 'success',
+      //       message: 'Follow-up appointment updated successfully',
+      //       color: 'success',
+      //     })
+      //     fetchFollowUpAppointments(searchValueF.value)
+      //   })
+      //   .catch((error) => {
+      //     const message = getErrorMessage(error)
+      //     init({
+      //       title: 'error',
+      //       message: message,
+      //       color: 'danger',
+      //     })
+      //   })
     }
   }
 }
@@ -1432,25 +1696,44 @@ const addMinutesToTime = (time: string, minutesToAdd: number): string => {
 }
 
 const isTimeInRange = (checkTime: string, startTime: string, endTime: string): boolean => {
-  return checkTime >= startTime && checkTime <= endTime
+  if (checkTime === startTime) {
+    return true
+  }
+  return checkTime > startTime && checkTime < endTime
 }
 
-const getAppointments = (time: any, doctorId: any) => {
+const getAppointments = (time: string, identifier: string) => {
   const startTime = time + ':00'
   const endTime = addMinutesToTime(startTime, 30)
 
-  return appointments.value.filter(
-    (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.dentistId) === doctorId,
-  )
+  if (role?.includes('Dentist')) {
+    // Filter appointments by date and time for Dentist role
+    return appointments.value.filter(
+      (a) => a.appointmentDate === identifier && isTimeInRange(a.startTime, startTime, endTime),
+    )
+  } else {
+    // Keep the existing logic for other roles
+    return appointments.value.filter(
+      (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.dentistId) === identifier,
+    )
+  }
 }
 
-const getFollowUpAppointments = (time: any, doctorId: any) => {
+const getFollowUpAppointments = (time: string, identifier: string) => {
   const startTime = time + ':00'
   const endTime = addMinutesToTime(startTime, 30)
 
-  return followUpAppointments.value.filter(
-    (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.doctorProfileID) === doctorId,
-  )
+  if (role?.includes('Dentist')) {
+    // Filter follow-up appointments by date and time for Dentist role
+    return followUpAppointments.value.filter(
+      (a) => a.date === identifier && isTimeInRange(a.startTime, startTime, endTime),
+    )
+  } else {
+    // Keep the existing logic for other roles
+    return followUpAppointments.value.filter(
+      (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.doctorProfileID) === identifier,
+    )
+  }
 }
 
 const closeContextMenuOnClickOutside = (event: Event) => {
@@ -1481,7 +1764,13 @@ const openCreateAppointmentDialog = () => {
   showModalAppointment.value = true
 }
 
-// Done in the setup function
+function getEventDotClass(isWorked: boolean) {
+  if (isWorked) {
+    console.log('ye')
+    return 'bg-green-500'
+  }
+  return 'bg-gray-500'
+}
 
 // calculate the width of the scrollbar of the calendar container
 const scrollbarWidth = ref(0)
@@ -1509,6 +1798,13 @@ onUnmounted(() => {
   document.removeEventListener('scroll', handleResize, true)
 })
 
+// Add a new function to get the date for each weekday
+const getWeekDayDate = (index: number) => {
+  const weekStart = startOfWeek(selectedDate.value)
+  const day = addDays(weekStart, index)
+  return format(day, 'yyyy-MM-dd')
+}
+
 // watch selectedDate
 watch(
   () => selectedDate.value,
@@ -1528,6 +1824,7 @@ watch(
     fetchAppointments(searchValueA.value)
     fetchFollowUpAppointments(searchValueF.value)
     fetchNonDoctorAppointments(searchValueN.value)
+    searchDoctor()
   },
   { immediate: true },
 )
@@ -1664,3 +1961,9 @@ watch(
   { deep: true },
 )
 </script>
+
+<style scoped>
+.small-text {
+  font-size: 13px;
+}
+</style>

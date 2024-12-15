@@ -11,6 +11,7 @@ export type MedicalRecordResponse = {
   basicExamination: BasicExaminationRequest
   diagnosis: DiagnosisRequest
   indication: IndicationRequest
+  indicationImages: string[]
 }
 
 export type BasicExaminationRequest = {
@@ -18,10 +19,12 @@ export type BasicExaminationRequest = {
   treatmentPlanNote: string
 }
 
-export type DiagnosisRequest = {
-  toothNumber: number
-  teethConditions: string[]
-}
+export type DiagnosisRequest = [
+  {
+    toothNumber: number
+    teethConditions: string[]
+  },
+]
 
 export type IndicationRequest = {
   indicationType: string[]

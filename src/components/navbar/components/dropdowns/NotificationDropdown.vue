@@ -357,6 +357,7 @@ const showToastNotification = (type: string, notification: any) => {
             id: random_id,
             title: notification?.title,
             body: notification?.message,
+            actionTypeId: 'OPEN_APP',
             largeIcon: 'res://drawable/icon_noti64.png',
             smallIcon: 'res://drawable/icon_bel48.png',
           },
@@ -373,6 +374,7 @@ const showToastNotification = (type: string, notification: any) => {
             id: random_id,
             title: notification?.title,
             body: notification?.message,
+            actionTypeId: 'OPEN_APP',
             largeBody:
               'Lịch hẹn nha khoa của bạn đã được xác nhận thành công. Chi tiết lịch hẹn đã được gửi vào email đăng ký.',
             summaryText: 'Đặt lịch khám nha khoa thành công',

@@ -80,7 +80,7 @@ const getPharmaceuticals = () => {
     .catch((error) => {
       notify({
         message: notifications.getFailed(t('phamarceutials.phamarceutial')) + getErrorMessage(error),
-        color: 'error',
+        color: 'danger',
       })
     })
     .finally(() => {

@@ -1,9 +1,15 @@
 import apiService from './api.service'
 
 class DoctorService {
-  async getDoctors(data: any): Promise<any> {
+  async getDoctors(data: any, date?: any): Promise<any> {
+    let url = ''
+    if (date) {
+      url = `/users/get-doctors?date=${date}`
+    } else {
+      url = `/users/get-doctors`
+    }
     return apiService
-      .post(`/users/get-doctors`, data)
+      .post(url, data)
       .then((response) => {
         return response.data
       })

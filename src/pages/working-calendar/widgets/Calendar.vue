@@ -485,6 +485,7 @@
         </template>
         <template #cell(actions)="{ rowData }">
           <VaIcon
+            v-if="rowData.doctorProfile.workingType === 2"
             class="text-6xl text-green-500 hover:cursor-pointer"
             name="schedule"
             size="2rem"
@@ -499,15 +500,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { CalendarDay, PartTimeSchedule, SearchResponse } from '../types'
-import { avatarColor, getErrorMessage } from '@/services/utils'
+import { avatarColor, getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { watch } from 'vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
-import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useToast } from 'vuestic-ui/web-components'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
 
 const auth = useAuthStore()
-const storeDoctor = useDoctorProfileStore()
 const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth())
@@ -675,10 +674,11 @@ const calendarDays = computed(() => {
 })
 
 const getAllDoctors = (): any => {
-  storeDoctor
-    .getDoctors({ isActive: true })
+  calendarStore
+    .getDoctorHasNoCalendar('2025-01-20')
     .then((response) => {
-      listDoctors.value = response.data
+      console.log(response)
+      listDoctors.value = response
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -811,13 +811,6 @@ const formatScheduleTime = (time: any): string => {
 const formatTime = (time: string): string => {
   const [hours, minutes] = time.split(':')
   return `${hours}:${minutes}`
-}
-
-function getSrcAvatar(img: any) {
-  const url = import.meta.env.VITE_APP_BASE_URL as string
-  const url_without_api = url.slice(0, -3)
-  if (img) return `${url_without_api}${img}`
-  return ''
 }
 
 function handleDragStart(event: DragEvent, dentist: any, item: any, selectedCalendarIndex: any) {

@@ -118,5 +118,16 @@ export const useCalendarStore = defineStore('calendar', {
         return await Promise.reject(error)
       }
     },
+    async getDoctorHasNoCalendar(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.getDoctorHasNoCalendar(data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

@@ -3217,33 +3217,67 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const toothNumber = [
   11, 12, 13, 14, 15, 16, 17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33, 34, 35, 36, 37, 38, 41, 42, 43, 44, 45,
   46, 47, 48,
 ]
 
+const emit = defineEmits(['toothNumber', 'toothHover'])
+const selectedTeeth = ref<number[]>([])
+const toothConditions = ref<{ [key: number]: string[] }>({})
+
 const tooth = (toothNumbers: number[]) => {
-  // Use non-null assertion or optional chaining with null check
   toothNumbers.forEach((toothNumber) => {
     const toothParent = document.querySelector(`.tooth-${toothNumber}-parent`)
     const tooth = document.querySelectorAll(`.tooth-${toothNumber}`)
 
-    // Null checks before adding event listeners
     if (toothParent) {
-      // Type assertion to HTMLElement to access style property
       const parentElement = toothParent as HTMLElement
+
+      // State for each tooth
+      const toothState = {
+        isSelected: false,
+        isHovered: false,
+      }
 
       tooth.forEach((t) => {
         const toothElement = t as HTMLElement
 
-        toothElement.addEventListener('mouseover', () => {
-          parentElement.style.fill = '#2199e8'
+        toothElement.addEventListener('mouseover', (event) => {
+          toothState.isHovered = true
+          if (!toothState.isSelected) {
+            parentElement.style.fill = '#2199e8'
+          }
+          emit('toothHover', { toothNumber, event, isHovered: true })
+        })
+
+        toothElement.addEventListener('click', () => {
+          toothState.isSelected = !toothState.isSelected
+          if (toothState.isSelected) {
+            parentElement.style.fill = '#2199e8'
+            if (!selectedTeeth.value.includes(toothNumber)) {
+              selectedTeeth.value.push(toothNumber)
+            }
+          } else {
+            parentElement.style.fill = 'none'
+            const index = selectedTeeth.value.indexOf(toothNumber)
+            if (index > -1) {
+              selectedTeeth.value.splice(index, 1)
+            }
+            // We no longer remove tooth conditions when deselecting
+            // Instead, we keep the conditions in the state
+          }
+          emit('toothNumber', selectedTeeth.value)
         })
 
         toothElement.addEventListener('mouseleave', () => {
-          parentElement.style.fill = 'none'
+          toothState.isHovered = false
+          if (!toothState.isSelected) {
+            parentElement.style.fill = 'none'
+          }
+          emit('toothHover', { toothNumber, event: null, isHovered: false })
         })
       })
     } else {
@@ -3251,6 +3285,18 @@ const tooth = (toothNumbers: number[]) => {
     }
   })
 }
+
+// Function to update tooth conditions
+const updateToothConditions = (toothNumber: number, conditions: string[]) => {
+  toothConditions.value[toothNumber] = conditions
+}
+
+// Expose the updateToothConditions function and toothConditions to the parent component
+defineExpose({
+  selectedTeeth,
+  updateToothConditions,
+  toothConditions,
+})
 
 onMounted(() => {
   tooth(toothNumber)

@@ -198,3 +198,10 @@ export const avatarColor = (userName: string | undefined) => {
   const index = userName.charCodeAt(0) % colors.length
   return colors[index]
 }
+
+export const getSrcAvatar = (img: any) => {
+  const url = import.meta.env.VITE_APP_BASE_URL as string
+  const url_without_api = url.slice(0, -3)
+  if (img) return `${url_without_api}${img}`
+  return ''
+}

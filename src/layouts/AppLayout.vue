@@ -132,6 +132,68 @@ const handleReceiveMessage = (message) => {
   }
 }
 
+const registerNotifications = async () => {
+  let permStatus = await LocalNotifications.checkPermissions()
+
+  if (permStatus.display === 'prompt') {
+    permStatus = await LocalNotifications.requestPermissions()
+  }
+
+  if (permStatus.display !== 'granted') {
+    throw new Error('User denied permissions!')
+  }
+
+  await LocalNotifications.registerActionTypes({
+    types: [
+      {
+        id: 'OPEN_APP',
+        actions: [
+          {
+            id: 'open',
+            title: 'Mở ứng dụng',
+          },
+          {
+            id: 'dismiss',
+            title: 'Bỏ qua',
+          },
+          {
+            id: 'reply',
+            title: 'Trả lời',
+            input: true,
+          },
+        ],
+      },
+    ],
+  })
+}
+
+const handleNotificationAction = (action) => {
+  switch (action.actionId) {
+    case 'open':
+      // Mở ứng dụng khi người dùng nhấn "Mở ứng dụng"
+      if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
+        // Nếu bạn muốn mở ứng dụng hoặc chuyển đến một màn hình khác, bạn có thể dùng Vue Router
+        // Ví dụ chuyển đến trang 'home'
+        router.push({ name: 'home' }) // Hoặc tên trang bạn muốn mở
+      }
+      break
+
+    case 'dismiss':
+      // Đóng notification khi người dùng nhấn "Bỏ qua"
+      LocalNotifications.remove({ id: action.notificationId })
+      break
+
+    case 'reply':
+      // Xử lý nội dung trả lời
+      console.log('User reply:', action.inputValue)
+      // Có thể gửi thông tin này đến server hoặc xử lý theo logic của bạn
+      break
+
+    default:
+      console.log('Action not recognized')
+  }
+}
+
 onMounted(async () => {
   if (!isGuest.value) {
     const url = import.meta.env.VITE_APP_BASE_URL
@@ -144,6 +206,15 @@ onMounted(async () => {
       signalRService.on('ReceiveMessage', handleReceiveMessage)
     }
   }
+  if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
+    registerNotifications().catch((error) => {
+      console.error('Failed to register notifications:', error)
+    })
+  }
+  // Khi nhận notification
+  LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
+    handleNotificationAction(action)
+  })
 })
 
 onBeforeUnmount(() => {

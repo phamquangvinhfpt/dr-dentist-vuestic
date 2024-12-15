@@ -37,6 +37,7 @@
     "axios": "^1.7.2",
     "chart.js": "^4.4.1",
     "chartjs-chart-geo": "^4.2.8",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.11",
     "epic-spinners": "^2.0.0",
     "flag-icons": "^6.15.0",

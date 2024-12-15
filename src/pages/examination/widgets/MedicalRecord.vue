@@ -55,7 +55,7 @@ const getMedicalRecord = async () => {
       const errorMessage = getErrorMessage(error)
       init({
         message: errorMessage,
-        color: 'error',
+        color: 'danger',
         title: 'Error',
       })
     })
@@ -146,16 +146,22 @@ onMounted(() => {
 
                         <template #default>
                           <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-                            <h4 class="font-medium mb-3">Tình trạng răng {{ record.diagnosis.toothNumber }}</h4>
-                            <div class="grid grid-cols-2 gap-4">
-                              <div v-for="condition in toothConditions" :key="condition.code" class="flex items-start">
-                                <VaCheckbox
-                                  :model-value="record.diagnosis.teethConditions.includes(condition.code)"
-                                  :label="condition.label"
-                                  :value="condition.code"
-                                  :disabled="!record.diagnosis.teethConditions.includes(condition.code)"
-                                  readonly
-                                />
+                            <div v-for="tooth in record.diagnosis" :key="tooth.toothNumber" class="flex flex-col">
+                              <h4 class="font-medium mb-3">Tình trạng răng {{ tooth.toothNumber }}</h4>
+                              <div class="grid grid-cols-2 gap-4">
+                                <div
+                                  v-for="condition in toothConditions"
+                                  :key="condition.code"
+                                  class="flex items-start"
+                                >
+                                  <VaCheckbox
+                                    :model-value="tooth.teethConditions.includes(condition.code)"
+                                    :label="condition.label"
+                                    :value="condition.code"
+                                    :disabled="!tooth.teethConditions.includes(condition.code)"
+                                    readonly
+                                  />
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -196,6 +202,7 @@ onMounted(() => {
                                 />
                               </div>
                             </div>
+                            <h4 class="font-medium mt-3">Chi tiết: {{ record.indication.description }}</h4>
                           </div>
                         </template>
                       </VaCollapse>

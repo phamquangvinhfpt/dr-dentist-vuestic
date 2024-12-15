@@ -34,7 +34,7 @@ const getAppointmentDetails = async () => {
       const errorMessage = getErrorMessage(error)
       init({
         message: errorMessage,
-        color: 'error',
+        color: 'danger',
         title: 'Error',
       })
     })

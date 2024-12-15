@@ -420,7 +420,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, watchEffect, onBeforeMount, onBeforeUnmount, onMounted } from 'vue'
 import { useAuthStore } from '@modules/auth.module'
-import { getErrorMessage } from '@/services/utils'
+import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import {
   useToast,
   VaAvatar,
@@ -595,13 +595,6 @@ const search = async () => {
   } else {
     loadUsers()
   }
-}
-
-const getSrcAvatar = (img: any) => {
-  const url = import.meta.env.VITE_APP_BASE_URL as string
-  const url_without_api = url.slice(0, -3)
-  if (img) return `${url_without_api}${img}`
-  return ''
 }
 
 const TIME_NAMES = {
