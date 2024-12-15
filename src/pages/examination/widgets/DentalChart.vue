@@ -3224,6 +3224,10 @@ const toothNumber = [
   46, 47, 48,
 ]
 
+const props = defineProps<{
+  tooths?: number[]
+}>()
+
 const emit = defineEmits(['toothNumber', 'toothHover'])
 const selectedTeeth = ref<number[]>([])
 const toothConditions = ref<{ [key: number]: string[] }>({})
@@ -3244,6 +3248,10 @@ const tooth = (toothNumbers: number[]) => {
 
       tooth.forEach((t) => {
         const toothElement = t as HTMLElement
+
+        if (props.tooths?.includes(toothNumber)) {
+          parentElement.style.fill = '#2199e8'
+        }
 
         toothElement.addEventListener('mouseover', (event) => {
           toothState.isHovered = true
@@ -3275,7 +3283,9 @@ const tooth = (toothNumbers: number[]) => {
         toothElement.addEventListener('mouseleave', () => {
           toothState.isHovered = false
           if (!toothState.isSelected) {
-            parentElement.style.fill = 'none'
+            if (!props.tooths?.includes(toothNumber)) {
+              parentElement.style.fill = 'none'
+            }
           }
           emit('toothHover', { toothNumber, event: null, isHovered: false })
         })

@@ -173,6 +173,7 @@ const birthDayRules = computed(() => [
       </div>
       <VaInput v-model="formData.username" :rules="usernameRules" class="mb-4" :label="t('auth.username')" />
       <VaInput v-model="formData.phoneNumber" :rules="phoneNumberRules" class="mb-4" :label="t('auth.phone_number')" />
+      <AddressAutocomplete :rules="addressRules" />
       <VaInput v-model="formData.email" :rules="emailRules" class="mb-4" :label="t('auth.email')" type="email" />
       <VaValue v-slot="isPasswordVisible" :default-value="false">
         <VaInput
@@ -233,8 +234,6 @@ const birthDayRules = computed(() => [
       />
 
       <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
-      <AddressAutocomplete :rules="addressRules" />
-
       <div class="flex justify-center mt-4">
         <VaButton class="w-full" @click="submit">{{ t('auth.create_account') }}</VaButton>
       </div>
