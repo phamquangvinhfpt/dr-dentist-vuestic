@@ -73,9 +73,15 @@ class AppointmentService {
         return Promise.reject(error)
       })
   }
-  async rescheduleAppointment(data: any): Promise<any> {
+  async rescheduleAppointment(type: any, data: any): Promise<any> {
+    let url
+    if (type === 'appointment' || type === 'unassigned') {
+      url = '/appointment/reschedule'
+    } else {
+      url = '/treatmentplan/update-detail'
+    }
     return apiService
-      .post(`/appointment/reschedule`, data)
+      .post(`${url}`, data)
       .then((response) => {
         return Promise.resolve(response)
       })

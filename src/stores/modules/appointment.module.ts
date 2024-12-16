@@ -69,10 +69,10 @@ export const useAppointmentStore = defineStore('appointment', {
         return await Promise.reject(error)
       }
     },
-    async rescheduleAppointment(data: any): Promise<any> {
+    async rescheduleAppointment(type: any, data: any): Promise<any> {
       try {
         this.isLoading = true
-        const response = await appointmentService.rescheduleAppointment(data)
+        const response = await appointmentService.rescheduleAppointment(type, data)
         this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {

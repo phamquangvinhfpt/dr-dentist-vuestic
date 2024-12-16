@@ -30,6 +30,17 @@ export const useTreatmentStore = defineStore('treatment', {
         return await Promise.reject(error)
       }
     },
+    async toogleFollowupAppointment(id: any) {
+      try {
+        this.isLoading = true
+        const response = await treatmentService.toogleFollowupAppointment(id)
+        this.isLoading = false
+        this.treatments = response.data
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        return await Promise.reject(error)
+      }
+    },
     async doTreatment(id: any) {
       try {
         this.isLoading = true

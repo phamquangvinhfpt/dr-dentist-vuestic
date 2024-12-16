@@ -77,26 +77,9 @@
 
                         <template #default>
                           <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-                            <!-- <div v-for="tooth in record.diagnosis" :key="tooth.toothNumber" class="flex flex-col">
-                              <h4 class="font-medium mb-3">Tình trạng răng {{ tooth.toothNumber }}</h4>
-                              <div class="grid grid-cols-2 gap-4">
-                                <div
-                                  v-for="condition in toothConditions"
-                                  :key="condition.code"
-                                  class="flex items-start"
-                                >
-                                  <VaCheckbox
-                                    :model-value="tooth.teethConditions.includes(condition.code)"
-                                    :label="condition.label"
-                                    :value="condition.code"
-                                    :disabled="!tooth.teethConditions.includes(condition.code)"
-                                    readonly
-                                  />
-                                </div>
-                              </div>
-                            </div> -->
                             <DentalChart
                               ref="dentalChartRef"
+                              :is-view="true"
                               :tooths="record.diagnosis.map((item) => item.toothNumber)"
                               @toothHover="handleToothHover"
                             />
@@ -135,22 +118,16 @@
                         <template #default>
                           <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
                             <h4 class="font-medium mb-3">Chỉ định (Thêm chỉ định như Chụp X-Quang, xét nghiệm máu)</h4>
-                            <div class="grid grid-cols-2 gap-4">
-                              <div
-                                v-for="indication in indicationTypes"
-                                :key="indication.code"
-                                class="flex items-start"
-                              >
-                                <VaCheckbox
-                                  :model-value="record.indication.indicationType.includes(indication.code)"
-                                  :label="indication.label"
-                                  :value="indication.code"
-                                  :disabled="!record.indication.indicationType.includes(indication.code)"
-                                  readonly
+                            <div class="grid grid-cols-3 gap-4 mt-4">
+                              <div v-for="image in record.indicationImages" :key="image.imageType" class="relative">
+                                <img
+                                  :src="getSrcAvatar(image.imageUrl)"
+                                  :alt="image.imageType"
+                                  class="w-full h-64 object-cover border-2 border-dashed"
                                 />
+                                <div class="text-center">{{ image.imageType }}</div>
                               </div>
                             </div>
-                            <h4 class="font-medium mt-3">Chi tiết: {{ record.indication.description }}</h4>
                           </div>
                         </template>
                       </VaCollapse>
@@ -168,10 +145,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { VaCard, VaCardContent, VaCollapse, VaIcon, VaCheckbox, useToast } from 'vuestic-ui'
+import { VaCard, VaCardContent, VaCollapse, VaIcon, useToast } from 'vuestic-ui'
 import { MedicalRecordResponse } from '@/pages/examination/types'
 import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
-import { getErrorMessage } from '@/services/utils'
+import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { watch } from 'vue'
 import DentalChart from './DentalChart.vue'
 
@@ -183,19 +160,6 @@ const { init } = useToast()
 const loading = ref(false)
 const storeMedicalRecord = useMedicalRecordStore()
 const medicalRecords = ref<MedicalRecordResponse[]>([])
-
-const indicationTypes = [
-  { code: 'Cephalometric', label: 'Cephalometric' },
-  { code: 'Panorama', label: 'Panorama' },
-  { code: '3D 5x5', label: '3D 5x5' },
-  { code: '3D', label: '3D' },
-  { code: 'Ảnh (ext)', label: 'Ảnh (ext)' },
-  { code: 'Khác', label: 'Khác' },
-  { code: 'Cắn chụp', label: 'Cắn chụp' },
-  { code: 'Ảnh (int)', label: 'Ảnh (int)' },
-  { code: 'Xét nghiệm huyết học', label: 'Xét nghiệm huyết học' },
-  { code: 'Xét nghiệm sinh hóa', label: 'Xét nghiệm sinh hóa' },
-]
 
 const formatDate = (date: string | Date) => {
   if (typeof date === 'string') {

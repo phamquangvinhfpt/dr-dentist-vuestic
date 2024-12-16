@@ -158,7 +158,7 @@ const formatDateOnly = (date: any) => {
 
 const optionsStartTimes = computed(() => {
   const slots = []
-  for (let hour = 8; hour < 17; hour++) {
+  for (let hour = 8; hour < 22; hour++) {
     slots.push(`${hour.toString().padStart(2, '0')}:00`)
     slots.push(`${hour.toString().padStart(2, '0')}:30`)
   }
@@ -771,7 +771,12 @@ onMounted(() => {
           <h3 class="text-xl font-semibold mb-4">TÌNH TRẠNG RĂNG</h3>
           <div class="grid grid-cols-2 gap-4">
             <div class="relative">
-              <DentalChart ref="dentalChartRef" @toothNumber="handleSelectedTeeth" @toothHover="handleToothHover" />
+              <DentalChart
+                ref="dentalChartRef"
+                :is-view="false"
+                @toothNumber="handleSelectedTeeth"
+                @toothHover="handleToothHover"
+              />
               <div
                 v-if="hoveredTooth && getToothConditions(hoveredTooth).length > 0"
                 class="tooth-popup"
@@ -821,6 +826,7 @@ onMounted(() => {
                 :alt="image.imageType"
                 class="w-full h-64 object-cover border-2 border-dashed"
               />
+              <div class="text-center">{{ image.imageType }}</div>
               <button
                 class="absolute top-0 right-0 transform scale-75 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
                 @click.stop="removeImage(image.imageType, index)"

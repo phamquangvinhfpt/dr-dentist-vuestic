@@ -3226,6 +3226,7 @@ const toothNumber = [
 
 const props = defineProps<{
   tooths?: number[]
+  isView: boolean
 }>()
 
 const emit = defineEmits(['toothNumber', 'toothHover'])
@@ -3251,6 +3252,9 @@ const tooth = (toothNumbers: number[]) => {
 
         if (props.tooths?.includes(toothNumber)) {
           parentElement.style.fill = '#2199e8'
+        } else if (props.isView) {
+          parentElement.style.fill = 'none'
+          return
         }
 
         toothElement.addEventListener('mouseover', (event) => {
@@ -3261,24 +3265,26 @@ const tooth = (toothNumbers: number[]) => {
           emit('toothHover', { toothNumber, event, isHovered: true })
         })
 
-        toothElement.addEventListener('click', () => {
-          toothState.isSelected = !toothState.isSelected
-          if (toothState.isSelected) {
-            parentElement.style.fill = '#2199e8'
-            if (!selectedTeeth.value.includes(toothNumber)) {
-              selectedTeeth.value.push(toothNumber)
+        if (!props.isView) {
+          toothElement.addEventListener('click', () => {
+            toothState.isSelected = !toothState.isSelected
+            if (toothState.isSelected) {
+              parentElement.style.fill = '#2199e8'
+              if (!selectedTeeth.value.includes(toothNumber)) {
+                selectedTeeth.value.push(toothNumber)
+              }
+            } else {
+              parentElement.style.fill = 'none'
+              const index = selectedTeeth.value.indexOf(toothNumber)
+              if (index > -1) {
+                selectedTeeth.value.splice(index, 1)
+              }
+              // We no longer remove tooth conditions when deselecting
+              // Instead, we keep the conditions in the state
             }
-          } else {
-            parentElement.style.fill = 'none'
-            const index = selectedTeeth.value.indexOf(toothNumber)
-            if (index > -1) {
-              selectedTeeth.value.splice(index, 1)
-            }
-            // We no longer remove tooth conditions when deselecting
-            // Instead, we keep the conditions in the state
-          }
-          emit('toothNumber', selectedTeeth.value)
-        })
+            emit('toothNumber', selectedTeeth.value)
+          })
+        }
 
         toothElement.addEventListener('mouseleave', () => {
           toothState.isHovered = false

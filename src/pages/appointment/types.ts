@@ -134,6 +134,7 @@ export type Appointment = {
 
 export type FollowUpAppointment = {
   roomID: string
+  treatmentID: string
   roomName: string
   calendarID: string
   patientName: string
@@ -161,6 +162,7 @@ export enum CalendarStatus {
   Booked,
   Completed,
   Canceled,
+  Checkin,
 }
 
 export enum AppointmentStatus {
@@ -278,6 +280,12 @@ export const getFollowUpStatusConfig = (status: CalendarStatus): FollowUpStatusC
         bgColor: 'bg-gray-100',
         textColor: 'text-gray-800',
       }
+    case CalendarStatus.Checkin:
+      return {
+        text: 'Check-In',
+        bgColor: 'bg-purple-100',
+        textColor: 'text-purple-800',
+      }
     default:
       return {
         text: 'Unknown',
@@ -357,6 +365,11 @@ export const getFollowUpStatus = (status: string | number): FollowUpStatusConfig
       return {
         text: 'Canceled',
         color: '#7f1f90', // purple
+      }
+    case CalendarStatus.Checkin:
+      return {
+        text: 'Check-In',
+        color: 'info', // typically a light blue or cyan
       }
     default:
       return {

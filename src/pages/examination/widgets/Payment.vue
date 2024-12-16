@@ -4,7 +4,7 @@ import { Appointment } from '@/pages/appointment/types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { useToast, VaInnerLoading, VaCard, VaButton, VaRadio, VaDivider, VaDataTable } from 'vuestic-ui'
 import { getPaymentMethodLabel, PaymentDetailResponse, PaymentMethod } from '../types'
-import { getErrorMessage } from '@/services/utils'
+import { generateQRCode, getErrorMessage } from '@/services/utils'
 import QrSelection from '@/pages/appointment/widgets/create-appointment/QrSelection.vue'
 
 const props = defineProps<{
@@ -14,15 +14,14 @@ const props = defineProps<{
 // const for payment
 const showQrCode = ref(false)
 const bankInfo = ref<any>({
-  bankName: 'MB Bank',
-  accountNumber: '0942705605',
-  accountHolder: 'PHAM QUANG VINH',
+  bankName: 'Vietcombank',
+  accountNo: '1017044309',
+  accountName: 'PHAM QUANG VINH',
+  acqId: 970436,
   amount: '',
-  description: '',
+  addInfo: '',
 })
-const qrCodeUrl = computed(() => {
-  return `https://api.vietqr.io/image/970422-0942705605-xd2RIRp.jpg?accountName=PHAM%20QUANG%20VINH&amount=${bankInfo.value.amount}&addInfo=${bankInfo.value.description}`
-})
+const qrCodeUrl = ref<string>('')
 const showSuccessModal = ref(false)
 const isMobile = computed(() => window.innerWidth < 768)
 
@@ -146,6 +145,15 @@ const confirmPayment = () => {
         showQrCode.value = true
         bankInfo.value.amount = paymentDetailResponse.value?.paymentResponse.remainingAmount
         bankInfo.value.description = paymentDetailResponse.value?.paymentResponse.patientCode
+        generateQRCode(
+          bankInfo.value.accountNo,
+          bankInfo.value.accountName,
+          bankInfo.value.acqId,
+          bankInfo.value.amount,
+          bankInfo.value.addInfo,
+        ).then((url) => {
+          qrCodeUrl.value = url
+        })
       })
       .catch((error) => {
         const errorMessage = getErrorMessage(error)
@@ -315,10 +323,10 @@ defineExpose({
                 data-original="#000000"
               />
             </svg>
-            <h4 class="text-xl text-gray-800 font-semibold mt-4">Đặt khám thành công!</h4>
+            <h4 class="text-xl text-gray-800 font-semibold mt-4">Thanh toán thành công!</h4>
             <p className="text-sm text-gray-600 leading-relaxed mt-4">
-              Cảm ơn bạn đã đặt lịch khám. Chúng tôi đã nhận được khoản đặt cọc giữ chỗ của bạn. Vui lòng kiểm tra email
-              để xem chi tiết cuộc hẹn và hướng dẫn tiếp theo.
+              Cảm ơn bạn đã thanh toán dịch vụ. Khoản thanh toán của bạn đã được xác nhận thành công. Vui lòng kiểm tra
+              email để nhận biên lai và thông tin chi tiết.
             </p>
           </div>
 
@@ -327,9 +335,9 @@ defineExpose({
               <strong>Lưu ý quan trọng:</strong>
             </p>
             <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
-              <li>Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục</li>
-              <li>Mang theo giấy tờ tùy thân và thẻ bảo hiểm y tế (nếu có)</li>
-              <li>Khoản đặt cọc sẽ được trừ vào tổng chi phí khám</li>
+              <li>Quý khách vui lòng giữ lại biên lai để đối chiếu nếu cần</li>
+              <li>Nhân viên sẽ liên hệ để xác nhận và hướng dẫn các bước tiếp theo</li>
+              <li>Mọi thắc mắc về thanh toán, vui lòng liên hệ bộ phận hỗ trợ khách hàng</li>
             </ul>
           </div>
 
@@ -338,7 +346,7 @@ defineExpose({
             class="px-5 py-2.5 mt-6 w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700"
             @click="handleCloseSuccessModal"
           >
-            Got it
+            Đóng
           </button>
         </div>
       </div>

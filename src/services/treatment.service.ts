@@ -11,6 +11,16 @@ class TreatmentClass {
         return Promise.reject(error)
       })
   }
+  async toogleFollowupAppointment(id: any): Promise<any> {
+    return apiService
+      .get(`/appointment/followup/checkin/${id}`)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
   async getTreatmentList(id: any): Promise<any> {
     return apiService
       .get(`/treatmentplan/get/${id}`)

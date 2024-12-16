@@ -6,7 +6,7 @@ import ServiceSelection from './widgets/create-appointment/ServiceSelection.vue'
 import DateSelection from './widgets/create-appointment/DateSelection.vue'
 import TimeSelection from './widgets/create-appointment/TimeSelection.vue'
 import DoctorSelection from './widgets/create-appointment/DoctorSelection.vue'
-import { getErrorMessage } from '@/services/utils'
+import { generateQRCode, getErrorMessage } from '@/services/utils'
 import QrSelection from './widgets/create-appointment/QrSelection.vue'
 import SubmitSelection from './widgets/create-appointment/SubmitSelection.vue'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
@@ -29,15 +29,14 @@ const isDoctorSelected = ref(false)
 const checkPaymentStatus = ref(false)
 const availableTimes = ref<string[]>([])
 const defaultTimeSelection = ref<string[]>([])
-const qrCodeUrl = computed(() => {
-  return `https://api.vietqr.io/image/970422-0942705605-xd2RIRp.jpg?accountName=PHAM%20QUANG%20VINH&amount=${bankInfo.value.amount}&addInfo=${bankInfo.value.description}`
-})
+const qrCodeUrl = ref<string>('')
 const bankInfo = ref<any>({
-  bankName: 'MB Bank',
-  accountNumber: '0942705605',
-  accountHolder: 'PHAM QUANG VINH',
+  bankName: 'Vietcombank',
+  accountNo: '1017044309',
+  accountName: 'PHAM QUANG VINH',
+  acqId: 970436,
   amount: '',
-  description: '',
+  addInfo: '',
 })
 const appointmentDepositRequest = ref<AppointmentDepositRequest>({
   key: '',
@@ -182,6 +181,15 @@ const saveBookingData = async (data: any) => {
     })
     .finally(() => {
       loading.value = false
+      generateQRCode(
+        bankInfo.value.accountNo,
+        bankInfo.value.accountName,
+        bankInfo.value.acqId,
+        bankInfo.value.amount,
+        bankInfo.value.addInfo,
+      ).then((url) => {
+        qrCodeUrl.value = url
+      })
     })
 }
 

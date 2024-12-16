@@ -8,8 +8,9 @@ const props = defineProps<{
   showQrCode: boolean
   bankInfo: {
     bankName: string
-    accountNumber: string
-    accountHolder: string
+    accountNo: string
+    accountName: string
+    acqId: number
     amount: number
     description: string
   }
@@ -219,13 +220,13 @@ watch(
               <div>
                 <p class="text-base font-medium dark:text-gray-300">Account Number</p>
                 <p class="text-sm font-medium dark:text-gray-200">
-                  {{ bankInfo.accountNumber }}
+                  {{ bankInfo.accountNo }}
                 </p>
               </div>
               <div>
                 <p class="text-base font-medium dark:text-gray-300">Account Holder</p>
                 <p class="text-sm font-medium dark:text-gray-200">
-                  {{ bankInfo.accountHolder }}
+                  {{ bankInfo.accountName }}
                 </p>
               </div>
               <div>
@@ -277,13 +278,13 @@ watch(
               <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Account Number</p>
                 <p class="text-lg font-sans font-medium text-gray-900 dark:text-white">
-                  {{ bankInfo.accountNumber }}
+                  {{ bankInfo.accountNo }}
                 </p>
               </div>
               <div>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Account Holder</p>
                 <p class="text-lg font-sans font-medium text-gray-900 dark:text-white">
-                  {{ bankInfo.accountHolder }}
+                  {{ bankInfo.accountName }}
                 </p>
               </div>
               <div>

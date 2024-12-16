@@ -441,6 +441,14 @@
             </template>
             <template #cell(actions)="{ rowData }">
               <div class="space-x-2">
+                <VaButton
+                  v-if="rowData.status === 2 && role?.includes('Staff')"
+                  round
+                  icon="check"
+                  color="#b1fadc"
+                  icon-color="#812E9E"
+                  @click="checkedFollowupAppointment(rowData.appointmentId)"
+                />
                 <VaButton round icon="sync" color="warning" icon-color="#812E9E" @click="rescheduleModal(rowData)" />
               </div>
             </template>
@@ -769,7 +777,12 @@
         </VaCard>
       </VaModal>
       <!-- Reschedule Appointment Modal -->
-      <VaModal v-model="showModalReschedule" ok-text="Reschedule" @close="handleCloseReschedule" @ok="submitReschedule">
+      <VaModal
+        v-model="showModalReschedule"
+        ok-text="Reschedule"
+        @close="handleCloseReschedule"
+        @ok="submitReschedule(isAppointment)"
+      >
         <h3 class="va-h3">Reschedule Appointment</h3>
         <VaCard>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -947,6 +960,7 @@ const patientId = ref<Options>()
 const doctorId = ref<Options>()
 const serviceId = ref<Options>()
 const date = ref(new Date())
+const current_follow_up = ref<any>()
 const startTime = ref('')
 const duration = ref('00:30:00')
 const notes = ref('')
@@ -972,7 +986,7 @@ const getServices = () => {
     })
 }
 const optionsDoctors = computed(() =>
-  doctors.value.map((doctor) => ({ text: `${doctor.firstName} ${doctor.lastName}`, value: doctor.id })),
+  activeDoctors.value.map((doctor) => ({ text: `${doctor.firstName} ${doctor.lastName}`, value: doctor.id })),
 )
 const optionsStartTimes = computed(() => {
   const slots = []
@@ -1061,10 +1075,38 @@ const checkedAppointment = async (appointmentId: any) => {
     })
 }
 
+const checkedFollowupAppointment = async (appointmentId: any) => {
+  loading.value = true
+  await storeTreatment
+    .toogleFollowupAppointment(appointmentId)
+    .then(() => {
+      init({
+        title: 'success',
+        color: 'success',
+        message: 'Bệnh nhân đã đến khám!',
+      })
+      fetchFollowUpAppointments(searchValueF.value)
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      init({
+        message: errorMessage,
+        color: 'danger',
+        title: 'Error',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
 const rescheduleModal = (appointment: any) => {
   appointmentId.value = appointment.appointmentId
   date.value = appointment.appointmentDate
   showModalReschedule.value = true
+  if (isAppointment.value === 'followup') {
+    current_follow_up.value = appointment
+  }
 }
 
 const cancelModal = (appointment: any) => {
@@ -1084,16 +1126,27 @@ const handleCloseCancel = () => {
   userId.value = ''
 }
 
-const submitReschedule = () => {
-  const request = {
-    appointmentID: appointmentId.value,
-    appointmentDate: formatDateForm(date.value),
-    startTime: startTime.value + ':00',
-    duration: duration.value,
+const submitReschedule = (isAppointment: any) => {
+  let request
+  if (isAppointment === 'appointment' || isAppointment === 'unassigned') {
+    request = {
+      appointmentID: appointmentId.value,
+      appointmentDate: formatDateForm(date.value),
+      startTime: startTime.value + ':00',
+      duration: duration.value,
+    }
+  } else {
+    request = {
+      appointmentID: appointmentId.value,
+      treatmentId: current_follow_up.value.treatmentID,
+      treatmentDate: formatDateForm(date.value),
+      treatmentTime: startTime.value + ':00',
+      note: '',
+    }
   }
 
   storeAppointments
-    .rescheduleAppointment(request)
+    .rescheduleAppointment(isAppointment, request)
     .then(() => {
       init({
         title: 'success',
@@ -1102,6 +1155,8 @@ const submitReschedule = () => {
       })
       showModalReschedule.value = false
       fetchAppointments(searchValueA.value)
+      fetchFollowUpAppointments(searchValueF.value)
+      fetchNonDoctorAppointments(searchValueN.value)
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -1128,6 +1183,7 @@ const submitCancel = () => {
       })
       showModalCancel.value = false
       fetchAppointments(searchValueA.value)
+      fetchNonDoctorAppointments(searchValueN.value)
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -1766,7 +1822,6 @@ const openCreateAppointmentDialog = () => {
 
 function getEventDotClass(isWorked: boolean) {
   if (isWorked) {
-    console.log('ye')
     return 'bg-green-500'
   }
   return 'bg-gray-500'

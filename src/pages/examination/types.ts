@@ -11,8 +11,15 @@ export type MedicalRecordResponse = {
   basicExamination: BasicExaminationRequest
   diagnosis: DiagnosisRequest
   indication: IndicationRequest
-  indicationImages: string[]
+  indicationImages: ImageRequest
 }
+
+export type ImageRequest = [
+  {
+    imageUrl: string
+    imageType: string
+  },
+]
 
 export type BasicExaminationRequest = {
   examinationContent: string
