@@ -224,7 +224,26 @@ class UserService {
         return Promise.reject(error)
       })
   }
-
+  async updateTreatmentPlanDetail(data: { appointmentID: string; message: string; rating: number }): Promise<any> {
+    return apiService
+      .post(`/v1/feedback/create`, data) // Gọi API với dữ liệu phản hồi
+      .then((response) => {
+        return Promise.resolve(response.data) // Trả về dữ liệu phản hồi
+      })
+      .catch((error) => {
+        return Promise.reject(error) // Xử lý lỗi
+      })
+  }
+  async updateFeedbackDetail(data: { feedbackID: string; message: string; rating: number }): Promise<any> {
+    return apiService
+      .post(`/v1/feedback/update`, data) // Gọi API với dữ liệu phản hồi
+      .then((response) => {
+        return Promise.resolve(response.data) // Trả về dữ liệu phản hồi
+      })
+      .catch((error) => {
+        return Promise.reject(error) // Xử lý lỗi
+      })
+  }
   async getAllDoctors(): Promise<any> {
     return apiService
       .get(`/users/get-doctors`)

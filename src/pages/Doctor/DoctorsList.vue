@@ -2,19 +2,17 @@
 import { useDoctorProfileStore } from '@stores/modules/doctor.module'
 import { useRouter } from 'vue-router'
 import { onMounted, Ref, ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { User } from './types'
 import { VaButton, VaAvatar, VaInput, VaPagination } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
-const { t } = useI18n()
+
 const userStore = useDoctorProfileStore()
 const router = useRouter()
 
-const userList: Ref<User[]> = ref([])
-
+const userList: Ref<User[]> = ref([]) // List of all doctors
 const selectedDoctorId = ref<string | null>(null)
-
 const searchQuery = ref('')
+
 const filteredDoctors = computed(() => {
   if (!userList.value || userList.value.length === 0) return []
 
@@ -26,19 +24,27 @@ const filteredDoctors = computed(() => {
   )
 })
 
+const totalItems = computed(() => filteredDoctors.value.length) // Total filtered items based on the search query
+
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value)) // Recalculate total pages based on filtered list
+
+const currentPage = ref(1)
+const itemsPerPage = ref(6)
+
+const paginatedDoctors = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return filteredDoctors.value.slice(start, end)
+})
+
 const toggleActionBar = (doctorId: string) => {
   selectedDoctorId.value = selectedDoctorId.value === doctorId ? null : doctorId
 }
 
 const getAllDoctors = async () => {
   try {
-    console.log('Fetching doctors...')
     const res = await userStore.getDoctors({ isActive: true })
-    console.log('Response:', res)
-
     userList.value = Array.isArray(res) ? res : res?.data ?? []
-
-    console.log('UserList:', userList.value)
   } catch (error) {
     console.error('Error fetching doctors:', error)
   }
@@ -63,29 +69,19 @@ const getSrcAvatar = (row: any) => {
   return ''
 }
 
-const currentPage = ref(1)
-const itemsPerPage = ref(10)
-const totalItems = ref(0)
-
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
-
-const paginatedDoctors = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return filteredDoctors.value.slice(start, end)
-})
-
-const deleteDoctor = async (id: string, event?: Event) => {
+const deleteDoctor = async (id: string, doctorName: string, event?: Event) => {
   if (event) {
     event.stopPropagation()
   }
-  try {
-    await userStore.deleteDoctor(id) // Call the delete function from the store
-    console.log(`Doctor with ID ${id} has been deleted.`)
-    // Optionally refresh the doctor list
-    await getAllDoctors()
-  } catch (error) {
-    console.error('Error deleting doctor:', error)
+
+  const confirmDelete = confirm(`Bạn có thực sự muốn xóa bác sĩ ${doctorName}?`)
+  if (confirmDelete) {
+    try {
+      await userStore.deleteDoctor(id) // Call the delete function from the store
+      await getAllDoctors() // Refresh the doctor list
+    } catch (error) {
+      console.error('Error deleting doctor:', error)
+    }
   }
 }
 
@@ -104,109 +100,93 @@ onMounted(() => {
 })
 
 watch(currentPage, () => {
-  // You can add logic here if you need to fetch data from API on page change
+  // Logic for fetching data on page change can be added here
 })
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-    <div class="mb-4 flex justify-between items-center">
-      <VaInput v-model="searchQuery" placeholder="Search by name or email..." class="max-w-md" />
-      <VaButton color="primary" @click="router.push('/doctors/create')">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-4 sm:px-10">
+    <!-- Header Section -->
+    <div class="mb-6 flex justify-between items-center">
+      <div class="flex-1 max-w-md">
+        <VaInput
+          v-model="searchQuery"
+          placeholder="Tìm kiếm bác sĩ theo tên hoặc email..."
+          rounded
+          outlined
+          clearable
+        />
+      </div>
+      <VaButton color="primary" class="rounded-md" @click="router.push('/doctors/create')">
         <template #prepend>
           <i class="mdi mdi-plus mr-2"></i>
         </template>
-        Add Doctor
+        Thêm Bác Sĩ
       </VaButton>
     </div>
 
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
-      <div class="grid grid-cols-5 gap-4 px-6 py-3 bg-gray-50 text-sm font-medium text-gray-500">
+    <!-- Doctor List Section -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <div class="grid grid-cols-5 gap-4 px-6 py-3 bg-indigo-100 text-sm font-semibold text-indigo-800">
         <div></div>
-        <div>Name</div>
-        <div>Gender</div>
+        <div>Tên</div>
+        <div>Giới Tính</div>
         <div>Email</div>
-        <div>Phone</div>
+        <div>Điện Thoại</div>
       </div>
 
-      <div v-if="filteredDoctors.length === 0" class="py-8 text-center text-gray-500">
-        No doctors found matching your search criteria
+      <div v-if="filteredDoctors.length === 0" class="py-10 text-center text-gray-500">
+        Không tìm thấy bác sĩ nào phù hợp.
       </div>
 
       <ul v-else>
-        <li v-for="doctor in paginatedDoctors" :key="doctor.id" class="border-b border-gray-200 last:border-b-0">
-          <div
-            class="grid grid-cols-5 gap-4 px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors duration-150 ease-in-out"
-            @click="toggleActionBar(doctor.id)"
-          >
-            <div class="flex items-center">
+        <li
+          v-for="doctor in paginatedDoctors"
+          :key="doctor.id"
+          class="border-b border-gray-200 last:border-b-0 hover:bg-indigo-50 transition-all cursor-pointer"
+          @click="toggleActionBar(doctor.id)"
+        >
+          <div class="grid grid-cols-5 gap-4 px-6 py-4 items-center">
+            <div>
               <VaAvatar
                 :src="getSrcAvatar({ rowData: doctor })"
-                class="w-10 h-10 bg-warning font-bold"
-                :fallback-text="doctor.userName?.charAt(0)?.toUpperCase()"
+                size="large"
+                class="shadow-lg"
+                fallback-icon="mdi-account"
               />
             </div>
-            <div class="flex items-center text-sm font-medium text-gray-900">
-              {{ doctor.userName }}
-            </div>
-            <div class="flex items-center text-sm text-gray-900">
-              {{ doctor.gender ? 'Male' : 'Female' }}
-            </div>
-            <div class="flex items-center text-sm text-gray-900">
-              {{ doctor.email.replace(/(\w{3})[\w.-]+(@[\w.]+)/, '$1***$2') }}
-            </div>
-            <div class="flex items-center text-sm text-gray-900">
-              {{ doctor.phoneNumber?.replace(/(\d{3})(\d{3})(\d{4})/, '$1-***-$3') }}
-            </div>
+            <div class="text-gray-900 font-medium">{{ doctor.userName }}</div>
+            <div>{{ doctor.gender ? 'Nam' : 'Nữ' }}</div>
+            <div class="truncate">{{ doctor.email.replace(/(\w{3})[\w.-]+(@[\w.]+)/, '$1***$2') }}</div>
+            <div>{{ doctor.phoneNumber?.replace(/(\d{3})(\d{3})(\d{4})/, '$1-***-$3') }}</div>
           </div>
 
-          <Transition
-            enter-active-class="transition ease-out duration-200"
-            enter-from-class="opacity-0 transform -translate-y-2"
-            enter-to-class="opacity-100 transform translate-y-0"
-            leave-active-class="transition ease-in duration-150"
-            leave-from-class="opacity-100 transform translate-y-0"
-            leave-to-class="opacity-0 transform -translate-y-2"
-          >
+          <Transition name="fade">
             <div
               v-if="selectedDoctorId === doctor.id"
-              class="bg-gray-50/80 px-6 py-4 border-t border-gray-200 backdrop-blur-sm shadow-inner relative"
+              class="bg-indigo-100/80 px-6 py-3 flex gap-4 justify-end items-center text-sm"
             >
-              <div class="absolute inset-0 bg-white/30 backdrop-blur-sm"></div>
-              <div class="flex justify-end gap-3 relative z-10">
-                <VaButton color="danger" @click="deleteDoctor(doctor.id, $event)">
-                  <template #prepend>
-                    <i class="mdi mdi-delete mr-2"></i>
-                  </template>
-                  {{ t('delete') }}
-                </VaButton>
-
-                <VaButton color="warning" @click="updateDoctor(doctor.id, $event)">
-                  <template #prepend>
-                    <i class="mdi mdi-pencil mr-2"></i>
-                  </template>
-                  {{ t('update') }}
-                </VaButton>
-
-                <VaButton color="primary" @click="viewDetails(doctor.id, $event)">
-                  <template #prepend>
-                    <i class="mdi mdi-open-in-new mr-2"></i>
-                  </template>
-                  {{ t('viewDetail') }}
-                </VaButton>
-              </div>
+              <VaButton color="danger" @click="deleteDoctor(doctor.id, doctor.userName, $event)">
+                <i class="mdi mdi-delete h-4 w-4 text-red"> </i>
+              </VaButton>
+              <VaButton color="warning" @click="updateDoctor(doctor.id, $event)">
+                <i class="mdi mdi-pencil h-4 w-4 text-yellow"></i>
+              </VaButton>
+              <VaButton color="info" @click="viewDetails(doctor.id, $event)">
+                <i class="mdi mdi-open-in-new h-4 w-4 text-blue"></i>
+              </VaButton>
             </div>
           </Transition>
         </li>
       </ul>
 
+      <!-- Pagination -->
       <div class="flex justify-center mt-6">
-        <VaPagination v-model="currentPage" :total-pages="totalPages" :visible-pages="5" class="mb-4" />
+        <VaPagination v-model="currentPage" :total-pages="totalPages" :visible-pages="5" color="primary" />
       </div>
     </div>
   </div>
 </template>
-
 <style scoped>
 .bg-gray-50 {
   background-color: #f9fafb;
@@ -218,5 +198,19 @@ watch(currentPage, () => {
 
 .shadow-inner {
   box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.list-item {
+  margin-bottom: 12px; /* Adjust spacing between items here */
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

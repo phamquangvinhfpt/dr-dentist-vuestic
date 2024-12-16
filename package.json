@@ -40,6 +40,7 @@
     "dayjs": "^1.11.11",
     "epic-spinners": "^2.0.0",
     "flag-icons": "^6.15.0",
+    "heroicons": "^2.2.0",
     "ionicons": "^4.6.3",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
