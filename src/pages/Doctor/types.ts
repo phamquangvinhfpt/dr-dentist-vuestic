@@ -126,14 +126,50 @@ export interface Doctor {
 
 export interface DoctorApiResponse {
   id: string
+  userName: string
   firstName: string
   lastName: string
-  imageUrl?: string
+  gender: boolean
+  email: string
+  phoneNumber: string
+  imageUrl: string
+  rating: number
+  totalFeedback: number
   doctorProfile?: {
-    specialty?: string
-    yearOfExp?: number
-    rating?: number
+    id: string
+    domainEvents?: Array<{
+      triggeredOn: string
+    }>
+    createdBy: string
+    createdOn: string
+    lastModifiedBy: string
+    lastModifiedOn: string
+    deletedOn?: string
+    deletedBy?: string
+    doctorId: string
+    typeServiceID: string
+    education: string
+    college: string
+    certification: string
+    certificationImage: string[]
+    yearOfExp: string
+    seftDescription: string
+    workingType: number
+    isActive: boolean
   }
+  doctorFeedback?: Array<{
+    ratingType: number
+    totalRating: number
+    feedbacks: Array<{
+      serviceID: string
+      serviceName: string
+      patientID: string
+      patientName: string
+      createDate: string
+      ratings: number
+      message: string
+    }>
+  }>
 }
 
 export interface DoctorProfile {

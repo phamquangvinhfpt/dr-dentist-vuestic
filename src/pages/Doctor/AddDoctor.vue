@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
+import { useServiceStore } from '@/stores/modules/service.module'
+
 import { useToast } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
+import { VaFile } from 'vuestic-ui'
 
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()
 const { init: toast } = useToast()
+const serviceStore = useServiceStore()
 
 const goBack = () => router.back()
 
@@ -20,8 +24,9 @@ interface DoctorForm {
   confirmPassword: string
   phoneNumber: string
   gender: boolean | null
-  imageUrl?: string
+  imageUrl: string
   address: string
+  typeServiceId: string // Add this line
   birthDate: string
   role: string
   specialization: string
@@ -29,6 +34,7 @@ interface DoctorForm {
   qualification: string
   consultationFee: number
   description: string
+  WorkingType: number
 }
 
 const doctor = reactive<DoctorForm>({
@@ -36,70 +42,61 @@ const doctor = reactive<DoctorForm>({
   firstName: '',
   lastName: '',
   email: '',
-  password: '',
-  confirmPassword: '',
+  password: '123Pa$$word!',
+  confirmPassword: '123Pa$$word!',
   phoneNumber: '',
   gender: null,
+  typeServiceId: '', // New field for TypeServiceID
   imageUrl: '',
   address: '',
   birthDate: '',
-  role: 'Dentist',
+  role: 'Bác Sĩ',
   specialization: '',
   experience: 0,
   qualification: '',
   consultationFee: 0,
   description: '',
+  WorkingType: 0,
 })
 
-interface ValidationState {
-  error: boolean
-  message: string
-}
-
-interface FormErrors {
-  firstName: ValidationState
-  lastName: ValidationState
-  email: ValidationState
-  password: ValidationState
-  confirmPassword: ValidationState
-  phoneNumber: ValidationState
-  userName: ValidationState
-  birthDate: ValidationState
-  gender: ValidationState
-  description: ValidationState
-  experience: ValidationState
-  address: ValidationState
-  consultationFee: ValidationState
-  specialization: ValidationState
-  qualification: ValidationState
-  // ... add other fields as needed
-}
-
-const errors = reactive<FormErrors>({
+const errors = reactive({
   firstName: { error: false, message: '' },
   lastName: { error: false, message: '' },
   email: { error: false, message: '' },
-  password: { error: false, message: '' },
-  confirmPassword: { error: false, message: '' },
   phoneNumber: { error: false, message: '' },
   userName: { error: false, message: '' },
   birthDate: { error: false, message: '' },
   gender: { error: false, message: '' },
-  description: { error: false, message: '' },
-  experience: { error: false, message: '' },
-  address: { error: false, message: '' },
-  consultationFee: { error: false, message: '' },
+  typeServiceId: { error: false, message: '' },
+  WorkingType: { error: false, message: '' },
   specialization: { error: false, message: '' },
+  experience: { error: false, message: '' },
   qualification: { error: false, message: '' },
-  // ... initialize other fields
+  consultationFee: { error: false, message: '' },
+  description: { error: false, message: '' },
 })
 
 const isSubmitting = ref(false)
 const showConfirmation = ref(false)
 const avatarPreview = ref<string | null>(null)
 const showSuccess = ref(false)
-
-// Add these refs for validation states
+const serviceTypes = ref<{ id: string; typeName: string }[]>([])
+const fetchServiceTypes = async () => {
+  try {
+    const response = await serviceStore.getServiceType({})
+    serviceTypes.value = response.data.map((service: { id: string; typeName: string }) => ({
+      id: service.id,
+      typeName: service.typeName,
+    }))
+  } catch (error) {
+    console.error('Error fetching service types:', error)
+    toast({ message: 'Không thể tải loại dịch vụ', color: 'danger' })
+  }
+}
+onMounted(() => {
+  fetchServiceTypes()
+})
+// Thêm các ref này cho trạng thái xác thực
 const validFields = reactive<Record<string, boolean>>({
   email: false,
   password: false,
@@ -112,12 +109,12 @@ const validFields = reactive<Record<string, boolean>>({
 
 const validateEmail = (email: string) => {
   if (!email?.trim()) {
-    errors.email = { error: true, message: 'Email is required' }
+    errors.email = { error: true, message: 'Email là bắt buộc' }
     validFields.email = false
     return false
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = { error: true, message: 'Invalid email format' }
+    errors.email = { error: true, message: 'Định dạng email không hợp lệ' }
     validFields.email = false
     return false
   }
@@ -126,53 +123,14 @@ const validateEmail = (email: string) => {
   return true
 }
 
-const validatePassword = (password: string) => {
-  if (!password) {
-    errors.password = { error: true, message: 'Password is required' }
-    validFields.password = false
-    return false
-  }
-
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/
-  if (!passwordRegex.test(password)) {
-    errors.password = {
-      error: true,
-      message:
-        'Password must be at least 8 characters and include: 1 number, 1 lowercase letter, 1 uppercase letter, and 1 special character',
-    }
-    validFields.password = false
-    return false
-  }
-
-  errors.password = { error: false, message: '' }
-  validFields.password = true
-  return true
-}
-
-const validateConfirmPassword = () => {
-  if (!doctor.confirmPassword) {
-    errors.confirmPassword = { error: true, message: 'Please confirm your password' }
-    validFields.confirmPassword = false
-    return false
-  }
-  if (doctor.password !== doctor.confirmPassword) {
-    errors.confirmPassword = { error: true, message: 'Passwords do not match' }
-    validFields.confirmPassword = false
-    return false
-  }
-  errors.confirmPassword = { error: false, message: '' }
-  validFields.confirmPassword = true
-  return true
-}
-
 const validatePhoneNumber = (phone: string) => {
   if (!phone) {
-    errors.phoneNumber = { error: true, message: 'Phone number is required' }
+    errors.phoneNumber = { error: true, message: 'Số điện thoại là bắt buộc' }
     validFields.phoneNumber = false
     return false
   }
   if (!/^\d{10,}$/.test(phone)) {
-    errors.phoneNumber = { error: true, message: 'Phone number must contain at least 10 digits only' }
+    errors.phoneNumber = { error: true, message: 'Số điện thoại phải chứa ít nhất 10 chữ số' }
     validFields.phoneNumber = false
     return false
   }
@@ -183,7 +141,7 @@ const validatePhoneNumber = (phone: string) => {
 
 const validateUserName = (userName: string) => {
   if (!userName) {
-    errors.userName = { error: true, message: 'Username is required' }
+    errors.userName = { error: true, message: 'Tên đăng nhập là bắt buộc' }
     validFields.userName = false
     return false
   }
@@ -194,7 +152,7 @@ const validateUserName = (userName: string) => {
 
 const validateFirstName = (firstName: string) => {
   if (!firstName?.trim()) {
-    errors.firstName = { error: true, message: 'First name is required' }
+    errors.firstName = { error: true, message: 'Họ là bắt buộc' }
     validFields.firstName = false
     return false
   }
@@ -205,7 +163,7 @@ const validateFirstName = (firstName: string) => {
 
 const validateLastName = (lastName: string) => {
   if (!lastName?.trim()) {
-    errors.lastName = { error: true, message: 'Last name is required' }
+    errors.lastName = { error: true, message: 'Tên là bắt buộc' }
     validFields.lastName = false
     return false
   }
@@ -219,27 +177,6 @@ watch(
   (newValue) => {
     if (validateEmail(newValue)) {
       errors.email = { error: false, message: '' }
-    }
-  },
-)
-
-watch(
-  () => doctor.password,
-  (newValue) => {
-    if (validatePassword(newValue)) {
-      errors.password = { error: false, message: '' }
-    }
-    if (doctor.confirmPassword) {
-      validateConfirmPassword()
-    }
-  },
-)
-
-watch(
-  () => doctor.confirmPassword,
-  () => {
-    if (validateConfirmPassword()) {
-      errors.confirmPassword = { error: false, message: '' }
     }
   },
 )
@@ -287,110 +224,99 @@ watch(
   },
 )
 
-const handleAvatarUpload = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (file) {
+const handleAvatarUpload = (files: VaFile[]) => {
+  if (files.length > 0) {
+    const file = files[0] // Get the first file
     const reader = new FileReader()
     reader.onload = (e) => {
-      avatarPreview.value = e.target?.result as string
-      doctor.imageUrl = e.target?.result as string
+      doctor.imageUrl = e.target?.result as string // Store the preview URL as a string
+      avatarPreview.value = doctor.imageUrl // Store the preview URL
     }
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(file as Blob) // Cast to Blob if necessary
+  } else {
+    doctor.imageUrl = '' // Reset if no files are selected
   }
 }
 
 const submitForm = async () => {
   if (
     !validateEmail(doctor.email) ||
-    !validatePassword(doctor.password) ||
-    !validateConfirmPassword() ||
     !validatePhoneNumber(doctor.phoneNumber) ||
     !validateFirstName(doctor.firstName) ||
     !validateLastName(doctor.lastName) ||
     !validateUserName(doctor.userName) ||
     !validateForm()
   ) {
-    toast({ message: 'Please correct the errors in the form', color: 'danger' })
+    toast({ message: 'Vui lòng điền thông tin trong biểu mẫu', color: 'danger' })
     return
   }
   showConfirmation.value = true
 }
 
+// ... existing code ...
+// ... existing code ...
 const confirmAddDoctor = async () => {
   try {
     isSubmitting.value = true
 
-    // Validate required fields first
+    // Validate required fields
     if (
       !validateEmail(doctor.email) ||
-      !validatePassword(doctor.password) ||
-      !validateConfirmPassword() ||
       !validatePhoneNumber(doctor.phoneNumber) ||
       !validateFirstName(doctor.firstName) ||
       !validateLastName(doctor.lastName) ||
       !validateUserName(doctor.userName)
     ) {
-      throw new Error('Please fill in all required fields correctly')
+      throw new Error('Vui lòng điền đúng tất cả các trường bắt buộc')
     }
 
-    // Format the data exactly as required by the API
+    // Format data for API
     const formattedData = {
-      firstName: doctor.firstName,
-      lastName: doctor.lastName,
-      email: doctor.email,
-      isMale: doctor.gender === true,
-      birthDay: doctor.birthDate,
-      userName: doctor.userName,
-      password: doctor.password,
-      confirmPassword: doctor.confirmPassword,
-      phoneNumber: doctor.phoneNumber,
-      job: 'Dentist',
-      address: doctor.address,
-      doctorProfile: {
-        doctorID: '',
-        education: doctor.qualification || '',
-        college: doctor.specialization || '',
-        certification: doctor.qualification || '',
-        yearOfExp: doctor.experience.toString(),
-        seftDescription: doctor.description || '',
+      FirstName: doctor.firstName,
+      LastName: doctor.lastName,
+      Email: doctor.email,
+      IsMale: doctor.gender === true,
+      BirthDay: doctor.birthDate,
+      UserName: doctor.userName,
+      Password: doctor.password,
+      ConfirmPassword: doctor.confirmPassword,
+      PhoneNumber: doctor.phoneNumber,
+      Job: 'Bác Sĩ',
+      Address: doctor.address,
+      DoctorProfile: {
+        DoctorID: '', // Set appropriate value if needed
+        TypeServiceID: doctor.typeServiceId || '', // Use a fallback value if null
+        Education: doctor.qualification || '',
+        College: doctor.specialization || '',
+        Certification: doctor.qualification || '',
+        CertificationImage: doctor.imageUrl,
+        YearOfExp: doctor.experience.toString(),
+        SeftDescription: doctor.description || '',
+        WorkingType: doctor.WorkingType, // Ensure this is a number
       },
-      role: 'Dentist', // Changed from "Doctor" to "Dentist"
+      Role: 'Dentist',
     }
 
-    // Debug log
-    console.log('Sending doctor data:', JSON.stringify(formattedData, null, 2))
+    // Log the formatted data for debugging
+    console.log('Đang gửi dữ liệu bác sĩ:', JSON.stringify(formattedData, null, 2))
 
     const response = await doctorStore.createDoctor({ request: formattedData })
 
     if (!response) {
-      throw new Error('No response from server')
+      throw new Error('Không có phản hồi từ máy chủ')
     }
 
     showConfirmation.value = false
     showSuccess.value = true
   } catch (error: any) {
-    console.error('Error details:', error)
-
-    // Handle validation errors
-    if (error.response?.data?.errors) {
-      const firstError = Object.values(error.response.data.errors)[0]
-      toast({
-        message: Array.isArray(firstError) ? firstError[0] : 'Validation error',
-        color: 'danger',
-        duration: 5000,
-      })
-    } else {
-      toast({
-        message: error.message || 'Failed to add doctor. Please try again.',
-        color: 'danger',
-        duration: 5000,
-      })
-    }
+    console.error('Chi tiết lỗi:', error)
+    // ... existing error handling ...
   } finally {
     isSubmitting.value = false
   }
 }
+// ... existing code ...
+// ... existing code ...
 
 const closeSuccessModal = () => {
   showSuccess.value = false
@@ -398,24 +324,23 @@ const closeSuccessModal = () => {
 }
 
 const genderOptions = [
-  { value: null, text: 'Select Gender' },
-  { value: true, text: 'Male' },
-  { value: false, text: 'Female' },
+  { value: false, text: 'Nam' },
+  { value: true, text: 'Nữ' },
 ]
 
 const validateForm = () => {
   let isValid = true
 
   if (!doctor.userName) {
-    errors.userName = { error: true, message: 'Username is required' }
+    errors.userName = { error: true, message: 'Tên đăng nhập là bắt buộc' }
     isValid = false
   }
   if (!doctor.birthDate) {
-    errors.birthDate = { error: true, message: 'Birth date is required' }
+    errors.birthDate = { error: true, message: 'Ngày sinh là bắt buộc' }
     isValid = false
   }
   if (doctor.gender === null) {
-    errors.gender = { error: true, message: 'Please select a gender' }
+    errors.gender = { error: true, message: 'Vui lòng chọn giới tính' }
     isValid = false
   }
 
@@ -425,33 +350,12 @@ const validateForm = () => {
 
   return isValid && Object.values(errors).every((error) => !error.error)
 }
+// Cập nhật các trình xử lý để kích hoạt khi mất tiêu điểm
 
-// Update watch handlers to trigger on blur
-const handleBlur = (field: string, value: any) => {
-  switch (field) {
-    case 'email':
-      validateEmail(value)
-      break
-    case 'password':
-      validatePassword(value)
-      break
-    case 'userName':
-      validateUserName(value)
-      break
-    case 'firstName':
-      validateFirstName(value)
-      break
-    case 'lastName':
-      validateLastName(value)
-      break
-    // Add cases for other fields...
-  }
-}
-
-// Add this validation function
+// Thêm hàm xác thực này
 const validateAge = (birthDate: string): boolean => {
   if (!birthDate) {
-    errors.birthDate = { error: true, message: 'Birth date is required' }
+    errors.birthDate = { error: true, message: 'Ngày sinh là bắt buộc' }
     return false
   }
 
@@ -465,7 +369,7 @@ const validateAge = (birthDate: string): boolean => {
   }
 
   if (age < 25) {
-    errors.birthDate = { error: true, message: 'Doctor must be at least 25 years old' }
+    errors.birthDate = { error: true, message: 'Bác sĩ phải ít nhất 25 tuổi' }
     return false
   }
 
@@ -475,7 +379,7 @@ const validateAge = (birthDate: string): boolean => {
 
 const validateSpecialization = (specialization: string) => {
   if (!specialization?.trim()) {
-    errors.specialization = { error: true, message: 'Specialization is required' }
+    errors.specialization = { error: true, message: 'Chuyên khoa là bắt buộc' }
     return false
   }
   errors.specialization = { error: false, message: '' }
@@ -498,31 +402,18 @@ watch(
           <template #prepend>
             <i class="mdi mdi-arrow-left mr-2"></i>
           </template>
-          Back
+          Quay lại
         </VaButton>
       </div>
 
       <div class="grid grid-cols-2 gap-8">
-        <!-- Left Column: Basic Information -->
         <div class="space-y-4">
-          <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
+          <h3 class="text-lg font-semibold mb-4">Thông tin cơ bản</h3>
 
-          <!-- Avatar Upload -->
-          <div class="mb-6 text-center">
-            <div class="mb-4">
-              <img v-if="avatarPreview" :src="avatarPreview" class="w-32 h-32 rounded-full mx-auto" />
-              <div v-else class="w-32 h-32 rounded-full bg-gray-200 mx-auto flex items-center justify-center">
-                <span class="text-gray-400">No Image</span>
-              </div>
-            </div>
-            <input type="file" accept="image/*" class="mb-4" @change="handleAvatarUpload" />
-          </div>
-
-          <!-- First Name Input -->
           <div class="input-group">
             <VaInput
               v-model="doctor.firstName"
-              label="First Name"
+              label="Họ"
               :error="errors.firstName.error"
               :error-messages="errors.firstName.message"
               :success="validFields.firstName"
@@ -530,11 +421,10 @@ watch(
             />
           </div>
 
-          <!-- Last Name Input -->
           <div class="input-group">
             <VaInput
               v-model="doctor.lastName"
-              label="Last Name"
+              label="Tên"
               :error="errors.lastName.error"
               :error-messages="errors.lastName.message"
               :success="validFields.lastName"
@@ -542,11 +432,10 @@ watch(
             />
           </div>
 
-          <!-- Username Input -->
           <div class="input-group">
             <VaInput
               v-model="doctor.userName"
-              label="Username"
+              label="Tên đăng nhập"
               :error="errors.userName.error"
               :error-messages="errors.userName.message"
               :success="validFields.userName"
@@ -567,33 +456,8 @@ watch(
 
           <div class="input-group">
             <VaInput
-              v-model="doctor.password"
-              label="Password"
-              type="password"
-              :error="errors.password.error"
-              :error-messages="errors.password.message"
-              :success="validFields.password"
-              @blur="handleBlur('password', doctor.password)"
-            />
-          </div>
-
-          <div class="input-group">
-            <VaInput
-              v-model="doctor.confirmPassword"
-              label="Confirm Password"
-              type="password"
-              :error="errors.confirmPassword.error"
-              :error-messages="errors.confirmPassword.message"
-              :success="validFields.confirmPassword"
-              @blur="validateConfirmPassword"
-            />
-          </div>
-
-          <!-- Phone Number Input -->
-          <div class="input-group">
-            <VaInput
               v-model="doctor.phoneNumber"
-              label="Phone Number"
+              label="Số điện thoại"
               :error="errors.phoneNumber.error"
               :error-messages="errors.phoneNumber.message"
               :success="validFields.phoneNumber"
@@ -601,27 +465,25 @@ watch(
             />
           </div>
 
-          <VaInput v-model="doctor.address" label="Address" :error="errors.address.error" />
-
           <div class="va-input">
             <label
-              class="va-input__label"
-              style="color: var(--va-primary); text-transform: uppercase; font-size: 0.75rem; font-weight: 600"
-              >Birth Date</label
+              style="color: var(--va-primary)"
+              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
             >
+              Ngày sinh
+            </label>
             <input
               v-model="doctor.birthDate"
               type="date"
-              class="va-input__input w-full px-3 py-2 border rounded-md"
+              class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               :max="new Date(new Date().setFullYear(new Date().getFullYear() - 25)).toISOString().split('T')[0]"
-              style="height: 40px; color: var(--va-text-primary); background-color: var(--va-background-primary)"
             />
             <span v-if="errors.birthDate.error" class="va-input__error">{{ errors.birthDate.message }}</span>
           </div>
 
           <VaSelect
             v-model="doctor.gender"
-            label="Gender"
+            label="Giới tính"
             :options="genderOptions"
             :error="errors.gender.error"
             :error-messages="errors.gender.message"
@@ -629,31 +491,73 @@ watch(
           />
         </div>
 
-        <!-- Right Column: Professional Information -->
         <div class="space-y-4">
-          <h3 class="text-lg font-semibold mb-4">Professional Information</h3>
+          <h3 class="text-lg font-semibold mb-4">Thông tin chuyên môn</h3>
+
+          <div class="mb-6 text-center">
+            <VaFileUpload v-model="doctor.imageUrl" dropzone file-types="jpg,png" @change="handleAvatarUpload" />
+          </div>
+          <label
+            for="serviceType"
+            style="color: var(--va-primary)"
+            class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+            >Chọn loại dịch vụ</label
+          >
+          <select
+            id="serviceType"
+            v-model="doctor.typeServiceId"
+            class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2"
+          >
+            <option v-for="service in serviceTypes" :key="service.id" :value="service.id">
+              {{ service.typeName }}
+            </option>
+          </select>
 
           <VaInput
             v-model="doctor.specialization"
-            label="Specialization"
+            label="Chuyên khoa"
             :error="errors.specialization.error"
             :error-messages="errors.specialization.message"
             @blur="validateSpecialization(doctor.specialization)"
           />
+          <div class="input-group">
+            <label
+              for="workingType"
+              style="color: var(--va-primary)"
+              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+              >Loại hình làm việc</label
+            >
+            <select
+              id="workingType"
+              v-model="doctor.WorkingType"
+              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2"
+            >
+              <option
+                v-for="option in [
+                  { value: 0, text: 'Part-time' },
+                  { value: 1, text: 'Full-time' },
+                ]"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.text }}
+              </option>
+            </select>
+          </div>
 
           <VaInput
             v-model.number="doctor.experience"
-            label="Years of Experience"
+            label="Số năm kinh nghiệm"
             type="number"
             min="0"
             :error="errors.experience.error"
           />
 
-          <VaInput v-model="doctor.qualification" label="Qualification" :error="errors.qualification.error" />
+          <VaInput v-model="doctor.qualification" label="Bằng cấp" :error="errors.qualification.error" />
 
           <VaInput
             v-model.number="doctor.consultationFee"
-            label="Consultation Fee"
+            label="Phí tư vấn"
             type="number"
             min="0"
             :error="errors.consultationFee.error"
@@ -661,62 +565,37 @@ watch(
 
           <VaTextarea
             v-model="doctor.description"
-            label="Description"
+            label="Mô tả"
             :error="errors.description.error"
             :error-messages="errors.description.message"
-            rows="4"
           />
         </div>
       </div>
 
-      <!-- Submit Button - Full Width -->
-      <div class="mt-6">
-        <VaButton type="submit" color="primary" :loading="isSubmitting" block> Add Doctor </VaButton>
+      <div class="flex justify-end mt-6">
+        <VaButton type="submit" color="primary">Thêm Bác Sĩ</VaButton>
       </div>
     </form>
 
-    <!-- Confirmation Modal -->
+    <!-- Modal xác nhận -->
     <VaModal v-model="showConfirmation" class="text-center" hide-default-actions>
       <div class="confirmation-modal">
-        <!-- Icon Section -->
-        <div class="text-center mb-6">
-          <i class="mdi mdi-help-circle-outline text-6xl text-primary"></i>
-        </div>
-
-        <!-- Content Section -->
-        <h3 class="text-2xl font-semibold mb-4">Confirm Action</h3>
-        <p class="text-gray-600 mb-8">Are you sure you want to add this doctor?</p>
-
-        <!-- Divider -->
+        <h3 class="text-2xl font-semibold mb-4">Xác nhận hành động</h3>
+        <p class="text-gray-600 mb-8">Bạn có chắc chắn muốn thêm bác sĩ này không?</p>
         <VaDivider class="mb-6" />
-
-        <!-- Buttons Section -->
         <div class="flex justify-end space-x-4">
-          <VaButton color="gray" class="px-6" @click="showConfirmation = false"> Cancel </VaButton>
-          <VaButton :loading="isSubmitting" class="px-6" @click="confirmAddDoctor"> Confirm </VaButton>
+          <VaButton color="danger" @click="confirmAddDoctor">Xác nhận</VaButton>
+          <VaButton @click="showConfirmation = false">Hủy</VaButton>
         </div>
       </div>
     </VaModal>
 
-    <!-- Add Success Modal -->
+    <!-- Success Modal -->
     <VaModal v-model="showSuccess" class="text-center" hide-default-actions>
-      <div class="success-modal">
-        <!-- Success Icon -->
-        <div class="text-center mb-6">
-          <i class="mdi mdi-check-circle-outline text-6xl text-success"></i>
-        </div>
-
-        <!-- Success Message -->
-        <h3 class="text-2xl font-semibold mb-4">Success!</h3>
-        <p class="text-gray-600 mb-8">Doctor has been successfully added</p>
-
-        <!-- Divider -->
-        <VaDivider class="mb-6" />
-
-        <!-- Close Button -->
-        <div class="flex justify-end">
-          <VaButton class="px-6" @click="closeSuccessModal"> Close </VaButton>
-        </div>
+      <div class="confirmation-modal">
+        <h3 class="text-2xl font-semibold mb-4">Thành công!</h3>
+        <p class="text-gray-600 mb-8">Bác sĩ đã được thêm thành công.</p>
+        <VaButton @click="closeSuccessModal">Đóng</VaButton>
       </div>
     </VaModal>
   </div>
@@ -830,7 +709,7 @@ h3 {
   border-color: var(--va-danger);
 }
 
-/* Add these CSS rules to handle icon display */
+/* Thêm các quy tắc CSS này để xử lý hiển thị biểu tượng */
 :deep(.va-input-wrapper__icon--success) {
   display: none !important;
 }
@@ -860,5 +739,12 @@ h3 {
   background-color: rgba(var(--va-danger-rgb), 0.1);
   border-radius: 4px;
   padding-left: 0.5rem;
+}
+.va-input__input {
+  border: 0.5px solid #dfe6f2;
+  /* Example for a green border */
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 16px;
 }
 </style>

@@ -247,5 +247,29 @@ export const useUserProfileStore = defineStore('userProfile', {
         return await Promise.reject(error)
       }
     },
+
+    async updateTreatmentPlanDetail(data: { appointmentID: string; message: string; rating: number }): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updateTreatmentPlanDetail(data) // Gọi API để cập nhật kế hoạch điều trị
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+
+    async updateFeedbackDetail(data: { feedbackID: string; message: string; rating: number }): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updateFeedbackDetail(data) // Gọi API để cập nhật phản hồi
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

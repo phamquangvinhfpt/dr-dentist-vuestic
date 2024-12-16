@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import AppLayout from '../layouts/AppLayout.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
+import ServiceForUser from '../pages/servipage-procedure/ServiceForUser.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -250,6 +251,24 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/home/dashboard/DashboardStaff.vue'),
       },
       {
+        name: 'list-room',
+        path: 'rooms',
+        meta: {
+          requiresAuth: true,
+          title: 'Danh sách phòng khám',
+        },
+        component: () => import('@/pages/working-calendar/listRoom.vue'),
+      },
+      {
+        name: 'add-room',
+        path: 'add-room',
+        meta: {
+          requiresAuth: true,
+          title: 'Thêm phòng',
+        },
+        component: () => import('@/pages/working-calendar/AddRoom.vue'),
+      },
+      {
         name: 'contact-requests',
         path: 'contact-requests',
         meta: {
@@ -283,6 +302,22 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
         },
+      },
+      {
+        name: 'feedback',
+        path: 'feedback/:appointmentID?',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/user/Feedback.vue'),
+      },
+      {
+        name: 'service-for-user',
+        path: 'service-for-user',
+        meta: {
+          requiresAuth: true,
+        },
+        component: ServiceForUser,
       },
     ],
   },
