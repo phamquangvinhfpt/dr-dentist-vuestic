@@ -24,7 +24,7 @@ interface DoctorForm {
   confirmPassword: string
   phoneNumber: string
   gender: boolean | null
-  imageUrl: string
+  imageUrl: VaFile | VaFile[] | undefined
   address: string
   typeServiceId: string // Add this line
   birthDate: string
@@ -47,7 +47,7 @@ const doctor = reactive<DoctorForm>({
   phoneNumber: '',
   gender: null,
   typeServiceId: '', // New field for TypeServiceID
-  imageUrl: '',
+  imageUrl: undefined,
   address: '',
   birthDate: '',
   role: 'Bác Sĩ',
@@ -229,12 +229,15 @@ const handleAvatarUpload = (files: VaFile[]) => {
     const file = files[0] // Get the first file
     const reader = new FileReader()
     reader.onload = (e) => {
-      doctor.imageUrl = e.target?.result as string // Store the preview URL as a string
-      avatarPreview.value = doctor.imageUrl // Store the preview URL
+      const result = e.target?.result // Get the result from the FileReader
+      if (result) {
+        doctor.imageUrl = [{ url: result as string }] // Wrap the result in an array with the correct structure
+        avatarPreview.value = result as string // Store the preview URL
+      }
     }
     reader.readAsDataURL(file as Blob) // Cast to Blob if necessary
   } else {
-    doctor.imageUrl = '' // Reset if no files are selected
+    doctor.imageUrl = undefined // Reset if no files are selected
   }
 }
 
@@ -289,7 +292,7 @@ const confirmAddDoctor = async () => {
         Education: doctor.qualification || '',
         College: doctor.specialization || '',
         Certification: doctor.qualification || '',
-        CertificationImage: doctor.imageUrl,
+        CertificationImage: (doctor.imageUrl as VaFile[])?.[0]?.url || '', // Provide an empty string as a fallback
         YearOfExp: doctor.experience.toString(),
         SeftDescription: doctor.description || '',
         WorkingType: doctor.WorkingType, // Ensure this is a number
