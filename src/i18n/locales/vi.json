@@ -201,7 +201,19 @@
     "teeth_grinding": "Nghiến răng",
     "geographic_tongue": "Lưỡi địa lý",
     "burning_mouth_syndrome": "Hội chứng bỏng rát miệng",
-    "please_check_items": "Vui lòng kiểm tra các mục"
+    "please_check_items": "Vui lòng kiểm tra các mục",
+    "father": "Ba",
+    "mother": "Mẹ",
+    "brother": "Anh/Em Trai",
+    "sister": "Chị/Em Gái",
+    "certification_image": "Chứng chỉ",
+    "enter_certification_image": "Nhập chứng chỉ",
+    "certification_image_removed": "Chứng chỉ được xóa thành công",
+    "certification_image_added": "Chứng chỉ được thêm thành công",
+    "full_time": "Toàn thời gian",
+    "part_time": "Bán thời gian",
+    "none": "Không",
+    "working_type": "Loại công việc"
   },
   "doctor": {
     "education": "Trình độ học vấn",
@@ -448,7 +460,10 @@
     "payment": "Thanh toán",
     "doctor-management": "Quản lý bác sĩ",
     "my-contacts": "Liên hệ",
-    "working-calendar": "Lịch làm việc"
+    "working-calendar": "Lịch làm việc",
+    "form-application": "Gửi Đơn",
+    "form-management": "Quản lý Đơn",
+    "form-for-dentist": "Đơn của tôi"
   },
   "bin": {
     "title": "Thùng rác",
@@ -746,5 +761,19 @@
     "method": "Phương Thức Thanh Toán",
     "status": "Trạng Thái",
     "management": "Quản Lý Thanh Toán"
+  },
+  "form": {
+    "formManagement": "Quản Lý Phiếu Đăng Ký",
+    "formForDentist": "Phiếu Đăng Ký Cho Bác Sĩ",
+    "name": "Tên",
+    "status": "Trạng Thái",
+    "actions": "Thao Tác",
+    "allStatus": "Tất Cả Trạng Thái",
+    "waiting": "Đang Chờ",
+    "accepted": "Đã Chấp Nhận",
+    "failed": "Đã Từ Chối",
+    "workingDate": "Ngày Làm Việc",
+    "workingTimes": "Giờ Làm Việc",
+    "description": "Mô Tả"
   }
 }

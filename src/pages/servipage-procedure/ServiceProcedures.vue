@@ -11,11 +11,11 @@
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <p class="font-semibold">Name:</p>
-                  <p>{{ serviceDetail?.serviceName || 'N/A' }}</p>
+                  <p>{{ serviceDetail?.name || 'N/A' }}</p>
                 </div>
                 <div>
                   <p class="font-semibold">Description:</p>
-                  <p>{{ serviceDetail?.serviceDescription || 'N/A' }}</p>
+                  <p>{{ serviceDetail?.description || 'N/A' }}</p>
                 </div>
                 <div>
                   <p class="font-semibold">Total Price:</p>

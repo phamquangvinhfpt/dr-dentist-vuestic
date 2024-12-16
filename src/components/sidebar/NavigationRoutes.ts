@@ -135,5 +135,30 @@ export default {
         roles: ['Admin'],
       },
     },
+    //form application
+    {
+      name: 'form-application',
+      displayName: 'menu.form-application',
+      meta: {
+        icon: 'description',
+        roles: ['Dentist'],
+      },
+    },
+    {
+      name: 'form-management',
+      displayName: 'menu.form-management',
+      meta: {
+        icon: 'assignment',
+        roles: ['Admin'],
+      },
+    },
+    {
+      name: 'form-for-dentist',
+      displayName: 'menu.form-for-dentist',
+      meta: {
+        icon: 'fact_check',
+        roles: ['Dentist'],
+      },
+    },
   ] as INavigationRoute[],
 }

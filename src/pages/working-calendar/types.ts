@@ -34,3 +34,19 @@ export type PartTimeSchedule = {
   date: Date
   time: string
 }
+
+export interface WorkingTime {
+  timeID: string
+  startTime: string
+  endTime: string
+  isActive: boolean
+}
+
+export interface WorkingCalendar {
+  calendarID: string
+  workingDate: string
+  workingTimes: WorkingTime[]
+  isActive: boolean
+  roomName: string
+  workingStatus: number
+}

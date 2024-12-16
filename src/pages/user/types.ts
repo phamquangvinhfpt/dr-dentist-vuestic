@@ -54,6 +54,10 @@ type DoctorProfileInfo = {
   certification: string
   yearOfExp: string
   seftDescription: string
+  certificationImage: string[]
+  workingType: WorkingType
+  typeServiceID: string
+  isActive: boolean
 }
 type PatientFamilyInfor = {
   name: string
@@ -68,10 +72,10 @@ type MedicalHistoryInfor = {
 }
 
 export enum Rela {
-  Father,
-  Mother,
-  Sister,
-  Brother,
+  Father = 0,
+  Mother = 1,
+  Sister = 2,
+  Brother = 3,
 }
 
 export type SettingProfile = {
@@ -196,6 +200,10 @@ export type DoctorProfile = BaseProfile & {
   certification: string | null
   yearOfExp: string | null
   seftDescription: string | null
+  certificationImage: string[]
+  workingType: WorkingType | null
+  typeServiceID: string | null
+  isActive: boolean
 }
 
 export type DoctorDetailFormData = {
@@ -204,6 +212,10 @@ export type DoctorDetailFormData = {
   certification: string | null
   yearOfExp: string | null
   seftDescription: string | null
+  certificationImage: string[]
+  workingType: WorkingType | null
+  typeServiceID: string | null
+  isActive: boolean
 }
 
 export type DoctorDetailsUpdate = {
@@ -212,6 +224,10 @@ export type DoctorDetailsUpdate = {
   certification: string | null
   yearOfExp: string | null
   seftDescription: string | null
+  workingType: WorkingType | null
+  typeServiceID: string | null
+  certificationImage: string[]
+  isActive: boolean
 }
 
 // Update patientfamily
@@ -262,4 +278,10 @@ export type FilterDoctor = {
   pageSize: number
   isActive: boolean
   orderBy?: string[]
+}
+
+export enum WorkingType {
+  None = 0,
+  PartTime = 1,
+  FullTime = 2,
 }

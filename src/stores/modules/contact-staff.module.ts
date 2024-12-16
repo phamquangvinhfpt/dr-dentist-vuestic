@@ -115,5 +115,29 @@ export const useContactStaffStore = defineStore('contactStaff', {
         this.isLoading = false
       }
     },
+
+    async updateCallImage(contactId: string, files: File[]) {
+      try {
+        this.isLoading = true
+        const response = await contactStaffService.updateCallImage(contactId, files)
+        return Promise.resolve(response)
+      } catch (error) {
+        return Promise.reject(error)
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    async sendEmail(contactId: string, emailContext: string) {
+      try {
+        this.isLoading = true
+        const response = await contactStaffService.sendEmail(contactId, emailContext)
+        return Promise.resolve(response)
+      } catch (error) {
+        return Promise.reject(error)
+      } finally {
+        this.isLoading = false
+      }
+    },
   },
 })

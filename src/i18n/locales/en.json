@@ -207,7 +207,19 @@
     "teeth_grinding": "Teeth Grinding",
     "geographic_tongue": "Geographic Tongue",
     "burning_mouth_syndrome": "Burning Mouth Syndrome",
-    "please_check_items": "please check items"
+    "please_check_items": "please check items",
+    "father": "father",
+    "mother": "mother",
+    "brother": "brother",
+    "sister": "sister",
+    "certification_image": "Certification Image",
+    "enter_certification_image": "Enter certification image",
+    "certification_image_removed": "Certification image removed successfully",
+    "certification_image_added": "Certification image added successfully",
+    "full_time": "Full Time",
+    "part_time": "Part Time",
+    "none": "None",
+    "working_type": "Working Type"
   },
   "doctor": {
     "education": "Education Level",
@@ -456,7 +468,10 @@
     "payment": "Payment",
     "doctor-management": "Doctor MG",
     "my-contacts": "Contacts",
-    "working-calendar": "Working Calendar"
+    "working-calendar": "Working Calendar",
+    "form-application": "Form Application",
+    "form-management": "Form Management",
+    "form-for-dentist": "My Forms"
   },
   "bin": {
     "title": "Trash",
@@ -789,5 +804,19 @@
     "method": "Payment Method",
     "status": "Status",
     "management": "Payment Management"
+  },
+  "form": {
+    "formManagement": "Form Management",
+    "formForDentist": "Form For Dentist",
+    "name": "Name",
+    "status": "Status",
+    "actions": "Actions",
+    "allStatus": "All Status",
+    "waiting": "Waiting",
+    "accepted": "Accepted",
+    "failed": "Failed",
+    "workingDate": "Working Date",
+    "workingTimes": "Working Times",
+    "description": "Description"
   }
 }

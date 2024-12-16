@@ -13,6 +13,7 @@ import {
   PatientFamilyUpdate,
   MedicalHistoryUpdate,
   PatientProfileUpdate,
+  WorkingType,
   // RoleEnum,
 } from './types'
 import { VaAvatar, useForm, useToast } from 'vuestic-ui'
@@ -82,6 +83,10 @@ const userDetail = ref<UserDetailFormData>({
     certification: '',
     yearOfExp: '',
     seftDescription: '',
+    certificationImage: [],
+    workingType: WorkingType.None,
+    typeServiceID: '',
+    isActive: true,
   },
   patientFamily: {
     name: '',
@@ -158,6 +163,10 @@ const getUserDetail = async () => {
         certification: userProfileStore?.userDetails?.doctorProfile?.certification ?? '',
         yearOfExp: userProfileStore?.userDetails?.doctorProfile?.yearOfExp ?? '',
         seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription ?? '',
+        certificationImage: userProfileStore?.userDetails?.doctorProfile?.certificationImage ?? [],
+        workingType: userProfileStore?.userDetails?.doctorProfile?.workingType ?? WorkingType.None,
+        typeServiceID: userProfileStore?.userDetails?.doctorProfile?.typeServiceID ?? '',
+        isActive: userProfileStore?.userDetails?.doctorProfile?.isActive ?? true,
       },
       patientFamily: {
         name: userProfileStore?.userDetails?.patientFamily?.name || '', // Thuộc tính `name` ở đây nằm trong `patientFamily`
@@ -603,6 +612,10 @@ const submitDoctorProfile = async () => {
       certification: formData.doctorProfile.certification ?? null,
       yearOfExp: formData.doctorProfile.yearOfExp ?? null,
       seftDescription: formData.doctorProfile.certification ?? null,
+      workingType: formData.doctorProfile.workingType ?? WorkingType.None,
+      typeServiceID: formData.doctorProfile.typeServiceID ?? '',
+      isActive: formData.doctorProfile.isActive ?? true,
+      certificationImage: formData.doctorProfile.certificationImage ?? [],
     }
     await userProfileStore
       .updateDoctorProfile(doctorProfileData)
@@ -1127,6 +1140,12 @@ const medicalHistoryOptions = [
   { value: 'Geographic_Tongue', text: t('auth.geographic_tongue') }, // Lưỡi địa lý
   { value: 'Burning_Mouth_Syndrome', text: t('auth.burning_mouth_syndrome') }, // Hội chứng bỏng rát miệng
 ]
+
+const workingTypeOptions = [
+  { text: t('auth.full_time'), value: WorkingType.FullTime },
+  { text: t('auth.part_time'), value: WorkingType.PartTime },
+  { text: t('auth.none'), value: WorkingType.None },
+]
 </script>
 
 <template>
@@ -1342,6 +1361,18 @@ const medicalHistoryOptions = [
                 textarea
               />
             </VaField>
+            <VaField>
+              <VaSelect
+                v-model="formData.doctorProfile.workingType"
+                :label="t('auth.working_type')"
+                class="mb-3"
+                :placeholder="t('auth.choose_working_type')"
+                :options="workingTypeOptions"
+                text-by="text"
+                value-by="value"
+                clearable
+              />
+            </VaField>
           </div>
 
           <div class="flex justify-end">
@@ -1392,6 +1423,8 @@ const medicalHistoryOptions = [
                 class="mb-3"
                 :placeholder="t('auth.choose_relationship')"
                 :options="relationshipOptions"
+                text-by="text"
+                clearable
               />
             </VaField>
           </div>

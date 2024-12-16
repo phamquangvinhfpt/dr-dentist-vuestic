@@ -1,141 +1,169 @@
 <template>
-  <div class="flex justify-between mb-4">
-    <div class="flex gap-2">
-      <VaButton color="primary" @click="showCreateModal = true">
-        <i class="va-icon material-icons mr-2">add</i>
-        Create Procedure
-      </VaButton>
-      <VaButton :color="showBin ? 'warning' : 'secondary'" @click="toggleBin">
-        <i class="va-icon material-icons mr-2">{{ showBin ? 'list' : 'delete' }}</i>
-        {{ showBin ? 'Active List' : 'Recycle Bin' }}
-      </VaButton>
-    </div>
+  <div class="service-management-container">
+    <VaCard class="service-card">
+      <VaCardTitle class="card-title">
+        <i class="fas fa-cog title-icon"></i>
+        Procedure Management
+      </VaCardTitle>
+
+      <VaCardContent>
+        <div class="header-actions">
+          <div class="button-group">
+            <VaButton color="primary" class="action-button create-button" @click="showCreateModal = true">
+              <i class="va-icon material-icons mr-2">add</i>
+              <span class="ml-1">Create</span>
+            </VaButton>
+            <VaButton
+              :color="showBin ? 'warning' : 'secondary'"
+              :class="['action-button bin-button', { warning: showBin }]"
+              @click="toggleBin"
+            >
+              <i class="va-icon material-icons mr-2">{{ showBin ? 'list' : 'delete' }}</i>
+              <span class="ml-1">{{ showBin ? 'Active' : 'Bin' }}</span>
+            </VaButton>
+          </div>
+        </div>
+
+        <VaDataTable
+          class="custom-table"
+          :items="procedureList"
+          :columns="columnsWithActions"
+          hoverable
+          select-mode="multiple"
+          :disable-client-side-sorting="false"
+          sticky-header
+          striped
+          no-data-html="<div class='text-center'>No procedures found</div>"
+        >
+          <template #cell(name)="{ row }">
+            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+              <span class="w-24">{{ row.rowData.name }}</span>
+            </div>
+          </template>
+
+          <template #cell(description)="{ row }">
+            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+              <span class="w-24">{{ row.rowData.description }}</span>
+            </div>
+          </template>
+
+          <template #cell(price)="{ row }">
+            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+              <span class="w-24">{{ formatPrice(row.rowData.price) }}</span>
+            </div>
+          </template>
+
+          <template #cell(createdOn)="{ row }">
+            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+              <span class="w-24">
+                {{ validateDate(row.rowData.createdOn) ? formatDate(row.rowData.createdOn) : 'Ngày không hợp lệ' }}
+              </span>
+            </div>
+          </template>
+
+          <template #cell(actions)="{ row }">
+            <div class="flex gap-2">
+              <template v-if="!showBin">
+                <VaButton
+                  small
+                  round
+                  color="primary"
+                  class="action-button-circle"
+                  @click="handleEdit(row.rowData as ProcedureDTO)"
+                >
+                  <i class="va-icon material-icons">edit</i>
+                </VaButton>
+                <VaButton
+                  small
+                  round
+                  color="danger"
+                  class="action-button-circle"
+                  @click="confirmDelete(row.rowData as ProcedureDTO)"
+                >
+                  <i class="va-icon material-icons">delete</i>
+                </VaButton>
+              </template>
+              <template v-else>
+                <VaButton
+                  small
+                  round
+                  color="success"
+                  class="action-button-circle"
+                  @click="handleRestore(row.rowData as ProcedureDTO)"
+                >
+                  <i class="va-icon material-icons">restore</i>
+                </VaButton>
+              </template>
+            </div>
+          </template>
+        </VaDataTable>
+
+        <div class="table-footer">
+          <div v-if="procedureList.length > 0 && procedureListResponse" class="footer-content">
+            <div class="records-info">
+              <b>{{ procedureListResponse.totalCount }} {{ t('common.result') }}</b>
+              <span class="page-size-selector">
+                {{ t('common.resultPerPage') }}
+                <VaSelect v-model="filterData.pageSize" class="page-size-select" :options="[10, 50, 100]" />
+              </span>
+            </div>
+            <div v-if="procedureListResponse && procedureListResponse.totalPages > 1" class="pagination-container">
+              <VaPagination
+                v-model="procedureListResponse.currentPage"
+                buttons-preset="primary"
+                :pages="procedureListResponse.totalPages"
+                :visible-pages="5"
+                :boundary-links="true"
+                :direction-links="true"
+              />
+            </div>
+          </div>
+        </div>
+      </VaCardContent>
+    </VaCard>
+
+    <VaModal v-model="showCreateModal" title="Create New Procedure" hide-default-actions>
+      <div class="p-4">
+        <form class="flex flex-col gap-4" @submit.prevent="handleCreate">
+          <VaInput v-model="formData.name" label="Name" required />
+          <VaTextarea v-model="formData.description" label="Description" required />
+          <VaInput v-model="formData.price" label="Price" type="number" required />
+        </form>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <VaButton color="gray" @click="showCreateModal = false">Cancel</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleCreate"> Create </VaButton>
+        </div>
+      </template>
+    </VaModal>
+
+    <VaModal v-model="showEditModal" title="Edit Procedure" hide-default-actions>
+      <div class="p-4">
+        <form class="flex flex-col gap-4" @submit.prevent="handleUpdate">
+          <VaInput v-model="formData.name" label="Name" required />
+          <VaTextarea v-model="formData.description" label="Description" required />
+          <VaInput v-model="formData.price" label="Price" type="number" required />
+        </form>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <VaButton color="gray" @click="showEditModal = false">Cancel</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate"> Update </VaButton>
+        </div>
+      </template>
+    </VaModal>
+
+    <VaModal v-model="showDeleteModal" title="Confirm Delete" hide-default-actions>
+      <div class="p-4">Are you sure you want to delete this procedure?</div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <VaButton color="gray" @click="showDeleteModal = false">Cancel</VaButton>
+          <VaButton color="danger" :loading="isDeleting" @click="handleDelete"> Delete </VaButton>
+        </div>
+      </template>
+    </VaModal>
   </div>
-
-  <VaDataTable
-    class="my-table va-table--hoverable"
-    :items="procedureList"
-    :columns="columnsWithActions"
-    hoverable
-    select-mode="multiple"
-    :disable-client-side-sorting="false"
-    :style="{
-      '--va-data-table-thead-background': 'var(--va-background-element)',
-      '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-    }"
-    sticky-header
-    no-data-html="<div class='text-center'>No procedures found</div>"
-  >
-    <template #cell(id)="{ row }">
-      <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ row.rowData.id }}</span>
-      </div>
-    </template>
-
-    <template #cell(name)="{ row }">
-      <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ row.rowData.name }}</span>
-      </div>
-    </template>
-
-    <template #cell(description)="{ row }">
-      <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ row.rowData.description }}</span>
-      </div>
-    </template>
-
-    <template #cell(price)="{ row }">
-      <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ formatPrice(row.rowData.price) }}</span>
-      </div>
-    </template>
-
-    <template #cell(createDate)="{ row }">
-      <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ formatDate(row.rowData.createDate) }}</span>
-      </div>
-    </template>
-
-    <template #cell(actions)="{ row }">
-      <div class="flex gap-2">
-        <template v-if="!showBin">
-          <VaButton small color="primary" @click="handleEdit(row.rowData as ProcedureDTO)">
-            <i class="va-icon material-icons">edit</i>
-          </VaButton>
-          <VaButton small color="danger" @click="confirmDelete(row.rowData as ProcedureDTO)">
-            <i class="va-icon material-icons">delete</i>
-          </VaButton>
-        </template>
-        <template v-else>
-          <VaButton small color="success" @click="handleRestore(row.rowData as ProcedureDTO)">
-            <i class="va-icon material-icons">restore</i>
-          </VaButton>
-        </template>
-      </div>
-    </template>
-  </VaDataTable>
-
-  <VaCardContent>
-    <div v-if="procedureListResponse" class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2">
-      <div>
-        <b>{{ procedureListResponse.totalCount }} {{ t('common.result') }}.</b>
-        {{ t('common.resultPerPage') }}
-        <VaSelect v-model="filterData.pageSize" class="!w-20" :options="[10, 50, 100]" />
-      </div>
-      <div v-if="procedureListResponse.totalPages > 1" class="flex">
-        <VaPagination
-          v-model="procedureListResponse.currentPage"
-          buttons-preset="secondary"
-          :pages="procedureListResponse.totalPages"
-          :visible-pages="5"
-          :boundary-links="true"
-          :direction-links="true"
-        />
-      </div>
-    </div>
-  </VaCardContent>
-
-  <VaModal v-model="showCreateModal" title="Create New Procedure" hide-default-actions>
-    <div class="p-4">
-      <form class="flex flex-col gap-4" @submit.prevent="handleCreate">
-        <VaInput v-model="formData.name" label="Name" required />
-        <VaTextarea v-model="formData.description" label="Description" required />
-        <VaInput v-model="formData.price" label="Price" type="number" required />
-      </form>
-    </div>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <VaButton color="gray" @click="showCreateModal = false">Cancel</VaButton>
-        <VaButton color="primary" :loading="isSubmitting" @click="handleCreate"> Create </VaButton>
-      </div>
-    </template>
-  </VaModal>
-
-  <VaModal v-model="showEditModal" title="Edit Procedure" hide-default-actions>
-    <div class="p-4">
-      <form class="flex flex-col gap-4" @submit.prevent="handleUpdate">
-        <VaInput v-model="formData.name" label="Name" required />
-        <VaTextarea v-model="formData.description" label="Description" required />
-        <VaInput v-model="formData.price" label="Price" type="number" required />
-      </form>
-    </div>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <VaButton color="gray" @click="showEditModal = false">Cancel</VaButton>
-        <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate"> Update </VaButton>
-      </div>
-    </template>
-  </VaModal>
-
-  <VaModal v-model="showDeleteModal" title="Confirm Delete" hide-default-actions>
-    <div class="p-4">Are you sure you want to delete this procedure?</div>
-    <template #footer>
-      <div class="flex justify-end gap-2">
-        <VaButton color="gray" @click="showDeleteModal = false">Cancel</VaButton>
-        <VaButton color="danger" :loading="isDeleting" @click="handleDelete"> Delete </VaButton>
-      </div>
-    </template>
-  </VaModal>
 </template>
 
 <script lang="ts" setup>
@@ -231,11 +259,10 @@ const formatDate = (date: Date) => {
 }
 
 const columns = computed(() => [
-  { key: 'id', label: t('procedure.id') },
   { key: 'name', label: t('procedure.name') },
   { key: 'description', label: t('procedure.description') },
   { key: 'price', label: t('procedure.price') },
-  { key: 'createDate', label: t('procedure.createDate') },
+  { key: 'createdOn', label: t('procedure.createDate') },
 ])
 
 const columnsWithActions = computed(() => [...columns.value, { key: 'actions', label: 'Actions' }])
@@ -359,6 +386,11 @@ const resetForm = () => {
   selectedProcedure.value = null
 }
 
+const validateDate = (dateString: string): boolean => {
+  const date = new Date(dateString)
+  return !isNaN(date.getTime())
+}
+
 onMounted(async () => {
   // Check if user is Admin
   if (!authStore.musHaveRole('Admin')) {
@@ -376,7 +408,254 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.va-table-responsive {
-  overflow: auto;
+.service-management-container {
+  padding: 24px;
+  background: var(--va-background-primary);
+  min-height: 100vh;
+}
+
+.service-card {
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background: var(--va-background-secondary);
+}
+
+.card-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--va-text-primary);
+  padding: 1.5rem;
+  border-bottom: 2px solid var(--va-border-color);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title-icon {
+  color: var(--va-primary);
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.action-button {
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  height: 40px;
+  min-width: 40px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.create-button {
+  background: var(--va-primary);
+  border: none;
+  color: white;
+}
+
+.bin-button {
+  background: var(--va-background-element);
+  border: 1px solid var(--va-border-color);
+  color: var(--va-text-primary);
+}
+
+.custom-table {
+  margin-top: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.custom-table :deep(th) {
+  background-color: var(--va-background-secondary) !important;
+  color: var(--va-text-primary) !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.custom-table :deep(td) {
+  padding: 1rem;
+  color: var(--va-text-primary);
+}
+
+.custom-table :deep(tr:hover) {
+  background-color: var(--va-background-element) !important;
+}
+
+.table-footer {
+  margin-top: 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--va-border-color);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.records-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--va-text-secondary);
+}
+
+/* Modal styles */
+:deep(.va-modal) {
+  border-radius: 15px;
+  overflow: hidden;
+  background: var(--va-background-secondary);
+}
+
+:deep(.va-modal__title) {
+  font-size: 1.5rem;
+  color: var(--va-text-primary);
+  padding: 1.5rem;
+  border-bottom: 2px solid var(--va-border-color);
+}
+
+:deep(.va-modal__content) {
+  padding: 1.5rem;
+  color: var(--va-text-primary);
+}
+
+:deep(.va-modal__actions) {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--va-border-color);
+}
+
+/* Form elements */
+:deep(.va-input__content),
+:deep(.va-textarea__content),
+:deep(.va-select__content) {
+  background: var(--va-background-element) !important;
+  color: var(--va-text-primary) !important;
+}
+
+:deep(.va-input__label),
+:deep(.va-textarea__label),
+:deep(.va-select__label) {
+  color: var(--va-text-secondary) !important;
+}
+
+/* Pagination */
+.pagination-container :deep(.va-pagination) {
+  background: var(--va-background-secondary);
+}
+
+.pagination-container :deep(.va-pagination__item) {
+  color: var(--va-text-primary);
+}
+
+.pagination-container :deep(.va-pagination__item--active) {
+  background: var(--va-primary);
+  color: white;
+}
+
+/* Add transition for smooth theme switching */
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Price and date formatting */
+.price-value {
+  color: var(--va-success);
+}
+
+.date-value {
+  color: var(--va-text-secondary);
+}
+
+/* Status indicators */
+.status-active {
+  color: var(--va-success);
+}
+
+.status-inactive {
+  color: var(--va-danger);
+}
+
+.action-button-circle {
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.action-button-circle i {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* View button */
+.action-button-circle[color='primary'] {
+  background: linear-gradient(135deg, #0396ff 0%, #42b0ff 100%);
+  border: none;
+  box-shadow: 0 2px 10px rgba(3, 150, 255, 0.2);
+}
+
+.action-button-circle[color='primary']:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(3, 150, 255, 0.4);
+  background: linear-gradient(135deg, #42b0ff 0%, #0396ff 100%);
+}
+
+/* Delete button */
+.action-button-circle[color='danger'] {
+  background: linear-gradient(135deg, #ff9a9e 0%, #ff5252 100%);
+  border: none;
+  box-shadow: 0 2px 10px rgba(255, 82, 82, 0.2);
+}
+
+.action-button-circle[color='danger']:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 82, 82, 0.4);
+  background: linear-gradient(135deg, #ff5252 0%, #ff9a9e 100%);
+}
+
+/* Restore button */
+.action-button-circle[color='success'] {
+  background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);
+  border: none;
+  box-shadow: 0 2px 10px rgba(72, 198, 239, 0.2);
+}
+
+.action-button-circle[color='success']:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(72, 198, 239, 0.4);
+  background: linear-gradient(135deg, #6f86d6 0%, #48c6ef 100%);
+}
+
+.action-button-circle:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 </style>

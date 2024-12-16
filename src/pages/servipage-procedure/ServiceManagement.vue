@@ -67,6 +67,12 @@
             </div>
           </template>
 
+          <template #cell(typeName)="{ row }">
+            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+              <span class="w-24">{{ row.rowData.typeName }}</span>
+            </div>
+          </template>
+
           <template #cell(totalPrice)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
               <span class="w-24">{{ formatPrice(row.rowData.totalPrice) }}</span>
@@ -167,7 +173,7 @@
 
       <div class="px-4 py-2">
         <p>{{ t('service.deleteConfirmMessage') }}</p>
-        <p class="font-bold mt-2">{{ selectedService?.serviceName }}</p>
+        <p class="font-bold mt-2">{{ selectedService?.name }}</p>
       </div>
 
       <template #footer>
@@ -188,6 +194,14 @@
           <VaInput v-model="formData.name" label="Service Name" required />
           <VaTextarea v-model="formData.description" label="Description" required />
           <VaCheckbox v-model="formData.isModify" label="Is Modifiable" />
+          <VaSelect
+            v-model="selectedTypeID"
+            label="Type Service"
+            :options="typeServices"
+            text-by="typeName"
+            value-by="id"
+            placeholder="Choose a service type"
+          />
         </form>
       </div>
       <template #footer>
@@ -220,10 +234,11 @@ import { useServiceStore } from '@/stores/modules/service.module'
 import { useRouter } from 'vue-router'
 import { onMounted, Ref, ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { ListServicePagination, ServiceDTO } from './types'
+import type { ListServicePagination, ServiceDTO, TypeService } from './types'
 import { VaButton } from 'vuestic-ui'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
+import { getErrorMessage } from '@/services/utils'
 
 const { t } = useI18n()
 const { init } = useToast()
@@ -239,6 +254,7 @@ const formData = reactive({
   name: '',
   description: '',
   isModify: true,
+  typeID: '',
 })
 
 const serviceListResponse: Ref<ListServicePagination | null> = ref(null)
@@ -276,7 +292,14 @@ const getAllServicesPagination = async () => {
         })
 
     serviceListResponse.value = {
-      data: res.data || [],
+      data:
+        res.data.map((service) => ({
+          ...service,
+          id: service.serviceID,
+          serviceName: service.name,
+          serviceDescription: service.description,
+          typeServiceID: service.typeServiceID || '',
+        })) || [],
       currentPage: res.currentPage || 1,
       totalPages: res.totalPages || Math.ceil((res.data?.length || 0) / formData.pageSize),
       totalCount: res.totalCount || res.data?.length || 0,
@@ -285,7 +308,14 @@ const getAllServicesPagination = async () => {
       hasNextPage: res.hasNextPage || false,
     }
 
-    serviceList.value = res.data || []
+    serviceList.value =
+      res.data.map((service) => ({
+        ...service,
+        id: service.serviceID,
+        serviceName: service.name,
+        serviceDescription: service.description,
+        typeServiceID: service.typeServiceID || '',
+      })) || []
 
     console.log('Processed Response:', {
       isRecycleBin: showBin.value,
@@ -294,6 +324,8 @@ const getAllServicesPagination = async () => {
       totalPages: serviceListResponse.value.totalPages,
       currentPage: serviceListResponse.value.currentPage,
     })
+
+    console.log('API Response:', res)
   } catch (error) {
     console.error('Error fetching services:', error)
     serviceListResponse.value = null
@@ -316,6 +348,7 @@ const columns = computed(() => {
   const baseColumns = [
     { key: 'serviceName', label: t('service.name') },
     { key: 'serviceDescription', label: t('service.description') },
+    { key: 'typeName', label: t('service.type') },
     { key: 'totalPrice', label: t('service.price') },
   ]
 
@@ -342,7 +375,7 @@ const handleDelete = async () => {
 
   try {
     isDeleting.value = true
-    await serviceStore.deleteService(selectedService.value.id)
+    await serviceStore.deleteService(selectedService.value.serviceID)
 
     init({
       message: t('service.deleteSuccess'),
@@ -363,14 +396,46 @@ const handleDelete = async () => {
   }
 }
 
+const typeServices = ref<TypeService[]>([])
+const selectedTypeID = ref('')
+
+const handleGetServiceTypes = async () => {
+  try {
+    const response = await serviceStore.getServiceTypes()
+    typeServices.value = response.data
+    console.log('Fetched Type Services:', typeServices.value)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    init({
+      title: 'Error',
+      message: message,
+      color: 'danger',
+    })
+  }
+}
+
 const handleCreate = async () => {
   try {
     isSubmitting.value = true
+
+    // Log the data being sent to the createService method
+    console.log('Creating service with data:', {
+      name: formData.name,
+      description: formData.description,
+      isModify: formData.isModify,
+      typeID: selectedTypeID.value, // Log the selected type ID
+    })
+
+    // Log the selected type ID
+    console.log('Selected Type ID:', selectedTypeID.value)
+
     await serviceStore.createService({
       name: formData.name,
       description: formData.description,
       isModify: formData.isModify,
+      typeID: selectedTypeID.value,
     })
+
     init({
       message: t('service.createSuccess'),
       color: 'success',
@@ -380,6 +445,7 @@ const handleCreate = async () => {
     resetForm()
     getAllServicesPagination()
   } catch (error) {
+    console.error('Error creating service:', error) // Log the error if it occurs
     init({
       message: t('service.createError'),
       color: 'danger',
@@ -401,7 +467,7 @@ const handleUpdate = async () => {
   if (!selectedService.value) return
   try {
     isSubmitting.value = true
-    await serviceStore.updateService(selectedService.value.id, {
+    await serviceStore.updateService(selectedService.value.serviceID, {
       name: formData.name,
       description: formData.description,
     })
@@ -426,7 +492,7 @@ const handleUpdate = async () => {
 
 const handleRestore = async (service: ServiceDTO) => {
   try {
-    await serviceStore.restoreService(service.id)
+    await serviceStore.restoreService(service.serviceID)
     init({
       message: t('service.restoreSuccess'),
       color: 'success',
@@ -460,6 +526,7 @@ const resetForm = () => {
   formData.name = ''
   formData.description = ''
   formData.isModify = true
+  formData.typeID = ''
 
   selectedService.value = null
 }
@@ -469,7 +536,7 @@ const handleToggleStatus = async (service: ServiceDTO) => {
     isToggling.value = true
 
     await serviceStore.toggleServiceStatus({
-      id: service.id,
+      id: service.serviceID,
       activate: !service.isActive,
     })
 
@@ -523,33 +590,28 @@ onMounted(async () => {
   }
 
   await getAllServicesPagination()
+  await handleGetServiceTypes() // Gọi hàm khi component được mount
 })
 </script>
-
 <style scoped>
 .service-management-container {
-  padding: 2rem;
-  background: linear-gradient(to bottom right, #f8f9fa 0%, #e9ecef 100%);
+  padding: 24px;
+  background: var(--va-background-primary);
   min-height: 100vh;
 }
 
 .service-card {
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  background: white;
-  transition: transform 0.3s ease;
-}
-
-.service-card:hover {
-  transform: translateY(-5px);
+  background: var(--va-background-secondary);
 }
 
 .card-title {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--va-text-primary);
   padding: 1.5rem;
-  border-bottom: 2px solid #edf2f7;
+  border-bottom: 2px solid var(--va-border-color);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -557,7 +619,6 @@ onMounted(async () => {
 
 .title-icon {
   color: var(--va-primary);
-  font-size: 1.5rem;
 }
 
 .header-actions {
@@ -581,6 +642,8 @@ onMounted(async () => {
 .button-group {
   display: flex;
   gap: 0.75rem;
+  align-items: center;
+  margin-left: auto;
 }
 
 .action-button {
@@ -651,26 +714,29 @@ onMounted(async () => {
 }
 
 .custom-table :deep(th) {
-  background-color: #f8fafc !important;
+  background-color: var(--va-background-secondary) !important;
   font-weight: 600;
   text-transform: uppercase;
   font-size: 0.85rem;
   letter-spacing: 0.5px;
   padding: 1rem;
+  text-align: center;
+  color: var(--va-text-primary) !important;
 }
 
 .custom-table :deep(td) {
   padding: 1rem;
+  color: var(--va-text-primary);
 }
 
 .custom-table :deep(tr:hover) {
-  background-color: #f1f5f9 !important;
+  background-color: var(--va-background-element) !important;
 }
 
 .table-footer {
   margin-top: 1.5rem;
   padding: 1rem 0;
-  border-top: 1px solid #edf2f7;
+  border-top: 1px solid var(--va-border-color);
 }
 
 .footer-content {
@@ -685,7 +751,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: #64748b;
+  color: var(--va-text-secondary);
 }
 
 .page-size-selector {
@@ -707,13 +773,14 @@ onMounted(async () => {
 :deep(.va-modal) {
   border-radius: 15px;
   overflow: hidden;
+  background: var(--va-background-secondary);
 }
 
 :deep(.va-modal__title) {
   font-size: 1.5rem;
-  color: #2c3e50;
+  color: var(--va-text-primary);
   padding: 1.5rem;
-  border-bottom: 2px solid #edf2f7;
+  border-bottom: 2px solid var(--va-border-color);
 }
 
 :deep(.va-modal__content) {
@@ -722,7 +789,7 @@ onMounted(async () => {
 
 :deep(.va-modal__actions) {
   padding: 1rem 1.5rem;
-  border-top: 1px solid #edf2f7;
+  border-top: 1px solid var(--va-border-color);
 }
 
 /* Button styles in table */
@@ -740,8 +807,7 @@ onMounted(async () => {
 
 .action-buttons {
   display: flex;
-  gap: 0.5rem;
-  justify-content: center;
+  gap: 0.25rem;
 }
 
 .action-button-circle {
@@ -753,11 +819,17 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--va-background-element);
+  color: var(--va-text-primary);
 }
 
 .action-button-circle i {
   font-size: 1.2rem;
   margin: 0;
+}
+
+.action-button-circle:hover {
+  background: var(--va-background-secondary);
 }
 
 /* View button */
@@ -822,5 +894,110 @@ onMounted(async () => {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+}
+
+/* Update existing styles to use CSS variables */
+.stat-card {
+  background: var(--va-background-secondary);
+  border-radius: 20px;
+  padding: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  box-shadow: var(--va-box-shadow);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-value {
+  color: var(--va-text-primary);
+}
+
+.stat-label {
+  color: var(--va-text-secondary);
+}
+
+.subtitle {
+  color: var(--va-text-secondary);
+}
+
+.custom-table :deep(th) {
+  background-color: var(--va-background-secondary) !important;
+  color: var(--va-text-primary) !important;
+}
+
+.custom-table :deep(td) {
+  color: var(--va-text-primary);
+}
+
+.custom-table :deep(tr:hover) {
+  background-color: var(--va-background-element) !important;
+}
+
+.description-text {
+  color: var(--va-text-secondary);
+}
+
+.description-text:hover {
+  color: var(--va-text-primary);
+}
+
+/* Update scrollbar colors */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--va-background-secondary);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--va-primary);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--va-primary-dark);
+}
+
+/* Update modal styles */
+:deep(.va-modal) {
+  background: var(--va-background-secondary);
+}
+
+:deep(.va-modal__title) {
+  color: var(--va-text-primary);
+  border-bottom: 2px solid var(--va-border-color);
+}
+
+/* Update form elements */
+:deep(.va-input__content) {
+  background: var(--va-background-element) !important;
+  color: var(--va-text-primary) !important;
+}
+
+:deep(.va-select__content) {
+  background: var(--va-background-element) !important;
+  color: var(--va-text-primary) !important;
+}
+
+/* Update action buttons */
+.action-button-circle {
+  background: var(--va-background-element);
+  color: var(--va-text-primary);
+}
+
+.action-button-circle:hover {
+  background: var(--va-background-secondary);
+}
+
+/* Update status colors */
+.status-active {
+  color: var(--va-success);
+}
+
+.status-inactive {
+  color: var(--va-danger);
+}
+
+/* Add transition for smooth theme switching */
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 </style>
