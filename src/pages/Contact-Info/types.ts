@@ -2,10 +2,14 @@ export interface ContactInfo {
   staffId: string | null
   staffName: string | null
   contactId: string
+  createDate: string
   title: string
   email: string
   phone: string
   content: string
+  emailContext: string
+  imageUrl: string[]
+  status: number
 }
 
 export interface AdvancedSearch {

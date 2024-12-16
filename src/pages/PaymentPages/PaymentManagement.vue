@@ -1,131 +1,140 @@
 <template>
-  <div class="flex justify-between mb-4">
-    <div class="flex gap-2">
-      <VaInput v-model="searchKeyword" placeholder="Search..." @keyup.enter="handleSearch">
-        <template #appendInner>
-          <i class="va-icon material-icons">search</i>
-        </template>
-      </VaInput>
+  <div class="payment-management-container">
+    <VaCard class="payment-card">
+      <VaCardTitle class="card-title">
+        <i class="fas fa-money-bill-wave title-icon"></i>
+        Payment Management
+      </VaCardTitle>
 
-      <div class="date-range-picker flex items-center gap-2 p-2 border rounded">
-        <VaInput
-          v-model="startDate"
-          type="date"
-          :max="maxDate"
-          class="date-input"
-          placeholder="Start Date"
-          @update:modelValue="handleDateChange"
-        />
-        <span class="mx-2">-</span>
-        <VaInput
-          v-model="endDate"
-          type="date"
-          :min="startDate"
-          :max="maxDate"
-          class="date-input"
-          placeholder="End Date"
-          @update:modelValue="handleDateChange"
-        />
-      </div>
-    </div>
+      <VaCardContent>
+        <div class="flex justify-between mb-4">
+          <div class="flex gap-2">
+            <VaInput v-model="searchKeyword" placeholder="Search..." @keyup.enter="handleSearch">
+              <template #appendInner>
+                <i class="va-icon material-icons">search</i>
+              </template>
+            </VaInput>
+
+            <div class="date-range-picker flex items-center gap-2 p-2 border rounded">
+              <VaInput
+                v-model="startDate"
+                type="date"
+                :max="maxDate"
+                class="date-input"
+                placeholder="Start Date"
+                @update:modelValue="handleDateChange"
+              />
+              <span class="mx-2">-</span>
+              <VaInput
+                v-model="endDate"
+                type="date"
+                :min="startDate"
+                :max="maxDate"
+                class="date-input"
+                placeholder="End Date"
+                @update:modelValue="handleDateChange"
+              />
+            </div>
+          </div>
+        </div>
+
+        <VaDataTable
+          class="my-table va-table--hoverable"
+          :items="paymentList"
+          :columns="columns"
+          hoverable
+          :loading="isLoading"
+          sticky-header
+          no-data-html="<div class='text-center'>No payments found</div>"
+        >
+          <template #cell(patientCode)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ row.rowData.patientCode }}</span>
+            </div>
+          </template>
+
+          <template #cell(patientName)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ row.rowData.patientName }}</span>
+            </div>
+          </template>
+
+          <template #cell(serviceName)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ row.rowData.serviceName }}</span>
+            </div>
+          </template>
+
+          <template #cell(depositAmount)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ formatPrice(row.rowData.depositAmount) }}</span>
+            </div>
+          </template>
+
+          <template #cell(depositDate)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(row.rowData.depositDate) }}</span>
+            </div>
+          </template>
+
+          <template #cell(remainingAmount)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ formatPrice(row.rowData.remainingAmount) }}</span>
+            </div>
+          </template>
+
+          <template #cell(totalAmount)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ formatPrice(row.rowData.totalAmount) }}</span>
+            </div>
+          </template>
+
+          <template #cell(method)="{ row }">
+            <div class="flex items-center gap-2">
+              <span>{{ getPaymentMethod(row.rowData.method) }}</span>
+            </div>
+          </template>
+
+          <template #cell(status)="{ row }">
+            <div class="flex items-center gap-2">
+              <span :class="getStatusClass(row.rowData.status)">
+                {{ getStatusText(row.rowData.status) }}
+              </span>
+            </div>
+          </template>
+        </VaDataTable>
+
+        <VaCardContent>
+          <div
+            v-if="paymentList.length > 0"
+            class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2"
+          >
+            <div>
+              <b>{{ paymentListResponse?.totalCount ?? 0 }} {{ t('common.result') }}.</b>
+              {{ t('common.resultPerPage') }}
+              <VaSelect
+                v-model="formData.pageSize"
+                class="!w-20"
+                :options="[10, 50, 100]"
+                @update:modelValue="handlePageSizeChange"
+              />
+            </div>
+            <div v-if="totalPages > 1" class="flex">
+              <VaPagination
+                v-model="currentPage"
+                buttons-preset="secondary"
+                :pages="totalPages"
+                :visible-pages="5"
+                :boundary-links="true"
+                :direction-links="true"
+                @update:modelValue="handlePageChange"
+              />
+            </div>
+          </div>
+        </VaCardContent>
+      </VaCardContent>
+    </VaCard>
   </div>
-
-  <VaDataTable
-    class="my-table va-table--hoverable"
-    :items="paymentList"
-    :columns="columns"
-    hoverable
-    :loading="isLoading"
-    :disable-client-side-sorting="false"
-    :style="{
-      '--va-data-table-thead-background': 'var(--va-background-element)',
-      '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-    }"
-    sticky-header
-    no-data-html="<div class='text-center'>No payments found</div>"
-  >
-    <template #cell(patientCode)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ row.rowData.patientCode }}</span>
-      </div>
-    </template>
-
-    <template #cell(patientName)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ row.rowData.patientName }}</span>
-      </div>
-    </template>
-
-    <template #cell(serviceName)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ row.rowData.serviceName }}</span>
-      </div>
-    </template>
-
-    <template #cell(depositAmount)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ formatPrice(row.rowData.depositAmount) }}</span>
-      </div>
-    </template>
-
-    <template #cell(depositDate)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(row.rowData.depositDate) }}</span>
-      </div>
-    </template>
-
-    <template #cell(remainingAmount)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ formatPrice(row.rowData.remainingAmount) }}</span>
-      </div>
-    </template>
-
-    <template #cell(totalAmount)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ formatPrice(row.rowData.totalAmount) }}</span>
-      </div>
-    </template>
-
-    <template #cell(method)="{ row }">
-      <div class="flex items-center gap-2">
-        <span>{{ getPaymentMethod(row.rowData.method) }}</span>
-      </div>
-    </template>
-
-    <template #cell(status)="{ row }">
-      <div class="flex items-center gap-2">
-        <span :class="getStatusClass(row.rowData.status)">
-          {{ getStatusText(row.rowData.status) }}
-        </span>
-      </div>
-    </template>
-  </VaDataTable>
-
-  <VaCardContent>
-    <div v-if="paymentList.length > 0" class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2">
-      <div>
-        <b>{{ paymentListResponse?.totalCount ?? 0 }} {{ t('common.result') }}.</b>
-        {{ t('common.resultPerPage') }}
-        <VaSelect
-          v-model="formData.pageSize"
-          class="!w-20"
-          :options="[10, 50, 100]"
-          @update:modelValue="handlePageSizeChange"
-        />
-      </div>
-      <div v-if="totalPages > 1" class="flex">
-        <VaPagination
-          v-model="currentPage"
-          buttons-preset="secondary"
-          :pages="totalPages"
-          :visible-pages="5"
-          :boundary-links="true"
-          :direction-links="true"
-          @update:modelValue="handlePageChange"
-        />
-      </div>
-    </div>
-  </VaCardContent>
 </template>
 
 <script lang="ts" setup>
@@ -193,13 +202,6 @@ const getAllPaymentsPagination = async () => {
 
     paymentListResponse.value = res
     paymentList.value = res.data
-
-    console.log('Processed Response:', {
-      data: paymentList.value,
-      totalCount: res.totalCount,
-      totalPages: res.totalPages,
-      currentPage: res.currentPage,
-    })
   } catch (error) {
     console.error('Error fetching payments:', error)
     paymentListResponse.value = null
@@ -313,7 +315,6 @@ watch(
   () => paymentStore.paymentList,
   (newValue) => {
     console.log('Payment store updated:', newValue)
-    console.log('Computed paymentList:', paymentList.value)
   },
   { deep: true },
 )
@@ -347,49 +348,28 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.payment-management-container {
+  padding: 24px;
+}
+
+.payment-card {
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.card-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--va-text-primary);
+  padding: 1.5rem;
+  border-bottom: 2px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .va-table-responsive {
   overflow: auto;
-}
-
-.flex {
-  display: flex;
-}
-
-.gap-2 {
-  gap: 0.5rem;
-}
-
-.justify-end {
-  justify-content: flex-end;
-}
-
-.date-range-picker {
-  background-color: var(--va-background-element);
-  border-color: var(--va-background-border);
-}
-
-.date-input {
-  width: 140px;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.border {
-  border-width: 1px;
-}
-
-.rounded {
-  border-radius: 0.25rem;
-}
-
-.mx-2 {
-  margin-left: 0.5rem;
-  margin-right: 0.5rem;
-}
-
-.p-2 {
-  padding: 0.5rem;
 }
 </style>

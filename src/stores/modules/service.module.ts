@@ -13,6 +13,7 @@ import type {
   ToggleServiceStatusRequest,
   // ToggleServiceStatusResponse,
   ListDeletedServicePagination,
+  TypeService,
 } from '@/pages/servipage-procedure/types'
 import serviceService from '@/services/service.service'
 // import axios from 'axios'
@@ -25,6 +26,7 @@ export const useServiceStore = defineStore('service', {
     serviceDetail: null as ServiceDTO | null,
     services: [],
     isLoading: false,
+    typeServices: [] as TypeService[],
   }),
 
   actions: {
@@ -123,15 +125,17 @@ export const useServiceStore = defineStore('service', {
         }
 
         const serviceData = response.data as ServiceDetailResponse
-
+        console.log('Service Data:', serviceData)
         this.serviceDetail = {
-          id: serviceData.serviceID,
-          serviceName: serviceData.name,
-          serviceDescription: serviceData.description,
+          serviceID: serviceData.serviceID,
+          name: serviceData.name,
+          description: serviceData.description,
           totalPrice: serviceData.totalPrice,
           isActive: serviceData.isActive,
           createBy: serviceData.createBy,
-          createDate: serviceData.createDate,
+          createdOn: serviceData.createdOn,
+          typeServiceID: serviceData.typeServiceID,
+          typeName: serviceData.typeName,
         }
 
         const mappedProcedures = serviceData.procedures.map((proc) => ({
@@ -142,7 +146,7 @@ export const useServiceStore = defineStore('service', {
             description: proc.description,
             price: proc.price,
             createBy: proc.createBy,
-            createDate: new Date(proc.createDate),
+            createdOn: new Date(proc.createdOn),
             isRemove: proc.isRemove,
           },
         }))
@@ -250,7 +254,7 @@ export const useServiceStore = defineStore('service', {
       }
     },
 
-    async createService(data: { name: string; description: string; isModify: boolean }) {
+    async createService(data: { name: string; description: string; isModify: boolean; typeID: string }): Promise<any> {
       try {
         this.isLoading = true
         console.log('Store - CreateService called with data:', data)
@@ -307,6 +311,18 @@ export const useServiceStore = defineStore('service', {
           return Promise.reject(error)
         })
     },
+    async getServiceTypes() {
+      try {
+        const response = await serviceService.getServiceTypes()
+        this.typeServices = response.data
+        console.log('Fetched Type Services:', this.typeServices)
+        return response
+      } catch (error) {
+        console.error('Error fetching service types:', error)
+        throw error
+      }
+    },
+
     async getServiceType(data: any): Promise<any> {
       return serviceService
         .getServiceType(data)

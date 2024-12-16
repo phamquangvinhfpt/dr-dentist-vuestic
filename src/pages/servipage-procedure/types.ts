@@ -13,14 +13,15 @@ export interface FilterProcedure {
 }
 
 export interface ServiceDTO {
-  id: string
-  serviceName: string
-  serviceDescription: string
-  // isActive: boolean
+  serviceID: string
+  name: string
+  description: string
   totalPrice: number
   isActive: boolean
   createBy: string
-  createDate: string
+  createdOn: string
+  typeServiceID: string
+  typeName: string
 }
 
 export interface ProcedureDTO {
@@ -29,7 +30,7 @@ export interface ProcedureDTO {
   description: string
   price: number
   createBy?: string
-  createDate: Date
+  createdOn: Date
   isRemove: boolean
 }
 
@@ -57,7 +58,7 @@ export interface ServiceProcedureDTO {
   id: string
   serviceId: string
   procedureId: string
-  createDate: string
+  createdOn: string
   createBy: string
 }
 
@@ -71,9 +72,11 @@ export interface ServiceDetailResponse {
   name: string
   description: string
   createBy: string
-  createDate: string
+  createdOn: string
   isActive: boolean
   totalPrice: number
+  typeServiceID: string
+  typeName: string
   procedures: ProcedureResponse[]
 }
 
@@ -83,7 +86,7 @@ export interface ProcedureResponse {
   description: string
   price: number
   createBy: string
-  createDate: string
+  createdOn: string
   isRemove: boolean
 }
 
@@ -97,6 +100,7 @@ export interface CreateServiceRequest {
   name: string
   description: string
   isModify: boolean
+  typeID: string
 }
 
 export interface UpdateServiceRequest {
@@ -110,15 +114,17 @@ export interface ToggleServiceStatusRequest {
 }
 
 export interface DeletedServiceDTO {
-  id: string
-  serviceName: string
-  serviceDescription: string
+  serviceID: string
+  name: string
+  description: string
   totalPrice: number
   isActive: boolean
   createBy: string
-  createDate: string
+  createdOn: string
   deletedOn: string
   deletedBy: string
+  typeServiceID: string
+  typeName: string
 }
 
 export interface ListDeletedServicePagination {
@@ -129,4 +135,9 @@ export interface ListDeletedServicePagination {
   pageSize: number
   hasPreviousPage: boolean
   hasNextPage: boolean
+}
+
+export type TypeService = {
+  id: string
+  typeName: string
 }

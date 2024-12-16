@@ -123,6 +123,45 @@ class ContactStaffService {
       throw error
     }
   }
+
+  async updateCallImage(contactId: string, files: File[]): Promise<any> {
+    try {
+      console.log('Raw contactId:', contactId)
+      console.log('Raw files count:', files.length)
+
+      const formData = new FormData()
+      formData.append('ContactID', contactId)
+
+      files.forEach((file) => {
+        formData.append('Images', file)
+      })
+
+      console.log('Sending FormData with:', {
+        ContactID: contactId,
+        filesCount: files.length,
+        fileNames: files.map((f) => f.name),
+      })
+
+      const response = await apiService.post('/customercontact/call/image', formData)
+      return response.data
+    } catch (error) {
+      console.error('Error in updateCallImage:', error)
+      throw error
+    }
+  }
+
+  async sendEmail(contactId: string, emailContext: string): Promise<any> {
+    try {
+      const response = await apiService.post('/customercontact/send/email', {
+        contactID: contactId,
+        emailContext: emailContext,
+      })
+      return response.data
+    } catch (error) {
+      console.error('Error in sendEmail:', error)
+      throw error
+    }
+  }
 }
 
 export default new ContactStaffService()

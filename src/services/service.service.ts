@@ -217,6 +217,19 @@ class ServiceService {
       })
   }
 
+  async getServiceTypes(): Promise<any> {
+    return apiService
+      .post('/service/type', {})
+      .then((response) => {
+        console.log('Service Type Response:', response.data)
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        console.error('Error fetching service types:', error)
+        return Promise.reject(error)
+      })
+  }
+
   async getServiceType(data: any): Promise<any> {
     return apiService
       .post('/service/type', data)
@@ -228,5 +241,4 @@ class ServiceService {
       })
   }
 }
-
 export default new ServiceService()

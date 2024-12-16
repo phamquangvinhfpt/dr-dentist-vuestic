@@ -233,6 +233,30 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
+        name: 'form-application',
+        path: 'form-application',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Form-Application/ApplicationForm.vue'),
+      },
+      {
+        name: 'form-management',
+        path: 'form-management',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Form-Application/FormManagement.vue'),
+      },
+      {
+        name: 'form-for-dentist',
+        path: 'form-for-dentist',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Form-Application/FormForDentist.vue'),
+      },
+      {
         name: 'medical-record-for-patient',
         path: 'medical-record-for-patient',
         meta: {

@@ -12,14 +12,18 @@ export interface MedicalRecordDTO {
     examinationContent: string
     treatmentPlanNote: string
   }
-  diagnosis: {
+  diagnosis: Array<{
     toothNumber: number
     teethConditions: string[]
-  }
+  }>
   indication: {
     indicationType: string[]
     description: string
   }
+  indicationImages: Array<{
+    imageUrl: string
+    imageType: string
+  }>
 }
 
 export type MedicalRecordListResponse = MedicalRecordDTO[]
