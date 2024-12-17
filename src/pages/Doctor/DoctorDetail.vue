@@ -1,83 +1,75 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-indigo-50 to-white py-10 px-6 sm:px-10">
+  <VaCard class="min-h-screen bg-gradient-to-br from-indigo-50 to-white py-10 px-6 sm:px-10">
     <div class="max-w-4xl mx-auto space-y-10">
       <!-- Thông Tin Bác Sĩ -->
-      <div class="bg-white rounded-2xl shadow-lg p-8 flex items-start">
-        <img
-          :src="
-            doctor.imageUrl ||
-            'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-          "
-          alt="Hồ sơ bác sĩ"
-          class="w-32 h-32 rounded-lg object-cover shadow-md"
-        />
-        <div class="ml-6 flex-1">
-          <div class="flex items-center justify-between">
-            <h1 class="text-3xl font-bold text-gray-900">{{ doctor.firstName }} {{ doctor.lastName }}</h1>
-          </div>
-          <div class="mt-3 flex items-center">
-            <div class="flex items-center">
-              <span v-for="i in 5" :key="i" class="text-xl">
-                <span
-                  class="material-symbols-outlined"
-                  :class="i <= Math.round(doctor.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
-                >
-                  star
-                </span>
+      <VaCard class="bg-white rounded-2xl shadow-lg p-8 flex flex-col">
+        <div class="flex">
+          <img
+            :src="
+              doctor.imageUrl ||
+              'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            "
+            alt="Hồ sơ bác sĩ"
+            class="relative inline-block h-12 w-12 md:h-32 md:w-32 !rounded-full object-cover object-center"
+          />
+          <div class="ml-6 flex-1">
+            <h1 class="va-h1 text-xl md:text-3xl font-bold">{{ doctor.firstName }} {{ doctor.lastName }}</h1>
+            <span v-for="i in 5" :key="i" class="text-sm md:text-xl">
+              <span
+                class="material-symbols-outlined"
+                :class="i <= Math.round(doctor.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
+              >
+                star
               </span>
-            </div>
-            <span class="ml-3 text-sm text-gray-500">({{ doctor.totalFeedback }} đánh giá)</span>
+            </span>
+            <span class="ml-2 text-[10px] md:text-sm text-gray-500">({{ doctor.totalFeedback }} đánh giá)</span>
+            <p><MailIcon class="h-5 w-5 mr-2 text-indigo-600" /> {{ doctor.email }}</p>
+            <p><PhoneIcon class="h-5 w-5 mr-2 text-indigo-600" /> {{ doctor.phoneNumber }}</p>
           </div>
-          <div class="mt-5 space-y-2">
-            <p class="flex items-center text-gray-700">
-              <MailIcon class="h-5 w-5 mr-2 text-indigo-600" /> {{ doctor.email }}
-            </p>
-            <p class="flex items-center text-gray-700">
-              <PhoneIcon class="h-5 w-5 mr-2 text-indigo-600" /> {{ doctor.phoneNumber }}
-            </p>
-          </div>
+        </div>
+        <div class="flex justify-end mt-4">
           <button
-            class="mt-6 w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition"
+            class="w-fit bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition"
             @click="bookAppointment"
           >
             Đặt Lịch Ngay
           </button>
         </div>
-      </div>
+      </VaCard>
 
       <!-- Thông Tin Chuyên Môn -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Thông Tin Chuyên Môn</h2>
+      <VaCard class="bg-white rounded-2xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold mb-6">Thông Tin Chuyên Môn</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <h3 class="text-sm text-gray-500">Học Vấn:</h3>
-            <p class="text-gray-800 font-medium">{{ doctor.doctorProfile.education }}</p>
-            <p class="text-gray-800">{{ doctor.doctorProfile.college }}</p>
+            <h3 class="text-sm">Học Vấn:</h3>
+            <p class="font-medium">{{ doctor.doctorProfile.education }}</p>
+            <p class="">{{ doctor.doctorProfile.college }}</p>
           </div>
           <div>
-            <h3 class="text-sm text-gray-500">Số Năm Kinh Nghiệm:</h3>
-            <p class="text-gray-800 font-medium">{{ doctor.doctorProfile.yearOfExp }}</p>
+            <h3 class="text-sm">Số Năm Kinh Nghiệm:</h3>
+            <p class="font-medium">{{ doctor.doctorProfile.yearOfExp }}</p>
           </div>
           <div>
-            <h3 class="text-sm text-gray-500">Loại Hình Làm Việc:</h3>
-            <p class="text-gray-800 font-medium">
+            <h3 class="text-sm">Loại Hình Làm Việc:</h3>
+            <p class="font-medium">
               {{ doctor.doctorProfile.workingType === 2 ? 'Toàn Thời Gian' : 'Bán Thời Gian' }}
             </p>
           </div>
           <div>
-            <h3 class="text-sm text-gray-500">Chứng Chỉ:</h3>
-            <p class="text-gray-800 font-medium">{{ doctor.doctorProfile.certification }}</p>
+            <h3 class="text-sm">Chứng Chỉ:</h3>
+            <p class="font-medium">{{ doctor.doctorProfile.certification }}</p>
           </div>
           <div class="col-span-full">
-            <h3 class="text-sm text-gray-500">Về Tôi:</h3>
-            <p class="text-gray-800">{{ doctor.doctorProfile.seftDescription }}</p>
+            <h3 class="text-sm">Về Tôi:</h3>
+            <p class="">{{ doctor.doctorProfile.seftDescription }}</p>
           </div>
         </div>
-      </div>
+      </VaCard>
 
       <!-- Phản Hồi Từ Bệnh Nhân -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Phản Hồi Từ Bệnh Nhân</h2>
+      <VaCard class="bg-white rounded-2xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold mb-6">Phản Hồi Từ Bệnh Nhân</h2>
         <div class="space-y-6">
           <div
             v-for="review in paginatedReviews"
@@ -86,10 +78,9 @@
           >
             <div class="flex justify-between items-center">
               <div>
-                <h3 class="text-lg font-semibold text-gray-800">{{ review.patientName }}</h3>
-                <p class="text-sm text-gray-500">Dịch Vụ: {{ review.serviceName }}</p>
+                <p class="text-sm">Dịch Vụ: {{ review.serviceName }}</p>
               </div>
-              <span class="text-sm text-gray-500">{{ formatDate(review.createDate) }}</span>
+              <span class="text-sm">{{ formatDate(review.createDate) }}</span>
             </div>
             <div class="flex items-center mt-2">
               <span v-for="i in 5" :key="i" class="text-xl">
@@ -128,7 +119,7 @@
             Sau
           </button>
         </div>
-      </div>
+      </VaCard>
 
       <button
         class="w-full sm:w-auto mt-6 bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-gray-300 transition"
@@ -137,7 +128,7 @@
         Quay Về
       </button>
     </div>
-  </div>
+  </VaCard>
   <!-- Popup for editing feedback -->
   <div v-if="isEditPopupOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
@@ -167,7 +158,7 @@
         >
           Lưu
         </button>
-        <button class="text-gray-500 hover:underline" @click="isEditPopupOpen = false">Hủy</button>
+        <button class="hover:underline" @click="isEditPopupOpen = false">Hủy</button>
       </div>
     </div>
   </div>
@@ -179,6 +170,7 @@ import { useRoute } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useOnlineUsersStore } from '@/stores/online-users-store'
 import userService from '@/services/user.service'
+import { VaCard } from 'vuestic-ui'
 
 // Lấy thông tin route và store
 const route = useRoute()

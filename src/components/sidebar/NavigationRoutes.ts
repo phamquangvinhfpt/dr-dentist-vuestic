@@ -24,6 +24,20 @@ export default {
       },
     },
     {
+      name: 'services',
+      displayName: 'menu.services',
+      meta: {
+        icon: 'medical_services',
+      },
+    },
+    {
+      name: 'doctors-for-users',
+      displayName: 'menu.doctors',
+      meta: {
+        icon: 'person_pin_circle',
+      },
+    },
+    {
       name: 'appointment',
       displayName: 'menu.appointment',
       meta: {
@@ -72,6 +86,7 @@ export default {
       displayName: 'menu.working-calendar',
       meta: {
         icon: 'calendar_month',
+        roles: ['Admin', 'Staff', 'Dentist'],
       },
     },
     {

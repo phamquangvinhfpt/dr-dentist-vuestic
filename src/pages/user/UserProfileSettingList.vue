@@ -51,6 +51,7 @@ const activeOption = ref(SettingProfileOptions.General)
 const emit = defineEmits(['select-setting-option'])
 const authStore = useAuthStore()
 const isPatient = computed(() => authStore.musHaveRole('Patient'))
+const isMobile = computed(() => window.innerWidth < 768)
 
 function selectSettingOption(item: SettingProfile) {
   emit('select-setting-option', item)
@@ -100,7 +101,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="{ 'max-w-3xl container items-center p-16': isPatient }">
+  <div :class="{ 'max-w-3xl container items-center p-16': isPatient && !isMobile }">
     <VaCard class="p-2 ml-1 rounded">
       <VaTabs v-model="selectedTab" vertical grow class="mr-5">
         <template #tabs>

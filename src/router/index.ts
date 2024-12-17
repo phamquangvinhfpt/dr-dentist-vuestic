@@ -336,8 +336,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/user/Feedback.vue'),
       },
       {
-        name: 'service-for-user',
-        path: 'service-for-user',
+        name: 'services',
+        path: 'services',
         meta: {
           requiresAuth: true,
         },

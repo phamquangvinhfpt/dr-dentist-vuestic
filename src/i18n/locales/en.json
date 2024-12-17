@@ -471,7 +471,9 @@
     "working-calendar": "Working Calendar",
     "form-application": "Form Application",
     "form-management": "Form Management",
-    "form-for-dentist": "My Forms"
+    "form-for-dentist": "My Forms",
+    "services": "Service",
+    "doctors": "Doctors"
   },
   "bin": {
     "title": "Trash",

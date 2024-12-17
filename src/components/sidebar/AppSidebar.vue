@@ -115,7 +115,6 @@ const hasAccess = (route: INavigationRoute) => {
     return true
   }
 
-  // Check roles first if specified
   if (route.meta.roles) {
     const hasRole = route.meta.roles.some((role) => authStore.musHaveRole(role))
     if (!hasRole) return false

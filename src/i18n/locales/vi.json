@@ -463,7 +463,9 @@
     "working-calendar": "Lịch làm việc",
     "form-application": "Gửi Đơn",
     "form-management": "Quản lý Đơn",
-    "form-for-dentist": "Đơn của tôi"
+    "form-for-dentist": "Đơn của tôi",
+    "services": "Dịch vụ",
+    "doctors": "Bác sĩ"
   },
   "bin": {
     "title": "Thùng rác",

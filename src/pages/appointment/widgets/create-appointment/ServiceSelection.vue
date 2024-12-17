@@ -184,7 +184,7 @@ onMounted(() => {
       <!-- Accordion content -->
       <div v-show="isOpen" class="transition-all duration-200">
         <div class="p-4 border-t border-gray-200 dark:border-gray-700">
-          <div class="flex flex-row gap-4">
+          <div class="flex flex-col md:flex-row gap-4">
             <VaInput
               v-model="filters.keyword"
               placeholder="Search service"
@@ -196,7 +196,7 @@ onMounted(() => {
             />
             <VaSelect
               v-model="filters.advancedSearch.keyword"
-              class="w-2/4"
+              class="w-2/4 mb-4 self-end"
               :options="resourceType"
               text-by="label"
               value-by="value"

@@ -210,7 +210,7 @@ window.addEventListener('resize', () => {
           <a
             href="#"
             class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
-            @click="showModalServiceList = true"
+            @click="router.push({ name: 'services' })"
             >See All</a
           >
         </div>
@@ -288,7 +288,7 @@ window.addEventListener('resize', () => {
               <h3
                 class="text-sm lg:text-xl font-semibold mb-4 text-center text-blue-800 dark:text-blue-300 group-hover:text-white transition-colors duration-300"
               >
-                Phục ình
+                Phục Hình
               </h3>
               <p
                 :class="[

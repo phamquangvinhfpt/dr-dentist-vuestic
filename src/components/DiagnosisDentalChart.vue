@@ -1,6 +1,6 @@
 <template>
   <div class="dental-chart-container">
-    <DentalChart />
+    <DentalChart :is-view="true" />
 
     <div v-show="showTooltip" class="tooltip" :style="tooltipStyle">{{ tooltipContent }}</div>
 

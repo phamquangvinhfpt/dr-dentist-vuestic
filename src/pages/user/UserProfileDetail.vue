@@ -23,6 +23,7 @@ import { useUserProfileStore } from '@/stores/modules/user.module'
 
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
+import AddressAutocomplete from '../auth/AddressAutocomplete.vue'
 
 const { t } = useI18n()
 
@@ -44,6 +45,7 @@ const { init: notify } = useToast()
 const authStores = useAuthStore()
 const userProfileStore = useUserProfileStore()
 const isShowProfile = ref(false)
+const isMobile = computed(() => window.innerWidth < 768)
 const isShowDoctorProfile = ref(false)
 const isShowPatientFamily = ref(false)
 const isShowMedicalHistory = ref(false)
@@ -1150,7 +1152,7 @@ const workingTypeOptions = [
 
 <template>
   <VaInnerLoading :loading="userProfileStore?.isLoading" class="z-50">
-    <div :class="{ 'max-w-6xl mx-auto p-10': isPatient }">
+    <div :class="{ 'max-w-6xl mx-auto p-10': isPatient && !isMobile }">
       <VaCard v-if="isShowProfile" class="p-2 ml-1 rounded">
         <div class="mt-3 mb-10 flex items-center gap-5">
           <div>
@@ -1292,16 +1294,16 @@ const workingTypeOptions = [
             </VaField>
             <!--phần test thử của Tuấn -->
             <VaField>
-              <VaInput v-model="formData.job" :label="t('auth.Job')" class="mb-3" :placeholder="t('auth.enter_job')" />
-            </VaField>
-            <VaField>
               <VaInput
                 v-model="formData.address"
                 :label="t('auth.Address')"
                 class="mb-3"
-                :rules="[(v: any) => !!v || t('auth.address_required')]"
                 :placeholder="t('auth.enter_address')"
               />
+              <AddressAutocomplete :rules="[(v: any) => !!v || t('auth.address_required')]" />
+            </VaField>
+            <VaField>
+              <VaInput v-model="formData.job" :label="t('auth.Job')" class="mb-3" :placeholder="t('auth.enter_job')" />
             </VaField>
 
             <!--kết phần test thử của Tuấn -->
