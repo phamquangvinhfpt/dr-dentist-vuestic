@@ -185,15 +185,23 @@ const performBiometricLogin = async () => {
         </RouterLink>
       </div>
 
-      <div class="flex flex-col justify-center mt-4 space-y-2">
+      <div class="flex flex-row justify-center mt-4 gap-4">
         <VaButton class="w-full" @click="submit">
           {{ t('auth.login') }}
         </VaButton>
 
-        <!-- Biometric Login Button (conditionally rendered) -->
-        <VaButton v-if="isBiometricAvailable" class="w-full" color="secondary" @click="performBiometricLogin">
-          {{ t('auth.login_with_biometrics') }}
-        </VaButton>
+        <!-- Biometric Login Button (conditionally rendered) v-if="isBiometricAvailable" @click="performBiometricLogin"-->
+        <VaButton
+          v-if="isBiometricAvailable"
+          round
+          class="mr-3"
+          preset="secondary"
+          border-color="primary"
+          icon="fingerprint"
+          color="primary"
+          size="large"
+          @click="performBiometricLogin"
+        />
       </div>
     </VaForm>
   </VaInnerLoading>

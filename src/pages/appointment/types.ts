@@ -198,6 +198,7 @@ export type FollowUpStatusConfig = {
 
 export type AppointmentTypeConfig = {
   text?: string
+  textColor?: string
   bgColor?: string
 }
 
@@ -443,16 +444,19 @@ export const getAppointmentType = computed(() => (type: AppointmentType): Appoin
     case AppointmentType.Appointment:
       return {
         text: 'Appointment',
+        textColor: 'text-green-800',
         bgColor: 'bg-green-100',
       }
     case AppointmentType.FollowUp:
       return {
         text: 'FollowUp',
+        textColor: 'bg-yellow-800',
         bgColor: 'bg-yellow-100',
       }
     default:
       return {
         text: 'Unknown',
+        textColor: 'bg-yellow-800',
         bgColor: 'bg-gray-100',
       }
   }

@@ -45,16 +45,8 @@
                   <path d="M18 16.5v1.5l.5 .5" />
                 </svg>
               </div>
-              <select v-model="currentYear" class="border rounded px-3 py-1.5">
-                <option v-for="year in years" :key="year" :value="year">
-                  {{ year }}
-                </option>
-              </select>
-              <select v-model="currentMonth" class="border rounded px-3 py-1.5">
-                <option v-for="(month, index) in months" :key="month" :value="index">
-                  {{ month }}
-                </option>
-              </select>
+              <VaSelect v-model="currentYear" :options="years" class="w-[100px]" />
+              <VaSelect v-model="currentMonthValue" :options="monthTexts" class="w-[100px]" />
             </div>
           </div>
         </div>
@@ -510,6 +502,18 @@ const auth = useAuthStore()
 const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth())
+const currentMonthValue = computed({
+  get() {
+    const foundMonth = months.find((month) => month.value === currentMonth.value)
+    return foundMonth ? foundMonth.text : ''
+  },
+  set(newValue) {
+    const foundMonth = months.find((month) => month.text === newValue)
+    if (foundMonth) {
+      currentMonth.value = foundMonth.value
+    }
+  },
+})
 const current_date = new Date().toISOString().split('T')[0]
 const showAddModal = ref(false)
 const hideSwitcher = ref(false)
@@ -595,7 +599,21 @@ const props = defineProps<{
 const emit = defineEmits(['update:updateWorkingCalendar', 'update:regist'])
 
 const years = Array.from({ length: 10 }, (_, i) => currentYear.value - 3 + i)
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const months = [
+  { value: 0, text: 'January' },
+  { value: 1, text: 'February' },
+  { value: 2, text: 'March' },
+  { value: 3, text: 'April' },
+  { value: 4, text: 'May' },
+  { value: 5, text: 'June' },
+  { value: 6, text: 'July' },
+  { value: 7, text: 'August' },
+  { value: 8, text: 'September' },
+  { value: 9, text: 'October' },
+  { value: 10, text: 'November' },
+  { value: 11, text: 'December' },
+]
+const monthTexts = months.map((month) => month.text)
 const weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 
 const calendarDays = computed(() => {

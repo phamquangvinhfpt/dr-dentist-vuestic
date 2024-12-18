@@ -493,6 +493,7 @@ const handleImageUpload = (event: Event) => {
 
 const removeImage = (index: number) => {
   selectedImages.value.splice(index, 1)
+  selectedFiles.value.splice(index, 1)
 }
 
 const openImageCarousel = (index: number, images?: string[]) => {

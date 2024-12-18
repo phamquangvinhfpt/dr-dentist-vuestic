@@ -1,7 +1,7 @@
 <template>
   <VaInnerLoading :loading="loading">
-    <div class="md:h-screen grid grid-cols-1 md:flex md:flex-col">
-      <header class="border-b p-4 bg-white" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
+    <VaCard class="md:h-screen grid grid-cols-1 md:flex md:flex-col">
+      <VaCard class="border-b p-4" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
         <div class="grid md:flex items-center justify-between">
           <div class="grid grid-cols-1 md:flex md:items-center md:space-x-4 gap-4">
             <VaDateInput
@@ -12,13 +12,15 @@
               class="w-full px-3 py-1.5"
               clearable
             />
-            <div class="w-full inline-flex rounded-lg border bg-gray-50 p-1">
+            <div class="w-full inline-flex rounded-lg border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 p-1">
               <button
                 v-for="type in filteredTypes"
                 :key="type.id"
                 :class="[
                   'w-full px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
-                  isAppointment === type.id ? 'bg-white shadow' : 'hover:bg-gray-100',
+                  isAppointment === type.id
+                    ? 'dark:bg-gray-700 shadow dark:shadow-lg'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700',
                 ]"
                 @click="isAppointment = type.id"
               >
@@ -28,32 +30,37 @@
           </div>
 
           <div class="grid md:flex items-center space-x-4" :class="isMobile ? 'hidden' : ''">
-            <div v-if="!role?.includes('Patient')" class="inline-flex rounded-lg border bg-gray-50 p-1">
+            <div
+              v-if="!role?.includes('Patient')"
+              class="inline-flex rounded-lg border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 p-1"
+            >
               <button
                 v-for="view in views"
                 :key="view.id"
                 :class="[
                   'px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
-                  currentView === view.id ? 'bg-white shadow' : 'hover:bg-gray-100',
+                  currentView === view.id
+                    ? 'bg-white dark:bg-gray-700 shadow dark:shadow-lg'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700',
                 ]"
                 @click="currentView = view.id"
               >
-                <span class="material-symbols-outlined"> {{ view.label }} </span>
+                <span class="material-symbols-outlined text-gray-700 dark:text-gray-200"> {{ view.label }} </span>
               </button>
             </div>
             <button
               v-if="role?.includes('Staff') || role?.includes('Admin')"
-              class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
+              class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
               @click="openCreateAppointmentDialog"
             >
               Create Appointment
             </button>
           </div>
         </div>
-      </header>
+      </VaCard>
       <div v-if="currentView === 'calendar' && !isMobile" class="flex-1 grid grid-cols-[auto,1fr] overflow-hidden">
         <!-- Time slots -->
-        <div class="border-r bg-white w-20 overflow-hidden">
+        <VaCard class="border-r bg-white w-20 overflow-hidden">
           <div class="h-16 border-b"></div>
           <div ref="timeSlotContainer" class="h-[calc(100vh-10rem)] overflow-y-auto" @scroll="handleTimeSlotScroll">
             <div
@@ -64,26 +71,26 @@
               {{ time }}
             </div>
           </div>
-        </div>
+        </VaCard>
         <!-- Calendar grid -->
-        <div
+        <VaCard
           ref="calendarContainer"
           class="overflow-auto"
           :style="role?.includes('Dentist') ? { marginRight: `${scrollbarWidth}px` } : {}"
           @scroll="handleCalendarScroll"
         >
-          <div
+          <VaCard
             class="grid"
             :style="{
               gridTemplateColumns: `repeat(${role?.includes('Dentist') ? 7 : doctors.length}, minmax(200px, 1fr))`,
             }"
           >
             <!-- Doctor headers -->
-            <div
+            <VaCard
               v-for="doctor in doctors"
               :key="doctor.id"
               :class="{
-                'h-16 p-4 text-center border-l bg-white sticky top-0 z-10': true,
+                'h-16 p-4 text-center border-l sticky top-0 z-10': true,
                 hidden: role?.includes('Dentist'),
               }"
             >
@@ -97,13 +104,13 @@
                   ></div>
                 </div>
               </div>
-            </div>
+            </VaCard>
             <!-- WeekDays headers -->
             <div
               v-for="(day, index) in weekDays"
               :key="index"
               :class="{
-                'h-16 p-4 text-center border-l bg-white sticky top-0 z-10': true,
+                'h-16 p-4 text-center border-l sticky top-0 z-10': true,
                 hidden: !role?.includes('Dentist'),
               }"
             >
@@ -112,7 +119,7 @@
               </div>
             </div>
             <!-- Appointment slots -->
-            <div
+            <VaCard
               v-for="(column, columnIndex) in role?.includes('Dentist') ? 7 : doctors.length"
               :key="columnIndex"
               class="border-l relative"
@@ -147,7 +154,7 @@
                         role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
                       ).length === 1
                     "
-                    class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
+                    class="absolute inset-x-1 rounded shadow-md cursor-move"
                     :style="{
                       top: '2px',
                       height: 'calc(100% - 4px)',
@@ -198,6 +205,12 @@
                               )[0].type,
                             ).bgColor,
                             'px-2 py-1 rounded-full inline-block',
+                            getAppointmentType(
+                              getAppointments(
+                                time,
+                                role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                              )[0].type,
+                            ).textColor,
                           ]"
                         >
                           {{
@@ -247,7 +260,7 @@
                         role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
                       ).length === 1
                     "
-                    class="absolute inset-x-1 rounded bg-white shadow-md cursor-move"
+                    class="absolute inset-x-1 rounded shadow-md cursor-move"
                     :style="{
                       top: '2px',
                       height: 'calc(100% - 4px)',
@@ -298,6 +311,12 @@
                               )[0].appointmentType,
                             ).bgColor,
                             'px-2 py-1 rounded-full inline-block',
+                            getAppointmentType(
+                              getFollowUpAppointments(
+                                time,
+                                role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
+                              )[0].appointmentType,
+                            ).textColor,
                           ]"
                         >
                           {{
@@ -341,9 +360,9 @@
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            </VaCard>
+          </VaCard>
+        </VaCard>
       </div>
       <!-- List View -->
       <div v-else class="flex-1 overflow-auto" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
@@ -523,9 +542,9 @@
         </div>
       </div>
       <!-- Appointment Details Modal -->
-      <div
+      <VaCard
         v-if="showAppointmentModal"
-        class="fixed z-50 bg-white rounded-md shadow-lg p-4"
+        class="fixed z-50 rounded-md shadow-lg p-4"
         :style="{ top: `${appointmentModalPosition.y}px`, left: `${appointmentModalPosition.x}px` }"
       >
         <h3 class="text-lg font-semibold mb-2">
@@ -551,11 +570,11 @@
             {{ getAppointmentStatusConfig(selectedAppointment.status).text }}
           </span>
         </p>
-      </div>
+      </VaCard>
       <!-- Follow-Up Appointment Details Modal -->
-      <div
+      <VaCard
         v-if="showFollowUpAppointmentModal"
-        class="fixed z-50 bg-white rounded-md shadow-lg p-4"
+        class="fixed z-50 rounded-md shadow-lg p-4"
         :style="{ top: `${followUpModalPosition.y}px`, left: `${followUpModalPosition.x}px` }"
       >
         <h3 class="text-lg font-semibold mb-2">
@@ -579,26 +598,26 @@
             {{ getFollowUpStatusConfig(selectedFollowUpAppointment.status).text }}
           </span>
         </p>
-      </div>
+      </VaCard>
       <!-- Context Menu -->
-      <div
+      <VaCard
         v-if="contextMenu.show"
         :style="{
           position: 'fixed',
           top: `${contextMenu.y}px`,
           left: `${contextMenu.x}px`,
         }"
-        class="z-50 bg-white rounded-md shadow-lg context-menu"
+        class="z-50 rounded-md shadow-lg context-menu"
       >
         <div class="py-1">
           <button
-            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            class="block w-full text-left px-4 py-2 text-sm"
             @click="showTimeSlotUnassignedModal(contextMenu.time, contextMenu.doctorId)"
           >
             Show Unassigned
           </button>
         </div>
-      </div>
+      </VaCard>
       <!-- Unassigned Bookings Dialog -->
       <TransitionRoot appear :show="showAllUnassignedModal" as="template">
         <Dialog as="div" class="relative z-10" @close="showAllUnassignedModal = false">
@@ -624,10 +643,10 @@
                 leave-from="opacity-100 scale-100"
                 leave-to="opacity-0 scale-95"
               >
-                <DialogPanel
-                  class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                <VaCard
+                  class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all"
                 >
-                  <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
+                  <DialogTitle as="h3" class="text-lg font-medium leading-6">
                     {{ selectedDate ? formatDate(selectedDate) : 'All' }} Unassigned Bookings at
                     {{ selectedTime ? `${selectedTime}` : '' }}
                   </DialogTitle>
@@ -654,7 +673,7 @@
                     </div>
                     <p v-else class="text-sm text-gray-500 text-center">No unassigned bookings.</p>
                   </div>
-                </DialogPanel>
+                </VaCard>
               </TransitionChild>
             </div>
           </div>
@@ -685,12 +704,10 @@
                 leave-from="opacity-100 scale-100"
                 leave-to="opacity-0 scale-95"
               >
-                <DialogPanel
-                  class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                <VaCard
+                  class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all"
                 >
-                  <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">
-                    Assign Booking
-                  </DialogTitle>
+                  <DialogTitle as="h3" class="text-lg font-medium leading-6"> Assign Booking </DialogTitle>
                   <form class="mt-4 space-y-4" @submit.prevent="handleAssignBooking">
                     <div class="space-y-2">
                       <label class="text-sm font-medium">Patient: {{ selectedBooking.patientName }}</label>
@@ -727,7 +744,7 @@
                       </button>
                     </div>
                   </form>
-                </DialogPanel>
+                </VaCard>
               </TransitionChild>
             </div>
           </div>
@@ -815,13 +832,13 @@
           <p>This action cannot be undone.</p>
         </VaAlert>
       </VaModal>
-    </div>
+    </VaCard>
   </VaInnerLoading>
 </template>
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, watch, Ref, nextTick, onBeforeMount } from 'vue'
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
+import { Dialog, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {
   useToast,
   VaAlert,

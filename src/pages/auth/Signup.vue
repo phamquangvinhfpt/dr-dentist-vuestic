@@ -151,92 +151,99 @@ const birthDayRules = computed(() => [
 
 <template>
   <VaInnerLoading :loading="isLoading" :size="60">
-    <VaForm ref="form" @submit.prevent="submit">
-      <h1 class="font-semibold text-4xl mb-4">{{ t('auth.sign_up') }}</h1>
-      <p class="text-base mb-4 leading-5">
-        {{ t('auth.have_account') }}
-        <RouterLink :to="{ name: 'login' }" class="font-semibold text-primary">{{ t('auth.login') }}</RouterLink>
-      </p>
-      <div class="grid grid-cols-2 gap-4 items-start">
+    <VaCard class="-mx-4 p-3 -my-4">
+      <VaForm ref="form" @submit.prevent="submit">
+        <h1 class="font-semibold text-4xl mb-4">{{ t('auth.sign_up') }}</h1>
+        <p class="text-base mb-4 leading-5">
+          {{ t('auth.have_account') }}
+          <RouterLink :to="{ name: 'login' }" class="font-semibold text-primary">{{ t('auth.login') }}</RouterLink>
+        </p>
+        <div class="grid grid-cols-2 gap-4 items-start">
+          <VaInput
+            v-model="formData.firstName"
+            :rules="[(v: any) => !!v || t('auth.first_name_required')]"
+            class="mb-4"
+            :label="t('auth.first_name')"
+          />
+          <VaInput
+            v-model="formData.lastName"
+            :rules="[(v: any) => !!v || t('auth.last_name_required')]"
+            class="mb-4"
+            :label="t('auth.last_name')"
+          />
+        </div>
+        <VaInput v-model="formData.username" :rules="usernameRules" class="mb-4" :label="t('auth.username')" />
         <VaInput
-          v-model="formData.firstName"
-          :rules="[(v: any) => !!v || t('auth.first_name_required')]"
+          v-model="formData.phoneNumber"
+          :rules="phoneNumberRules"
           class="mb-4"
-          :label="t('auth.first_name')"
+          :label="t('auth.phone_number')"
         />
-        <VaInput
-          v-model="formData.lastName"
-          :rules="[(v: any) => !!v || t('auth.last_name_required')]"
-          class="mb-4"
-          :label="t('auth.last_name')"
+        <AddressAutocomplete :rules="addressRules" />
+        <VaInput v-model="formData.email" :rules="emailRules" class="mb-4" :label="t('auth.email')" type="email" />
+        <VaValue v-slot="isPasswordVisible" :default-value="false">
+          <VaInput
+            ref="password1"
+            v-model="formData.password"
+            :rules="passwordRules"
+            :type="isPasswordVisible.value ? 'text' : 'password'"
+            class="mb-4"
+            :label="t('auth.password')"
+            :messages="t('auth.password_hint')"
+            @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+          >
+            <template #appendInner>
+              <VaIcon
+                :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
+                class="cursor-pointer"
+                color="secondary"
+              />
+            </template>
+          </VaInput>
+          <VaInput
+            ref="password2"
+            v-model="formData.repeatPassword"
+            :rules="[
+              (v: any) => !!v || t('auth.repeat_password_required'),
+              (v: string) => v === formData.password || t('auth.password_match'),
+            ]"
+            :type="isPasswordVisible.value ? 'text' : 'password'"
+            class="mb-4"
+            :label="t('auth.repeat_password')"
+            @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+          >
+            <template #appendInner>
+              <VaIcon
+                :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
+                class="cursor-pointer"
+                color="secondary"
+              />
+            </template>
+          </VaInput>
+        </VaValue>
+
+        <div class="mb-4">
+          <VaRadio
+            v-model="formData.isMale"
+            :options="genderOptions"
+            class="flex gap-4"
+            :rules="[(v: any) => !!v || t('auth.gender_required')]"
+          />
+        </div>
+
+        <VaDateInput
+          v-model="formData.birthDay"
+          :rules="birthDayRules"
+          class="w-full"
+          :label="t('auth.birthDay')"
+          clearable
         />
-      </div>
-      <VaInput v-model="formData.username" :rules="usernameRules" class="mb-4" :label="t('auth.username')" />
-      <VaInput v-model="formData.phoneNumber" :rules="phoneNumberRules" class="mb-4" :label="t('auth.phone_number')" />
-      <AddressAutocomplete :rules="addressRules" />
-      <VaInput v-model="formData.email" :rules="emailRules" class="mb-4" :label="t('auth.email')" type="email" />
-      <VaValue v-slot="isPasswordVisible" :default-value="false">
-        <VaInput
-          ref="password1"
-          v-model="formData.password"
-          :rules="passwordRules"
-          :type="isPasswordVisible.value ? 'text' : 'password'"
-          class="mb-4"
-          :label="t('auth.password')"
-          :messages="t('auth.password_hint')"
-          @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
-        >
-          <template #appendInner>
-            <VaIcon
-              :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
-              class="cursor-pointer"
-              color="secondary"
-            />
-          </template>
-        </VaInput>
-        <VaInput
-          ref="password2"
-          v-model="formData.repeatPassword"
-          :rules="[
-            (v: any) => !!v || t('auth.repeat_password_required'),
-            (v: string) => v === formData.password || t('auth.password_match'),
-          ]"
-          :type="isPasswordVisible.value ? 'text' : 'password'"
-          class="mb-4"
-          :label="t('auth.repeat_password')"
-          @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
-        >
-          <template #appendInner>
-            <VaIcon
-              :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
-              class="cursor-pointer"
-              color="secondary"
-            />
-          </template>
-        </VaInput>
-      </VaValue>
 
-      <div class="mb-4">
-        <VaRadio
-          v-model="formData.isMale"
-          :options="genderOptions"
-          class="flex gap-4"
-          :rules="[(v: any) => !!v || t('auth.gender_required')]"
-        />
-      </div>
-
-      <VaDateInput
-        v-model="formData.birthDay"
-        :rules="birthDayRules"
-        class="w-full"
-        :label="t('auth.birthDay')"
-        clearable
-      />
-
-      <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
-      <div class="flex justify-center mt-4">
-        <VaButton class="w-full" @click="submit">{{ t('auth.create_account') }}</VaButton>
-      </div>
-    </VaForm>
+        <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
+        <div class="flex justify-center mt-4">
+          <VaButton class="w-full" @click="submit">{{ t('auth.create_account') }}</VaButton>
+        </div>
+      </VaForm>
+    </VaCard>
   </VaInnerLoading>
 </template>
