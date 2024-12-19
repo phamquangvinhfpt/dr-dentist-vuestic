@@ -417,7 +417,7 @@
                   @click="router.push(`/examination/${rowData.appointmentId}`)"
                 />
                 <VaButton
-                  v-if="rowData.status === 6 && role?.includes('Staff')"
+                  v-if="rowData.status === 6 && role?.includes('Staff') && rowData.paymentStatus === 1"
                   round
                   icon="payments"
                   color="#b1fadc"
@@ -894,6 +894,7 @@ import { useServiceStore } from '@/stores/modules/service.module'
 import { useRouter } from 'vue-router'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { startOfWeek, addDays, format } from 'date-fns'
+import { debounce } from 'lodash'
 
 const selectedDate = ref(new Date())
 const showAllUnassignedModal = ref(false)
@@ -1338,10 +1339,11 @@ const totalPagesA = computed(() => Math.ceil(paginationA.value.total / paginatio
 const totalPagesF = computed(() => Math.ceil(paginationF.value.total / paginationF.value.perPage))
 const totalPagesN = computed(() => Math.ceil(paginationN.value.total / paginationN.value.perPage))
 
+const request = {
+  date: formatDateForm(selectedDate.value),
+}
+
 const fetchAppointments = (search: Search) => {
-  const request = {
-    date: formatDateForm(selectedDate.value),
-  }
   loading.value = true
   storeAppointments
     .getAppointments(currentView.value === 'calendar' ? request : search)
@@ -1365,7 +1367,7 @@ const fetchAppointments = (search: Search) => {
 const fetchFollowUpAppointments = (search: Search) => {
   loading.value = true
   storeAppointments
-    .getFollowUpAppointments(search)
+    .getFollowUpAppointments(currentView.value === 'calendar' ? request : search)
     .then((response) => {
       followUpAppointments.value = response.data
       followUpAppointmentsSearchRes.value = response
@@ -1386,7 +1388,7 @@ const fetchFollowUpAppointments = (search: Search) => {
 const fetchNonDoctorAppointments = (search: Search) => {
   loading.value = true
   storeAppointments
-    .getNonDoctorsAppointments(search)
+    .getNonDoctorsAppointments(currentView.value === 'calendar' ? request : search)
     .then((response) => {
       nonDoctorAppointments.value = response.data
       nonDoctorSearchRes.value = response
@@ -1934,176 +1936,108 @@ const getWeekDayDate = (index: number) => {
   return format(day, 'yyyy-MM-dd')
 }
 
-// watch selectedDate
+// Debounce function for API calls
+const debouncedFetchAppointments = debounce(fetchAppointments, 300)
+const debouncedFetchFollowUpAppointments = debounce(fetchFollowUpAppointments, 300)
+const debouncedFetchNonDoctorAppointments = debounce(fetchNonDoctorAppointments, 300)
+
+// Combine multiple watchers into a single watcher
 watch(
-  () => selectedDate.value,
-  () => {
+  [
+    () => selectedDate.value,
+    () => selectedTime.value,
+    () => currentView.value,
+    () => paginationA.value.page,
+    () => paginationA.value.perPage,
+    () => paginationF.value.page,
+    () => paginationF.value.perPage,
+    () => paginationN.value.page,
+    () => paginationN.value.perPage,
+  ],
+  ([newDate, newTime, newView, newPageA, newPerPageA, newPageF, newPerPageF, newPageN, newPerPageN]) => {
+    // Update search values
+    const updatedSearchValue = {
+      date: formatDateForm(newDate),
+      time: newTime,
+    }
+
     searchValueA.value = {
       ...searchValueA.value,
-      date: formatDateForm(selectedDate.value),
+      ...updatedSearchValue,
+      pageNumber: newPageA,
+      pageSize: newPerPageA,
     }
+
     searchValueF.value = {
       ...searchValueF.value,
-      date: formatDateForm(selectedDate.value),
+      ...updatedSearchValue,
+      pageNumber: newPageF,
+      pageSize: newPerPageF,
     }
+
     searchValueN.value = {
       ...searchValueN.value,
-      date: formatDateForm(selectedDate.value),
+      ...updatedSearchValue,
+      pageNumber: newPageN,
+      pageSize: newPerPageN,
     }
-    fetchAppointments(searchValueA.value)
-    fetchFollowUpAppointments(searchValueF.value)
-    fetchNonDoctorAppointments(searchValueN.value)
-    searchDoctor()
-  },
-  { immediate: true },
-)
 
-// watch selectedTime
-watch(
-  () => selectedTime.value,
-  () => {
-    searchValueA.value.time = selectedTime.value
-    searchValueF.value.time = selectedTime.value
-    searchValueN.value.time = selectedTime.value
-    fetchAppointments(searchValueA.value)
-    fetchFollowUpAppointments(searchValueF.value)
-    fetchNonDoctorAppointments(searchValueN.value)
-  },
-  { immediate: true },
-)
+    // Use debounced functions to fetch data
+    debouncedFetchAppointments(searchValueA.value)
+    debouncedFetchFollowUpAppointments(searchValueF.value)
+    debouncedFetchNonDoctorAppointments(searchValueN.value)
 
-// watch pagination
-
-watch(
-  () => paginationA.value.page,
-  () => {
-    searchValueA.value.pageNumber = paginationA.value.page
-    searchValueA.value.pageSize = paginationA.value.perPage
-    fetchAppointments(searchValueA.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => paginationA.value.perPage,
-  () => {
-    searchValueA.value.pageNumber = 1
-    searchValueA.value.pageSize = paginationA.value.perPage
-    fetchAppointments(searchValueA.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => appointmentSearchRes.value,
-  () => {
-    if (appointmentSearchRes.value) {
-      paginationA.value.total = appointmentSearchRes.value.totalCount
+    // Only call searchDoctor when the date changes
+    if (newDate !== selectedDate.value) {
+      searchDoctor()
     }
-  },
-  { immediate: true },
-)
 
-watch(
-  () => paginationF.value.page,
-  () => {
-    searchValueF.value.pageNumber = paginationF.value.page
-    searchValueF.value.pageSize = paginationF.value.perPage
-    fetchFollowUpAppointments(searchValueF.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => paginationF.value.perPage,
-  () => {
-    searchValueF.value.pageNumber = 1
-    searchValueF.value.pageSize = paginationF.value.perPage
-    fetchFollowUpAppointments(searchValueF.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => followUpAppointmentsSearchRes.value,
-  () => {
-    if (followUpAppointmentsSearchRes.value) {
-      paginationF.value.total = followUpAppointmentsSearchRes.value.totalCount
+    // Handle view changes
+    if (newView !== currentView.value) {
+      handleViewChange()
     }
-  },
-  { immediate: true },
-)
-
-watch(
-  () => paginationN.value.page,
-  () => {
-    searchValueN.value.pageNumber = paginationN.value.page
-    searchValueN.value.pageSize = paginationN.value.perPage
-    fetchNonDoctorAppointments(searchValueN.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => paginationN.value.perPage,
-  () => {
-    searchValueN.value.pageNumber = 1
-    searchValueN.value.pageSize = paginationN.value.perPage
-    fetchNonDoctorAppointments(searchValueN.value)
-  },
-  { immediate: true },
-)
-
-watch(
-  () => nonDoctorSearchRes.value,
-  () => {
-    if (nonDoctorSearchRes.value) {
-      paginationN.value.total = nonDoctorSearchRes.value.totalCount
-    }
-  },
-  { immediate: true },
-)
-// done watching pagination
-
-// Watch for changes in appointments
-watch(
-  appointments,
-  (newAppointments) => {
-    items.value = newAppointments
   },
   { deep: true },
 )
 
+// Add this function to handle view changes
+const handleViewChange = () => {
+  debouncedFetchAppointments(searchValueA.value)
+  debouncedFetchFollowUpAppointments(searchValueF.value)
+  debouncedFetchNonDoctorAppointments(searchValueN.value)
+}
+
+// Use a single watcher for search results
 watch(
-  followUpAppointments,
-  (newAppointments) => {
-    followitems.value = newAppointments
+  [() => appointmentSearchRes.value, () => followUpAppointmentsSearchRes.value, () => nonDoctorSearchRes.value],
+  ([newAppointmentRes, newFollowUpRes, newNonDoctorRes]) => {
+    if (newAppointmentRes) {
+      paginationA.value.total = newAppointmentRes.totalCount
+      items.value = newAppointmentRes.data
+    }
+    if (newFollowUpRes) {
+      paginationF.value.total = newFollowUpRes.totalCount
+      followitems.value = newFollowUpRes.data
+    }
+    if (newNonDoctorRes) {
+      paginationN.value.total = newNonDoctorRes.totalCount
+      unassigneditems.value = newNonDoctorRes.data
+    }
   },
   { deep: true },
 )
 
+// Optimize the watcher for available doctors
+const debouncedFetchAvailableDoctors = debounce(fetchAvailableDoctors, 300)
+
 watch(
-  nonDoctorAppointments,
-  (newAppointments) => {
-    unassigneditems.value = newAppointments
+  [serviceId, date, startTime],
+  ([newServiceId, newDate, newStartTime]) => {
+    if (newServiceId && newDate && newStartTime) {
+      debouncedFetchAvailableDoctors()
+    }
   },
   { deep: true },
-)
-
-watch([serviceId, date, startTime], async ([newServiceId, newDate, newStartTime]) => {
-  if (newServiceId && newDate && newStartTime) {
-    fetchAvailableDoctors()
-  }
-})
-
-watch(
-  () => currentView.value,
-  () => {
-    fetchAppointments(searchValueA.value)
-    fetchFollowUpAppointments(searchValueF.value)
-    fetchNonDoctorAppointments(searchValueN.value)
-  },
-  { immediate: true },
 )
 </script>
 

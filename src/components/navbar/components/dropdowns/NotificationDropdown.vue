@@ -375,9 +375,8 @@ const showToastNotification = (type: string, notification: any) => {
             title: notification?.title,
             body: notification?.message,
             actionTypeId: 'OPEN_APP',
-            largeBody:
-              'Lịch hẹn nha khoa của bạn đã được xác nhận thành công. Chi tiết lịch hẹn đã được gửi vào email đăng ký.',
-            summaryText: 'Đặt lịch khám nha khoa thành công',
+            largeBody: notification?.largeBody,
+            summaryText: notification?.summaryText,
             largeIcon: 'res://drawable/icon_noti64.png',
             smallIcon: 'res://drawable/icon_bel48.png',
           },
@@ -393,7 +392,6 @@ const showToastNotification = (type: string, notification: any) => {
 }
 
 const receiveNotificationFromServer = (type: string, notification: any) => {
-  console.log('type', type)
   const tempPageNumber = 1
   const tempPageSize = pagination.value.currentPages * pagination.value.pageSize
   const data = {

@@ -203,9 +203,11 @@ const handleCloseSubmit = () => {
 
 const receiveNotification = (type: string, notification: any) => {
   console.log('Received paid notification:', type, notification)
-  showQrCode.value = false
-  showSuccessModal.value = true
-  checkPaymentStatus.value = false
+  if (type === 'Payment') {
+    showQrCode.value = false
+    showSuccessModal.value = true
+    checkPaymentStatus.value = false
+  }
 }
 
 const handleCloseSuccessModal = () => {
@@ -354,13 +356,13 @@ defineExpose({
             </ul>
           </div>
 
-          <button
+          <a
             type="button"
-            class="px-5 py-2.5 mt-6 w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700"
-            @click="handleCloseSuccessModal"
+            class="px-5 py-2.5 mt-6 text-center w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700"
+            href="/appointment"
           >
             Got it
-          </button>
+          </a>
         </div>
       </div>
     </VaCard>

@@ -22,7 +22,7 @@ const bankInfo = ref<any>({
 const qrCodeUrl = ref<string>('')
 const showSuccessModal = ref(false)
 const isMobile = computed(() => window.innerWidth < 768)
-
+const result = ref(false)
 const loading = ref(false)
 const { init } = useToast()
 const storeTreatment = useTreatmentStore()
@@ -181,8 +181,11 @@ const handleCloseSuccessModal = () => {
 
 const receiveNotification = (type: string, notification: any) => {
   console.log('Received paid notification:', type, notification)
-  showQrCode.value = false
-  showSuccessModal.value = true
+  if (type === 'Payment') {
+    showQrCode.value = false
+    showSuccessModal.value = true
+    result.value = true
+  }
 }
 
 onMounted(() => {
@@ -216,23 +219,6 @@ defineExpose({
           <template #cell(paymentAmount)="{ value }">
             {{ formatCurrency(Number(value)) }}
           </template>
-          <!-- <template #cell(paymentStatus)="{ value }">
-            <VaChip
-              :color="
-                Number(value) === PaymentStatus.Completed
-                  ? 'success'
-                  : Number(value) === PaymentStatus.Canceled
-                    ? 'warning'
-                    : Number(value) === PaymentStatus.Failed
-                      ? 'danger'
-                      : Number(value) === PaymentStatus.Incomplete
-                        ? 'info'
-                        : 'gray'
-              "
-            >
-              {{ getPaymentStatusText(Number(value)) }}
-            </VaChip>
-          </template> -->
         </VaDataTable>
 
         <VaDivider />
@@ -281,6 +267,7 @@ defineExpose({
       </VaCard>
       <QrSelection
         v-model:show-success-modal="showSuccessModal"
+        v-model:success="result"
         :bank-info="bankInfo"
         :qr-code-url="qrCodeUrl"
         :show-qr-code="showQrCode"
@@ -339,13 +326,13 @@ defineExpose({
             </ul>
           </div>
 
-          <button
+          <a
             type="button"
-            class="px-5 py-2.5 mt-6 w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700"
-            @click="handleCloseSuccessModal"
+            class="px-5 py-2.5 mt-6 text-center w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700"
+            href="/appointment"
           >
             Đóng
-          </button>
+          </a>
         </div>
       </div>
     </VaInnerLoading>

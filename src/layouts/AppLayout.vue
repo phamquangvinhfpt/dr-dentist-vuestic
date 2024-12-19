@@ -219,6 +219,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   if (!isGuest.value) {
+    console.log('Disconnect SignalR...')
     signalRService.off('NotificationFromServer')
     signalRService.off('UpdateOnlineUsers')
     signalRService.off('ReceiveMessage')

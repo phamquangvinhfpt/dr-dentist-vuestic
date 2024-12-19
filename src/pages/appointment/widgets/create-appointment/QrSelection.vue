@@ -17,9 +17,10 @@ const props = defineProps<{
   qrCodeUrl: string
   isMobile: boolean
   finalPayment: boolean
+  success?: boolean
 }>()
 
-const emit = defineEmits(['update:showQrCode', 'update:closeSubmit'])
+const emit = defineEmits(['update:showQrCode', 'update:closeSubmit', 'update:success'])
 const { init } = useToast()
 
 const showCopySuccess = ref(false)
@@ -120,8 +121,11 @@ const closeModal = () => {
   emit('update:closeSubmit', false)
   stopTimer()
   if (props.finalPayment) {
-    cancelPayment()
+    if (!props.success) {
+      cancelPayment()
+    }
   }
+  emit('update:success', false)
 }
 
 const loadQrCodeImage = () => {

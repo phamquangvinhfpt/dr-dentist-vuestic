@@ -43,6 +43,7 @@ import { useColors } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useRouter } from 'vue-router'
 import Avatar from '@/components/avatar/Avatar.vue'
+import signalRService from '@/signalR'
 
 const { colors, setHSLAColor } = useColors()
 const hoverColor = computed(() => setHSLAColor(colors.focus, { a: 0.1 }))
@@ -145,6 +146,10 @@ const resolveLinkAttribute = (item: ProfileListItem) => {
       onClick: () => {
         if (item.action === 'logoutAction') {
           logout()
+          signalRService.off('NotificationFromServer')
+          signalRService.off('UpdateOnlineUsers')
+          signalRService.off('ReceiveMessage')
+          signalRService.disconnect()
           push({ name: 'login' })
         }
       },

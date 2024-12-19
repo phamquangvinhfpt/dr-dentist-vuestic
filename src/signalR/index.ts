@@ -31,6 +31,7 @@ class SignalRService {
     }
 
     if (this.token) {
+      console.log('Connecting to SignalR...')
       const option: IHttpConnectionOptions = {
         accessTokenFactory: () => this.getAccessToken(),
         transport: HttpTransportType.WebSockets | HttpTransportType.LongPolling,
