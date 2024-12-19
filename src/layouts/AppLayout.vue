@@ -128,7 +128,11 @@ const handleReceiveMessage = (message) => {
         },
       ],
     }
-    LocalNotifications.schedule(options)
+    if (authStore.user?.id !== message.senderId) {
+      console.log('user id', authStore.user?.id)
+      console.log('sender id', message.senderId)
+      LocalNotifications.schedule(options)
+    }
   }
 }
 
