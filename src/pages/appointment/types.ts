@@ -172,6 +172,7 @@ export enum AppointmentStatus {
   Come,
   Cancelled,
   Done,
+  Examinated,
 }
 
 export enum PaymentStatus {
@@ -239,6 +240,12 @@ export const getAppointmentStatusConfig = (status: AppointmentStatus): StatusCon
         text: 'Done',
         bgColor: 'bg-green-100',
         textColor: 'text-green-800',
+      }
+    case AppointmentStatus.Examinated:
+      return {
+        text: 'Paid',
+        bgColor: 'bg-purple-100',
+        textColor: 'text-purple-800',
       }
     default:
       return {
@@ -329,6 +336,11 @@ export const getStatusConfig = (status: string | number): StatusConfig => {
       return {
         text: 'Done',
         color: '#7f1f90', // purple
+      }
+    case AppointmentStatus.Examinated:
+      return {
+        text: 'Paid',
+        color: '#4caf50', // green
       }
     default:
       return {

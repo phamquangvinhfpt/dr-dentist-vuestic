@@ -12,7 +12,10 @@
               class="w-full px-3 py-1.5"
               clearable
             />
-            <div class="w-full inline-flex rounded-lg border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 p-1">
+            <div
+              v-if="filteredTypes.length > 0"
+              class="w-full inline-flex rounded-lg border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 p-1"
+            >
               <button
                 v-for="type in filteredTypes"
                 :key="type.id"
@@ -60,25 +63,20 @@
       </VaCard>
       <div v-if="currentView === 'calendar' && !isMobile" class="flex-1 grid grid-cols-[auto,1fr] overflow-hidden">
         <!-- Time slots -->
-        <VaCard class="border-r bg-white w-20 overflow-hidden">
-          <div class="h-16 border-b"></div>
+        <VaCard class="border-r overflow-hidden">
+          <div class="h-20 w-20 border-b"></div>
           <div ref="timeSlotContainer" class="h-[calc(100vh-10rem)] overflow-y-auto" @scroll="handleTimeSlotScroll">
             <div
               v-for="time in timeSlots"
               :key="time"
-              class="h-16 flex items-center justify-end pr-2 text-sm text-gray-500 border-b"
+              class="h-20 flex items-center justify-end pr-2 text-sm text-gray-500 border-b"
             >
               {{ time }}
             </div>
           </div>
         </VaCard>
         <!-- Calendar grid -->
-        <VaCard
-          ref="calendarContainer"
-          class="overflow-auto"
-          :style="role?.includes('Dentist') ? { marginRight: `${scrollbarWidth}px` } : {}"
-          @scroll="handleCalendarScroll"
-        >
+        <VaCard ref="calendarContainer" class="overflow-auto" @scroll="handleCalendarScroll">
           <VaCard
             class="grid"
             :style="{
@@ -90,19 +88,27 @@
               v-for="doctor in doctors"
               :key="doctor.id"
               :class="{
-                'h-16 p-4 text-center border-l sticky top-0 z-10': true,
+                'h-20 p-4 text-center border-l sticky top-0 z-10': true,
                 hidden: role?.includes('Dentist'),
               }"
             >
-              <div class="flex flex-col items-center">
-                <div class="w-8 h-8 rounded-full bg-gray-200 mb-1"></div>
-                <div class="flex relative">
-                  <span class="text-sm font-medium">{{ doctor.name }}</span>
-                  <div
-                    :class="getEventDotClass(doctor.isWorked)"
-                    class="w-2 h-2 rounded-full flex-shrink-0 absolute -right-3 bottom-2"
-                  ></div>
-                </div>
+              <div class="flex flex-col items-center justify-center">
+                <VaBadge
+                  dot
+                  overlap
+                  placement="bottom-right"
+                  :offset="[-7, -7]"
+                  class="mr-2"
+                  :color="doctor.isWorked ? 'success' : 'secondary'"
+                >
+                  <VaAvatar
+                    color="#692BEB"
+                    :src="getSrcAvatar(doctor.imageUrl)"
+                    :fallback-text="doctor.name?.charAt(0).toUpperCase()"
+                    alt="Avatar"
+                  />
+                </VaBadge>
+                <span class="text-sm font-medium">{{ doctor.name }}</span>
               </div>
             </VaCard>
             <!-- WeekDays headers -->
@@ -110,7 +116,7 @@
               v-for="(day, index) in weekDays"
               :key="index"
               :class="{
-                'h-16 p-4 text-center border-l sticky top-0 z-10': true,
+                'h-20 p-4 text-center border-l sticky top-0 z-10': true,
                 hidden: !role?.includes('Dentist'),
               }"
             >
@@ -129,7 +135,7 @@
                 <div
                   v-for="time in timeSlots"
                   :key="time"
-                  class="h-16 border-b relative group"
+                  class="h-20 border-b relative group"
                   @contextmenu.prevent="
                     openContextMenu(
                       $event,
@@ -238,7 +244,7 @@
                               role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
                             )[0].status,
                           ).textColor,
-                          'px-2 py-1 rounded-full inline-block',
+                          'px-2 py-1 mt-3 rounded-full inline-block',
                         ]"
                       >
                         {{
@@ -344,7 +350,7 @@
                               role?.includes('Dentist') ? getWeekDayDate(columnIndex) : doctors[columnIndex].id,
                             )[0].status,
                           ).textColor,
-                          'px-2 py-1 rounded-full inline-block',
+                          'px-2 py-1 mt-3 rounded-full inline-block',
                         ]"
                       >
                         {{
@@ -409,6 +415,14 @@
                   color="#b1fadc"
                   icon-color="#812E9E"
                   @click="router.push(`/examination/${rowData.appointmentId}`)"
+                />
+                <VaButton
+                  v-if="rowData.status === 6 && role?.includes('Staff')"
+                  round
+                  icon="payments"
+                  color="#b1fadc"
+                  icon-color="green"
+                  @click="router.push(`/payment/${rowData.appointmentId}`)"
                 />
                 <VaButton
                   v-if="rowData.status === 2"
@@ -871,7 +885,7 @@ import {
   getAppointmentType,
 } from './types'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
-import { getErrorMessage } from '@/services/utils'
+import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
@@ -1002,9 +1016,17 @@ const getServices = () => {
       })
     })
 }
-const optionsDoctors = computed(() =>
-  activeDoctors.value.map((doctor) => ({ text: `${doctor.firstName} ${doctor.lastName}`, value: doctor.id })),
-)
+const availableDoctorsRef = ref([])
+const optionsDoctors = computed(() => {
+  if (availableDoctorsRef.value) {
+    return availableDoctorsRef.value
+  }
+
+  return activeDoctors.value.map((doctor) => ({
+    text: `${doctor.firstName} ${doctor.lastName}`,
+    value: doctor.id,
+  }))
+})
 const optionsStartTimes = computed(() => {
   const slots = []
   for (let hour = 8; hour < 22; hour++) {
@@ -1019,7 +1041,6 @@ const getPatients = () => {
   users
     .getPatients(request)
     .then((response) => {
-      console.log('patients list', response)
       optionsPatients.value = response.data.map((patient: any) => ({
         text: patient.phoneNumber,
         value: patient.id,
@@ -1078,6 +1099,8 @@ const checkedAppointment = async (appointmentId: any) => {
         message: 'Bệnh nhân đã đến khám!',
       })
       fetchAppointments(searchValueA.value)
+      fetchFollowUpAppointments(searchValueF.value)
+      fetchNonDoctorAppointments(searchValueN.value)
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)
@@ -1316,9 +1339,12 @@ const totalPagesF = computed(() => Math.ceil(paginationF.value.total / paginatio
 const totalPagesN = computed(() => Math.ceil(paginationN.value.total / paginationN.value.perPage))
 
 const fetchAppointments = (search: Search) => {
+  const request = {
+    date: formatDateForm(selectedDate.value),
+  }
   loading.value = true
   storeAppointments
-    .getAppointments(search)
+    .getAppointments(currentView.value === 'calendar' ? request : search)
     .then((response) => {
       appointments.value = response.data
       appointmentSearchRes.value = response
@@ -1364,6 +1390,44 @@ const fetchNonDoctorAppointments = (search: Search) => {
     .then((response) => {
       nonDoctorAppointments.value = response.data
       nonDoctorSearchRes.value = response
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+const fetchAvailableDoctors = async () => {
+  const request = {
+    serviceID: serviceId.value?.value,
+    date: formatDateForm(date.value),
+    startTime: startTime.value + ':00',
+    endTime: addMinutesToTime(startTime.value + ':00', 30),
+  }
+  loading.value = true
+  storeDoctors
+    .getAvailableDoctors(request)
+    .then((response) => {
+      if (response && response.length > 0) {
+        availableDoctorsRef.value = response.map((doctor: any) => ({
+          text: `${doctor.firstName} ${doctor.lastName}`,
+          value: doctor.id,
+        }))
+
+        if (doctorId.value && !availableDoctorsRef.value.some((option: any) => option.value === doctorId.value)) {
+          doctorId.value = undefined
+        }
+      } else {
+        availableDoctorsRef.value = []
+        doctorId.value = undefined
+      }
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -1667,7 +1731,7 @@ const openContextMenu = (event: MouseEvent, time: string, doctorId: string) => {
   const calendarContainer = document.querySelector('.overflow-auto') as HTMLElement
   if (!calendarContainer) return
 
-  const cell = (event.target as HTMLElement).closest('.h-16') as HTMLElement
+  const cell = (event.target as HTMLElement).closest('.h-20') as HTMLElement
   if (!cell) return
 
   // Calculate position relative to the viewport
@@ -1835,13 +1899,6 @@ const openCreateAppointmentDialog = () => {
   startTime.value = ''
   notes.value = ''
   showModalAppointment.value = true
-}
-
-function getEventDotClass(isWorked: boolean) {
-  if (isWorked) {
-    return 'bg-green-500'
-  }
-  return 'bg-gray-500'
 }
 
 // calculate the width of the scrollbar of the calendar container
@@ -2031,6 +2088,22 @@ watch(
     unassigneditems.value = newAppointments
   },
   { deep: true },
+)
+
+watch([serviceId, date, startTime], async ([newServiceId, newDate, newStartTime]) => {
+  if (newServiceId && newDate && newStartTime) {
+    fetchAvailableDoctors()
+  }
+})
+
+watch(
+  () => currentView.value,
+  () => {
+    fetchAppointments(searchValueA.value)
+    fetchFollowUpAppointments(searchValueF.value)
+    fetchNonDoctorAppointments(searchValueN.value)
+  },
+  { immediate: true },
 )
 </script>
 

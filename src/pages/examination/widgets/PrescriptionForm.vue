@@ -115,6 +115,8 @@ const selectPharmaceutical = (pharmaceutical: Pharmaceutical) => {
       dosage: '',
       frequency: '',
     })
+    // clear search
+    searchKeyword.value = ''
   }
 }
 
@@ -189,3 +191,33 @@ const removeItem = (rowData: PrescriptionItem) => {
     </VaCard>
   </VaForm>
 </template>
+<style scoped>
+.prescription-form {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.fixed-search {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-results {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  margin-top: 0.5rem;
+}
+
+.prescription-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+</style>

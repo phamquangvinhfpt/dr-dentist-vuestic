@@ -2,7 +2,7 @@
 import { defineEmits, onMounted, ref } from 'vue'
 import { Doctor } from '../../types'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
-import { getErrorMessage } from '@/services/utils'
+import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { useToast } from 'vuestic-ui/web-components'
 
 const { init } = useToast()
@@ -121,11 +121,11 @@ onMounted(() => {
                 >
                   <img
                     :src="
-                      practitioner.imageUrl ||
+                      getSrcAvatar(practitioner.imageUrl) ||
                       'https://plus.unsplash.com/premium_photo-1661718954553-f775043016d5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
                     "
                     alt="Practitioner Image"
-                    class="w-full h-32 object-cover rounded-lg mb-2"
+                    class="items-center h-12 w-12 md:h-32 md:w-32 !rounded-full object-cover object-center mx-auto"
                   />
                   <span class="font-medium">{{ practitioner.firstName }} {{ practitioner.lastName }}</span>
                   <span class="text-xs uppercase">{{ practitioner.doctorProfile.education }}</span>

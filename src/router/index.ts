@@ -217,6 +217,14 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/Contact-Info/MyContacts.vue'),
       },
       {
+        name: 'payment',
+        path: 'payment/:id',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/examination/widgets/Payment.vue'),
+      },
+      {
         path: 'payment-management',
         name: 'payment-management',
         meta: {

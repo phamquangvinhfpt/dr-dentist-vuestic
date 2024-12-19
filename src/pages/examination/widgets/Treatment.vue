@@ -31,8 +31,6 @@ const props = defineProps<{
   appointment: Appointment | undefined
 }>()
 
-const emit = defineEmits(['update:appointment'])
-
 const { init } = useToast()
 const storeTreatment = useTreatmentStore()
 const storeMedicalRecord = useMedicalRecordStore()
@@ -54,7 +52,6 @@ const selectedTreatmentPlan = ref<TreatmentPlanResponse>()
 const date = ref(new Date())
 const startTime = ref('')
 const notes = ref('')
-const appointmentStatus = props.appointment?.status
 const treatmentplans = ref<TreatmentPlanResponse[]>([])
 const user = useAuthStore()
 const isDoctor = user.musHaveRole('Dentist')
@@ -173,26 +170,6 @@ const isToday = (dateString: string) => {
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear()
   )
-}
-
-const toogleAppointmentStatus = async () => {
-  loading.value = true
-  await storeTreatment
-    .toogleAppointment(props.appointment?.appointmentId)
-    .then((response) => {
-      treatmentplans.value = response.sort((a: any, b: any) => a.step - b.step)
-    })
-    .catch((error) => {
-      const errorMessage = getErrorMessage(error)
-      init({
-        message: errorMessage,
-        color: 'danger',
-        title: 'Error',
-      })
-    })
-    .finally(() => {
-      loading.value = false
-    })
 }
 
 const getTreatmentPlans = async () => {
@@ -578,14 +555,7 @@ const removeImage = (type: any, index: number) => {
 }
 
 onMounted(() => {
-  if (appointmentStatus === 2) {
-    if (isDoctor) {
-      toogleAppointmentStatus()
-      emit('update:appointment', { ...props.appointment, status: 3 })
-    }
-  } else {
-    getTreatmentPlans()
-  }
+  getTreatmentPlans()
 })
 </script>
 

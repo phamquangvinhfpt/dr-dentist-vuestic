@@ -4,7 +4,7 @@ import { onBeforeMount, onMounted, ref } from 'vue'
 import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useToast, VaCardActions } from 'vuestic-ui'
 import { Doctors, TypeService } from './types'
 import { useRouter } from 'vue-router'
-import { getErrorMessage } from '@/services/utils'
+import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import Contact from '../../landingpage/Contact.vue'
 
 import { useServiceStore } from '@/stores/modules/service.module'
@@ -396,7 +396,7 @@ window.addEventListener('resize', () => {
                     lazy
                     :src="
                       doctor.imageUrl
-                        ? doctor.imageUrl
+                        ? getSrcAvatar(doctor.imageUrl)
                         : 'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
                     "
                     :alt="`${doctor.firstName} ${doctor.lastName}`"

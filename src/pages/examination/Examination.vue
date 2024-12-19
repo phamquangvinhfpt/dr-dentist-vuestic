@@ -8,7 +8,6 @@ import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import Treatment from './widgets/Treatment.vue'
 import { getErrorMessage } from '@/services/utils'
 import { useAuthStore } from '@/stores/modules/auth.module'
-import Payment from './widgets/Payment.vue'
 
 const router = useRoute()
 const loading = ref(false)
@@ -53,11 +52,6 @@ const allTabs = [
     name: 'Examination',
     icon: 'assignment',
   },
-  {
-    id: 3,
-    name: 'Payment',
-    icon: 'payment',
-  },
 ]
 
 const tabs = computed(() => {
@@ -91,5 +85,4 @@ onMounted(() => {
   </div>
   <MedicalRecord v-if="selectedTab === 1 && !loading" v-model:patientId="patientid" />
   <Treatment v-if="selectedTab === 2" :appointment="appointment" @update:appointment="appointment = $event" />
-  <Payment v-if="selectedTab === 3" :appointment="appointment" />
 </template>

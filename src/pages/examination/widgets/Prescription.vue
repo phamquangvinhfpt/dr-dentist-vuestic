@@ -1,6 +1,15 @@
 <template>
   <div>
-    <VaButton icon="add" @click="doShowPrescriptionFormModal = true">{{ $t('prescriptions.prescription') }}</VaButton>
+    <VaButton
+      preset="primary"
+      class="mr-6 mb-2"
+      round
+      border-color="primary"
+      size="small"
+      @click="doShowPrescriptionFormModal = true"
+    >
+      {{ $t('prescriptions.prescription') }}
+    </VaButton>
   </div>
   <VaModal
     v-slot="{ cancel, ok }"

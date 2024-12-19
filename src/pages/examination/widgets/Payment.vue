@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Appointment } from '@/pages/appointment/types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { useToast, VaInnerLoading, VaCard, VaButton, VaRadio, VaDivider, VaDataTable } from 'vuestic-ui'
 import { getPaymentMethodLabel, PaymentDetailResponse, PaymentMethod } from '../types'
 import { generateQRCode, getErrorMessage } from '@/services/utils'
 import QrSelection from '@/pages/appointment/widgets/create-appointment/QrSelection.vue'
-
-const props = defineProps<{
-  appointment: Appointment | undefined
-}>()
+import { useRoute } from 'vue-router'
 
 // const for payment
+const router = useRoute()
+const appointmentId = router.params.id as string
 const showQrCode = ref(false)
 const bankInfo = ref<any>({
   bankName: 'Vietcombank',
@@ -34,7 +32,7 @@ const selectedPaymentMethod = ref<PaymentMethod>(PaymentMethod.None)
 const getRemainingAppointment = () => {
   loading.value = true
   storeTreatment
-    .getRemainingAppointment(props.appointment?.appointmentId)
+    .getRemainingAppointment(appointmentId)
     .then((response) => {
       paymentDetailResponse.value = response
       console.log(paymentDetailResponse.value)
@@ -96,7 +94,7 @@ const confirmPayment = () => {
     loading.value = true
     const request = {
       paymentID: paymentDetailResponse.value?.paymentResponse.paymentId,
-      appointmentId: props.appointment?.appointmentId,
+      appointmentId: appointmentId,
       patientCode: paymentDetailResponse.value?.paymentResponse.patientCode,
       amount: paymentDetailResponse.value?.paymentResponse.remainingAmount,
       method: PaymentMethod.Cash,
@@ -127,7 +125,7 @@ const confirmPayment = () => {
     loading.value = true
     const request = {
       paymentID: paymentDetailResponse.value?.paymentResponse.paymentId,
-      appointmentId: props.appointment?.appointmentId,
+      appointmentId: appointmentId,
       patientCode: paymentDetailResponse.value?.paymentResponse.patientCode,
       amount: paymentDetailResponse.value?.paymentResponse.remainingAmount,
       method: PaymentMethod.BankTransfer,

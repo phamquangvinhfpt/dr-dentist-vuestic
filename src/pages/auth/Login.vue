@@ -7,6 +7,7 @@ import { useAuthStore } from '@modules/auth.module'
 import { useReCaptcha } from 'vue-recaptcha-v3'
 import { useI18n } from 'vue-i18n'
 import { NativeBiometric, BiometryType } from '@capgo/capacitor-native-biometric'
+import { Capacitor } from '@capacitor/core'
 
 const { t } = useI18n()
 const { validate } = useForm('form')
@@ -16,7 +17,7 @@ const reCaptcha = useReCaptcha()
 
 const isLoading = ref(false)
 const isBiometricAvailable = ref(false)
-
+const platform = Capacitor.getPlatform()
 const formData = reactive({
   email: '',
   password: '',
@@ -36,8 +37,10 @@ onBeforeMount(async () => {
 
   // Check biometric availability
   try {
-    const result = await NativeBiometric.isAvailable()
-    isBiometricAvailable.value = result.isAvailable
+    if (platform === 'android' || platform === 'ios') {
+      const result = await NativeBiometric.isAvailable()
+      isBiometricAvailable.value = result.isAvailable
+    }
   } catch (error) {
     console.error('Biometric check failed', error)
     isBiometricAvailable.value = false
@@ -55,7 +58,9 @@ const submit = async () => {
       await store.login(formData.email, formData.password, captchaToken ?? '', formData.keepLoggedIn)
 
       // Save credentials for biometric login if keep logged in is true
-      await saveCredentialsForBiometrics()
+      if (platform === 'android' || platform === 'ios') {
+        await saveCredentialsForBiometrics()
+      }
 
       init({
         message: t('auth.login_success'),
