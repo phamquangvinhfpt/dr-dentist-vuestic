@@ -744,9 +744,8 @@
     "confirm": "Xác nhận",
     "search": "Tìm kiếm",
     "reset": "Đặt lại",
-    "unauthorized" : "Bạn không có quyền truy cập",
-    "errorOccurred" : "Đã xảy ra lỗi"
-
+    "unauthorized": "Bạn không có quyền truy cập",
+    "errorOccurred": "Đã xảy ra lỗi"
   },
   "payment": {
     "patientCode": "Mã Bệnh Nhân",
@@ -765,13 +764,12 @@
     "paymentInfo": "Thông Tin Thanh Toán",
     "paymentMethod": "Phương Thức Thanh Toán",
     "actions": "Thao Tác",
-    "procedures" : "Thủ thuật",
-    "noProcedures" : "Không có thủ thuật",
+    "procedures": "Thủ thuật",
+    "noProcedures": "Không có thủ thuật",
     "noPaymentFound": "Không tìm thấy thông tin thanh toán",
     "procedureName": "Tên Thủ Thuật",
     "amount": "Số Tiền",
     "notDeposited": "Chưa đặt cọc"
-
   },
   "form": {
     "formManagement": "Quản Lý Phiếu Đăng Ký",

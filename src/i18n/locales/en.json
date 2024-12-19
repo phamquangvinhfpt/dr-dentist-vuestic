@@ -784,8 +784,8 @@
     "delete": "Delete",
     "confirmDelete": "Confirm delete",
     "cancel": "Cancel",
-    "unauthorized" : "Unauthorized",
-    "errorOccurred" : "An error occurred"
+    "unauthorized": "Unauthorized",
+    "errorOccurred": "An error occurred"
   },
   "payment": {
     "patientCode": "Patient Code",
@@ -804,14 +804,12 @@
     "paymentInfo": "Payment Information",
     "paymentMethod": "Payment Method",
     "actions": "Actions",
-    "procedures" : "Procedures",
-    "noProcedures" : "No procedures",
+    "procedures": "Procedures",
+    "noProcedures": "No procedures",
     "noPaymentFound": "No payment found",
     "procedureName": "Procedure Name",
     "amount": "Amount",
     "notDeposited": "Not Deposited"
-
-
   },
   "form": {
     "formManagement": "Form Management",
