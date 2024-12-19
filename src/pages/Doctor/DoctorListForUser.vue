@@ -1,23 +1,22 @@
 <template>
-  <VaCard class="doctor-listing-page">
-    <VaCardContent>
-      <div class="md:container md:mx-auto px-4 py-8">
-        <!-- Mobile optimized header -->
-        <div class="text-center mb-6">
-          <h1 class="text-xl va-h2 mb-2">Danh Sách Bác Sĩ</h1>
-          <p class="text-gray-600 dark:text-gray-400 text-sm">Tìm kiếm bác sĩ phù hợp với bạn</p>
+  <VaCard style="padding: 0.5%" class="doctor-listing-page">
+    <VaCardContent style="padding-top: 0%">
+      <div style="padding-top: 0%" class="container mx-auto p-4">
+        <!-- Header -->
+
+        <div style="margin-bottom: 0%" class="text-center mb-6">
+          <h1 class="text-2xl font-semibold text-gray-800 mb-2">Danh Sách Bác Sĩ</h1>
+          <p class="text-gray-600 text-sm">Tìm kiếm bác sĩ phù hợp với bạn</p>
         </div>
 
-        <!-- Search and Filters - Responsive Layout -->
-        <div style="margin-bottom: 2%" class="bg-white rounded-2xl p-4 shadow-md space-y-4">
-          <!-- Search Input -->
+        <!-- Search and Filters -->
+        <div class="bg-white rounded-2xl p-4 shadow-md space-y-4">
           <div class="relative mb-4">
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Tìm bác sĩ..."
-              class="w-full border border-gray-300 rounded-lg py-1 pl-10 pr-4 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300"
-              style="width: 550px"
+              class="w-full border border-gray-300 rounded-lg py-2 pl-10 pr-4 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300"
             />
             <svg
               class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -37,15 +36,13 @@
             </svg>
           </div>
 
-          <!-- Filters: Service Type, Sort By, Order -->
-          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <!-- Service Type -->
+          <!-- Filters -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <label style="font-weight: 600">Loại Dịch Vụ</label>
+              <label class="font-medium text-sm">Loại Dịch Vụ</label>
               <select
-                id="typeService"
                 v-model="selectedTypeService"
-                class="w-full border border-gray-300 rounded-lg py-1 px-3 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+                class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-300"
               >
                 <option value="">Tất cả Dịch Vụ</option>
                 <option v-for="service in typeServiceOptions" :key="service.value" :value="service.value">
@@ -54,27 +51,22 @@
               </select>
             </div>
 
-            <!-- Sort By -->
             <div>
-              <label style="font-weight: 600">Sắp Xếp Theo</label>
+              <label class="font-medium text-sm">Sắp Xếp Theo</label>
               <select
-                id="sortField"
                 v-model="sortField"
-                class="w-full border border-gray-300 rounded-lg py-1 px-3 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+                class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-300"
               >
                 <option value="rating">Đánh Giá</option>
                 <option value="experience">Kinh Nghiệm</option>
               </select>
             </div>
 
-            <!-- Order -->
             <div>
-              <label style="font-weight: 600">Thứ Tự</label>
-
+              <label class="font-medium text-sm">Thứ Tự</label>
               <select
-                id="sortOrder"
                 v-model="sortOrder"
-                class="w-full border border-gray-300 rounded-lg py-1 px-3 focus:ring-2 focus:ring-indigo-300 focus:outline-none"
+                class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-300"
               >
                 <option value="asc">Từ Thấp Đến Cao</option>
                 <option value="desc">Từ Cao Đến Thấp</option>
@@ -83,12 +75,10 @@
           </div>
         </div>
 
-        <!-- Loading state -->
+        <!-- Loading / Error States -->
         <div v-if="loading" class="flex justify-center items-center py-8">
           <VaProgressCircle indeterminate size="large" />
         </div>
-
-        <!-- Error state -->
         <VaAlert v-else-if="error" color="danger" class="mb-6" closeable>
           {{ error }}
           <template #actions>
@@ -96,11 +86,11 @@
           </template>
         </VaAlert>
 
-        <!-- Doctors grid -->
+        <!-- Doctors Grid -->
         <DoctorsGrid v-else :doctors="paginatedDoctors" />
 
-        <!-- Mobile optimized pagination -->
-        <div class="flex flex-col items-center gap-4 mt-6">
+        <!-- Pagination -->
+        <div class="flex justify-center gap-4 mt-6">
           <VaPagination
             v-model="currentPage"
             :pages="totalPages"
@@ -112,7 +102,7 @@
               :disabled="currentPage === 1"
               icon="arrow_back"
               size="small"
-              class="flex-1 sm:flex-none"
+              class="pagination-button"
               @click="prevPage"
             >
               Trước
@@ -121,7 +111,7 @@
               :disabled="currentPage === totalPages"
               icon-right="arrow_forward"
               size="small"
-              class="flex-1 sm:flex-none"
+              class="pagination-button"
               @click="nextPage"
             >
               Sau
@@ -249,16 +239,19 @@ onMounted(() => {
 </script>
 <style scoped>
 .doctor-listing-page {
+  background-color: #f9fafb;
   min-height: 100vh;
-  background-color: var(--va-background-primary);
+  padding: 2rem;
 }
 
-:deep(.va-input__content) {
-  background-color: var(--va-background-element);
-}
-
+:deep(.va-input__content),
 :deep(.va-select__value) {
-  background-color: var(--va-background-element);
+  background-color: #f1f5f9;
+}
+
+:deep(.va-pagination) {
+  justify-content: center;
+  align-items: center;
 }
 
 @media (max-width: 640px) {
@@ -267,22 +260,55 @@ onMounted(() => {
     padding-right: 1rem;
   }
 
-  :deep(.va-pagination) {
+  .va-pagination {
     flex-wrap: wrap;
     justify-content: center;
   }
 }
+
 select {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23444444'><path d='M5.516 7.548a1 1 0 011.416 0L10 10.585l3.068-3.037a1 1 0 011.416 1.415l-3.775 3.744a1 1 0 01-1.415 0l-3.775-3.744a1 1 0 010-1.415z'/></svg>");
-  background-repeat: no-repeat;
+  background-color: #f3f4f6;
+  padding-right: 2.5rem;
   background-position: right 0.75rem center;
   background-size: 1rem;
-  padding-right: 2.5rem;
+  padding-right: 2rem;
+  border-radius: 8px;
 }
-select {
-  background-image: url('custom-arrow-down.svg'); /* Icon tùy chỉnh */
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 2rem; /* Tạo khoảng trống cho icon */
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination-button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.pagination-button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.pagination-button:disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: default;
 }
 </style>

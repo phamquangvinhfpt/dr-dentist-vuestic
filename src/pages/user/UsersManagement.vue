@@ -46,7 +46,7 @@
             <div class="truncate">{{ maskEmail(user.email) }}</div>
             <div>{{ maskPhone(user.phoneNumber) }}</div>
             <div class="flex gap-2 justify-end items-center text-sm">
-              <VaButton color="danger" @click.stop="deleteUser(user.id, user.userName)">
+              <VaButton color="danger">
                 <i class="mdi mdi-delete h-4 w-4 text-red"></i>
               </VaButton>
               <VaButton color="warning" @click.stop="updateUser(user.id)">
@@ -133,17 +133,6 @@ const getAllUsers = async () => {
 const viewDetails = (id: string) => {
   userStore.id = id
   router.push({ name: 'user-detail', params: { id } })
-}
-
-const deleteUser = async (id: string, userName: string) => {
-  if (confirm(`Are you sure you want to delete user ${userName}?`)) {
-    try {
-      await userStore.deleteUser(id)
-      await getAllUsers()
-    } catch (error) {
-      console.error('Error deleting user:', error)
-    }
-  }
 }
 
 const updateUser = (id: string) => {

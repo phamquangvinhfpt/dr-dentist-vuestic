@@ -1,5 +1,5 @@
 <template>
-  <VaCard class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+  <VaCard style="padding-top: 0.5%" class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
       <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">Dịch Vụ Nha Khoa</h1>
       <div style="margin-bottom: 3%; margin-top: 5px" class="flex justify-between items-center mt-6">

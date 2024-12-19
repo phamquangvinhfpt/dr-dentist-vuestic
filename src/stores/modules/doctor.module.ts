@@ -105,7 +105,7 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
           Education: string
           College: string
           Certification: string
-          CertificationImage: string // Thêm CertificationImage
+          CertificationImage: File[]
           YearOfExp: string
           SeftDescription: string
           WorkingType: number

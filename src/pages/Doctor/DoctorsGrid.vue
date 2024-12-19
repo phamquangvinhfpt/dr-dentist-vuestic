@@ -88,4 +88,33 @@ button {
 button:hover {
   transform: scale(1.05);
 }
+.relative.w-full.h-48 img {
+  height: 200px; /* Giảm chiều cao của ảnh bác sĩ */
+  object-fit: cover;
+}
+
+/* Thẻ bác sĩ nhỏ lại */
+
+/* Giảm kích thước chữ */
+.text-lg {
+  font-size: 1.125rem; /* Giảm kích thước font chữ */
+}
+
+/* Giảm kích thước chữ cho chuyên khoa và kinh nghiệm */
+.text-sm {
+  font-size: 0.875rem;
+}
+
+/* Giảm kích thước của các nút */
+button {
+  font-size: 0.875rem; /* Giảm kích thước font chữ của nút */
+  padding: 0.75rem 1.25rem; /* Giảm padding */
+  width: auto; /* Đảm bảo chiều rộng của nút tự động điều chỉnh */
+}
+
+/* Giảm kích thước các biểu tượng sao */
+.va-icon {
+  width: 1rem;
+  height: 1rem;
+}
 </style>

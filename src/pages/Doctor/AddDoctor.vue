@@ -23,7 +23,7 @@ interface DoctorForm {
   confirmPassword: string
   phoneNumber: string
   gender: boolean | null
-  imageUrl: string
+  imageUrl: File[]
   address: string
   typeServiceId: string // Add this line
   birthDate: string
@@ -46,7 +46,7 @@ const doctor = reactive<DoctorForm>({
   phoneNumber: '',
   gender: null,
   typeServiceId: '', // New field for TypeServiceID
-  imageUrl: '',
+  imageUrl: [] as File[],
   address: '',
   birthDate: '',
   role: 'Bác Sĩ',
@@ -77,7 +77,6 @@ const errors = reactive({
 const fileName = ref('')
 const isSubmitting = ref(false)
 const showConfirmation = ref(false)
-const avatarPreview = ref<string | null>(null)
 const showSuccess = ref(false)
 const serviceTypes = ref<{ id: string; typeName: string }[]>([])
 const fetchServiceTypes = async () => {
@@ -238,28 +237,34 @@ watch(
     }
   },
 )
+
 const handleAvatarUpload = (event: Event) => {
   const input = event.target as HTMLInputElement // Cast event.target to HTMLInputElement
   const files = input.files // Access the files property
 
   if (files && files.length > 0) {
-    const file = files[0] // Get the first file
-    const reader = new FileReader()
+    doctor.imageUrl = [] // Initialize as an empty array to store multiple files
 
-    reader.onload = (e) => {
-      doctor.imageUrl = e.target?.result as string // Store the preview URL as a string
-      avatarPreview.value = doctor.imageUrl // Store the preview URL
-      fileName.value = file.name // Lưu tên file vào fileName
-    }
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader()
 
-    reader.readAsDataURL(file) // Read the file as a data URL
+      reader.onload = () => {
+        // Store the file directly in the imageUrl array
+        doctor.imageUrl.push(file) // Store the File object directly
+      }
+
+      reader.readAsDataURL(file) // Read the file as a data URL
+    })
+
+    fileName.value = files.length > 1 ? `${files.length} files selected` : files[0].name // Update fileName to show multiple files
   } else {
-    doctor.imageUrl = '' // Reset if no files are selected
+    doctor.imageUrl = [] // Reset if no files are selected
     fileName.value = '' // Reset file name if no files are selected
   }
 }
 
 const submitForm = async () => {
+  console.log('Working Type:', doctor.WorkingType) // Kiểm tra giá trị
   if (
     !validateEmail(doctor.email) ||
     !validatePhoneNumber(doctor.phoneNumber) ||
@@ -310,10 +315,10 @@ const confirmAddDoctor = async () => {
         Education: doctor.qualification || '',
         College: doctor.qualification || '',
         Certification: doctor.qualification || '',
-        CertificationImage: doctor.imageUrl,
+        CertificationImage: doctor.imageUrl || 'url',
         YearOfExp: doctor.experience.toString(),
         SeftDescription: doctor.description || '',
-        WorkingType: doctor.WorkingType, // Ensure this is a number
+        WorkingType: doctor.WorkingType,
       },
       Role: 'Dentist',
     }
@@ -586,8 +591,8 @@ watch(
             >
               <option
                 v-for="option in [
-                  { value: 0, text: 'Part-time' },
-                  { value: 1, text: 'Full-time' },
+                  { value: 1, text: 'Part-time' },
+                  { value: 2, text: 'Full-time' },
                 ]"
                 :key="option.value"
                 :value="option.value"
@@ -628,7 +633,7 @@ watch(
         <p class="text-gray-600 mb-8">Bạn có chắc chắn muốn thêm bác sĩ này không?</p>
         <VaDivider class="mb-6" />
         <div class="flex justify-end space-x-4">
-          <VaButton color="danger" @click="confirmAddDoctor">Xác nhận</VaButton>
+          <VaButton color="danger" :disabled="isSubmitting" @click="confirmAddDoctor">Xác nhận</VaButton>
           <VaButton @click="showConfirmation = false">Hủy</VaButton>
         </div>
       </div>
