@@ -750,7 +750,12 @@
     "resultPerPage": "Kết quả mỗi trang",
     "delete": "Xóa",
     "confirmDelete": "Xác nhận xóa",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "search": "Tìm kiếm",
+    "reset": "Đặt lại",
+    "unauthorized": "Bạn không có quyền truy cập",
+    "errorOccurred": "Đã xảy ra lỗi"
   },
   "payment": {
     "patientCode": "Mã Bệnh Nhân",
@@ -762,7 +767,19 @@
     "totalAmount": "Tổng Tiền",
     "method": "Phương Thức Thanh Toán",
     "status": "Trạng Thái",
-    "management": "Quản Lý Thanh Toán"
+    "management": "Quản Lý Thanh Toán",
+    "paymentDetail": "Chi Tiết Thanh Toán",
+    "patientInfo": "Thông Tin Bệnh Nhân",
+    "serviceInfo": "Thông Tin Dịch Vụ",
+    "paymentInfo": "Thông Tin Thanh Toán",
+    "paymentMethod": "Phương Thức Thanh Toán",
+    "actions": "Thao Tác",
+    "procedures": "Thủ thuật",
+    "noProcedures": "Không có thủ thuật",
+    "noPaymentFound": "Không tìm thấy thông tin thanh toán",
+    "procedureName": "Tên Thủ Thuật",
+    "amount": "Số Tiền",
+    "notDeposited": "Chưa đặt cọc"
   },
   "form": {
     "formManagement": "Quản Lý Phiếu Đăng Ký",

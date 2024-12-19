@@ -3,7 +3,7 @@
     <VaCard class="payment-card">
       <VaCardTitle class="card-title">
         <i class="fas fa-money-bill-wave title-icon"></i>
-        Payment Management
+        {{ t('payment.myPayments') }}
       </VaCardTitle>
 
       <VaCardContent>
@@ -47,18 +47,6 @@
           sticky-header
           no-data-html="<div class='text-center'>No payments found</div>"
         >
-          <template #cell(patientCode)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ row.rowData.patientCode }}</span>
-            </div>
-          </template>
-
-          <template #cell(patientName)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ row.rowData.patientName }}</span>
-            </div>
-          </template>
-
           <template #cell(serviceName)="{ row }">
             <div class="flex items-center gap-2">
               <span>{{ row.rowData.serviceName }}</span>
@@ -102,11 +90,24 @@
               </span>
             </div>
           </template>
+
+          <template #cell(actions)="{ row }">
+            <div class="flex items-center gap-2">
+              <VaButton
+                v-tooltip="t('common.view')"
+                icon="visibility"
+                preset="secondary"
+                size="small"
+                class="action-button"
+                @click="router.push(`/payment/${row.rowData.paymentId}`)"
+              />
+            </div>
+          </template>
         </VaDataTable>
 
         <VaCardContent>
           <div
-            v-if="paginatedPayments.length > 0"
+            v-if="paymentList.length > 0"
             class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2"
           >
             <div>
@@ -140,25 +141,23 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import { usePaymentStore } from '@/stores/modules/payment.module'
-import { useRoute, useRouter } from 'vue-router'
-import { onMounted, ref, reactive, computed, watch } from 'vue'
+<script setup lang="ts">
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vuestic-ui'
-import { PaymentMethod, PaymentStatus } from './types'
-import type { PaginationFilter } from './types'
-import type { PaginationResponse, PaymentDTO } from './types'
+import { usePaymentStore } from '@/stores/modules/payment.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
+import { PaymentMethod, PaymentStatus } from './types'
+import type { PaginationFilter, PaginationResponse, PaymentDTO } from './types'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
 const { init } = useToast()
+const router = useRouter()
 const paymentStore = usePaymentStore()
 const authStore = useAuthStore()
 
-const route = useRoute()
-const router = useRouter()
-
+// State
 const formData = reactive<PaginationFilter>({
   pageNumber: 1,
   pageSize: 10,
@@ -167,6 +166,10 @@ const formData = reactive<PaginationFilter>({
 
 const searchKeyword = ref('')
 const currentPage = ref(1)
+const startDate = ref(new Date().toISOString().split('T')[0])
+const endDate = ref(new Date().toISOString().split('T')[0])
+const maxDate = ref(new Date().toISOString().split('T')[0])
+
 const isLoading = computed(() => paymentStore.isLoading)
 const paymentListResponse = ref<PaginationResponse<PaymentDTO> | null>(null)
 const paymentList = ref<PaymentDTO[]>([])
@@ -179,9 +182,9 @@ const filteredPayments = computed(() => {
 
   return paymentList.value.filter(
     (payment) =>
-      (payment.patientCode || '').toLowerCase().includes(query) ||
-      (payment.patientName || '').toLowerCase().includes(query) ||
-      (payment.serviceName || '').toLowerCase().includes(query),
+      (payment.serviceName?.toLowerCase() || '').includes(query) ||
+      (payment.patientCode?.toLowerCase() || '').includes(query) ||
+      formatPrice(payment.totalAmount).toLowerCase().includes(query),
   )
 })
 
@@ -202,24 +205,22 @@ const paginatedPayments = computed(() => {
   return paymentList.value
 })
 
+// Columns
 const columns = [
-  { key: 'patientCode', label: t('payment.patientCode') },
-  { key: 'patientName', label: t('payment.patientName') },
   { key: 'serviceName', label: t('payment.serviceName') },
   { key: 'depositAmount', label: t('payment.depositAmount') },
+  { key: 'depositDate', label: t('payment.depositDate') },
   { key: 'remainingAmount', label: t('payment.remainingAmount') },
   { key: 'totalAmount', label: t('payment.totalAmount') },
   { key: 'method', label: t('payment.method') },
   { key: 'status', label: t('payment.status') },
+  { key: 'actions', label: '' },
 ]
 
-const startDate = ref((route.params.startDate as string) || new Date().toISOString().split('T')[0])
-const endDate = ref((route.params.endDate as string) || new Date().toISOString().split('T')[0])
-const maxDate = ref(new Date().toISOString().split('T')[0])
-
+// Methods
 const getAllPaymentsPagination = async () => {
   try {
-    const res = await paymentStore.getAllPayments(
+    const res = await paymentStore.getPatientPayments(
       {
         pageNumber: currentPage.value,
         pageSize: formData.pageSize,
@@ -233,12 +234,46 @@ const getAllPaymentsPagination = async () => {
     paymentListResponse.value = res
     paymentList.value = res.data
   } catch (error) {
-    console.error('Error fetching payments:', error)
+    console.error('Error:', error)
     paymentListResponse.value = null
     paymentList.value = []
+    init({
+      message: t('common.errorOccurred'),
+      color: 'danger',
+      duration: 3000,
+    })
   }
 }
 
+const handleSearch = () => {
+  currentPage.value = 1
+  if (!searchKeyword.value.trim()) {
+    getAllPaymentsPagination()
+  }
+}
+
+const handleDateChange = () => {
+  if (new Date(endDate.value) > new Date(maxDate.value)) {
+    endDate.value = maxDate.value
+  }
+  if (new Date(endDate.value) < new Date(startDate.value)) {
+    endDate.value = startDate.value
+  }
+  getAllPaymentsPagination()
+}
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  getAllPaymentsPagination()
+}
+
+const handlePageSizeChange = (size: number) => {
+  formData.pageSize = size
+  currentPage.value = 1
+  getAllPaymentsPagination()
+}
+
+// Helpers
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -246,7 +281,7 @@ const formatPrice = (price: number) => {
   }).format(price)
 }
 
-const formatDate = (date: string | null) => {
+const formatDate = (date: Date | null) => {
   if (!date) return 'N/A'
 
   try {
@@ -312,50 +347,18 @@ const getStatusClass = (status: number) => {
   }
 }
 
-const handlePageChange = (page: number) => {
-  currentPage.value = page
-  if (!searchKeyword.value.trim()) {
-    getAllPaymentsPagination()
+// Lifecycle
+onMounted(async () => {
+  if (!authStore.musHaveRole('Patient')) {
+    init({
+      message: t('common.unauthorized'),
+      color: 'danger',
+      duration: 3000,
+    })
+    router.push({ name: 'dashboard' })
+    return
   }
-}
-
-const handlePageSizeChange = (size: number) => {
-  formData.pageSize = size
-  currentPage.value = 1
-  if (!searchKeyword.value.trim()) {
-    getAllPaymentsPagination()
-  }
-}
-
-const handleSearch = () => {
-  currentPage.value = 1
-  if (!searchKeyword.value.trim()) {
-    getAllPaymentsPagination()
-  }
-}
-
-const handleDateChange = () => {
-  if (new Date(endDate.value) > new Date(maxDate.value)) {
-    endDate.value = maxDate.value
-  }
-
-  if (new Date(endDate.value) < new Date(startDate.value)) {
-    endDate.value = startDate.value
-  }
-
-  router.push(`/payment-management/${startDate.value}/${endDate.value}`)
-  getAllPaymentsPagination()
-}
-
-let searchTimeout: NodeJS.Timeout
-watch(searchKeyword, (newValue) => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    if (!newValue.trim()) {
-      getAllPaymentsPagination()
-    }
-    currentPage.value = 1
-  }, 300)
+  await getAllPaymentsPagination()
 })
 
 watch(
@@ -366,31 +369,15 @@ watch(
   { deep: true },
 )
 
-onMounted(async () => {
-  // Check if user is Admin
-  if (!authStore.musHaveRole('Admin')) {
-    init({
-      message: t('common.unauthorized'),
-      color: 'danger',
-      duration: 3000,
-    })
-    router.push({ name: 'dashboard' })
-    return
-  }
-
-  if (!route.params.startDate || !route.params.endDate) {
-    const today = new Date().toISOString().split('T')[0]
-    startDate.value = today
-    endDate.value = today
-    await router.push(`/payment-management/${today}/${today}`)
-  } else {
-    if (new Date(endDate.value) > new Date(maxDate.value)) {
-      endDate.value = maxDate.value
-      await router.push(`/payment-management/${startDate.value}/${maxDate.value}`)
+let searchTimeout: ReturnType<typeof setTimeout>
+watch(searchKeyword, (newValue) => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    if (!newValue.trim()) {
+      getAllPaymentsPagination()
     }
-  }
-
-  await getAllPaymentsPagination()
+    currentPage.value = 1
+  }, 300)
 })
 </script>
 
@@ -418,5 +405,11 @@ onMounted(async () => {
 
 .va-table-responsive {
   overflow: auto;
+}
+
+.action-button {
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
 }
 </style>

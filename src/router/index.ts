@@ -242,6 +242,23 @@ const routes: Array<RouteRecordRaw> = [
         ],
       },
       {
+        name: 'payment-for-patient',
+        path: 'payment-for-patient',
+        meta: {
+          requiresAuth: true,
+        },
+        redirect: () => {
+          const today = new Date().toISOString().split('T')[0]
+          return `/payment-for-patient/${today}/${today}`
+        },
+        children: [
+          {
+            path: ':startDate/:endDate',
+            component: () => import('../pages/PaymentPages/PaymentForPatient.vue'),
+          },
+        ],
+      },
+      {
         name: 'form-application',
         path: 'form-application',
         meta: {
@@ -333,6 +350,15 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/pages/working-calendar/WorkingManager.vue'),
         meta: {
           requiresAuth: true,
+        },
+      },
+      {
+        path: '/payment-detail/:id',
+        name: 'payment-detail',
+        component: () => import('@/pages/PaymentPages/PaymentDetail.vue'),
+        meta: {
+          requiresAuth: true,
+          roles: ['Patient'],
         },
       },
       {

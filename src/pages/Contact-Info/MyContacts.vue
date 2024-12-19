@@ -187,45 +187,115 @@
     </VaModal>
 
     <!-- Send Email Modal -->
-    <VaModal v-model="showEmailModal" title="Send Email" hide-default-actions>
-      <div class="p-4">
-        <VaInput v-model="emailContext" type="textarea" placeholder="Enter email content..." rows="5" />
+    <VaModal v-model="showEmailModal" title="Send Email" hide-default-actions class="email-modal">
+      <div class="p-6">
+        <!-- Email field -->
+        <div class="mb-6">
+          <div class="flex items-center border-b border-gray-200 pb-2">
+            <span class="text-sm font-medium w-16 text-gray-600">Email:</span>
+            <VaInput
+              v-model="emailData.to"
+              type="email"
+              readonly
+              class="flex-grow"
+              :style="{
+                '--va-input-wrapper-border-color': 'transparent',
+                '--va-input-wrapper-background': 'transparent',
+              }"
+            />
+          </div>
+        </div>
+
+        <!-- Subject field -->
+        <div class="mb-6">
+          <div class="flex items-center border-b border-gray-200 pb-2">
+            <span class="text-sm font-medium w-16 text-gray-600">Subject:</span>
+            <VaInput
+              v-model="emailData.subject"
+              placeholder="Enter subject"
+              class="flex-grow"
+              :style="{
+                '--va-input-wrapper-border-color': 'transparent',
+                '--va-input-wrapper-background': 'transparent',
+              }"
+            />
+          </div>
+        </div>
+
+        <!-- Message content -->
+        <div class="email-content">
+          <VaTextarea
+            v-model="emailData.content"
+            rows="12"
+            placeholder="Write your message here..."
+            class="w-full"
+            autosize
+            :style="{
+              '--va-textarea-background': 'var(--va-background-primary)',
+              '--va-textarea-border-color': 'var(--va-background-border)',
+            }"
+          />
+        </div>
       </div>
+
       <template #footer>
-        <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showEmailModal = false">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="submitEmail"> Send Email </VaButton>
+        <div class="flex justify-end items-center px-6 py-4 border-t">
+          <div class="flex gap-4">
+            <VaButton color="gray" @click="showEmailModal = false">Cancel</VaButton>
+            <VaButton color="primary" :loading="isSubmitting" @click="submitEmail"> Send </VaButton>
+          </div>
         </div>
       </template>
     </VaModal>
 
     <!-- Update Call Image Modal -->
-    <VaModal v-model="showImageModal" title="Upload Images" hide-default-actions>
-      <div class="p-4">
-        <div class="mb-4">
-          <VaFileUpload
-            v-model="selectedImages"
-            multiple
-            accept="image/*"
-            placeholder="Drop images here or click to upload"
-            hide-file-list
-          />
+    <VaModal v-model="showImageModal" title="Upload Images" hide-default-actions class="upload-modal">
+      <div class="p-6">
+        <p class="text-sm text-gray-600 mb-4">Upload images to update call image</p>
+
+        <div
+          class="upload-area mb-6"
+          @dragover.prevent="handleDragOver"
+          @dragleave.prevent="handleDragLeave"
+          @drop.prevent="handleDrop"
+        >
+          <div
+            class="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-gray-50"
+            :class="isDragging ? 'border-primary border-solid' : 'border-gray-300'"
+          >
+            <div class="mb-4">
+              <i class="va-icon material-icons text-4xl text-gray-400">cloud_upload</i>
+            </div>
+            <p class="text-center mb-2">Drag and drop image files to upload</p>
+            <p class="text-sm text-gray-500 mb-4">Or click the button below</p>
+            <VaFileUpload
+              v-model="selectedImages"
+              multiple
+              accept="image/*"
+              hide-file-list
+              class="upload-btn"
+              @paste="handlePaste"
+            >
+              <VaButton color="primary">Select files</VaButton>
+            </VaFileUpload>
+          </div>
         </div>
 
-        <!-- Thêm phần preview hình ảnh -->
-        <div v-if="imagePreviewUrls.length" class="image-preview-grid">
+        <!-- Preview Grid -->
+        <div v-if="imagePreviewUrls.length" class="preview-grid mb-6">
           <div v-for="(url, index) in imagePreviewUrls" :key="index" class="preview-item">
-            <img :src="url" :alt="`Preview ${index + 1}`" class="preview-thumbnail" />
+            <img :src="url" :alt="`Preview ${index + 1}`" class="preview-image" />
             <button class="remove-btn" @click="removeImage(index)">
               <i class="va-icon material-icons">close</i>
             </button>
           </div>
         </div>
       </div>
+
       <template #footer>
-        <div class="flex justify-end gap-2">
+        <div class="flex justify-end gap-4 p-4 border-t">
           <VaButton color="gray" @click="closeImageModal">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="submitImages"> Upload Images </VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="submitImages"> Add to profile </VaButton>
         </div>
       </template>
     </VaModal>
@@ -368,19 +438,46 @@ let searchTimeout: NodeJS.Timeout
 // New refs for modals and data
 const showEmailModal = ref(false)
 const showImageModal = ref(false)
-const emailContext = ref('')
+const emailData = reactive({
+  to: '',
+  subject: '',
+  content: '',
+})
 const selectedImages = ref<File[]>([])
 const isSubmitting = ref(false)
 const selectedContactId = ref('')
 
-// Handle send email
+// Thêm hàm để tạo template email
+const generateDentalEmailTemplate = (patientName: string) => {
+  return `Dear ${patientName},
+
+Thank you for contacting Dental Clinic. We have received your inquiry and would like to provide you with the following information:
+
+Regarding your dental consultation request, we would like to:
+- Confirm your appointment details
+- Provide information about the requested treatment
+- Answer any specific questions you may have
+
+Our dental team is committed to providing you with the highest quality of care. If you need any additional information or would like to reschedule your appointment, please don't hesitate to contact us.
+
+Best regards,
+Dental Care Team
+Phone: (123) 456-7890
+Email: contact@dentalcare.com`
+}
+
+// Cập nhật hàm handleSendEmail
 const handleSendEmail = (contact: ContactInfo) => {
   selectedContactId.value = contact.contactId
+  selectedContact.value = contact
+  emailData.to = contact.email
+  emailData.subject = 'Re: Dental Care Consultation'
+  emailData.content = generateDentalEmailTemplate(contact.title)
   showEmailModal.value = true
 }
 
 const submitEmail = async () => {
-  if (!emailContext.value.trim()) {
+  if (!emailData.content.trim()) {
     init({
       message: 'Please enter email content',
       color: 'warning',
@@ -391,9 +488,13 @@ const submitEmail = async () => {
 
   try {
     isSubmitting.value = true
-    await contactStaffStore.sendEmail(selectedContactId.value, emailContext.value)
+    await contactStaffStore.sendEmail(selectedContactId.value, emailData.content)
     showEmailModal.value = false
-    emailContext.value = ''
+    // Reset form data
+    emailData.to = ''
+    emailData.subject = ''
+    emailData.content = ''
+
     init({
       message: 'Email sent successfully',
       color: 'success',
@@ -491,24 +592,67 @@ const getImageSrc = (imageUrl: string) => {
   return `${url_without_api}${imageUrl}`
 }
 
-// Thêm các biến mới
-const imagePreviewUrls = ref<string[]>([])
-
-// Watch selectedImages để tạo preview URLs
-watch(selectedImages, (files) => {
-  imagePreviewUrls.value = []
-  if (files && files.length) {
-    files.forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          imagePreviewUrls.value.push(e.target.result as string)
-        }
+// Hàm helper để tạo preview cho files
+const createPreviewsForFiles = (files: File[]) => {
+  files.forEach((file) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        imagePreviewUrls.value.push(e.target.result as string)
       }
-      reader.readAsDataURL(file)
-    })
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
+// Handle drag & drop
+const handleDragOver = (event: DragEvent) => {
+  isDragging.value = true
+  event.dataTransfer!.dropEffect = 'copy'
+}
+
+const handleDragLeave = () => {
+  isDragging.value = false
+}
+
+const handleDrop = (event: DragEvent) => {
+  isDragging.value = false
+  const files = Array.from(event.dataTransfer!.files)
+  const imageFiles = files.filter((file) => file.type.startsWith('image/'))
+
+  if (imageFiles.length) {
+    selectedImages.value = [...selectedImages.value, ...imageFiles]
+    // Không cần gọi createPreviewsForFiles ở đây vì watch sẽ xử lý
+  }
+}
+
+// Watch selectedImages để xử lý khi có thay đổi (từ cả drag & drop và button upload)
+watch(selectedImages, (files) => {
+  if (files && files.length) {
+    // Reset previews và tạo mới cho tất cả files
+    imagePreviewUrls.value = []
+    createPreviewsForFiles(files)
+  } else {
+    // Reset previews nếu không có files
+    imagePreviewUrls.value = []
   }
 })
+
+// Handle paste from clipboard
+const handlePaste = (event: ClipboardEvent) => {
+  const items = event.clipboardData?.items
+  if (!items) return
+
+  for (const item of Array.from(items)) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile()
+      if (file) {
+        selectedImages.value = [...selectedImages.value, file]
+        // Không cần gọi createPreviewsForFiles ở đây vì watch sẽ xử lý
+      }
+    }
+  }
+}
 
 // Hàm xóa ảnh
 const removeImage = (index: number) => {
@@ -522,6 +666,12 @@ const closeImageModal = () => {
   selectedImages.value = []
   imagePreviewUrls.value = []
 }
+
+// Thêm ref để track trạng thái kéo thả
+const isDragging = ref(false)
+
+// Thêm vào phần đầu của script, cùng với các ref khác
+const imagePreviewUrls = ref<string[]>([])
 </script>
 
 <style scoped>
@@ -647,7 +797,6 @@ const closeImageModal = () => {
   aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid var(--va-primary);
 }
 
 .preview-thumbnail {
@@ -660,7 +809,7 @@ const closeImageModal = () => {
   position: absolute;
   top: 4px;
   right: 4px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   color: white;
   border-radius: 50%;
   width: 24px;
@@ -670,10 +819,104 @@ const closeImageModal = () => {
   justify-content: center;
   cursor: pointer;
   border: none;
-  padding: 0;
+  transition: background 0.2s;
 }
 
 .remove-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Thêm vào phần style hiện có */
+.email-modal {
+  max-width: 600px !important;
+}
+
+.email-modal :deep(.va-input__content) {
+  border: none !important;
+  padding: 0;
+}
+
+.email-content {
+  background-color: var(--va-background-primary);
+  border-radius: 8px;
+}
+
+.email-content :deep(.va-textarea__content) {
+  padding: 12px;
+}
+
+/* Remove default input styles */
+:deep(.va-input-wrapper) {
+  background: transparent !important;
+  border: none !important;
+}
+
+:deep(.va-input__content) {
+  padding: 0 !important;
+}
+
+.upload-modal {
+  max-width: 500px !important;
+}
+
+.upload-area {
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  border-color: var(--va-primary);
+}
+
+.upload-btn :deep(.va-file-upload__button) {
+  display: none;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+}
+
+.preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.remove-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.upload-area {
+  transition: all 0.3s ease;
+}
+
+.border-primary {
+  border-color: var(--va-primary) !important;
+  background-color: var(--va-background-secondary) !important;
 }
 </style>
