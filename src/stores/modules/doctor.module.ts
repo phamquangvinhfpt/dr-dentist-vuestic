@@ -117,7 +117,6 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         this.isLoading = true
         const response = await doctorService.createDoctor(doctorData)
         this.isLoading = false
-        await this.getDoctors(null)
         return response
       } catch (error) {
         this.isLoading = false

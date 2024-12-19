@@ -2,34 +2,33 @@
   <VaCard class="min-h-screen bg-gradient-to-br from-indigo-50 to-white py-10 px-6 sm:px-10">
     <div class="max-w-4xl mx-auto space-y-10">
       <!-- Thông Tin Bác Sĩ -->
-      <VaCard class="bg-white rounded-2xl shadow-lg p-8 flex flex-col">
-        <div class="flex">
+      <VaCard class="bg-white rounded-2xl shadow-xl p-8 flex flex-col">
+        <div class="flex flex-col md:flex-row items-center md:items-start">
           <img
-            :src="
-              doctor.imageUrl ||
-              'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-            "
+            :src="doctor.imageUrl || 'https://via.placeholder.com/150'"
             alt="Hồ sơ bác sĩ"
-            class="relative inline-block h-12 w-12 md:h-32 md:w-32 !rounded-full object-cover object-center"
+            class="h-28 w-28 md:h-36 md:w-36 rounded-full object-cover shadow-lg"
           />
-          <div class="ml-6 flex-1">
-            <h1 class="va-h1 text-xl md:text-3xl font-bold">{{ doctor.firstName }} {{ doctor.lastName }}</h1>
-            <span v-for="i in 5" :key="i" class="text-sm md:text-xl">
+          <div class="md:ml-6 mt-6 md:mt-0 text-center md:text-left flex-1">
+            <h1 class="text-2xl font-bold text-gray-800">{{ doctor.firstName }} {{ doctor.lastName }}</h1>
+            <div class="flex items-center justify-center md:justify-start mt-2">
               <span
-                class="material-symbols-outlined"
+                v-for="i in 5"
+                :key="i"
+                class="material-symbols-outlined text-2xl"
                 :class="i <= Math.round(doctor.rating || 0) ? 'text-yellow-400' : 'text-gray-300'"
               >
                 star
               </span>
-            </span>
-            <span class="ml-2 text-[10px] md:text-sm text-gray-500">({{ doctor.totalFeedback }} đánh giá)</span>
-            <p><MailIcon class="h-5 w-5 mr-2 text-indigo-600" /> {{ doctor.email }}</p>
-            <p><PhoneIcon class="h-5 w-5 mr-2 text-indigo-600" /> {{ doctor.phoneNumber }}</p>
+              <span class="ml-2 text-gray-500 text-sm">({{ doctor.totalFeedback }} đánh giá)</span>
+            </div>
+            <p class="mt-4 text-sm text-gray-700"><strong>Email:</strong> {{ doctor.email }}</p>
+            <p class="text-sm text-gray-700"><strong>Điện Thoại:</strong> {{ doctor.phoneNumber }}</p>
           </div>
         </div>
-        <div class="flex justify-end mt-4">
+        <div class="flex justify-end mt-6">
           <button
-            class="w-fit bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition"
+            class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
             @click="bookAppointment"
           >
             Đặt Lịch Ngay
@@ -38,38 +37,59 @@
       </VaCard>
 
       <!-- Thông Tin Chuyên Môn -->
-      <VaCard class="bg-white rounded-2xl shadow-lg p-8">
-        <h2 class="text-2xl font-bold mb-6">Thông Tin Chuyên Môn</h2>
+      <VaCard class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Thông Tin Chuyên Môn</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <h3 class="text-sm">Học Vấn:</h3>
+            <h3 class="text-sm text-gray-500">Học Vấn:</h3>
             <p class="font-medium">{{ doctor.doctorProfile.education }}</p>
-            <p class="">{{ doctor.doctorProfile.college }}</p>
+            <p>{{ doctor.doctorProfile.college }}</p>
           </div>
           <div>
-            <h3 class="text-sm">Số Năm Kinh Nghiệm:</h3>
+            <h3 class="text-sm text-gray-500">Số Năm Kinh Nghiệm:</h3>
             <p class="font-medium">{{ doctor.doctorProfile.yearOfExp }}</p>
           </div>
           <div>
-            <h3 class="text-sm">Loại Hình Làm Việc:</h3>
+            <h3 class="text-sm text-gray-500">Loại Hình Làm Việc:</h3>
             <p class="font-medium">
               {{ doctor.doctorProfile.workingType === 2 ? 'Toàn Thời Gian' : 'Bán Thời Gian' }}
             </p>
           </div>
           <div>
-            <h3 class="text-sm">Chứng Chỉ:</h3>
+            <h3 class="text-sm text-gray-500">Chứng Chỉ:</h3>
             <p class="font-medium">{{ doctor.doctorProfile.certification }}</p>
           </div>
           <div class="col-span-full">
-            <h3 class="text-sm">Về Tôi:</h3>
-            <p class="">{{ doctor.doctorProfile.seftDescription }}</p>
+            <h3 class="text-sm text-gray-500">Về Tôi:</h3>
+            <p>{{ doctor.doctorProfile.seftDescription }}</p>
           </div>
         </div>
       </VaCard>
 
       <!-- Phản Hồi Từ Bệnh Nhân -->
-      <VaCard class="bg-white rounded-2xl shadow-lg p-8">
-        <h2 class="text-2xl font-bold mb-6">Phản Hồi Từ Bệnh Nhân</h2>
+      <VaCard class="bg-white rounded-xl shadow-lg p-6">
+        <!-- Tiêu đề -->
+        <h2 class="text-2xl font-bold mb-4">Phản Hồi Từ Bệnh Nhân</h2>
+        <VaCard class="">
+          <div class="flex justify-center gap-2 mb-6">
+            <button
+              v-for="i in 6"
+              :key="i"
+              :class="{
+                'bg-indigo-600 text-white shadow-md': selectedRating === i,
+                'bg-gray-100 text-gray-700 hover:bg-gray-200': selectedRating !== i,
+              }"
+              class="px-4 py-2 rounded-lg transition-all duration-200"
+              @click="filterRating(i)"
+            >
+              <span v-if="i === 6" class="text-sm font-semibold">Tất Cả</span>
+              <span v-else class="flex items-center space-x-1 text-sm font-semibold">
+                <span>{{ i }}</span>
+                <span class="material-icons text-yellow-500">star</span>
+              </span>
+            </button>
+          </div>
+        </VaCard>
         <div class="space-y-6">
           <div
             v-for="review in paginatedReviews"
@@ -103,6 +123,8 @@
             </button>
           </div>
         </div>
+        <!-- Bộ lọc đánh giá -->
+
         <div class="flex justify-between mt-8">
           <button
             :disabled="currentPage === 1"
@@ -232,6 +254,10 @@ const itemsPerPage = 4
 
 // Function to check if user is online
 const isUserOnline = (patientID: string) => {
+  console.log(
+    'Danh sách người dùng trực tuyến:',
+    onlineUsersStore.onlineUsers.some((user) => user === patientID),
+  )
   return onlineUsersStore.onlineUsers.some((user) => user === patientID)
 }
 
@@ -269,27 +295,50 @@ onMounted(async () => {
     console.error('Lỗi khi lấy dữ liệu bác sĩ:', error)
   }
 })
+const selectedRating = ref(6) // State for selected rating filter
 
-// Tính toán các đánh giá phân trang
+// Hàm lọc dựa trên số sao
+const filterRating = (rating: number) => {
+  selectedRating.value = rating
+  currentPage.value = 1 // Reset to first page when filtering
+}
+
+// Phản hồi phân trang có tích hợp lọc rating
 const paginatedReviews = computed(() => {
-  const onlineReviews = doctor.value.doctorFeedback.filter((review) => isUserOnline(review.patientID))
-  const offlineReviews = doctor.value.doctorFeedback.filter((review) => !isUserOnline(review.patientID))
+  // Lọc phản hồi dựa trên số sao
+  const filteredReviews =
+    selectedRating.value === 6
+      ? doctor.value.doctorFeedback // Không lọc nếu selectedRating = 6
+      : doctor.value.doctorFeedback.filter((review) => review.ratings === selectedRating.value)
 
-  // Kết hợp các phản hồi trực tuyến và ngoại tuyến
+  // Phân chia phản hồi thành online và offline
+  const onlineReviews = filteredReviews.filter((review) => isUserOnline(review.patientID))
+  const offlineReviews = filteredReviews.filter((review) => !isUserOnline(review.patientID))
+
+  // Kết hợp phản hồi trực tuyến và ngoại tuyến
   const combinedReviews = [...onlineReviews, ...offlineReviews]
 
+  // Lấy dữ liệu theo phân trang
   const start = (currentPage.value - 1) * itemsPerPage
   return combinedReviews.slice(start, start + itemsPerPage)
 })
 
-// Tính tổng số trang
+// Tính tổng số trang dựa trên bộ lọc hiện tại
 const totalPages = computed(() => {
-  const onlineReviews = doctor.value.doctorFeedback.filter((review) => isUserOnline(review.patientID))
-  const offlineReviews = doctor.value.doctorFeedback.filter((review) => !isUserOnline(review.patientID))
+  // Lọc phản hồi dựa trên số sao
+  const filteredReviews =
+    selectedRating.value === 6
+      ? doctor.value.doctorFeedback
+      : doctor.value.doctorFeedback.filter((review) => review.ratings === selectedRating.value)
 
-  // Kết hợp các phản hồi trực tuyến và ngoại tuyến
+  // Phân chia phản hồi thành online và offline
+  const onlineReviews = filteredReviews.filter((review) => isUserOnline(review.patientID))
+  const offlineReviews = filteredReviews.filter((review) => !isUserOnline(review.patientID))
+
+  // Kết hợp phản hồi trực tuyến và ngoại tuyến
   const combinedReviews = [...onlineReviews, ...offlineReviews]
 
+  // Tính tổng số trang
   return Math.ceil(combinedReviews.length / itemsPerPage)
 })
 

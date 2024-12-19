@@ -9,7 +9,7 @@
         <template #prepend>
           <i class="mdi mdi-plus mr-2"></i>
         </template>
-        Add User
+        Add Staff
       </VaButton>
     </div>
 
@@ -97,10 +97,10 @@ const filteredUsers = computed(() => {
   return query
     ? userList.value.filter(
         (user) =>
-          user.role === 'Patient' &&
+          user.role === 'Staff' &&
           (user.email?.toLowerCase().includes(query) || user.userName?.toLowerCase().includes(query)),
       )
-    : userList.value.filter((user) => user.role === 'Patient')
+    : userList.value.filter((user) => user.role === 'Staff')
 })
 
 const currentPage = ref(1)
