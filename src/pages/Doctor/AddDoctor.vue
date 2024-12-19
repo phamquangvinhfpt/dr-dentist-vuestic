@@ -6,7 +6,6 @@ import { useServiceStore } from '@/stores/modules/service.module'
 
 import { useToast } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
-import { VaFile } from 'vuestic-ui'
 
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()
@@ -24,7 +23,7 @@ interface DoctorForm {
   confirmPassword: string
   phoneNumber: string
   gender: boolean | null
-  imageUrl: VaFile | VaFile[] | undefined
+  imageUrl: File[]
   address: string
   typeServiceId: string // Add this line
   birthDate: string
@@ -47,7 +46,7 @@ const doctor = reactive<DoctorForm>({
   phoneNumber: '',
   gender: null,
   typeServiceId: '', // New field for TypeServiceID
-  imageUrl: undefined,
+  imageUrl: [] as File[],
   address: '',
   birthDate: '',
   role: 'Bác Sĩ',
@@ -75,10 +74,9 @@ const errors = reactive({
   consultationFee: { error: false, message: '' },
   description: { error: false, message: '' },
 })
-
+const fileName = ref('')
 const isSubmitting = ref(false)
 const showConfirmation = ref(false)
-const avatarPreview = ref<string | null>(null)
 const showSuccess = ref(false)
 const serviceTypes = ref<{ id: string; typeName: string }[]>([])
 const fetchServiceTypes = async () => {
@@ -130,7 +128,7 @@ const validatePhoneNumber = (phone: string) => {
     return false
   }
   if (!/^\d{10,}$/.test(phone)) {
-    errors.phoneNumber = { error: true, message: 'Số điện thoại phải chứa ít nhất 10 chữ số' }
+    errors.phoneNumber = { error: true, message: 'Số điện thoại phải chứa  10 chữ số' }
     validFields.phoneNumber = false
     return false
   }
@@ -150,9 +148,20 @@ const validateUserName = (userName: string) => {
   return true
 }
 
+const validateName = (name: string): boolean => {
+  const trimmedName = name.trim() // Loại bỏ khoảng trắng ở đầu và cuối
+  const namePattern = /^[A-Za-zÀ-ÿ\s]+$/ // Regex to allow letters and spaces
+  return namePattern.test(trimmedName)
+}
+
 const validateFirstName = (firstName: string) => {
   if (!firstName?.trim()) {
     errors.firstName = { error: true, message: 'Họ là bắt buộc' }
+    validFields.firstName = false
+    return false
+  }
+  if (!validateName(firstName)) {
+    errors.firstName = { error: true, message: 'Họ chỉ được chứa chữ cái' }
     validFields.firstName = false
     return false
   }
@@ -164,6 +173,11 @@ const validateFirstName = (firstName: string) => {
 const validateLastName = (lastName: string) => {
   if (!lastName?.trim()) {
     errors.lastName = { error: true, message: 'Tên là bắt buộc' }
+    validFields.lastName = false
+    return false
+  }
+  if (!validateName(lastName)) {
+    errors.lastName = { error: true, message: 'Tên chỉ được chứa chữ cái' }
     validFields.lastName = false
     return false
   }
@@ -224,24 +238,33 @@ watch(
   },
 )
 
-const handleAvatarUpload = (files: VaFile[]) => {
-  if (files.length > 0) {
-    const file = files[0] // Get the first file
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const result = e.target?.result // Get the result from the FileReader
-      if (result) {
-        doctor.imageUrl = [{ url: result as string }] // Wrap the result in an array with the correct structure
-        avatarPreview.value = result as string // Store the preview URL
+const handleAvatarUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement // Cast event.target to HTMLInputElement
+  const files = input.files // Access the files property
+
+  if (files && files.length > 0) {
+    doctor.imageUrl = [] // Initialize as an empty array to store multiple files
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader()
+
+      reader.onload = () => {
+        // Store the file directly in the imageUrl array
+        doctor.imageUrl.push(file) // Store the File object directly
       }
-    }
-    reader.readAsDataURL(file as Blob) // Cast to Blob if necessary
+
+      reader.readAsDataURL(file) // Read the file as a data URL
+    })
+
+    fileName.value = files.length > 1 ? `${files.length} files selected` : files[0].name // Update fileName to show multiple files
   } else {
-    doctor.imageUrl = undefined // Reset if no files are selected
+    doctor.imageUrl = [] // Reset if no files are selected
+    fileName.value = '' // Reset file name if no files are selected
   }
 }
 
 const submitForm = async () => {
+  console.log('Working Type:', doctor.WorkingType) // Kiểm tra giá trị
   if (
     !validateEmail(doctor.email) ||
     !validatePhoneNumber(doctor.phoneNumber) ||
@@ -278,7 +301,7 @@ const confirmAddDoctor = async () => {
       FirstName: doctor.firstName,
       LastName: doctor.lastName,
       Email: doctor.email,
-      IsMale: doctor.gender === true,
+      IsMale: doctor.gender || true,
       BirthDay: doctor.birthDate,
       UserName: doctor.userName,
       Password: doctor.password,
@@ -290,12 +313,12 @@ const confirmAddDoctor = async () => {
         DoctorID: '', // Set appropriate value if needed
         TypeServiceID: doctor.typeServiceId || '', // Use a fallback value if null
         Education: doctor.qualification || '',
-        College: doctor.specialization || '',
+        College: doctor.qualification || '',
         Certification: doctor.qualification || '',
-        CertificationImage: (doctor.imageUrl as VaFile[])?.[0]?.url || '', // Provide an empty string as a fallback
+        CertificationImage: doctor.imageUrl || 'url',
         YearOfExp: doctor.experience.toString(),
         SeftDescription: doctor.description || '',
-        WorkingType: doctor.WorkingType, // Ensure this is a number
+        WorkingType: doctor.WorkingType,
       },
       Role: 'Dentist',
     }
@@ -323,13 +346,8 @@ const confirmAddDoctor = async () => {
 
 const closeSuccessModal = () => {
   showSuccess.value = false
-  router.push({ name: 'doctors-list' })
+  router.push({ name: 'doctor-create' })
 }
-
-const genderOptions = [
-  { value: false, text: 'Nam' },
-  { value: true, text: 'Nữ' },
-]
 
 const validateForm = () => {
   let isValid = true
@@ -481,24 +499,60 @@ watch(
               class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               :max="new Date(new Date().setFullYear(new Date().getFullYear() - 25)).toISOString().split('T')[0]"
             />
-            <span v-if="errors.birthDate.error" class="va-input__error">{{ errors.birthDate.message }}</span>
+            <span v-if="errors.birthDate.error" class="text-red-500 text-sm">{{ errors.birthDate.message }}</span>
           </div>
 
-          <VaSelect
-            v-model="doctor.gender"
-            label="Giới tính"
-            :options="genderOptions"
-            :error="errors.gender.error"
-            :error-messages="errors.gender.message"
-            @update:modelValue="validateForm"
-          />
+          <div class="input-group">
+            <label
+              for="gender"
+              style="color: var(--va-primary)"
+              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+              >Giới tính</label
+            >
+            <select
+              id="gender"
+              v-model="doctor.gender"
+              class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              @change="validateForm"
+            >
+              <option value="true">Nam</option>
+              <option value="false">Nữ</option>
+            </select>
+            <span v-if="errors.gender.error" class="text-red-500 text-sm">{{ errors.gender.message }}</span>
+          </div>
         </div>
 
         <div class="space-y-4">
           <h3 class="text-lg font-semibold mb-4">Thông tin chuyên môn</h3>
+          <label
+            for="serviceType"
+            style="color: var(--va-primary)"
+            class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+            >Hình ảnh bằng cấp
+          </label>
+          <!-- File Upload Container -->
+          <div
+            class="flex flex-col items-center justify-center w-full p-6 bg-white border-2 border-dashed border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition"
+          >
+            <!-- Upload Icon -->
 
-          <div class="mb-6 text-center">
-            <VaFileUpload v-model="doctor.imageUrl" dropzone file-types="jpg,png" @change="handleAvatarUpload" />
+            <!-- Instructions -->
+            <p class="text-gray-600 text-sm mb-2">Drag & drop your file here</p>
+            <p class="text-gray-500 text-xs mb-4">or click to browse</p>
+
+            <!-- File Input -->
+            <label
+              for="fileUpload"
+              class="relative cursor-pointer bg-indigo-500 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-indigo-600 transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              Select File
+              <input id="fileUpload" type="file" class="sr-only" @change="handleAvatarUpload($event)" />
+            </label>
+
+            <!-- Display selected file name -->
+            <div v-if="fileName" class="mt-4 text-sm text-gray-500">
+              Selected file: <span class="font-medium text-indigo-600">{{ fileName }}</span>
+            </div>
           </div>
           <label
             for="serviceType"
@@ -537,8 +591,8 @@ watch(
             >
               <option
                 v-for="option in [
-                  { value: 0, text: 'Part-time' },
-                  { value: 1, text: 'Full-time' },
+                  { value: 1, text: 'Part-time' },
+                  { value: 2, text: 'Full-time' },
                 ]"
                 :key="option.value"
                 :value="option.value"
@@ -558,14 +612,6 @@ watch(
 
           <VaInput v-model="doctor.qualification" label="Bằng cấp" :error="errors.qualification.error" />
 
-          <VaInput
-            v-model.number="doctor.consultationFee"
-            label="Phí tư vấn"
-            type="number"
-            min="0"
-            :error="errors.consultationFee.error"
-          />
-
           <VaTextarea
             v-model="doctor.description"
             label="Mô tả"
@@ -581,13 +627,13 @@ watch(
     </form>
 
     <!-- Modal xác nhận -->
-    <VaModal v-model="showConfirmation" class="text-center" hide-default-actions>
+    <VaModal v-model="showConfirmation" class="text-center" overlay hide-default-actions>
       <div class="confirmation-modal">
         <h3 class="text-2xl font-semibold mb-4">Xác nhận hành động</h3>
         <p class="text-gray-600 mb-8">Bạn có chắc chắn muốn thêm bác sĩ này không?</p>
         <VaDivider class="mb-6" />
         <div class="flex justify-end space-x-4">
-          <VaButton color="danger" @click="confirmAddDoctor">Xác nhận</VaButton>
+          <VaButton color="danger" :disabled="isSubmitting" @click="confirmAddDoctor">Xác nhận</VaButton>
           <VaButton @click="showConfirmation = false">Hủy</VaButton>
         </div>
       </div>
@@ -749,5 +795,10 @@ h3 {
   border-radius: 8px;
   padding: 10px;
   font-size: 16px;
+}
+.va-button:hover {
+  background: #1cc88a;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
 }
 </style>

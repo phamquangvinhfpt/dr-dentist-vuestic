@@ -9,7 +9,7 @@
         <template #prepend>
           <i class="mdi mdi-plus mr-2"></i>
         </template>
-        Add User
+        Add Staff
       </VaButton>
     </div>
 
@@ -46,7 +46,7 @@
             <div class="truncate">{{ maskEmail(user.email) }}</div>
             <div>{{ maskPhone(user.phoneNumber) }}</div>
             <div class="flex gap-2 justify-end items-center text-sm">
-              <VaButton color="danger">
+              <VaButton color="danger" @click.stop="deleteUser(user.id, user.userName)">
                 <i class="mdi mdi-delete h-4 w-4 text-red"></i>
               </VaButton>
               <VaButton color="warning" @click.stop="updateUser(user.id)">
@@ -97,10 +97,10 @@ const filteredUsers = computed(() => {
   return query
     ? userList.value.filter(
         (user) =>
-          user.role === 'Patient' &&
+          user.role === 'Staff' &&
           (user.email?.toLowerCase().includes(query) || user.userName?.toLowerCase().includes(query)),
       )
-    : userList.value.filter((user) => user.role === 'Patient')
+    : userList.value.filter((user) => user.role === 'Staff')
 })
 
 const currentPage = ref(1)
@@ -133,6 +133,17 @@ const getAllUsers = async () => {
 const viewDetails = (id: string) => {
   userStore.id = id
   router.push({ name: 'user-detail', params: { id } })
+}
+
+const deleteUser = async (id: string, userName: string) => {
+  if (confirm(`Are you sure you want to delete user ${userName}?`)) {
+    try {
+      await userStore.deleteUser(id)
+      await getAllUsers()
+    } catch (error) {
+      console.error('Error deleting user:', error)
+    }
+  }
 }
 
 const updateUser = (id: string) => {

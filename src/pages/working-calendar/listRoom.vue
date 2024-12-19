@@ -8,73 +8,65 @@
       <button class="nav-button" @click="goToAddRoom">Thêm phòng mới</button>
     </div>
 
-    <input
-      v-model="searchKeyword"
-      type="text"
-      class="search-input"
-      placeholder="Tìm kiếm theo tên phòng"
-      @input="searchRooms"
-    />
-
-    <!-- Updated Room Cards Layout -->
-    <div v-if="filteredRooms.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-      <div
-        v-for="room in filteredRooms"
-        :key="room.id"
-        class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105"
+    <!-- Search Input -->
+    <div class="relative">
+      <input
+        v-model="searchKeyword"
+        type="text"
+        class="search-input w-full border border-gray-300 rounded-lg py-1 pl-10 pr-4 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300"
+        placeholder="Tìm kiếm theo tên phòng"
+        @input="searchRooms"
+      />
+      <svg
+        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        width="20"
+        height="20"
       >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-4.35-4.35m1.6-5.4A7.5 7.5 0 1110 2.5a7.5 7.5 0 018.25 8.25z"
+        ></path>
+      </svg>
+    </div>
+
+    <!-- Room Cards -->
+    <div
+      v-if="filteredRooms.length > 0"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6"
+    >
+      <div v-for="room in filteredRooms" :key="room.id" class="room-card">
         <div class="p-4">
           <h3 class="font-semibold text-lg mb-2 truncate" :title="room.roomName">
             {{ room.roomName }}
           </h3>
-          <span
-            :class="[
-              'px-2 py-1 rounded-full text-xs mb-2 inline-flex items-center',
-              room.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
-            ]"
-          >
-            <CheckCircleIcon v-if="room.status" class="w-3 h-3 mr-1" />
-            <XCircleIcon v-else class="w-3 h-3 mr-1" />
+          <span :class="['status-badge', room.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800']">
+            <CheckCircleIcon v-if="room.status" class="w-4 h-4 mr-1" />
+            <XCircleIcon v-else class="w-4 h-4 mr-1" />
             {{ room.status ? 'Hoạt động' : 'Không hoạt động' }}
           </span>
-          <div class="text-xs text-gray-500 flex items-center mb-1">
-            <CalendarIcon class="w-3 h-3 mr-1" />
-            <span>{{ formatDate(room.createdOn) }}</span>
-          </div>
-          <div class="text-xs text-gray-500 flex items-center">
-            <ClockIcon class="w-3 h-3 mr-1" />
-            <span>{{ formatDate(room.lastModifiedOn) }}</span>
-          </div>
+          <p class="text-sm text-gray-600">Bác sĩ: {{ room.doctorName }}</p>
         </div>
-        <button
-          class="w-full py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors duration-300"
-          @click="viewDetails(room.id)"
-        >
-          Xem chi tiết
-        </button>
       </div>
     </div>
+
+    <!-- No Rooms Message -->
     <p v-else class="text-center text-gray-500">Không có phòng nào.</p>
 
-    <!-- Pagination Controls -->
-    <div class="flex items-center justify-between mt-8">
+    <!-- Pagination -->
+    <div class="pagination-controls">
       <p class="text-sm text-gray-600">Trang {{ currentPage }} / {{ totalPages }}</p>
-      <div class="flex items-center space-x-2">
-        <button
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="!hasPreviousPage"
-          @click="previousPage"
-        >
-          <ChevronLeftIcon class="w-4 h-4 mr-1 inline" />
-          Trang trước
+      <div class="pagination-buttons">
+        <button class="pagination-button" :disabled="!hasPreviousPage" @click="previousPage">
+          <ChevronLeftIcon class="w-4 h-4 mr-1" /> Trang trước
         </button>
-        <button
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="!hasNextPage"
-          @click="nextPage"
-        >
-          Trang sau
-          <ChevronRightIcon class="w-4 h-4 ml-1 inline" />
+        <button class="pagination-button" :disabled="!hasNextPage" @click="nextPage">
+          Trang sau <ChevronRightIcon class="w-4 h-4 ml-1" />
         </button>
       </div>
     </div>
@@ -91,6 +83,7 @@ interface Room {
   status: boolean
   createdOn: string
   lastModifiedOn: string
+  doctorName: string
 }
 
 export default defineComponent({
@@ -139,7 +132,6 @@ export default defineComponent({
     const goToListRoom = () => {
       router.push('/rooms')
     }
-
     onMounted(fetchRooms)
 
     return {
@@ -166,105 +158,130 @@ export default defineComponent({
   },
 })
 </script>
-
 <style scoped>
-.nav-bar {
-  display: flex;
-  justify-content: flex-start; /* Căn trái */
-  margin-bottom: 20px;
-  padding: 5px 10px;
-  background-color: #f0f0f0; /* Màu nền nhẹ */
-  border-radius: 10px; /* Bo góc mềm mại */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
-}
-
-.nav-button {
-  background-color: transparent; /* Nền trong suốt */
-  color: #333; /* Màu chữ mặc định */
-  border: none;
-  padding: 10px 20px;
-  margin-right: 15px; /* Khoảng cách giữa các nút */
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 5px;
-  transition:
-    background-color 0.3s,
-    color 0.3s; /* Hiệu ứng màu sắc */
-}
-
-.nav-button.active {
-  background-color: #007bff; /* Màu nền xanh cho nút đang hoạt động */
-  color: white; /* Màu chữ trắng */
-}
-
-.nav-button:hover {
-  background-color: #e8f0fe; /* Nền xanh nhạt khi di chuột */
-  color: #007bff; /* Chữ màu xanh */
-}
 .room-list {
   padding: 20px;
-  background-color: #f9f9f9; /* Thêm màu nền nhẹ */
-  border-radius: 8px; /* Bo góc cho khung */
+  background-color: #f4f7f9;
+  border-radius: 10px;
 }
 
 .title {
-  font-size: 24px;
+  font-size: 28px;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
   margin-bottom: 20px;
-  text-align: center; /* Căn giữa tiêu đề */
+}
+
+.nav-bar {
+  display: flex;
+  justify-content: center;
+  background-color: #eef2f6;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  color: #555;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.nav-button.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.nav-button:hover {
+  background-color: #dbeafe;
+  color: #007bff;
 }
 
 .search-input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 16px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 20px; /* Thêm khoảng cách dưới ô tìm kiếm */
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  transition: all 0.3s;
 }
 
-.room-cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center; /* Căn giữa các thẻ phòng */
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 .room-card {
-  border: 1px solid #ccc;
+  background-color: #fff;
   border-radius: 8px;
-  padding: 16px;
-  width: 220px; /* Tăng chiều rộng cho thẻ phòng */
-  text-align: center;
-  transition: transform 0.2s; /* Hiệu ứng chuyển động */
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
 }
 
 .room-card:hover {
-  transform: scale(1.05); /* Phóng to khi di chuột */
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .details-button {
-  background-color: #007bff; /* Màu nền cho nút */
-  color: white; /* Màu chữ */
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
   border: none;
-  border-radius: 4px;
-  padding: 10px 15px;
+  border-radius: 0 0 8px 8px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
 }
 
 .details-button:hover {
-  background-color: #0056b3; /* Màu nền khi di chuột */
+  background-color: #0056b3;
 }
 
-.inactive {
-  background-color: #f8d7da;
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
 }
 
-.active {
-  color: green;
+.pagination-buttons {
+  display: flex;
+  gap: 10px;
 }
 
-.inactive {
-  color: red;
+.pagination-button {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.pagination-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #0056b3;
 }
 </style>
-```

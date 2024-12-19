@@ -91,7 +91,7 @@ class DoctorService {
         Education: string
         College: string
         Certification: string
-        CertificationImage: string
+        CertificationImage: File[]
         YearOfExp: string
         SeftDescription: string
         WorkingType: number
@@ -124,12 +124,14 @@ class DoctorService {
     formData.append('DoctorProfile.YearOfExp', doctorData.request.DoctorProfile.YearOfExp)
     formData.append('DoctorProfile.SeftDescription', doctorData.request.DoctorProfile.SeftDescription)
     formData.append('DoctorProfile.WorkingType', doctorData.request.DoctorProfile.WorkingType.toString())
+
     // Add CertificationImage (array)
     if (Array.isArray(doctorData.request.DoctorProfile.CertificationImage)) {
-      doctorData.request.DoctorProfile.CertificationImage.forEach((image: File, index: number) => {
-        formData.append(`DoctorProfile.CertificationImage[${index}]`, image)
+      doctorData.request.DoctorProfile.CertificationImage.forEach((image: File) => {
+        formData.append(`DoctorProfile.CertificationImage`, image)
       })
     }
+
     // Send request as multipart/form-data
     return apiService
       .post('/users/create-user', formData)

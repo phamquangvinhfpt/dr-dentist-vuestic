@@ -377,6 +377,14 @@ const routes: Array<RouteRecordRaw> = [
         },
         component: ServiceForUser,
       },
+      {
+        name: 'list-staff',
+        path: 'list-staff',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/user/listStaff.vue'),
+      },
     ],
   },
   {

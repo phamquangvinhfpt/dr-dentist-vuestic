@@ -105,7 +105,7 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
           Education: string
           College: string
           Certification: string
-          CertificationImage: string // Thêm CertificationImage
+          CertificationImage: File[]
           YearOfExp: string
           SeftDescription: string
           WorkingType: number
@@ -117,7 +117,6 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         this.isLoading = true
         const response = await doctorService.createDoctor(doctorData)
         this.isLoading = false
-        await this.getDoctors(null)
         return response
       } catch (error) {
         this.isLoading = false
