@@ -783,7 +783,9 @@
     "resultPerPage": "Result per page",
     "delete": "Delete",
     "confirmDelete": "Confirm delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "unauthorized" : "Unauthorized",
+    "errorOccurred" : "An error occurred"
   },
   "payment": {
     "patientCode": "Patient Code",
@@ -795,7 +797,21 @@
     "totalAmount": "Total Amount",
     "method": "Payment Method",
     "status": "Status",
-    "management": "Payment Management"
+    "management": "Payment Management",
+    "paymentDetail": "Payment Detail",
+    "patientInfo": "Patient Information",
+    "serviceInfo": "Service Information",
+    "paymentInfo": "Payment Information",
+    "paymentMethod": "Payment Method",
+    "actions": "Actions",
+    "procedures" : "Procedures",
+    "noProcedures" : "No procedures",
+    "noPaymentFound": "No payment found",
+    "procedureName": "Procedure Name",
+    "amount": "Amount",
+    "notDeposited": "Not Deposited"
+
+
   },
   "form": {
     "formManagement": "Form Management",

@@ -73,3 +73,37 @@ export interface PaymentResponse {
   supportMessage: string | null
   statusCode: number
 }
+
+export interface PaymentDetailDTO {
+  procedureId: string
+  procedureName: string
+  paymentAmount: number
+  paymentStatus: number
+}
+
+export interface PaymentDetailResponse {
+  messages: string[]
+  data: {
+    paymentResponse: {
+      appointmentId: string
+      depositAmount: number
+      depositDate: string | null
+      method: number
+      patientCode: string
+      patientName: string
+      patientProfileId: string
+      paymentId: string
+      remainingAmount: number
+      serviceId: string
+      serviceName: string
+      status: number
+      totalAmount: number
+      details: PaymentDetailDTO[]
+    }
+  }
+  source: string
+  exception: string | null
+  errorId: string | null
+  supportMessage: string | null
+  statusCode: number
+}
