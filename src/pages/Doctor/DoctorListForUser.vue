@@ -265,15 +265,6 @@ onMounted(() => {
   }
 }
 
-select {
-  background-color: #f3f4f6;
-  padding-right: 2.5rem;
-  background-position: right 0.75rem center;
-  background-size: 1rem;
-  padding-right: 2rem;
-  border-radius: 8px;
-}
-
 .pagination {
   display: flex;
   list-style: none;

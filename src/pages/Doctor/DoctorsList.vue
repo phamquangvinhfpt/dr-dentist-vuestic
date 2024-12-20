@@ -210,10 +210,10 @@ watch(currentPage, () => {
       </ul>
 
       <!-- Pagination -->
-      <div class="flex flex-col sm:flex-row items-center justify-between mt-6 space-y-4 sm:space-y-0">
+      <VaCard class="flex flex-col sm:flex-row items-center justify-between mt-6 mx-3 space-y-4 sm:space-y-0">
         <!-- Số mục mỗi trang -->
         <div class="flex items-center space-x-2">
-          <label for="pageSize" class="text-sm font-medium text-gray-700">Số mục mỗi trang:</label>
+          <label for="pageSize" class="text-sm font-medium">Số mục mỗi trang:</label>
           <select
             id="pageSize"
             v-model="itemsPerPage"
@@ -242,7 +242,7 @@ watch(currentPage, () => {
             </button>
           </li>
         </ul>
-      </div>
+      </VaCard>
     </VaCard>
   </VaCard>
 </template>

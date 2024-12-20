@@ -28,7 +28,7 @@ const isStaff = computed(() => authStore.musHaveRole('Staff'))
   <div v-else-if="isDoctor">
     <Appointment />
   </div>
-  <div v-else>
+  <div v-else class="mx-3">
     <section class="flex flex-col gap-4">
       <div class="flex flex-col sm:flex-row gap-4">
         <RevenueUpdates class="w-full sm:w-[70%]" />

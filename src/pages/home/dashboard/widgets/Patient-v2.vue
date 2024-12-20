@@ -9,8 +9,6 @@ import Contact from '../../landingpage/Contact.vue'
 
 import { useServiceStore } from '@/stores/modules/service.module'
 
-import { formatMoney } from '../../../../data/charts/revenueChartData'
-
 const serviceStore = useServiceStore()
 
 const loading = ref(true)
@@ -26,8 +24,6 @@ const serviceType = ref<TypeService[]>()
 
 const INTERVAL_TIME = 3000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
-
-const showModalServiceList = ref(false)
 
 const startContentAnimation = () => {
   setInterval(() => {
@@ -311,7 +307,7 @@ window.addEventListener('resize', () => {
       >
         <h5
           class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer"
-          @click="showModalServiceList = true"
+          @click="router.push({ name: 'services' })"
         >
           OUR SERVICES
         </h5>
@@ -337,26 +333,6 @@ window.addEventListener('resize', () => {
         </div>
       </div>
       <!-- ====== Services Section End -->
-
-      <!-- Service Modal List -->
-      <VaModal v-model="showModalServiceList" size="large">
-        <h3 class="va-h3">List of Services</h3>
-        <VaTreeView :nodes="services" class="customizable-content">
-          <template #content="service">
-            <div class="flex items-center">
-              <div class="mr-2">
-                <b v-if="service.serviceName" class="display-6">{{ service.serviceName }}</b>
-                <p v-if="service.serviceDescription" class="va-text-secondary mb-0">
-                  {{ service.serviceDescription }}
-                </p>
-              </div>
-              <VaButton preset="secondary" icon="" size="small" class="ml-auto">{{
-                formatMoney(service.totalPrice)
-              }}</VaButton>
-            </div>
-          </template>
-        </VaTreeView>
-      </VaModal>
 
       <!-- Doctors section-->
       <div :class="[isLargeScreen ? 'w-full max-w-4xl md:max-w-screen-xl mx-auto mt-16 mb-6' : '']">
@@ -679,40 +655,6 @@ window.addEventListener('resize', () => {
                 <h1 class="text-6xl text-blue-500">1</h1>
               </div>
             </div>
-            <h6 class="mb-2 text-2xl font-extrabold">Choose a date.</h6>
-            <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto">
-              Go the
-              <span class="border-b border-sky-700">Set an Appointment</span>
-              page. Choose and select your preferred date and time. Then, specify the needed service.
-            </p>
-            <span
-              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
-              >View our Schedules
-            </span>
-            <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
-              <svg
-                class="w-8 text-teal-500 transform rotate-90 lg:rotate-0"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                viewBox="0 0 24 24"
-              >
-                <line fill="none" stroke-miterlimit="10" x1="2" y1="12" x2="22" y2="12"></line>
-                <polyline fill="none" stroke-miterlimit="10" points="15,5 22,12 15,19 "></polyline>
-              </svg>
-            </div>
-          </div>
-          <div class="relative text-center">
-            <div
-              class="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-200 ease-in-out bg-gray-300 rounded-full hover:bg-teal-300 sm:w-20 sm:h-20 hover:scale-110 hover:rounded-full"
-            >
-              <div
-                class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110"
-              >
-                <h1 class="text-6xl text-blue-500">2</h1>
-              </div>
-            </div>
             <h6 class="mb-2 text-2xl font-extrabold">Create your Account.</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
               Create an account or
@@ -746,13 +688,54 @@ window.addEventListener('resize', () => {
               <div
                 class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110"
               >
+                <h1 class="text-6xl text-blue-500">2</h1>
+              </div>
+            </div>
+            <h6 class="mb-2 text-2xl font-extrabold">Choose a date.</h6>
+            <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto">
+              Go the
+              <span
+                class="border-b border-sky-700 hover:cursor-pointer"
+                @click="router.push({ name: 'create-appointment' })"
+                >Set an Appointment</span
+              >
+              page. Choose and select your preferred services, date and time. Then, specify the needed service.
+            </p>
+            <span
+              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
+              @click="router.push({ name: 'working-calendar' })"
+              >View our Schedules
+            </span>
+            <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
+              <svg
+                class="w-8 text-teal-500 transform rotate-90 lg:rotate-0"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                viewBox="0 0 24 24"
+              >
+                <line fill="none" stroke-miterlimit="10" x1="2" y1="12" x2="22" y2="12"></line>
+                <polyline fill="none" stroke-miterlimit="10" points="15,5 22,12 15,19 "></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="relative text-center">
+            <div
+              class="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-200 ease-in-out bg-gray-300 rounded-full hover:bg-teal-300 sm:w-20 sm:h-20 hover:scale-110 hover:rounded-full"
+            >
+              <div
+                class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110"
+              >
                 <h1 class="text-6xl text-blue-500">3</h1>
               </div>
             </div>
             <h6 class="mb-2 text-2xl font-extrabold">Done.</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
               View your scheduled appointments in the
-              <span class="border-b border-sky-700"> My Appointments</span>
+              <span class="border-b border-sky-700 hover:cursor-pointer" @click="router.push({ name: 'appointment' })">
+                My Appointments</span
+              >
               page.
             </p>
             <div

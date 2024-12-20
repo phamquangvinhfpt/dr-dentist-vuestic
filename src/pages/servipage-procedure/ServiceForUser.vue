@@ -1,11 +1,21 @@
 <template>
-  <VaCard style="padding-top: 0.5%" class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+  <VaCard style="padding-top: 0.5%" class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
-      <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">Dịch Vụ Nha Khoa</h1>
-      <div style="margin-bottom: 3%; margin-top: 5px" class="flex justify-between items-center mt-6">
-        <p class="text-base text-left mb-0">Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi</p>
+      <div class="flex justify-between mb-3">
+        <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">Dịch Vụ Nha Khoa</h1>
         <button
-          class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          v-if="isMobile"
+          class="bg-indigo-600 text-white font-semibold text-sm py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          @click="bookAppointment"
+        >
+          Đặt Lịch Ngay
+        </button>
+      </div>
+      <div style="margin-bottom: 3%; margin-top: 5px" class="flex justify-between items-center mt-6">
+        <p class="text-sm md:text-base text-left mb-0">Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi</p>
+        <button
+          v-if="!isMobile"
+          class="bg-indigo-600 text-white font-semibold text-sm md:py-2 md:px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
           @click="bookAppointment"
         >
           Đặt Lịch Ngay
@@ -49,12 +59,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { VaCard, VaProgressCircle } from 'vuestic-ui'
 import ServiceDetailsModal from './widgets/ServiceDetailsModal.vue'
 import { useRouter } from 'vue-router'
-
+const isMobile = computed(() => window.innerWidth < 768)
 const services = ref([])
 const isLoading = ref(false)
 const serviceDetails = ref([])
@@ -132,11 +142,10 @@ onMounted(fetchServices)
 }
 
 .service-card {
-  background-color: #fff;
   border-radius: 10px;
   padding: 1.5rem;
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
   transition:
     transform 0.3s,
     box-shadow 0.3s;
