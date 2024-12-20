@@ -1,17 +1,17 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-3">
     <!-- Thẻ bác sĩ -->
     <div
       v-for="doctor in doctors"
       :key="doctor.id"
-      class="bg-white rounded-lg shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
+      class="rounded-lg shadow-lg hover:shadow-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-1 cursor-pointer"
       @click="navigateToDetail(doctor.id)"
     >
       <!-- Ảnh bác sĩ -->
       <div class="relative w-full h-48">
         <img
           :src="
-            doctor.image ||
+            getSrcAvatar(doctor.image) ||
             'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
           "
           :alt="doctor.name"
@@ -62,6 +62,7 @@
 import { useRouter } from 'vue-router'
 import { useDoctorProfileStore } from '@stores/modules/doctor.module'
 import type { Doctor } from './types'
+import { getSrcAvatar } from '@/services/utils'
 
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()

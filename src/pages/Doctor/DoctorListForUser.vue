@@ -1,76 +1,36 @@
 <template>
   <VaCard style="padding: 0.5%" class="doctor-listing-page">
     <VaCardContent style="padding-top: 0%">
-      <div style="padding-top: 0%" class="container mx-auto p-4">
+      <div style="padding-top: 0%" class="md:container mx-auto p-4">
         <!-- Header -->
 
-        <div style="margin-bottom: 0%" class="text-center mb-6">
-          <h1 class="text-2xl font-semibold text-gray-800 mb-2">Danh Sách Bác Sĩ</h1>
-          <p class="text-gray-600 text-sm">Tìm kiếm bác sĩ phù hợp với bạn</p>
-        </div>
+        <VaCard style="margin-bottom: 0%" class="text-center mb-6">
+          <h1 class="text-2xl font-semibold va-h1 mb-2">Danh Sách Bác Sĩ</h1>
+          <p class="text-sm">Tìm kiếm bác sĩ phù hợp với bạn</p>
+        </VaCard>
 
         <!-- Search and Filters -->
-        <div class="bg-white rounded-2xl p-4 shadow-md space-y-4">
+        <div class="rounded-2xl p-4 shadow-md space-y-4">
           <div class="relative mb-4">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Tìm bác sĩ..."
-              class="w-full border border-gray-300 rounded-lg py-2 pl-10 pr-4 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300"
-            />
-            <svg
-              class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              width="16"
-              height="16"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-4.35-4.35m1.6-5.4A7.5 7.5 0 1110 2.5a7.5 7.5 0 018.25 8.25z"
-              ></path>
-            </svg>
+            <VaInput v-model="searchQuery" type="text" placeholder="Tìm bác sĩ..." label="Search">
+              <template #prependInner>
+                <VaIcon name="pageview" color="secondary" />
+              </template>
+            </VaInput>
           </div>
 
           <!-- Filters -->
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <label class="font-medium text-sm">Loại Dịch Vụ</label>
-              <select
-                v-model="selectedTypeService"
-                class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-300"
-              >
-                <option value="">Tất cả Dịch Vụ</option>
-                <option v-for="service in typeServiceOptions" :key="service.value" :value="service.value">
-                  {{ service.text }}
-                </option>
-              </select>
+              <VaSelect v-model="selectedTypeService" :options="typeServiceOptions" label="Loại dịch vụ" />
             </div>
 
             <div>
-              <label class="font-medium text-sm">Sắp Xếp Theo</label>
-              <select
-                v-model="sortField"
-                class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-300"
-              >
-                <option value="rating">Đánh Giá</option>
-                <option value="experience">Kinh Nghiệm</option>
-              </select>
+              <VaSelect v-model="sortField" :options="arrange" label="Sắp Xếp Theo" />
             </div>
 
             <div>
-              <label class="font-medium text-sm">Thứ Tự</label>
-              <select
-                v-model="sortOrder"
-                class="w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-2 focus:ring-indigo-300"
-              >
-                <option value="asc">Từ Thấp Đến Cao</option>
-                <option value="desc">Từ Cao Đến Thấp</option>
-              </select>
+              <VaSelect v-model="sortOrder" :options="step" label="Thứ Tự" />
             </div>
           </div>
         </div>
@@ -93,11 +53,14 @@
         <div class="flex justify-center gap-4 mt-6">
           <VaPagination
             v-model="currentPage"
+            buttons-preset="secondary"
             :pages="totalPages"
+            :boundary-links="true"
+            :direction-links="true"
             :visible-pages="isMobile ? 3 : 5"
             class="va-pagination--small"
           />
-          <div class="flex justify-center gap-4 w-full">
+          <div v-if="!isMobile" class="flex justify-center gap-4 w-full">
             <VaButton
               :disabled="currentPage === 1"
               icon="arrow_back"
@@ -123,46 +86,78 @@
   </VaCard>
 </template>
 
-<script setup>
-import { ref, onMounted, computed } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, computed, watch } from 'vue'
 import DoctorsGrid from './DoctorsGrid.vue'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { VaCard, VaCardContent } from 'vuestic-ui'
 
+// Define interfaces for our data structures
+interface Doctor {
+  id: string | number
+  name: string
+  specialty: string
+  typeServiceID: string | number | null
+  experience: string
+  image: string
+  rating: number
+}
+
+interface ServiceType {
+  id: string | number
+  typeName: string
+}
+
+interface SelectOption {
+  text: string
+  value: string
+}
+
+// Store instantiation
 const doctorStore = useDoctorProfileStore()
 const serviceStore = useServiceStore()
-const doctors = ref([])
-const loading = ref(true)
-const error = ref(null)
-const currentPage = ref(1)
-const searchQuery = ref('')
-const sortField = ref('')
-const sortOrder = ref('')
-const selectedTypeService = ref(null) // State for selected type service
 
-// Fetch type services for the filter
+// Reactive references with type annotations
+const doctors = ref<Doctor[]>([])
+const loading = ref<boolean>(true)
+const error = ref<string | null>(null)
+const currentPage = ref<number>(1)
+const searchQuery = ref<string>('')
+const sortField = ref<string>('')
+const sortOrder = ref<'asc' | 'desc'>('asc')
+const selectedTypeService = ref<string | number | null>(null)
+const arrange = ref<SelectOption[]>([
+  { text: 'Đánh Giá', value: 'rating' },
+  { text: 'Kinh Nghiệm', value: 'experience' },
+])
+const step = ref<SelectOption[]>([
+  { text: 'Từ Thấp Đến Cao', value: 'asc' },
+  { text: 'Từ Cao Đến Thấp', value: 'desc' },
+])
+
+// Computed properties with type annotations
 const typeServiceOptions = computed(() => {
-  return serviceStore.typeServices.map((service) => ({
+  return serviceStore.typeServices.map((service: ServiceType) => ({
     value: service.id,
     text: service.typeName,
   }))
 })
 
-// Mobile detection
-const isMobile = computed(() => {
+const isMobile = computed((): boolean => {
   return window.innerWidth < 640
 })
 
-const itemsPerPage = ref(isMobile.value ? 6 : 6)
+const itemsPerPage = ref<number>(isMobile.value ? 6 : 6)
 
 // Update items per page when screen size changes
 window.addEventListener('resize', () => {
   itemsPerPage.value = isMobile.value ? 6 : 6
 })
 
-const totalPages = computed(() => Math.ceil(filteredDoctors.value.length / itemsPerPage.value))
-const filteredDoctors = computed(() => {
+const totalPages = computed((): number => Math.ceil(filteredDoctors.value.length / itemsPerPage.value))
+
+const filteredDoctors = computed((): Doctor[] => {
   const lowerCaseQuery = searchQuery.value.toLowerCase()
   return doctors.value.filter((doctor) => {
     const matchesSearch =
@@ -172,7 +167,7 @@ const filteredDoctors = computed(() => {
   })
 })
 
-const sortedDoctors = computed(() => {
+const sortedDoctors = computed((): Doctor[] => {
   return [...filteredDoctors.value].sort((a, b) => {
     const aValue = sortField.value === 'experience' ? parseInt(a.experience) : a.rating
     const bValue = sortField.value === 'experience' ? parseInt(b.experience) : b.rating
@@ -180,12 +175,13 @@ const sortedDoctors = computed(() => {
   })
 })
 
-const paginatedDoctors = computed(() => {
+const paginatedDoctors = computed((): Doctor[] => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   return sortedDoctors.value.slice(start, start + itemsPerPage.value)
 })
 
-async function fetchDoctors() {
+// Functions with type annotations
+async function fetchDoctors(): Promise<void> {
   loading.value = true
   error.value = null
   try {
@@ -194,24 +190,22 @@ async function fetchDoctors() {
       throw new Error('Invalid response format')
     }
 
-    // Fetch service types
     await serviceStore.getServiceTypes()
-
     const serviceTypes = serviceStore.typeServices
 
-    doctors.value = response.data.map((doc) => {
-      const typeService = serviceTypes.find((type) => type.id === doc.doctorProfile?.typeServiceID)
+    doctors.value = response.data.map((doc: any): Doctor => {
+      const typeService = serviceTypes.find((type: ServiceType) => type.id === doc.doctorProfile?.typeServiceID)
       return {
         id: doc.id,
         name: `${doc.firstName} ${doc.lastName}`,
         specialty: typeService ? typeService.typeName : 'General Practice',
-        typeServiceID: typeService ? typeService.id : null, // Store typeServiceID for filtering
+        typeServiceID: typeService ? typeService.id : null,
         experience: `${doc.doctorProfile?.yearOfExp || 0} years`,
         image: doc.imageUrl,
         rating: doc.rating || 0,
       }
     })
-  } catch (e) {
+  } catch (e: any) {
     console.error('Fetch error:', e)
     error.value = `Failed to load doctors: ${e.message}`
   } finally {
@@ -219,24 +213,29 @@ async function fetchDoctors() {
   }
 }
 
-// Function to handle type service change
-
-function nextPage() {
+function nextPage(): void {
   if (currentPage.value < totalPages.value) {
     currentPage.value++
   }
 }
 
-function prevPage() {
+function prevPage(): void {
   if (currentPage.value > 1) {
     currentPage.value--
   }
 }
 
+// Watch with type annotations
+watch(currentPage, (newPage: number) => {
+  currentPage.value = newPage
+  console.log(currentPage.value)
+})
+
 onMounted(() => {
   fetchDoctors()
 })
 </script>
+
 <style scoped>
 .doctor-listing-page {
   background-color: #f9fafb;

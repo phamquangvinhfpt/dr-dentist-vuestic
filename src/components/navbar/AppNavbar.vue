@@ -32,15 +32,19 @@
         <VaAccordion v-model="openedSections" multiple>
           <VaCollapse v-for="(route, index) in navigationRoutesCanAccess" :key="index">
             <template #header="{ value: isCollapsed }">
-              <RouterLink
-                :to="{ name: route.name }"
+              <!-- Changed from RouterLink to div for routes with children -->
+              <component
+                :is="route.children ? 'div' : 'RouterLink'"
+                :to="route.children ? undefined : { name: route.name }"
                 :class="[
-                  'py-3 px-4 flex items-center justify-between cursor-pointer',
+                  'py-3 px-4 flex items-center justify-between',
+                  route.children ? 'cursor-pointer' : '',
                   routeHasActiveChild(route)
                     ? 'text-primary bg-primary/10 dark:text-primary-lighter dark:bg-primary/20'
                     : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700',
                   'transition-colors duration-200 ease-in-out',
                 ]"
+                @click="!route.children && drawerRef?.closeDrawer()"
               >
                 <div class="flex items-center">
                   <VaIcon
@@ -61,7 +65,7 @@
                   size="20px"
                   class="text-gray-500 dark:text-gray-400"
                 />
-              </RouterLink>
+              </component>
             </template>
 
             <template v-if="route.children" #body>

@@ -126,11 +126,10 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/message/Message.vue'),
       },
       {
-        name: 'doctors-for-users',
+        name: 'find-doctors',
         path: 'find-doctors',
         meta: {
           requiresAuth: true,
-          title: 'Our Medical Team',
         },
         component: () => import('../pages/Doctor/DoctorListForUser.vue'),
       },
@@ -325,16 +324,6 @@ const routes: Array<RouteRecordRaw> = [
           roles: ['staff', 'admin'],
         },
         component: () => import('../pages/Staff/Contact.vue'),
-      },
-      {
-        name: 'doctors-for-staff',
-        path: 'staff/doctors',
-        meta: {
-          requiresAuth: true,
-          roles: ['staff', 'admin'],
-          title: 'Doctors Management',
-        },
-        component: () => import('../pages/Staff/DoctorListForStaff.vue'),
       },
       {
         path: 'doctor/rating',

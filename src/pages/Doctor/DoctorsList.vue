@@ -26,7 +26,7 @@ const filteredDoctors = computed(() => {
 const totalItems = computed(() => filteredDoctors.value.length) // Total filtered items based on the search query
 
 const currentPage = ref(1)
-const itemsPerPage = ref(6)
+const itemsPerPage = ref(5)
 
 // Define pageSize options
 const pageSizeOptions = ref([5, 10, 20, 50]) // Array of page size options
@@ -116,9 +116,9 @@ watch(currentPage, () => {
 </script>
 
 <template>
-  <div style="padding-top: 0.1rem" class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-4 sm:px-10">
+  <VaCard style="padding-top: 0.1rem" class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-4 sm:px-10">
     <!-- Header Section -->
-    <div class="mb-6 flex justify-between items-center">
+    <VaCard class="mb-6 flex justify-between items-center">
       <div class="flex-1 max-w-md">
         <VaInput
           v-model="searchQuery"
@@ -149,10 +149,10 @@ watch(currentPage, () => {
         </template>
         Thêm Bác Sĩ
       </VaButton>
-    </div>
+    </VaCard>
 
     <!-- Doctor List Section -->
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <VaCard class="shadow-md rounded-lg overflow-hidden">
       <div
         style="padding: 1%"
         class="grid grid-cols-5 gap-4 px-6 py-3 bg-indigo-100 text-sm font-semibold text-indigo-800"
@@ -172,7 +172,7 @@ watch(currentPage, () => {
         <li
           v-for="doctor in paginatedDoctors"
           :key="doctor.id"
-          class="border-b border-gray-200 last:border-b-0 hover:bg-indigo-50 transition-all cursor-pointer"
+          class="border-b border-gray-200 last:border-b-0 hover:bg-indigo-50 hover:dark:bg-[#1f263f] transition-all cursor-pointer"
           @click="toggleActionBar(doctor.id)"
         >
           <div class="grid grid-cols-5 gap-4 px-6 py-4 items-center">
@@ -184,7 +184,7 @@ watch(currentPage, () => {
                 fallback-icon="mdi-account"
               />
             </div>
-            <div class="text-gray-900 font-medium">{{ doctor.userName }}</div>
+            <div class="font-medium">{{ doctor.userName }}</div>
             <div>{{ doctor.gender ? 'Nam' : 'Nữ' }}</div>
             <div class="truncate">{{ doctor.email.replace(/(\w{3})[\w.-]+(@[\w.]+)/, '$1***$2') }}</div>
             <div>{{ doctor.phoneNumber?.replace(/(\d{3})(\d{3})(\d{4})/, '$1-***-$3') }}</div>
@@ -243,8 +243,8 @@ watch(currentPage, () => {
           </li>
         </ul>
       </div>
-    </div>
-  </div>
+    </VaCard>
+  </VaCard>
 </template>
 <style scoped>
 .bg-gray-50 {

@@ -31,7 +31,7 @@ export default {
       },
     },
     {
-      name: 'doctors-for-users',
+      name: 'find-doctors',
       displayName: 'menu.doctors',
       meta: {
         icon: 'person_pin_circle',
