@@ -26,14 +26,14 @@
       <!-- Thông tin bác sĩ -->
       <div class="p-4 flex flex-col items-center text-center">
         <!-- Tên bác sĩ -->
-        <h3 class="text-lg font-bold text-gray-800">{{ doctor.name }}</h3>
+        <h3 class="text-lg font-bold">{{ doctor.name }}</h3>
         <!-- Chuyên khoa -->
-        <p class="text-sm text-gray-500">{{ doctor.specialty }}</p>
+        <p class="text-sm">{{ doctor.specialty }}</p>
 
         <!-- Kinh nghiệm -->
         <div class="flex items-center text-indigo-600 mt-2">
           <VaIcon name="schedule" class="mr-1" />
-          <span>{{ doctor.experience }} năm kinh nghiệm</span>
+          <span>{{ doctor.experience }} kinh nghiệm</span>
         </div>
 
         <!-- Đánh giá (Sao) -->

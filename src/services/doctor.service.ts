@@ -169,6 +169,49 @@ class DoctorService {
         return Promise.reject(error)
       })
   }
+  async createUser(userData: {
+    request: {
+      FirstName: string
+      LastName: string
+      Email: string
+      IsMale: boolean
+      BirthDay: string
+      UserName: string
+      Password: string
+      ConfirmPassword: string
+      PhoneNumber: string
+      Job: string
+      Address: string
+      Role: string
+    }
+  }): Promise<any> {
+    const formData = new FormData()
+    // Append user data fields to the formData object
+    formData.append('firstName', userData.request.FirstName)
+    formData.append('lastName', userData.request.LastName)
+    formData.append('email', userData.request.Email)
+    formData.append('isMale', userData.request.IsMale.toString())
+    formData.append('birthDay', userData.request.BirthDay)
+    formData.append('userName', userData.request.UserName)
+    formData.append('password', userData.request.Password)
+    formData.append('confirmPassword', userData.request.ConfirmPassword)
+    formData.append('phoneNumber', userData.request.PhoneNumber)
+    formData.append('job', userData.request.Job)
+    formData.append('address', userData.request.Address)
+    formData.append('role', userData.request.Role)
+    // Send the request as multipart/form-data
+    return apiService
+      .post('/users/self-register', formData)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('API call successful:', response.data)
+        }
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        console.error('API call failed:', error)
+        return Promise.reject(error)
+      })
+  }
 }
-
 export default new DoctorService()

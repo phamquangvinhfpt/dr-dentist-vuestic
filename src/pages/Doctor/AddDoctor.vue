@@ -150,7 +150,7 @@ const validateUserName = (userName: string) => {
 
 const validateName = (name: string): boolean => {
   const trimmedName = name.trim() // Loại bỏ khoảng trắng ở đầu và cuối
-  const namePattern = /^[A-Za-zÀ-ÿ\s]+$/ // Regex to allow letters and spaces
+  const namePattern = /^[a-zA-ZÀ-ỹ\s]+$/u
   return namePattern.test(trimmedName)
 }
 
@@ -416,7 +416,7 @@ watch(
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+  <VaCard class="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
     <form class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow" @submit.prevent="submitForm">
       <div class="flex justify-between mb-6">
         <VaButton @click="goBack">
@@ -647,7 +647,7 @@ watch(
         <VaButton @click="closeSuccessModal">Đóng</VaButton>
       </div>
     </VaModal>
-  </div>
+  </VaCard>
 </template>
 
 <style scoped>

@@ -155,5 +155,33 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         return await Promise.reject(error)
       }
     },
+    async createUser(userData: {
+      request: {
+        FirstName: string
+        LastName: string
+        Email: string
+        IsMale: boolean
+        BirthDay: string
+        UserName: string
+        Password: string
+        ConfirmPassword: string
+        PhoneNumber: string
+        Job: string
+        Address: string
+        Role: string
+      }
+    }): Promise<any> {
+      this.isLoading = true // Bắt đầu tải
+      try {
+        const response = await doctorService.createUser(userData) // Gọi dịch vụ tạo người dùng
+        this.doctors.push(response) // Thêm người dùng mới vào danh sách bác sĩ
+        return response // Trả về phản hồi
+      } catch (error) {
+        console.error('Error creating user in doctor store:', error)
+        throw error // Ném lỗi để xử lý ở nơi gọi hàm
+      } finally {
+        this.isLoading = false // Kết thúc tải
+      }
+    },
   },
 })

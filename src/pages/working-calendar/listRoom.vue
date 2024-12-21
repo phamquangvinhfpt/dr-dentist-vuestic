@@ -1,16 +1,16 @@
 <template>
-  <div class="room-list">
+  <VaCard class="room-list">
     <h1 class="title">Danh sách phòng khám</h1>
 
     <!-- Navigation Bar -->
-    <div class="nav-bar">
+    <VaCard class="nav-bar">
       <button class="nav-button active" @click="goToListRoom">Danh sách phòng</button>
       <button class="nav-button" @click="goToAddRoom">Thêm phòng mới</button>
-    </div>
+    </VaCard>
 
     <!-- Search Input -->
-    <div class="relative">
-      <input
+    <VaCard class="relative">
+      <VaInput
         v-model="searchKeyword"
         type="text"
         class="search-input w-full border border-gray-300 rounded-lg py-1 pl-10 pr-4 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300"
@@ -33,14 +33,14 @@
           d="M21 21l-4.35-4.35m1.6-5.4A7.5 7.5 0 1110 2.5a7.5 7.5 0 018.25 8.25z"
         ></path>
       </svg>
-    </div>
+    </VaCard>
 
     <!-- Room Cards -->
-    <div
+    <VaCards
       v-if="filteredRooms.length > 0"
       class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6"
     >
-      <div v-for="room in filteredRooms" :key="room.id" class="room-card">
+      <VaCard v-for="room in filteredRooms" :key="room.id" class="room-card">
         <div class="p-4">
           <h3 class="font-semibold text-lg mb-2 truncate" :title="room.roomName">
             {{ room.roomName }}
@@ -50,10 +50,10 @@
             <XCircleIcon v-else class="w-4 h-4 mr-1" />
             {{ room.status ? 'Hoạt động' : 'Không hoạt động' }}
           </span>
-          <p class="text-sm text-gray-600">Bác sĩ: {{ room.doctorName }}</p>
+          <p class="text-sm">Bác sĩ: {{ room.doctorName }}</p>
         </div>
-      </div>
-    </div>
+      </VaCard>
+    </VaCards>
 
     <!-- No Rooms Message -->
     <p v-else class="text-center text-gray-500">Không có phòng nào.</p>
@@ -70,7 +70,7 @@
         </button>
       </div>
     </div>
-  </div>
+  </VaCard>
 </template>
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from 'vue'
@@ -167,7 +167,6 @@ export default defineComponent({
 
 .title {
   font-size: 28px;
-  color: #333;
   font-weight: 600;
   text-align: center;
   margin-bottom: 20px;

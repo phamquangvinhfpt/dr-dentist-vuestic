@@ -68,18 +68,36 @@ export default {
       displayName: 'menu.user-management',
       meta: {
         icon: 'vuestic-iconset-user',
-        permission: 'Users.View',
-        roles: ['Admin'],
       },
-    },
-    {
-      name: 'doctors',
-      displayName: 'menu.doctor-management',
-      meta: {
-        icon: 'person',
-        permission: 'Users.View',
-        roles: ['Admin'],
-      },
+      children: [
+        {
+          name: 'doctors',
+          displayName: 'menu.doctor-management',
+          meta: {
+            icon: 'person',
+            permission: 'Users.View',
+            roles: ['Admin'],
+          },
+        },
+        {
+          name: 'list-staff',
+          displayName: 'menu.staff-management',
+          meta: {
+            icon: 'person',
+            permission: 'Users.View',
+            roles: ['Admin'],
+          },
+        },
+        {
+          name: 'patients',
+          displayName: 'menu.patient-management',
+          meta: {
+            icon: 'person',
+            permission: 'Users.View',
+            roles: ['Admin'],
+          },
+        },
+      ],
     },
     {
       name: 'working-calendar',

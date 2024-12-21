@@ -102,7 +102,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/audit-logs/AuditLogs.vue'),
       },
       {
-        name: 'users-management',
+        name: 'patients',
         path: 'users-management',
         meta: {
           requiresAuth: true,
@@ -157,6 +157,22 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
           title: 'Doctors List',
+        },
+      },
+      {
+        path: '/user/create',
+        name: 'user-create',
+        component: () => import('@/pages/Doctor/CreateUser.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: '/staff/create',
+        name: 'staff-create',
+        component: () => import('@/pages/Doctor/CreateStaff.vue'),
+        meta: {
+          requiresAuth: true,
         },
       },
       {

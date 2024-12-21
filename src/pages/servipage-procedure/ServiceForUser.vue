@@ -3,6 +3,9 @@
     <div class="max-w-7xl mx-auto">
       <div class="flex justify-between mb-3">
         <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">Dịch Vụ Nha Khoa</h1>
+      </div>
+      <div style="margin-bottom: 3%; margin-top: 5px" class="flex justify-between items-center mt-6">
+        <p class="text-sm md:text-base text-left mb-0">Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi</p>
         <button
           v-if="isMobile"
           class="bg-indigo-600 text-white font-semibold text-sm py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
@@ -10,12 +13,10 @@
         >
           Đặt Lịch Ngay
         </button>
-      </div>
-      <div style="margin-bottom: 3%; margin-top: 5px" class="flex justify-between items-center mt-6">
-        <p class="text-sm md:text-base text-left mb-0">Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi</p>
         <button
-          v-if="!isMobile"
-          class="bg-indigo-600 text-white font-semibold text-sm md:py-2 md:px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          v-else
+          style="height: 4cap"
+          class="bg-indigo-600 text-white font-semibold text-sm py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
           @click="bookAppointment"
         >
           Đặt Lịch Ngay

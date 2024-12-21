@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-4 sm:px-10">
+  <VaCard class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-4 sm:px-10">
     <!-- Header Section -->
     <div class="mb-6 flex justify-between items-center">
       <div class="flex-1 max-w-md">
         <VaInput v-model="searchQuery" placeholder="Search by name or email..." rounded outlined clearable />
       </div>
-      <VaButton color="primary" class="rounded-md" @click="router.push('/users/create')">
+      <VaButton color="primary" class="rounded-md" @click="router.push('/user/create')">
         <template #prepend>
           <i class="mdi mdi-plus mr-2"></i>
         </template>
@@ -14,7 +14,7 @@
     </div>
 
     <!-- User List Section -->
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <VaCard class="bg-white shadow-md rounded-lg overflow-hidden">
       <div class="grid grid-cols-6 gap-4 px-6 py-3 bg-indigo-100 text-sm font-semibold text-indigo-800">
         <div></div>
         <div>Name</div>
@@ -23,7 +23,6 @@
         <div>Phone</div>
         <div>Actions</div>
       </div>
-
       <div v-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">No matching users found.</div>
 
       <ul v-else>
@@ -34,14 +33,9 @@
         >
           <div class="grid grid-cols-6 gap-4 px-6 py-4 items-center">
             <div>
-              <VaAvatar
-                :src="getSrcAvatar({ rowData: user })"
-                size="large"
-                class="shadow-lg"
-                fallback-icon="mdi-account"
-              />
+              <VaAvatar :src="getSrcAvatar({ rowData: user })" size="large" class="shadow-lg" />
             </div>
-            <div class="text-gray-900 font-medium">{{ user.userName }}</div>
+            <div class="font-medium">{{ user.userName }}</div>
             <div>{{ user.Gender ? 'Male' : 'Female' }}</div>
             <div class="truncate">{{ maskEmail(user.email) }}</div>
             <div>{{ maskPhone(user.phoneNumber) }}</div>
@@ -64,8 +58,8 @@
       <div class="flex justify-center mt-6">
         <VaPagination v-model="currentPage" :total-pages="totalPages" :visible-pages="5" color="primary" />
       </div>
-    </div>
-  </div>
+    </VaCard>
+  </VaCard>
 </template>
 
 <script lang="ts" setup>
@@ -87,7 +81,12 @@ const userList = ref<
     phoneNumber: string
     imageUrl?: string
     name: string
-    role: string
+    role: {
+      roleId: string
+      roleName: string
+      description: string
+      enabled: boolean
+    }
   }[]
 >([])
 const searchQuery = ref('')
@@ -95,12 +94,17 @@ const searchQuery = ref('')
 const filteredUsers = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
   return query
-    ? userList.value.filter(
-        (user) =>
-          user.role === 'Patient' &&
-          (user.email?.toLowerCase().includes(query) || user.userName?.toLowerCase().includes(query)),
-      )
-    : userList.value.filter((user) => user.role === 'Patient')
+    ? userList.value.filter((user) => {
+        console.log('User role:', user.role)
+        return (
+          user.role.roleName === 'Patient' &&
+          (user.email?.toLowerCase().includes(query) || user.userName?.toLowerCase().includes(query))
+        )
+      })
+    : userList.value.filter((user) => {
+        console.log('User role:', user.role)
+        return user.role.roleName === 'Patient'
+      })
 })
 
 const currentPage = ref(1)
@@ -114,7 +118,7 @@ const paginatedUsers = computed(() => {
 
 const getAllUsers = async () => {
   try {
-    const res = await userStore.getUsers({ isActive: true, pageNumber: 1, pageSize: 10 })
+    const res = await userStore.getAllPatients({ isActive: true, pageNumber: 1, pageSize: 10 })
     userList.value = res.data.map((user) => ({
       id: user.id,
       userName: user.userName,
@@ -123,7 +127,12 @@ const getAllUsers = async () => {
       phoneNumber: user.phoneNumber || '',
       imageUrl: user.imageUrl || '',
       name: user.userName || '',
-      role: String(user.role),
+      role: {
+        roleId: user.role.roleId,
+        roleName: user.role.roleName,
+        description: user.role.description,
+        enabled: user.role.enabled,
+      },
     }))
   } catch (error) {
     console.error('Error fetching users:', error)

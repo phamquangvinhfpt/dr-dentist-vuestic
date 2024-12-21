@@ -223,10 +223,22 @@ export const useUserProfileStore = defineStore('userProfile', {
       }
     },
 
-    async getAllPatients(): Promise<any> {
+    async getAllPatients(filter: FilterUser): Promise<ListUserPagination> {
       try {
         this.isLoading = true
-        const response = await userService.getAllPatients()
+        const response = await userService.getAllPatients(filter)
+        this.isLoading = false
+        console.log('API Response:', response) // Log the response
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getAllStaff(filter: FilterUser): Promise<ListUserPagination> {
+      try {
+        this.isLoading = true
+        const response = await userService.getAllStaff(filter)
         this.isLoading = false
         console.log('API Response:', response) // Log the response
         return await Promise.resolve(response)

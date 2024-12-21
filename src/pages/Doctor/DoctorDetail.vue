@@ -41,7 +41,13 @@
           <div>
             <h3 class="text-sm font-medium">Loại Hình Làm Việc:</h3>
             <p class="mt-1">
-              {{ doctor.doctorProfile?.workingType === 2 ? 'Toàn Thời Gian' : 'Bán Thời Gian' }}
+              {{
+                doctor.doctorProfile?.workingType === 2
+                  ? 'Toàn Thời Gian'
+                  : doctor.doctorProfile?.workingType === 1
+                    ? 'Bán Thời Gian'
+                    : 'Chưa có thông tin'
+              }}
             </p>
           </div>
           <div>
@@ -82,11 +88,28 @@
             :key="review.feedbackID"
             class="border-b border-gray-200 pb-6 last:border-0"
           >
+            <div class="flex items-center">
+              <img
+                v-if="review.patientAvatar"
+                :src="getSrcAvatar(review.patientAvatar)"
+                alt="Avatar"
+                class="h-10 w-10 rounded-full object-cover mr-3"
+              />
+              <img
+                v-else
+                src="https://png.pngtree.com/png-clipart/20230102/original/pngtree-business-man-avatar-png-image_8855195.png"
+                alt="Avatar"
+                class="h-10 w-10 rounded-full object-cover mr-3"
+              />
+              <p v-if="isUserOnline(review.patientID)" style="font-weight: bold" class="text-sm">Tôi</p>
+              <p v-else style="font-weight: bold" class="text-sm">{{ review.patientName }}</p>
+            </div>
             <div class="flex justify-between items-center">
               <p class="text-sm">Dịch Vụ: {{ review.serviceName }}</p>
               <span class="text-sm">{{ formatDate(review.createDate) }}</span>
             </div>
             <div class="flex items-center mt-2">
+              <p style="margin-right: 0.5%">{{ review.ratings }}</p>
               <span v-for="i in 5" :key="i">
                 <Star
                   class="w-5 h-5 cursor-pointer"

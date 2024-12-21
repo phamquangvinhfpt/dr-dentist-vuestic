@@ -214,9 +214,19 @@ class UserService {
       })
   }
 
-  async getAllPatients(): Promise<any> {
+  async getAllPatients(filter: FilterUser): Promise<any> {
     return apiService
-      .post(`/users/get-patients`, {})
+      .post(`/users/get-patients`, filter)
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getAllStaff(filter: FilterUser): Promise<any> {
+    return apiService
+      .post(`/users/get-staffs`, filter)
       .then((response) => {
         return Promise.resolve(response.data)
       })

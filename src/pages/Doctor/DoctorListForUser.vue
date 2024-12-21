@@ -124,16 +124,16 @@ const loading = ref<boolean>(true)
 const error = ref<string | null>(null)
 const currentPage = ref<number>(1)
 const searchQuery = ref<string>('')
-const sortField = ref<string>('')
-const sortOrder = ref<'asc' | 'desc'>('asc')
-const selectedTypeService = ref<string | number | null>(null)
+const sortField = ref<SelectOption>()
+const sortOrder = ref<SelectOption>()
+const selectedTypeService = ref<SelectOption>()
 const arrange = ref<SelectOption[]>([
   { text: 'Đánh Giá', value: 'rating' },
   { text: 'Kinh Nghiệm', value: 'experience' },
 ])
 const step = ref<SelectOption[]>([
-  { text: 'Từ Thấp Đến Cao', value: 'asc' },
-  { text: 'Từ Cao Đến Thấp', value: 'desc' },
+  { text: 'Tăng dần', value: 'asc' },
+  { text: 'Giảm dần', value: 'desc' },
 ])
 
 // Computed properties with type annotations
@@ -162,16 +162,21 @@ const filteredDoctors = computed((): Doctor[] => {
   return doctors.value.filter((doctor) => {
     const matchesSearch =
       doctor.name.toLowerCase().includes(lowerCaseQuery) || doctor.specialty.toLowerCase().includes(lowerCaseQuery)
-    const matchesTypeService = selectedTypeService.value ? doctor.typeServiceID === selectedTypeService.value : true
+    const matchesTypeService = selectedTypeService.value
+      ? doctor.typeServiceID === selectedTypeService.value.value
+      : true
     return matchesSearch && matchesTypeService
   })
 })
 
 const sortedDoctors = computed((): Doctor[] => {
+  if (!sortField.value || !sortField.value.value) return filteredDoctors.value
+
+  const key = sortField.value.value // 'experience' hoặc 'rating'
   return [...filteredDoctors.value].sort((a, b) => {
-    const aValue = sortField.value === 'experience' ? parseInt(a.experience) : a.rating
-    const bValue = sortField.value === 'experience' ? parseInt(b.experience) : b.rating
-    return sortOrder.value === 'asc' ? aValue - bValue : bValue - aValue
+    const aValue = key === 'experience' ? parseInt(a.experience) : a.rating
+    const bValue = key === 'experience' ? parseInt(b.experience) : b.rating
+    return sortOrder.value?.value === 'asc' ? aValue - bValue : bValue - aValue
   })
 })
 
@@ -229,6 +234,10 @@ function prevPage(): void {
 watch(currentPage, (newPage: number) => {
   currentPage.value = newPage
   console.log(currentPage.value)
+})
+watch([sortField, sortOrder], ([newField, newOrder]) => {
+  console.log('Sort Field:', newField?.value)
+  console.log('Sort Order:', newOrder)
 })
 
 onMounted(() => {
