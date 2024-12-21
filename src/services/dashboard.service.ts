@@ -154,6 +154,16 @@ class DashboardService {
         return Promise.reject(error)
       })
   }
+  async getPatientTestimonials(): Promise<any> {
+    return apiService
+      .get(`/v1/dashboard/patients/feedbacks`)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new DashboardService()

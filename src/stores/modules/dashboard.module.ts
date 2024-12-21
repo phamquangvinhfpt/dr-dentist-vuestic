@@ -10,6 +10,7 @@ export const useDashboardStore = defineStore('Dashboard', {
     regularDoctorData: null as any,
     totalServiceData: null as any,
     appointmentDoneData: null as any,
+    feedbackData: null as any,
   }),
   actions: {
     async getChartRevenue(data: any): Promise<any> {
@@ -119,6 +120,18 @@ export const useDashboardStore = defineStore('Dashboard', {
         this.isLoading = true
         const response = await dashboardService.getAppointmentDone()
         this.appointmentDoneData = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getPatientTestimonials(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getPatientTestimonials()
+        this.feedbackData = response
         this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {

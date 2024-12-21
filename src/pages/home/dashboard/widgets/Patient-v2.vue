@@ -4,7 +4,7 @@ import { computed, onBeforeMount, onMounted, ref } from 'vue'
 import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useToast, VaCardActions } from 'vuestic-ui'
 import { Doctors, TypeService } from './types'
 import { useRouter } from 'vue-router'
-import { getErrorMessage, getSrcAvatar } from '@/services/utils'
+import { avatarColor, getErrorMessage, getSrcAvatar } from '@/services/utils'
 import Contact from '../../landingpage/Contact.vue'
 
 import { useServiceStore } from '@/stores/modules/service.module'
@@ -27,6 +27,7 @@ const satisfiedData = computed(() => dashboard.satisfiedData)
 const regularDoctorData = computed(() => dashboard.regularDoctorData)
 const totalServiceData = computed(() => dashboard.totalServiceData)
 const appointmentDoneData = computed(() => dashboard.appointmentDoneData)
+const feedBackData = computed(() => dashboard.feedbackData)
 const INTERVAL_TIME = 3000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
 
@@ -129,6 +130,7 @@ onMounted(() => {
   dashboard.getRegularDoctor()
   dashboard.getTotalService()
   dashboard.getAppointmentDone()
+  dashboard.getPatientTestimonials()
 })
 
 onBeforeMount(() => {
@@ -362,72 +364,60 @@ window.addEventListener('resize', () => {
           </h5>
         </VaCardTitle>
         <VaCardContent>
-          <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div
               v-for="(doctor, index) in doctors"
               :key="index"
-              class="doctor-card bg-white dark:bg-gray-800 rounded-lg shadow border-2 border-solid dark:border-gray-700 flex flex-col min-w-[150px] md:min-w-[200px] lg:min-w-[250px] relative"
+              class="doctor-card bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-lg border-0 flex flex-col min-w-[200px] relative transform transition-transform duration-500 hover:scale-105"
               :class="[
                 'animate__animated',
                 isLargeScreen ? 'animate__fadeIn' : index === 0 ? 'animate__fadeInLeft' : 'animate__fadeInRight',
               ]"
             >
-              <!-- Main content with padding except bottom -->
-              <div class="p-6 pb-16">
-                <!-- Added pb-16 to make space for buttons -->
-                <div class="flex justify-center">
-                  <img
-                    lazy
-                    :src="
-                      doctor.imageUrl
-                        ? getSrcAvatar(doctor.imageUrl)
-                        : 'https://plus.unsplash.com/premium_photo-1664475543697-229156438e1e?q=80&w=1972&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-                    "
-                    :alt="`${doctor.firstName} ${doctor.lastName}`"
-                    class="w-24 h-24 rounded-full object-cover"
-                  />
-                </div>
-
-                <div class="flex flex-col flex-grow">
-                  <div class="min-h-[3rem] flex items-center justify-center">
-                    <h3 class="text-sm lg:text-xl font-semibold text-center">
-                      {{ doctor.firstName }} {{ doctor.lastName }}
-                    </h3>
-                  </div>
-
-                  <div class="min-h-[3rem] flex items-center justify-center">
-                    <p class="text-gray-600 dark:text-gray-300 text-center text-sm font-semibold">
-                      {{ doctor.doctorProfile.education }}
-                    </p>
-                  </div>
-
-                  <div v-if="isLargeScreen" class="flex">
-                    <p
-                      class="selection:bg-fuchsia-300 selection:text-fuchsia-900 text-gray-600 dark:text-gray-300 text-center text-sm"
-                    >
-                      {{ doctor.doctorProfile.seftDescription }}
-                    </p>
-                  </div>
+              <!-- Avatar và thông tin -->
+              <div class="relative overflow-hidden rounded-t-2xl md:rounded-t-3xl">
+                <img
+                  lazy
+                  :src="doctor.imageUrl ? getSrcAvatar(doctor.imageUrl) : 'https://via.placeholder.com/200x200'"
+                  :alt="`${doctor.firstName} ${doctor.lastName}`"
+                  class="w-full h-52 md:h-64 object-cover transition-all duration-500 hover:scale-110"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
+                  <h3 class="text-xl font-bold text-white">{{ doctor.firstName }} {{ doctor.lastName }}</h3>
                 </div>
               </div>
 
-              <!-- Buttons container with absolute positioning -->
-              <div class="absolute bottom-0 left-0 right-0 flex">
-                <button
-                  class="flex-1 py-3 bg-blue-500 text-white rounded-bl-lg hover:bg-blue-600 transition-colors duration-300 text-sm"
-                  @click="router.push({ name: 'doctor-detail', params: { id: doctor.id } })"
+              <!-- Nội dung chính -->
+              <div class="flex flex-col flex-grow bg-white dark:bg-gray-900 p-5 rounded-b-3xl">
+                <p class="text-gray-600 dark:text-gray-300 text-center text-sm font-semibold mb-3">
+                  {{ doctor.doctorProfile.education }}
+                </p>
+                <p
+                  v-if="isLargeScreen"
+                  class="selection:bg-fuchsia-300 selection:text-fuchsia-900 text-gray-600 dark:text-gray-300 text-center text-sm mb-4"
                 >
-                  View Profile
-                </button>
+                  {{ doctor.doctorProfile.seftDescription }}
+                </p>
 
-                <button
-                  class="flex-1 py-3 bg-green-500 text-white rounded-br-lg hover:bg-green-600 transition-colors duration-300 text-sm"
-                >
-                  <div class="flex items-center justify-center gap-1">
+                <!-- Nút tùy chỉnh -->
+                <div class="flex justify-between mt-auto space-x-2">
+                  <!-- Nút View Profile -->
+                  <button
+                    class="flex-1 py-3 bg-gradient-to-br from-blue-500 to-green-400 text-white rounded-full shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-green-500 transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2"
+                    @click="router.push({ name: 'doctor-detail', params: { id: doctor.id } })"
+                  >
+                    <span class="material-symbols-outlined text-white text-sm">visibility</span>
+                    View Profile
+                  </button>
+
+                  <!-- Nút Đánh giá -->
+                  <button
+                    class="flex-1 py-3 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full shadow-lg hover:shadow-xl hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2"
+                  >
                     <span>{{ doctor.rating }}</span>
                     <span class="material-symbols-outlined text-yellow-300">star</span>
-                  </div>
-                </button>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -490,44 +480,20 @@ window.addEventListener('resize', () => {
               <div class="mb-6">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Patient Testimonials</h3>
               </div>
-              <div class="space-y-4">
-                <div class="flex items-center">
-                  <img
-                    lazy
-                    src="https://images.unsplash.com/photo-1482849297070-f4fae2173efe?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                    alt="Patient 1"
-                    class="w-16 h-16 rounded-full object-cover"
+              <div v-for="feedback in feedBackData" :key="feedback">
+                <div class="flex items-center space-y-4">
+                  <VaAvatar
+                    :src="getSrcAvatar(feedback.patientAvatar)"
+                    class="w-14 h-14 font-bold"
+                    :fallback-text="feedback.patientName.charAt(0)?.toUpperCase()"
+                    :color="avatarColor(feedback.patientName)"
                   />
                   <div class="ml-4">
-                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Jane Doe</h4>
-                    <p class="text-gray-700 dark:text-gray-300">
-                      "The best dental care I have ever experienced! Professional, courteous, and friendly staff made me
-                      feel like family... would highly recommend to anyone!!!"
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ feedback.patientName }}</h4>
+                    <p class="text-gray-700 dark:text-gray-300 overflow-auto max-w-[14rem] md:max-w-md break-words">
+                      {{ feedback.message }}
                     </p>
                   </div>
-                </div>
-                <div class="flex items-center">
-                  <img
-                    lazy
-                    src="https://images.unsplash.com/photo-1570045006801-08ec03621a42?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                    alt="Patient 2"
-                    class="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div class="ml-4">
-                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white">John Smith</h4>
-                    <p class="text-gray-700 dark:text-gray-300">
-                      "Great attention and service. You know you are in good hands when you learn things about your bone
-                      structure that you had no clue about. Keen eye on detail!"
-                    </p>
-                  </div>
-                </div>
-                <!-- Add more testimonials as needed -->
-              </div>
-              <div class="flex justify-center">
-                <div
-                  class="w-56 px-4 py-4 mt-10 text-center transition ease-in-out delay-150 bg-white hover:-translate-y-1 hover:scale-110 hover:bg-sky-500 hover:text-white text-sky-700 rounded-md duration-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 dark:hover:text-white"
-                >
-                  <button>View More</button>
                 </div>
               </div>
             </div>
@@ -669,18 +635,16 @@ window.addEventListener('resize', () => {
                 <h1 class="text-6xl text-blue-500">1</h1>
               </div>
             </div>
-            <h6 class="mb-2 text-2xl font-extrabold">Create your Account.</h6>
+            <h6 class="mb-2 text-2xl font-extrabold">Choose a service.</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
-              Create an account or
-              <span class="border-b border-sky-700">Sign in</span>
-              with an existing account.
+              Go the
+              <span
+                class="border-b border-sky-700 hover:cursor-pointer"
+                @click="router.push({ name: 'create-appointment' })"
+                >Set an Appointment</span
+              >
+              Then choose a service you want.
             </p>
-            <div
-              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
-              @click="router.push({ name: 'login' })"
-            >
-              Login or Sign up
-            </div>
             <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
               <svg
                 class="w-8 text-teal-500 transform rotate-90 lg:rotate-0"
@@ -707,19 +671,8 @@ window.addEventListener('resize', () => {
             </div>
             <h6 class="mb-2 text-2xl font-extrabold">Choose a date.</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto">
-              Go the
-              <span
-                class="border-b border-sky-700 hover:cursor-pointer"
-                @click="router.push({ name: 'create-appointment' })"
-                >Set an Appointment</span
-              >
-              page. Choose and select your preferred services, date and time. Then, specify the needed service.
+              Next, choose and select your preferred date, time.
             </p>
-            <span
-              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
-              @click="router.push({ name: 'working-calendar' })"
-              >View our Schedules
-            </span>
             <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
               <svg
                 class="w-8 text-teal-500 transform rotate-90 lg:rotate-0"
@@ -752,11 +705,6 @@ window.addEventListener('resize', () => {
               >
               page.
             </p>
-            <div
-              class="inline-flex items-center font-semibold transition-colors duration-200 ease-in-out text-deep-purple-accent-400 hover:text-teal-500 hover:scale-110 hover:cursor-pointer"
-            >
-              See your Appointments
-            </div>
           </div>
         </div>
       </div>
