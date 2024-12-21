@@ -21,7 +21,8 @@ const props = defineProps<{
 
 const getAvailableDoctors = () => {
   const date = props.date.split('T')[0]
-  const [hours, minutes, seconds] = props.time.split(':')
+  const availableTimes = props.time + ':00'
+  const [hours, minutes, seconds] = availableTimes.split(':')
   let newMinutes = parseInt(minutes) + 30
   let newHours = parseInt(hours)
 
@@ -34,7 +35,7 @@ const getAvailableDoctors = () => {
   const request = {
     serviceID: props.service.serviceID,
     date: date,
-    startTime: props.time,
+    startTime: availableTimes,
     endTime: endTime,
   }
   loading.value = true
@@ -42,7 +43,6 @@ const getAvailableDoctors = () => {
     .getAvailableDoctors(request)
     .then((response) => {
       doctors.value = response
-      console.log(response)
     })
     .catch((error) => {
       const message = getErrorMessage(error)

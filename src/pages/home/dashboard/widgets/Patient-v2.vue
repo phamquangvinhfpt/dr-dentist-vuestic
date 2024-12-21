@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
-import { onBeforeMount, onMounted, ref } from 'vue'
+import { computed, onBeforeMount, onMounted, ref } from 'vue'
 import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useToast, VaCardActions } from 'vuestic-ui'
 import { Doctors, TypeService } from './types'
 import { useRouter } from 'vue-router'
@@ -8,6 +8,7 @@ import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import Contact from '../../landingpage/Contact.vue'
 
 import { useServiceStore } from '@/stores/modules/service.module'
+import { useDashboardStore } from '@/stores/modules/dashboard.module'
 
 const serviceStore = useServiceStore()
 
@@ -21,7 +22,11 @@ const doctors = ref<Doctors[]>([])
 const router = useRouter()
 const { init } = useToast()
 const serviceType = ref<TypeService[]>()
-
+const dashboard = useDashboardStore()
+const satisfiedData = computed(() => dashboard.satisfiedData)
+const regularDoctorData = computed(() => dashboard.regularDoctorData)
+const totalServiceData = computed(() => dashboard.totalServiceData)
+const appointmentDoneData = computed(() => dashboard.appointmentDoneData)
 const INTERVAL_TIME = 3000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
 
@@ -73,23 +78,23 @@ const faqs = ref([
   },
 ])
 
-interface ServiceA {
-  id: number
-  serviceName: string
-  serviceDescription: string
-  totalPrice: number
-  children: ServiceA[]
-}
+// interface ServiceA {
+//   id: number
+//   serviceName: string
+//   serviceDescription: string
+//   totalPrice: number
+//   children: ServiceA[]
+// }
 
-const services = ref<ServiceA[]>([])
+// const services = ref<ServiceA[]>([])
 
-serviceStore.getAllCustomerServices().then((res) => {
-  services.value = res.data
-  console.log('services', services.value)
-  services.value.forEach((service) => {
-    console.log('service', service)
-  })
-})
+// serviceStore.getAllCustomerServices().then((res) => {
+//   services.value = res.data
+//   console.log('services', services.value)
+//   services.value.forEach((service) => {
+//     console.log('service', service)
+//   })
+// })
 
 const handleGetServiceType = async () => {
   const request = {}
@@ -97,7 +102,6 @@ const handleGetServiceType = async () => {
     .getServiceType(request)
     .then((res) => {
       serviceType.value = res.data
-      console.log('serviceType', serviceType.value)
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -121,6 +125,10 @@ onMounted(() => {
   loading.value = false
   startContentAnimation()
   handleGetServiceType()
+  dashboard.getSatisfied()
+  dashboard.getRegularDoctor()
+  dashboard.getTotalService()
+  dashboard.getAppointmentDone()
 })
 
 onBeforeMount(() => {
@@ -535,7 +543,7 @@ window.addEventListener('resize', () => {
               class="fun-fact-one__single text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
             >
               <i class="material-icons text-blue-500 text-5xl">medical_services</i>
-              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">500k</h3>
+              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">{{ satisfiedData }}</h3>
               <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Satisfied Patients</p>
             </div>
           </Transition>
@@ -545,7 +553,9 @@ window.addEventListener('resize', () => {
               class="fun-fact-one__single text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
             >
               <i class="material-symbols-outlined text-blue-500 text-5xl">stethoscope</i>
-              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">230+</h3>
+              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">
+                {{ regularDoctorData }}
+              </h3>
               <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Regular Doctors</p>
             </div>
           </Transition>
@@ -555,8 +565,10 @@ window.addEventListener('resize', () => {
               class="fun-fact-one__single text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
             >
               <i class="material-icons text-blue-500 text-5xl">local_hospital</i>
-              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">25+</h3>
-              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Departments</p>
+              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">
+                {{ totalServiceData }}
+              </h3>
+              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Services</p>
             </div>
           </Transition>
           <Transition name="fade" mode="out-in">
@@ -565,7 +577,9 @@ window.addEventListener('resize', () => {
               class="fun-fact-one__single text-center bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg"
             >
               <i class="material-icons text-blue-500 text-5xl">favorite</i>
-              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">98.5%</h3>
+              <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">
+                {{ appointmentDoneData }}
+              </h3>
               <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Success Surgeries</p>
             </div>
           </Transition>

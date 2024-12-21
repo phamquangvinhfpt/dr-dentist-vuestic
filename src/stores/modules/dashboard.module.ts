@@ -6,6 +6,10 @@ export const useDashboardStore = defineStore('Dashboard', {
   state: () => ({
     isLoading: false as boolean,
     dataMonthlyEarnings: [] as Revenues[],
+    satisfiedData: null as any,
+    regularDoctorData: null as any,
+    totalServiceData: null as any,
+    appointmentDoneData: null as any,
   }),
   actions: {
     async getChartRevenue(data: any): Promise<any> {
@@ -67,6 +71,54 @@ export const useDashboardStore = defineStore('Dashboard', {
       try {
         this.isLoading = true
         const response = await dashboardService.getAnalyticBooking(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getSatisfied(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getSatisfied()
+        this.satisfiedData = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getRegularDoctor(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getRegularDoctor()
+        this.regularDoctorData = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getTotalService(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getTotalService()
+        this.totalServiceData = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getAppointmentDone(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getAppointmentDone()
+        this.appointmentDoneData = response
         this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {

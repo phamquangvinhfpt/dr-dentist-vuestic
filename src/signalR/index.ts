@@ -67,14 +67,16 @@ class SignalRService {
         // this.reconnectAttempts = 0
       })
 
-      this.connection.onclose((error) => {
-        console.warn('Attempting to close', error)
-      })
+      // this.connection.onclose((error) => {
+      //   console.warn('Attempting to close', error)
+      // })
       try {
         await this.connection.start()
         if (!this.connection || this.connection.state !== 'Connected') {
           throw new Error('Connection not established')
         }
+        await this.connection.stop()
+        await this.connection.start()
       } catch (error) {
         console.error('Error connecting to SignalR:', error)
         // if (this.reconnectAttempts < this.maxReconnectAttempts) {

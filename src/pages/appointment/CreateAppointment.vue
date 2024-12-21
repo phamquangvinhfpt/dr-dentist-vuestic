@@ -72,7 +72,8 @@ const handleGetAvailableTimes = async () => {
     .getAvailableTime(requestData)
     .then((response) => {
       availableTimes.value = response.data.map((item: any) => item.time)
-      if (selectedTime.value && !availableTimes.value.includes(selectedTime.value)) {
+      const times = selectedTime.value + ':00'
+      if (selectedTime.value && !availableTimes.value.includes(times)) {
         init({
           title: 'Error',
           message: 'The selected time is not available. Please select another time.',
@@ -270,7 +271,7 @@ defineExpose({
                 v-if="showDoctorsList"
                 v-model:selectedPractitioner="selectedPractitioner"
                 :service="selectedService"
-                :date="selectedDate"
+                :date="parseDate(selectedDate)"
                 :time="selectedTime"
               />
             </div>

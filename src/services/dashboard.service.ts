@@ -114,6 +114,46 @@ class DashboardService {
         return Promise.reject(error)
       })
   }
+  async getSatisfied(): Promise<any> {
+    return apiService
+      .get(`/v1/dashboard/patient/satisfied`)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getRegularDoctor(): Promise<any> {
+    return apiService
+      .get(`/v1/dashboard/doctor/regular`)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getTotalService(): Promise<any> {
+    return apiService
+      .get(`/v1/dashboard/doctor/regular`)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getAppointmentDone(): Promise<any> {
+    return apiService
+      .get(`/v1/dashboard/appointment/done`)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new DashboardService()
