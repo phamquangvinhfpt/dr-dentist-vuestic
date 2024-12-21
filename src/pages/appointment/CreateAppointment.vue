@@ -162,6 +162,7 @@ const handleSubmit = async () => {
 
 const saveBookingData = async (data: any) => {
   loading.value = true
+  data.startTime = data.startTime + ':00'
   checkPaymentStatus.value = true
   appointmentStore
     .createAppointment(data)
