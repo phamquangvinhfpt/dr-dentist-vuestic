@@ -1955,42 +1955,42 @@ watch(
     () => paginationN.value.perPage,
   ],
   ([newDate, newTime, newView, newPageA, newPerPageA, newPageF, newPerPageF, newPageN, newPerPageN]) => {
+    // update request
+    request.date = formatDateForm(newDate)
     // Update search values
     const updatedSearchValue = {
       date: formatDateForm(newDate),
       time: newTime,
     }
 
+    const getPageSize = (currentPageSize: any) => (newView === 'calendar' ? 100 : currentPageSize)
+
     searchValueA.value = {
       ...searchValueA.value,
       ...updatedSearchValue,
       pageNumber: newPageA,
-      pageSize: newPerPageA,
+      pageSize: getPageSize(newPerPageA),
     }
 
     searchValueF.value = {
       ...searchValueF.value,
       ...updatedSearchValue,
       pageNumber: newPageF,
-      pageSize: newPerPageF,
+      pageSize: getPageSize(newPerPageF),
     }
 
     searchValueN.value = {
       ...searchValueN.value,
       ...updatedSearchValue,
       pageNumber: newPageN,
-      pageSize: newPerPageN,
+      pageSize: getPageSize(newPerPageN),
     }
 
     // Use debounced functions to fetch data
     debouncedFetchAppointments(searchValueA.value)
     debouncedFetchFollowUpAppointments(searchValueF.value)
     debouncedFetchNonDoctorAppointments(searchValueN.value)
-
-    // Only call searchDoctor when the date changes
-    if (newDate !== selectedDate.value) {
-      searchDoctor()
-    }
+    searchDoctor()
 
     // Handle view changes
     if (newView !== currentView.value) {

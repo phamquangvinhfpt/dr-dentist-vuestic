@@ -367,6 +367,14 @@ const routes: Array<RouteRecordRaw> = [
         component: ServiceForUser,
       },
       {
+        name: 'phone',
+        path: 'phone',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Contact-Info/Phone.vue'),
+      },
+      {
         name: 'list-staff',
         path: 'list-staff',
         meta: {
