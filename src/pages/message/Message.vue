@@ -32,7 +32,7 @@
                       dot
                       overlap
                       placement="bottom-right"
-                      :offset="[-7, -7]"
+                      :offset="-7"
                       class="mr-2"
                       :color="user.isOnline ? 'success' : 'secondary'"
                     >
@@ -77,7 +77,7 @@
                     dot
                     overlap
                     placement="bottom-right"
-                    :offset="[-7, -7]"
+                    :offset="-7"
                     class="mr-2"
                     :color="selectedUser?.isOnline ? 'success' : 'secondary'"
                   >
