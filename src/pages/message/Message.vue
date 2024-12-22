@@ -32,7 +32,7 @@
                       dot
                       overlap
                       placement="bottom-right"
-                      :offset="-7"
+                      :offset="[-7, -7]"
                       class="mr-2"
                       :color="user.isOnline ? 'success' : 'secondary'"
                     >
@@ -77,7 +77,7 @@
                     dot
                     overlap
                     placement="bottom-right"
-                    :offset="-7"
+                    :offset="[-7, -7]"
                     class="mr-2"
                     :color="selectedUser?.isOnline ? 'success' : 'secondary'"
                   >
@@ -418,7 +418,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, onBeforeMount, onBeforeUnmount, onMounted } from 'vue'
+import { ref, computed, watch, watchEffect, onBeforeMount, onMounted } from 'vue'
 import { useAuthStore } from '@modules/auth.module'
 import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import {
@@ -437,6 +437,7 @@ import { storeToRefs } from 'pinia'
 import { Message, User } from './types'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/stores/modules/notification.module'
+import { debounce } from 'lodash'
 
 const authStore = useAuthStore()
 
@@ -589,14 +590,14 @@ const sendMessage = async () => {
   }
 }
 
-const search = async () => {
+const search = debounce(async () => {
   if (keyword.value) {
     const filteredUsers = users.value?.filter((user) => user.name.toLowerCase().includes(keyword.value.toLowerCase()))
     users.value = filteredUsers
   } else {
     loadUsers()
   }
-}
+}, 300)
 
 const TIME_NAMES = {
   second: 1000,
@@ -648,13 +649,6 @@ const convertDateTimeToTime = (date: string) => {
       day: 'numeric',
     })
   }
-}
-
-const updateMessageTimes = () => {
-  messages.value = messages.value.map((message) => ({
-    ...message,
-    time: convertDateTimeToTime(message.originalTime || ''),
-  }))
 }
 
 const loadUsers = async () => {
@@ -780,18 +774,6 @@ watch(
   },
   { deep: true },
 )
-
-watchEffect(() => {
-  updateMessageTimes()
-
-  const interval = setInterval(() => {
-    updateMessageTimes()
-  }, 60 * 1000)
-
-  onBeforeUnmount(() => {
-    clearInterval(interval)
-  })
-})
 </script>
 <style scoped>
 .scrollbar-hide::-webkit-scrollbar {
