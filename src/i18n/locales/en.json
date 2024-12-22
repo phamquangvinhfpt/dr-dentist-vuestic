@@ -478,7 +478,9 @@
     "form-management": "Form Management",
     "form-for-dentist": "My Forms",
     "services": "Service",
-    "doctors": "Doctors"
+    "doctors": "Doctors",
+    "medical-record-for-patient": "Medical Record",
+    "payment-for-patient": "Payment"
   },
   "bin": {
     "title": "Trash",
@@ -824,7 +826,10 @@
     "noPaymentFound": "No payment found",
     "procedureName": "Procedure Name",
     "amount": "Amount",
-    "notDeposited": "Not Deposited"
+    "notDeposited": "Not Deposited",
+    "incomplete": "Incomplete",
+    "completed": "Completed",
+    "allStatus": "All Status"
   },
   "form": {
     "formManagement": "Form Management",
@@ -838,6 +843,16 @@
     "failed": "Failed",
     "workingDate": "Working Date",
     "workingTimes": "Working Times",
-    "description": "Description"
+    "description": "Description",
+    "MyForms": "My Forms",
+    "CreateApplication": "Create Application",
+    "SearchForms": "Search Forms",
+    "BasicInformation": "Basic Information",
+    "WorkingDate": "Working Date",
+    "WorkingHours": "Working Hours",
+    "Notes": "Notes",
+    "Close": "Close",
+    "Description": "Description",
+    "FormDetails": "Form Details"
   }
 }

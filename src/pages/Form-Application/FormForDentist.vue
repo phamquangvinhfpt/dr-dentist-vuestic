@@ -4,14 +4,14 @@
       <VaCardTitle class="card-title">
         <div class="flex items-center gap-4">
           <i class="fas fa-file-alt title-icon"></i>
-          <h2 class="text-2xl font-semibold">My Forms</h2>
+          <h2 class="text-2xl font-semibold">{{ t('form.MyForms') }}</h2>
         </div>
       </VaCardTitle>
 
       <VaCardContent>
         <div class="header-actions">
           <div class="search-section">
-            <VaInput v-model="searchQuery" placeholder="Search forms..." class="search-input" size="medium">
+            <VaInput v-model="searchQuery" :placeholder="$t('form.SearchForms')" class="search-input" size="medium">
               <template #prepend>
                 <VaIcon name="search" color="primary" class="search-icon" />
               </template>
@@ -21,7 +21,16 @@
             </VaInput>
           </div>
 
-          <div class="button-group">
+          <div class="button-group flex items-center gap-4">
+            <VaButton
+              class="create-button"
+              color="primary"
+              icon="add"
+              @click="router.push({ name: 'form-application' })"
+            >
+              {{ t('form.CreateApplication') }}
+            </VaButton>
+
             <div class="status-tabs">
               <div
                 v-for="status in statusFilterOptions"
@@ -122,7 +131,7 @@
     </VaCard>
 
     <!-- Form Details Modal -->
-    <VaModal v-model="showDetailsModal" title="Form Details" hide-default-actions class="details-modal">
+    <VaModal v-model="showDetailsModal" :title="$t('form.FormDetails')" hide-default-actions class="details-modal">
       <div v-if="selectedForm" class="form-details-container">
         <div class="details-header">
           <div class="status-badge" :class="getStatusColor(selectedForm.status)">
@@ -133,17 +142,17 @@
 
         <div class="details-grid">
           <div class="detail-section">
-            <h3 class="section-title"><i class="fas fa-info-circle mr-2"></i>Basic Information</h3>
+            <h3 class="section-title"><i class="fas fa-info-circle mr-2"></i>{{ t('form.BasicInformation') }}</h3>
             <div class="detail-content">
               <div class="detail-item">
-                <span class="detail-label">Working Date</span>
+                <span class="detail-label">{{ t('form.WorkingDate') }}</span>
                 <span class="detail-value">{{ formatDate(selectedForm.workingDate) }}</span>
               </div>
             </div>
           </div>
 
           <div class="detail-section">
-            <h3 class="section-title"><i class="fas fa-clock mr-2"></i>Working Hours</h3>
+            <h3 class="section-title"><i class="fas fa-clock mr-2"></i>{{ t('form.WorkingHours') }}</h3>
             <div class="detail-content">
               <div class="working-times-grid">
                 <div v-for="time in selectedForm.workingTimes" :key="time.timeID" class="time-slot">
@@ -155,14 +164,14 @@
           </div>
 
           <div class="detail-section full-width">
-            <h3 class="section-title"><i class="fas fa-align-left mr-2"></i>Description</h3>
+            <h3 class="section-title"><i class="fas fa-align-left mr-2"></i>{{ t('form.Description') }}</h3>
             <div class="detail-content">
               <p class="description-text">{{ selectedForm.description || 'No description provided' }}</p>
             </div>
           </div>
 
           <div class="detail-section full-width">
-            <h3 class="section-title"><i class="fas fa-sticky-note mr-2"></i>Notes</h3>
+            <h3 class="section-title"><i class="fas fa-sticky-note mr-2"></i>{{ t('form.Notes') }}</h3>
             <div class="detail-content">
               <div class="note-container">
                 <p class="note-text">{{ selectedForm.note || 'No notes available' }}</p>
@@ -174,7 +183,7 @@
       <template #footer>
         <div class="modal-footer">
           <VaButton color="gray" class="close-button" @click="showDetailsModal = false">
-            <i class="fas fa-times mr-2"></i>Close
+            <i class="fas fa-times mr-2"></i>{{ t('form.Close') }}
           </VaButton>
         </div>
       </template>
@@ -463,52 +472,60 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  background: var(--va-background-secondary);
-  border-radius: 15px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  gap: 1.5rem;
 }
 
 .search-section {
-  width: 70%;
-  max-width: 800px;
-  transition: all 0.3s ease;
+  width: 60%;
+  max-width: 600px;
 }
 
 .search-input {
   width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
   transition: all 0.3s ease;
 }
 
 .search-input:deep(input) {
-  height: 45px;
-  font-size: 1rem;
-  padding: 0 1.2rem;
-  background: var(--va-background-secondary) !important;
-  color: var(--va-text-primary) !important;
-  border: 2px solid transparent;
+  height: 40px;
+  font-size: 0.95rem;
+  background: var(--va-background-element) !important;
+  border: none !important;
+  border-radius: 8px;
+  padding: 0 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 
 .search-input:deep(input):focus {
-  border-color: var(--va-primary);
-  box-shadow: 0 0 0 4px rgba(var(--va-primary-rgb), 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-input:deep(input)::placeholder {
+  color: var(--va-text-secondary);
+  opacity: 0.7;
 }
 
 .search-icon {
-  font-size: 1.3rem;
-  margin-left: 0.8rem;
+  font-size: 1.1rem;
+  margin-left: 1rem;
+  color: var(--va-text-secondary) !important;
+  opacity: 0.7;
 }
 
 .clear-icon {
   cursor: pointer;
   padding: 0.4rem;
-  margin-right: 0.8rem;
+  margin-right: 1rem;
   border-radius: 50%;
   transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.clear-icon:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .status-filter-button {
@@ -664,7 +681,7 @@ onMounted(async () => {
   color: #1e293b;
   padding: 1.5rem;
   border-bottom: 1px solid #edf2f7;
-  background: #f8fafc;
+  background: var(--va-background-secondary);
 }
 
 :deep(.va-list-item) {
@@ -951,4 +968,46 @@ onMounted(async () => {
 }
 
 /* Giữ nguyên tất cả các styles khác không liên quan đến màu sắc */
+
+.create-button {
+  padding: 0.5rem 1rem;
+  height: 38px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background: var(--va-primary);
+  color: white;
+}
+
+.create-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Thêm responsive styles */
+@media (max-width: 768px) {
+  .header-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-section {
+    width: 100%;
+    max-width: none;
+  }
+
+  .button-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .create-button {
+    width: auto;
+  }
+}
 </style>

@@ -7,33 +7,66 @@
       </VaCardTitle>
 
       <VaCardContent>
-        <div class="flex justify-between mb-4">
-          <div class="flex gap-2">
-            <VaInput v-model="searchKeyword" placeholder="Search..." @keyup.enter="handleSearch">
-              <template #appendInner>
-                <i class="va-icon material-icons">search</i>
+        <div class="search-filter-container">
+          <!-- Search Box -->
+          <div class="search-box">
+            <VaInput
+              v-model="searchKeyword"
+              :placeholder="t('common.search')"
+              class="search-input"
+              @keyup.enter="handleSearch"
+            >
+              <template #append>
+                <i class="fas fa-search search-icon"></i>
               </template>
             </VaInput>
+          </div>
 
-            <div class="date-range-picker flex items-center gap-2 p-2 border rounded">
+          <!-- Status Filter Pills -->
+          <div class="status-filter">
+            <div class="status-tabs">
+              <button
+                v-for="status in statusFilterOptions"
+                :key="status.id"
+                class="status-tab"
+                :class="{ active: selectedStatusFilter === status.value }"
+                :data-status="status.id"
+                @click="handleStatusFilterChange(status.value)"
+              >
+                {{ status.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Date Range -->
+          <div class="date-range">
+            <div class="date-input-group">
               <VaInput
                 v-model="startDate"
                 type="date"
                 :max="maxDate"
                 class="date-input"
-                placeholder="Start Date"
                 @update:modelValue="handleDateChange"
-              />
-              <span class="mx-2">-</span>
+              >
+                <template #prepend>
+                  <i class="fas fa-calendar text-gray-500"></i>
+                </template>
+              </VaInput>
+              <div class="date-separator">
+                <div class="separator-line"></div>
+              </div>
               <VaInput
                 v-model="endDate"
                 type="date"
                 :min="startDate"
                 :max="maxDate"
                 class="date-input"
-                placeholder="End Date"
                 @update:modelValue="handleDateChange"
-              />
+              >
+                <template #prepend>
+                  <i class="fas fa-calendar text-gray-500"></i>
+                </template>
+              </VaInput>
             </div>
           </div>
         </div>
@@ -217,6 +250,20 @@ const startDate = ref((route.params.startDate as string) || new Date().toISOStri
 const endDate = ref((route.params.endDate as string) || new Date().toISOString().split('T')[0])
 const maxDate = ref(new Date().toISOString().split('T')[0])
 
+const selectedStatusFilter = ref<PaymentStatus | null>(null)
+
+const statusFilterOptions = [
+  { id: 'all', value: null, label: t('payment.allStatus') },
+  { id: 'incomplete', value: PaymentStatus.Incomplete, label: t('payment.incomplete') },
+  { id: 'completed', value: PaymentStatus.Completed, label: t('payment.completed') },
+]
+
+const handleStatusFilterChange = async (status: PaymentStatus | null) => {
+  selectedStatusFilter.value = status
+  currentPage.value = 1
+  await getAllPaymentsPagination()
+}
+
 const getAllPaymentsPagination = async () => {
   try {
     const res = await paymentStore.getAllPayments(
@@ -225,6 +272,19 @@ const getAllPaymentsPagination = async () => {
         pageSize: formData.pageSize,
         orderBy: formData.orderBy,
         keyword: searchKeyword.value,
+        advancedFilter:
+          selectedStatusFilter.value !== null
+            ? {
+                logic: 'and',
+                filters: [
+                  {
+                    field: 'status',
+                    operator: 'eq',
+                    value: selectedStatusFilter.value.toString(),
+                  },
+                ],
+              }
+            : undefined,
       },
       startDate.value,
       endDate.value,
@@ -295,18 +355,24 @@ const getStatusText = (status: number) => {
   }
 }
 
+// const getStatusDotClass = (status: PaymentStatus | null) => {
+//   if (status === null) return 'bg-gray-400'
+//   switch (status) {
+//     case PaymentStatus.Incomplete:
+//       return 'bg-yellow-500'  // Màu vàng
+//     case PaymentStatus.Completed:
+//       return 'bg-green-500'   // Màu xanh lá
+//     default:
+//       return 'bg-gray-400'
+//   }
+// }
+
 const getStatusClass = (status: number) => {
   switch (status) {
-    case PaymentStatus.Waiting:
-      return 'text-blue-500'
     case PaymentStatus.Incomplete:
-      return 'text-yellow-500'
+      return 'text-yellow-500' // Màu vàng
     case PaymentStatus.Completed:
-      return 'text-green-500'
-    case PaymentStatus.Canceled:
-      return 'text-red-500'
-    case PaymentStatus.Failed:
-      return 'text-red-700'
+      return 'text-green-500' // Màu xanh lá
     default:
       return ''
   }
@@ -418,5 +484,318 @@ onMounted(async () => {
 
 .va-table-responsive {
   overflow: auto;
+}
+
+/* Filter Tabs Styles */
+.filter-tabs {
+  margin-bottom: 20px;
+}
+
+.tab-wrapper {
+  display: flex;
+  gap: 8px;
+  background: var(--va-background-element);
+  padding: 4px;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: var(--va-text-secondary);
+}
+
+.tab-button:hover {
+  background: var(--va-background-secondary);
+}
+
+.tab-button.active {
+  background: var(--va-background-secondary);
+}
+
+.tab-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Status Colors */
+.tab-button.active.tab-incomplete {
+  color: #eab308; /* Yellow-500 */
+}
+
+.tab-button.active.tab-completed {
+  color: #22c55e; /* Green-500 */
+}
+
+.tab-button.active.tab-all {
+  color: var(--va-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tab-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.search-filter-container {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  min-width: 280px;
+  flex: 1;
+  position: relative;
+}
+
+.search-input :deep(input) {
+  height: 42px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+  background: white;
+}
+
+/* Bỏ viền và background mặc định của Vuestic */
+.search-input :deep(.va-input-wrapper) {
+  border: none;
+  background: transparent;
+}
+
+.search-input :deep(.va-input) {
+  box-shadow: none;
+}
+
+/* Icon search */
+.search-icon {
+  color: #718096;
+  font-size: 14px;
+  margin-right: 12px;
+}
+
+/* Bỏ các style không cần thiết khác */
+
+/* Status Pills */
+.status-filter {
+  margin: 1rem 0;
+}
+
+.status-tabs {
+  display: inline-flex;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.status-tab {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  min-width: 100px;
+  text-align: center;
+}
+
+.status-tab:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 60%;
+  background: #e2e8f0;
+}
+
+/* All Status - Màu xanh */
+.status-tab[data-status='all'].active,
+.status-tab[data-status='all']:hover:not(.active) {
+  color: #2563eb;
+}
+
+/* Incomplete Status - Màu vàng */
+.status-tab[data-status='incomplete'].active,
+.status-tab[data-status='incomplete']:hover:not(.active) {
+  color: #eab308;
+}
+
+/* Completed Status - Màu xanh lá */
+.status-tab[data-status='completed'].active,
+.status-tab[data-status='completed']:hover:not(.active) {
+  color: #22c55e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .status-tabs {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+/* Date Range */
+.date-range {
+  display: flex;
+  align-items: center;
+}
+
+.date-input-group {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.date-input {
+  width: 160px;
+}
+
+.date-input :deep(input) {
+  height: 38px;
+  border: none !important;
+  background: transparent;
+  font-size: 14px;
+  color: #2d3748;
+  padding: 0 8px;
+}
+
+/* Bỏ border và background mặc định của Vuestic */
+.date-input :deep(.va-input-wrapper) {
+  border: none;
+  background: transparent;
+}
+
+.date-input :deep(.va-input) {
+  box-shadow: none;
+}
+
+/* Icon calendar */
+.date-input :deep(.va-input__prepend-inner) {
+  padding-left: 8px;
+}
+
+/* Separator */
+.date-separator {
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+}
+
+.separator-line {
+  width: 16px;
+  height: 2px;
+  background: #cbd5e0;
+  border-radius: 2px;
+}
+
+/* Hover & Focus states */
+.date-input-group:hover {
+  border-color: #cbd5e0;
+}
+
+.date-input :deep(input:focus) {
+  background: #f7fafc;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .date-input-group {
+    width: 100%;
+  }
+
+  .date-input {
+    flex: 1;
+  }
+}
+
+/* Animation */
+.status-pill {
+  transform: translateY(0);
+  transition: all 0.2s ease;
+}
+
+.status-pill:hover {
+  transform: translateY(-1px);
+}
+
+.status-pill.active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* All Status - Màu xanh */
+.status-tab.active[data-status='all'] {
+  color: #2563eb; /* Màu xanh */
+}
+
+.status-tab.active[data-status='all'] .status-count {
+  background: #3b82f6; /* Màu xanh */
+  color: white;
+}
+
+/* Incomplete Status - Màu vàng */
+.status-tab.active[data-status='incomplete'] {
+  color: #eab308; /* Màu vàng */
+}
+
+.status-tab.active[data-status='incomplete'] .status-count {
+  background: #eab308; /* Màu vàng */
+  color: white;
+}
+
+/* Completed Status - Màu xanh lá */
+.status-tab.active[data-status='completed'] {
+  color: #22c55e; /* Màu xanh lá */
+}
+
+.status-tab.active[data-status='completed'] .status-count {
+  background: #22c55e; /* Màu xanh lá */
+  color: white;
+}
+
+/* Hover effect theo màu tương ứng */
+.status-tab[data-status='all']:hover:not(.active) {
+  color: #2563eb;
+}
+
+.status-tab[data-status='incomplete']:hover:not(.active) {
+  color: #eab308;
+}
+
+.status-tab[data-status='completed']:hover:not(.active) {
+  color: #22c55e;
 }
 </style>

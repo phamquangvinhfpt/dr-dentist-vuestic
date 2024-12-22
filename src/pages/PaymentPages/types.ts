@@ -9,10 +9,11 @@ export interface PaginationFilter {
   keyword?: string
   advancedFilter?: {
     logic: string
-    filters: string[]
-    field?: string
-    operator?: string
-    value?: string
+    filters: Array<{
+      field: string
+      operator: string
+      value: string
+    }>
   }
 }
 
