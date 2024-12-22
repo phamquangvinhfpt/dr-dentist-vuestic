@@ -28,6 +28,7 @@ export default {
       displayName: 'menu.services',
       meta: {
         icon: 'medical_services',
+        roles: ['Guest', 'Patient'],
       },
     },
     {
@@ -35,6 +36,7 @@ export default {
       displayName: 'menu.doctors',
       meta: {
         icon: 'person_pin_circle',
+        roles: ['Guest', 'Patient'],
       },
     },
     {
