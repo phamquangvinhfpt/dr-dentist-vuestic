@@ -45,7 +45,7 @@
         >
           <template #cell(serviceName)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.serviceName }}</span>
+              <span class="w-24">{{ row.rowData.name }}</span>
             </div>
           </template>
 
@@ -63,7 +63,7 @@
 
           <template #cell(serviceDescription)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.serviceDescription }}</span>
+              <span class="w-24">{{ row.rowData.description }}</span>
             </div>
           </template>
 
@@ -96,7 +96,7 @@
                   class="action-button-circle"
                   preset="primary"
                   round
-                  @click="viewDetails(row.rowData.id)"
+                  @click="viewDetails(row.rowData.serviceID)"
                 >
                   <VaIcon name="visibility" />
                 </VaButton>

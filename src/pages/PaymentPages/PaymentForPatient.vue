@@ -61,7 +61,7 @@
 
           <template #cell(depositDate)="{ row }">
             <div class="flex items-center gap-2">
-              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(row.rowData.depositDate) }}</span>
+              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(new Date(row.rowData.depositDate)) }}</span>
             </div>
           </template>
 

@@ -254,8 +254,9 @@ const formatPrice = (price: number) => {
   }).format(price)
 }
 
-const formatDate = (date: Date) => {
-  return new Date(date).toLocaleDateString('vi-VN')
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('vi-VN')
 }
 
 const columns = computed(() => [
@@ -388,7 +389,7 @@ const resetForm = () => {
 
 const validateDate = (dateString: string): boolean => {
   const date = new Date(dateString)
-  return !isNaN(date.getTime())
+  return !isNaN(date.getTime()) && dateString !== null && dateString !== undefined
 }
 
 onMounted(async () => {
