@@ -99,7 +99,7 @@
                 preset="secondary"
                 size="small"
                 class="action-button"
-                @click="router.push(`/payment/${row.rowData.paymentId}`)"
+                @click="router.push(`/payment-detail/${row.rowData.paymentId}`)"
               />
             </div>
           </template>
