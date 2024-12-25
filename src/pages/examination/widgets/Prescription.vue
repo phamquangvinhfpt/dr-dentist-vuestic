@@ -19,7 +19,6 @@
     close-button
     mobile-fullscreen
     hide-default-actions
-    :before-cancel="beforeEditFormModalClose"
     @close="doShowPrescriptionFormModal = false"
   >
     <VaModalHeader>
@@ -42,7 +41,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useModal, useToast } from 'vuestic-ui'
+import { useToast } from 'vuestic-ui'
 import { getErrorMessage, notifications } from '@/services/utils'
 import { Prescription, TreatmentPlanResponse } from '../types'
 import { usePrescriptionStore } from '@/stores/modules/prescription.module'
@@ -56,7 +55,6 @@ const { init: notify } = useToast()
 const doShowPrescriptionFormModal = ref(false)
 const prescriptionToEdit = ref<Prescription | null>(null)
 const prescriptionStore = usePrescriptionStore()
-const { confirm } = useModal()
 
 const props = defineProps<{
   items: TreatmentPlanResponse
@@ -83,20 +81,5 @@ const onPrescriptionSaved = async (prescription: Prescription) => {
         color: 'danger',
       })
     })
-}
-
-const beforeEditFormModalClose = async (hide: () => unknown) => {
-  if (editFormRef.value.isFormHasUnsavedChanges) {
-    const agreed = await confirm({
-      maxWidth: '380px',
-      message: notifications.unsavedChanges,
-      size: 'small',
-    })
-    if (agreed) {
-      hide()
-    }
-  } else {
-    hide()
-  }
 }
 </script>

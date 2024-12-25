@@ -79,24 +79,6 @@ const faqs = ref([
   },
 ])
 
-// interface ServiceA {
-//   id: number
-//   serviceName: string
-//   serviceDescription: string
-//   totalPrice: number
-//   children: ServiceA[]
-// }
-
-// const services = ref<ServiceA[]>([])
-
-// serviceStore.getAllCustomerServices().then((res) => {
-//   services.value = res.data
-//   console.log('services', services.value)
-//   services.value.forEach((service) => {
-//     console.log('service', service)
-//   })
-// })
-
 const handleGetServiceType = async () => {
   const request = {}
   serviceStore
@@ -814,7 +796,6 @@ window.addEventListener('resize', () => {
 
 /* Thêm styles cho doctor cards */
 .doctor-card {
-  height: 100%;
   transition: transform 0.3s ease;
 }
 

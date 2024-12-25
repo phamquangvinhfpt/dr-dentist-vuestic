@@ -110,6 +110,7 @@ export enum PaymentMethod {
 export type Appointment = {
   appointmentId: string
   patientId: string
+  patientAvatar?: string
   patientUserID?: string
   patientCode: string | null
   patientName: string | null
@@ -135,6 +136,7 @@ export type Appointment = {
 export type FollowUpAppointment = {
   roomID: string
   treatmentID: string
+  patientAvatar?: string
   roomName: string
   calendarID: string
   patientName: string

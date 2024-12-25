@@ -691,6 +691,7 @@ const calendarDays = computed(() => {
 })
 
 const getAllDoctors = (): any => {
+  loading.value = true
   calendarStore
     .getDoctorHasNoCalendar('2025-01-20')
     .then((response) => {
@@ -704,6 +705,9 @@ const getAllDoctors = (): any => {
         message: message,
         color: 'danger',
       })
+    })
+    .finally(() => {
+      loading.value = false
     })
 }
 
@@ -1015,10 +1019,16 @@ const removePartTimeSchedule = (index: number) => {
 }
 
 function getAllRoom() {
-  calendarStore.getAllRoom({}).then((response) => {
-    getAllRooms.value = response.data
-    console.log('get all', getAllRooms.value)
-  })
+  loading.value = true
+  calendarStore
+    .getAllRoom({})
+    .then((response) => {
+      getAllRooms.value = response.data
+      console.log('get all', getAllRooms.value)
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 async function AutoSetRoomForPartTime(calendars: any) {

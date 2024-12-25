@@ -221,7 +221,10 @@
     "full_time": "Full Time",
     "part_time": "Part Time",
     "none": "None",
-    "working_type": "Working Type"
+    "working_type": "Working Type",
+    "verify": "Verification",
+    "verify_message": "We have sent a code to your phone",
+    "verify_ask": "Didn't receive code?"
   },
   "doctor": {
     "education": "Education Level",

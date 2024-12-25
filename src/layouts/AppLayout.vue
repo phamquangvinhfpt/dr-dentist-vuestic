@@ -198,17 +198,80 @@ const handleNotificationAction = (action) => {
   }
 }
 
-onMounted(async () => {
-  if (!isGuest.value) {
+const isConnecting = ref(false)
+const retryCount = ref(0)
+const maxRetries = 3
+const connectionStatus = ref('Disconnected')
+
+const setupSignalR = async () => {
+  if (isConnecting.value) return
+
+  isConnecting.value = true
+  try {
     const url = import.meta.env.VITE_APP_BASE_URL
     const url_without_api = url.slice(0, -3)
     const path = url_without_api + 'notifications'
+
     await signalRService.connect(`${path}`)
+
     if (signalRService.isConnected()) {
+      connectionStatus.value = 'Connected'
+      console.log('SignalR Connected')
+
       signalRService.on('NotificationFromServer', handleReceiveNotification)
       signalRService.on('UpdateOnlineUsers', handleUserIsOnline)
       signalRService.on('ReceiveMessage', handleReceiveMessage)
+
+      // Thêm một ping test để đảm bảo kết nối hoạt động
+      await testConnection()
+    } else {
+      throw new Error('Connection failed')
     }
+  } catch (error) {
+    console.error('SignalR Connection Error:', error)
+    connectionStatus.value = 'Error: ' + error.message
+    if (retryCount.value < maxRetries) {
+      retryCount.value++
+      console.log(`Retrying connection (${retryCount.value}/${maxRetries})...`)
+      setTimeout(setupSignalR, 2000) // Retry after 2 seconds
+    }
+  } finally {
+    isConnecting.value = false
+  }
+}
+
+const testConnection = async () => {
+  try {
+    // Gửi một ping test và đợi phản hồi
+    await signalRService.invoke('PingTest')
+    console.log('Ping test successful')
+  } catch (error) {
+    console.error('Ping test failed:', error)
+    throw new Error('Connection test failed')
+  }
+}
+
+const cleanupSignalR = () => {
+  if (signalRService.isConnected()) {
+    signalRService.off('NotificationFromServer', handleReceiveNotification)
+    signalRService.off('UpdateOnlineUsers', handleUserIsOnline)
+    signalRService.off('ReceiveMessage', handleReceiveMessage)
+    signalRService.disconnect()
+  }
+}
+
+onMounted(async () => {
+  if (!isGuest.value) {
+    // const url = import.meta.env.VITE_APP_BASE_URL
+    // const url_without_api = url.slice(0, -3)
+    // const path = url_without_api + 'notifications'
+    // await signalRService.connect(`${path}`)
+    // if (signalRService.isConnected()) {
+    //   signalRService.on('NotificationFromServer', handleReceiveNotification)
+    //   signalRService.on('UpdateOnlineUsers', handleUserIsOnline)
+    //   signalRService.on('ReceiveMessage', handleReceiveMessage)
+    // }
+    setupSignalR()
   }
   if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
     registerNotifications().catch((error) => {
@@ -222,13 +285,14 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  if (!isGuest.value) {
-    console.log('Disconnect SignalR...')
-    signalRService.off('NotificationFromServer')
-    signalRService.off('UpdateOnlineUsers')
-    signalRService.off('ReceiveMessage')
-    signalRService.disconnect()
-  }
+  // if (!isGuest.value) {
+  //   console.log('Disconnect SignalR...')
+  //   signalRService.off('NotificationFromServer')
+  //   signalRService.off('UpdateOnlineUsers')
+  //   signalRService.off('ReceiveMessage')
+  //   signalRService.disconnect()
+  // }
+  cleanupSignalR()
 })
 </script>
 

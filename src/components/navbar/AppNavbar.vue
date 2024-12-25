@@ -14,7 +14,7 @@
         <RouterLink
           :to="isPatientOrGuest ? '' : '/'"
           aria-label="Visit home page"
-          @click.prevent="isPatientOrGuest && !isMobile ? openDrawer() : null"
+          @click.prevent="isPatientOrGuest && !isMobile ? openDrawer() : reload()"
         >
           <VuesticLogo />
         </RouterLink>
@@ -26,7 +26,7 @@
   </VaNavbar>
 
   <!-- Drawer Component -->
-  <Drawer ref="drawerRef" title="Menu" button-text="Open Menu" side="left">
+  <Drawer ref="drawerRef" title="Menu" side="left">
     <div class="space-y-4 p-4">
       <nav>
         <VaAccordion v-model="openedSections" multiple>
@@ -124,6 +124,9 @@ const openDrawer = () => {
   if (drawerRef.value) {
     drawerRef.value?.openDrawer()
   }
+}
+const reload = () => {
+  window.location.reload()
 }
 const openedSections = ref<boolean[]>([])
 const value = ref<boolean[]>([])

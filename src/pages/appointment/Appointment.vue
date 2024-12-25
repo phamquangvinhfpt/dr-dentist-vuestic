@@ -373,85 +373,90 @@
       <!-- List View -->
       <div v-else class="flex-1 overflow-auto" :style="{ marginRight: !isMobile ? `${scrollbarWidth}px` : `` }">
         <div v-if="isAppointment === 'appointment'">
-          <VaDataTable
-            :items="items"
-            :columns="columns"
-            hoverable
-            class="my-table va-table--hoverable"
-            :style="{
-              '--va-data-table-thead-background': 'var(--va-background-element)',
-              '--va-data-table-grid-tbody-gap': '0.15rem',
-              '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-            }"
-            :class="['small-text']"
-            sticky-header
-          >
-            <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
-            <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
-            <template #cell(status)="{ value }">
-              <VaChip :color="getStatusColor(value)" class="text-sm">
-                {{ getStatusText(value) }}
-              </VaChip>
-            </template>
-            <template #cell(paymentStatus)="{ value }">
-              <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
-                {{ getPaymentStatusText(value) }}
-              </VaChip>
-            </template>
-            <template #cell(actions)="{ rowData }">
-              <div class="space-x-2">
-                <VaButton
-                  v-if="rowData.status === 2 && role?.includes('Staff')"
-                  round
-                  icon="check"
-                  color="#b1fadc"
-                  icon-color="#812E9E"
-                  @click="checkedAppointment(rowData.appointmentId)"
-                />
-                <VaButton
-                  v-if="rowData.status !== 4 && rowData.status !== 2"
-                  round
-                  icon="arrow_forward"
-                  color="#b1fadc"
-                  icon-color="#812E9E"
-                  @click="router.push(`/examination/${rowData.appointmentId}`)"
-                />
-                <VaButton
-                  v-if="rowData.status === 6 && role?.includes('Staff') && rowData.paymentStatus === 1"
-                  round
-                  icon="payments"
-                  color="#b1fadc"
-                  icon-color="green"
-                  @click="router.push(`/payment/${rowData.appointmentId}`)"
-                />
-                <VaButton
-                  v-if="rowData.status === 2"
-                  round
-                  icon="sync"
-                  color="warning"
-                  icon-color="#812E9E"
-                  @click="rescheduleModal(rowData)"
-                />
-                <VaButton
-                  v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
-                  round
-                  icon="clear"
-                  color="danger"
-                  icon-color="#812E9E"
-                  @click="cancelModal(rowData)"
-                />
-              </div>
-            </template>
-          </VaDataTable>
-          <VaPagination
-            v-model="paginationA.page"
-            class="items-center justify-end mt-4"
-            buttons-preset="secondary"
-            :pages="totalPagesA"
-            :visible-pages="5"
-            :boundary-links="true"
-            :direction-links="true"
-          />
+          <div v-if="!isMobile">
+            <VaDataTable
+              :items="items"
+              :columns="columns"
+              hoverable
+              class="my-table va-table--hoverable"
+              :style="{
+                '--va-data-table-thead-background': 'var(--va-background-element)',
+                '--va-data-table-grid-tbody-gap': '0.15rem',
+                '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
+              }"
+              :class="['small-text']"
+              sticky-header
+            >
+              <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
+              <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
+              <template #cell(status)="{ value }">
+                <VaChip :color="getStatusColor(value)" class="text-sm">
+                  {{ getStatusText(value) }}
+                </VaChip>
+              </template>
+              <template #cell(paymentStatus)="{ value }">
+                <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
+                  {{ getPaymentStatusText(value) }}
+                </VaChip>
+              </template>
+              <template #cell(actions)="{ rowData }">
+                <div class="space-x-2">
+                  <VaButton
+                    v-if="rowData.status === 2 && role?.includes('Staff')"
+                    round
+                    icon="check"
+                    color="#b1fadc"
+                    icon-color="#812E9E"
+                    @click="checkedAppointment(rowData.appointmentId)"
+                  />
+                  <VaButton
+                    v-if="rowData.status !== 4 && rowData.status !== 2"
+                    round
+                    icon="arrow_forward"
+                    color="#b1fadc"
+                    icon-color="#812E9E"
+                    @click="router.push(`/examination/${rowData.appointmentId}`)"
+                  />
+                  <VaButton
+                    v-if="rowData.status === 6 && role?.includes('Staff') && rowData.paymentStatus === 1"
+                    round
+                    icon="payments"
+                    color="#b1fadc"
+                    icon-color="green"
+                    @click="router.push(`/payment/${rowData.appointmentId}`)"
+                  />
+                  <VaButton
+                    v-if="rowData.status === 2"
+                    round
+                    icon="sync"
+                    color="warning"
+                    icon-color="#812E9E"
+                    @click="rescheduleModal(rowData)"
+                  />
+                  <VaButton
+                    v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
+                    round
+                    icon="clear"
+                    color="danger"
+                    icon-color="#812E9E"
+                    @click="cancelModal(rowData)"
+                  />
+                </div>
+              </template>
+            </VaDataTable>
+            <VaPagination
+              v-model="paginationA.page"
+              class="items-center justify-end mt-4"
+              buttons-preset="secondary"
+              :pages="totalPagesA"
+              :visible-pages="5"
+              :boundary-links="true"
+              :direction-links="true"
+            />
+          </div>
+          <div v-else>
+            <ListAppointment :date="formatDateForm(selectedDate)" />
+          </div>
         </div>
         <div v-if="isAppointment === 'followup'">
           <VaDataTable
@@ -695,7 +700,7 @@
       </TransitionRoot>
       <!-- Assign Booking Dialog -->
       <TransitionRoot appear :show="showAssignDialog" as="template">
-        <Dialog as="div" class="relative z-10" @close="showAssignDialog = false">
+        <Dialog as="div" @close="showAssignDialog = false">
           <TransitionChild
             as="template"
             enter="duration-300 ease-out"
@@ -727,20 +732,7 @@
                       <label class="text-sm font-medium">Patient: {{ selectedBooking.patientName }}</label>
                     </div>
                     <div class="space-y-2">
-                      <label class="text-sm font-medium">Doctor</label>
-                      <select v-model="selectedDoctorId" required class="w-full px-3 py-2 border rounded-md">
-                        <option v-for="doctor in activeDoctors" :key="doctor.id" :value="doctor.id">
-                          {{ doctor.name }}
-                        </option>
-                      </select>
-                    </div>
-                    <div class="space-y-2">
-                      <label class="text-sm font-medium">Time</label>
-                      <select v-model="selectedTime" required class="w-full px-3 py-2 border rounded-md" disabled>
-                        <option v-for="time in timeSlots" :key="time" :value="time">
-                          {{ time }}
-                        </option>
-                      </select>
+                      <VaSelect v-model="selectedDoctorId" label="Doctor" :options="listDoctorsOptionsAssign" />
                     </div>
                     <div class="flex justify-end space-x-2 mt-4">
                       <button
@@ -778,14 +770,6 @@
               highlight-matched-text
             />
             <VaSelect
-              v-model="doctorId"
-              class="col-span-1"
-              label="Doctor"
-              :options="optionsDoctors"
-              autocomplete
-              highlight-matched-text
-            />
-            <VaSelect
               v-model="serviceId"
               class="col-span-1"
               label="Service"
@@ -803,6 +787,14 @@
               clearable
             />
             <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
+            <VaSelect
+              v-model="doctorId"
+              class="col-span-1"
+              label="Doctor"
+              :options="optionsDoctors"
+              autocomplete
+              highlight-matched-text
+            />
             <VaTextarea v-model="notes" label="Notes" />
           </div>
         </VaCard>
@@ -895,6 +887,7 @@ import { useRouter } from 'vue-router'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { startOfWeek, addDays, format } from 'date-fns'
 import { debounce } from 'lodash'
+import ListAppointment from './widgets/list-appointment/ListAppointment.vue'
 
 const selectedDate = ref(new Date())
 const showAllUnassignedModal = ref(false)
@@ -1018,6 +1011,7 @@ const getServices = () => {
     })
 }
 const availableDoctorsRef = ref([])
+const availableNonDoctorsRef = ref<Options[]>([])
 const optionsDoctors = computed(() => {
   if (availableDoctorsRef.value) {
     return availableDoctorsRef.value
@@ -1027,6 +1021,11 @@ const optionsDoctors = computed(() => {
     text: `${doctor.firstName} ${doctor.lastName}`,
     value: doctor.id,
   }))
+})
+
+const listDoctorsOptionsAssign = computed(() => {
+  console.log(availableNonDoctorsRef.value)
+  return availableNonDoctorsRef.value
 })
 const optionsStartTimes = computed(() => {
   const slots = []
@@ -1444,6 +1443,44 @@ const fetchAvailableDoctors = async () => {
     })
 }
 
+const fetchAvailableNonDoctors = async () => {
+  const request = {
+    serviceID: selectedBooking.value.serviceId,
+    date: selectedBooking.value.appointmentDate,
+    startTime: selectedBooking.value.startTime,
+    endTime: addMinutesToTime(selectedBooking.value.startTime, 30),
+  }
+  loading.value = true
+  storeDoctors
+    .getAvailableDoctors(request)
+    .then((response) => {
+      if (response && response.length > 0) {
+        availableNonDoctorsRef.value = response.map((doctor: any) => ({
+          text: `${doctor.firstName} ${doctor.lastName}`,
+          value: doctor.id,
+        }))
+
+        if (doctorId.value && !availableNonDoctorsRef.value.some((option: any) => option.value === doctorId.value)) {
+          doctorId.value = undefined
+        }
+      } else {
+        availableNonDoctorsRef.value = []
+        doctorId.value = undefined
+      }
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
 const searchDoctor = () => {
   loading.value = true
   const request = { isActive: true }
@@ -1533,16 +1570,20 @@ const selectedBooking = ref<Appointment>({
   roomID: '',
   roomName: '',
 })
-const selectedDoctorId = ref('')
+const selectedDoctorId = ref<Options>()
 const selectedTime = ref('')
 
 const openAssignDialog = (booking: any) => {
   selectedBooking.value = booking
   selectedTime.value = booking.startTime.slice(0, -3)
-  showAssignDialog.value = true
+  handleAssignBooking()
 }
 
 const openAssignListDialog = (booking: any) => {
+  selectedDoctorId.value = {
+    text: '',
+    value: '',
+  }
   searchValueN.value = {
     ...searchValueN.value,
   }
@@ -1550,51 +1591,38 @@ const openAssignListDialog = (booking: any) => {
   selectedBooking.value = booking
   selectedTime.value = booking.startTime.slice(0, -3)
   showAssignDialog.value = true
+  fetchAvailableNonDoctors()
 }
 
 const handleAssignBooking = () => {
-  const index = nonDoctorAppointments.value.findIndex((a) => a.appointmentId === selectedBooking.value.appointmentId)
-  selectedTime.value = selectedTime.value + ':00'
-  if (index !== -1) {
-    // Check if the selected time and doctor combination is already occupied
-    const isDuplicate = nonDoctorAppointments.value.some(
-      (a) => a.startTime === selectedTime.value && getDoctorId(a.dentistId) === selectedDoctorId.value,
-    )
-
-    if (isDuplicate) {
+  const request = {
+    doctorID: getDoctorProfileId(
+      selectedDoctorId.value?.value ? selectedDoctorId.value?.value : selectedDoctorId.value,
+    ),
+    appointmentID: selectedBooking.value.appointmentId,
+  }
+  storeAppointments
+    .assignDoctor(request)
+    .then((response) => {
+      init({
+        title: 'success',
+        message: response.data,
+        color: 'success',
+      })
+      fetchAppointments(searchValueA.value)
+      fetchNonDoctorAppointments(searchValueN.value)
+      showAssignDialog.value = false
+      availableDoctorsRef.value = []
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
       init({
         title: 'error',
-        message: 'Cannot assign booking. Time slot is already occupied.',
+        message: message,
         color: 'danger',
       })
-      return
-    }
-    const request = {
-      doctorID: getDoctorProfileId(selectedDoctorId.value),
-      appointmentID: selectedBooking.value.appointmentId,
-    }
-    storeAppointments
-      .assignDoctor(request)
-      .then((response) => {
-        init({
-          title: 'success',
-          message: response.data,
-          color: 'success',
-        })
-        fetchAppointments(searchValueA.value)
-        fetchNonDoctorAppointments(searchValueN.value)
-        showAssignDialog.value = false
-      })
-      .catch((error) => {
-        const message = getErrorMessage(error)
-        init({
-          title: 'error',
-          message: message,
-          color: 'danger',
-        })
-        selectedTime.value = selectedTime.value.slice(0, 5)
-      })
-  }
+      selectedTime.value = selectedTime.value.slice(0, 5)
+    })
 }
 
 const handleDragStart = (event: DragEvent, appointment: Appointment | FollowUpAppointment) => {
@@ -1841,39 +1869,35 @@ const isTimeInRange = (checkTime: string, startTime: string, endTime: string): b
   return checkTime > startTime && checkTime < endTime
 }
 
-const getAppointments = (time: string, identifier: string) => {
+const getAppointments = computed(() => (time: string, identifier: string) => {
   const startTime = time + ':00'
   const endTime = addMinutesToTime(startTime, 30)
 
   if (role?.includes('Dentist')) {
-    // Filter appointments by date and time for Dentist role
     return appointments.value.filter(
       (a) => a.appointmentDate === identifier && isTimeInRange(a.startTime, startTime, endTime),
     )
   } else {
-    // Keep the existing logic for other roles
     return appointments.value.filter(
       (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.dentistId) === identifier,
     )
   }
-}
+})
 
-const getFollowUpAppointments = (time: string, identifier: string) => {
+const getFollowUpAppointments = computed(() => (time: string, identifier: string) => {
   const startTime = time + ':00'
   const endTime = addMinutesToTime(startTime, 30)
 
   if (role?.includes('Dentist')) {
-    // Filter follow-up appointments by date and time for Dentist role
     return followUpAppointments.value.filter(
       (a) => a.date === identifier && isTimeInRange(a.startTime, startTime, endTime),
     )
   } else {
-    // Keep the existing logic for other roles
     return followUpAppointments.value.filter(
       (a) => isTimeInRange(a.startTime, startTime, endTime) && getDoctorId(a.doctorProfileID) === identifier,
     )
   }
-}
+})
 
 const closeContextMenuOnClickOutside = (event: Event) => {
   const target = event.target as HTMLElement
@@ -1897,6 +1921,7 @@ const openCreateAppointmentDialog = () => {
     text: '',
     value: '',
   }
+  availableDoctorsRef.value = []
   date.value = new Date()
   startTime.value = ''
   notes.value = ''

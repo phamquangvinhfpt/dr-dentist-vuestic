@@ -74,6 +74,34 @@ class AuthService {
       })
   }
 
+  async verifyByPhone(phone: string, code: string): Promise<any> {
+    return apiService
+      .request({
+        url: `/users/confirm-account-phone-number?phone=${phone}&code=${code}`,
+        method: 'GET',
+      })
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  async resendPhoneConfirm(phone: string): Promise<any> {
+    return apiService
+      .request({
+        url: `/users/resend-phone-confirm?phone=${phone}`,
+        method: 'GET',
+      })
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
   async forgotPassword(email: string): Promise<any> {
     return apiService
       .post('/users/forgot-password', {

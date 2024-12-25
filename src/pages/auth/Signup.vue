@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useForm, useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { Register } from './types'
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
 import AddressAutocomplete from './AddressAutocomplete.vue'
+import { Capacitor } from '@capacitor/core'
+import OTPModal from './OTPModal.vue'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
 
@@ -14,7 +16,7 @@ const { validate } = useForm('form')
 const { push } = useRouter()
 const { init } = useToast()
 const store = useAuthStore()
-
+const showModal = ref(false)
 const isLoading = ref(false)
 
 const formData = reactive({
@@ -69,7 +71,6 @@ const submit = () => {
           message: t('auth.account_created'),
           color: 'success',
         })
-        push({ name: 'login' })
       })
       .catch((error) => {
         const message = getErrorMessage(error)
@@ -81,6 +82,11 @@ const submit = () => {
       })
       .finally(() => {
         isLoading.value = false
+        if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
+          showModal.value = true
+        } else {
+          push({ name: 'login' })
+        }
       })
   }
 }
@@ -147,6 +153,11 @@ const birthDayRules = computed(() => [
   (v: any) => !!v || t('validation.birthDay.required'),
   (v: any) => checkBirthDayValid(v) || t('validation.birthDay.invalid'),
 ])
+
+const handleEnter = (e: KeyboardEvent) => {
+  e.preventDefault()
+  submit()
+}
 </script>
 
 <template>
@@ -179,7 +190,6 @@ const birthDayRules = computed(() => [
           class="mb-4"
           :label="t('auth.phone_number')"
         />
-        <AddressAutocomplete v-model="formData.address" :rules="addressRules" />
         <VaInput v-model="formData.email" :rules="emailRules" class="mb-4" :label="t('auth.email')" type="email" />
         <VaValue v-slot="isPasswordVisible" :default-value="false">
           <VaInput
@@ -197,6 +207,7 @@ const birthDayRules = computed(() => [
                 :name="isPasswordVisible.value ? 'mso-visibility_off' : 'mso-visibility'"
                 class="cursor-pointer"
                 color="secondary"
+                tabindex="-1"
               />
             </template>
           </VaInput>
@@ -221,7 +232,6 @@ const birthDayRules = computed(() => [
             </template>
           </VaInput>
         </VaValue>
-
         <div class="mb-4">
           <VaRadio
             v-model="formData.isMale"
@@ -230,7 +240,7 @@ const birthDayRules = computed(() => [
             :rules="[(v: any) => !!v || t('auth.gender_required')]"
           />
         </div>
-
+        <AddressAutocomplete v-model="formData.address" :rules="addressRules" />
         <VaDateInput
           v-model="formData.birthDay"
           :rules="birthDayRules"
@@ -239,11 +249,20 @@ const birthDayRules = computed(() => [
           clearable
         />
 
-        <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
+        <VaInput
+          v-model="formData.job"
+          :rules="jobRules"
+          class="mb-4"
+          :label="t('auth.job')"
+          @keydown.enter="handleEnter"
+        />
         <div class="flex justify-center mt-4">
           <VaButton class="w-full" @click="submit">{{ t('auth.create_account') }}</VaButton>
         </div>
       </VaForm>
     </VaCard>
+    <VaModal v-model="showModal" close-button hide-default-actions>
+      <OTPModal :loading="isLoading" :phone="formData.phoneNumber" @update:loading="(val) => (isLoading = val)" />
+    </VaModal>
   </VaInnerLoading>
 </template>

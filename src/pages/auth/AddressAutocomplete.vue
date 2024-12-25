@@ -8,7 +8,7 @@ const addressInput = ref('')
 const suggestions = ref<any[]>([])
 const showSuggestions = ref(false)
 let sessionToken = crypto.randomUUID()
-
+const isSelected = ref(false)
 const { t } = useI18n()
 const authStore = useAuthStore()
 const props = defineProps<{
@@ -55,17 +55,22 @@ const debouncedSearch = debounce(fetchAddressSuggestions, 500)
 
 const selectSuggestion = (prediction: any) => {
   addressInput.value = prediction.description
+  isSelected.value = true
   showSuggestions.value = false
   sessionToken = crypto.randomUUID()
+  setTimeout(() => {
+    isSelected.value = false
+  }, 300)
 }
 
 watch(
   () => addressInput.value,
   (newValue) => {
-    emit('update:modelValue', newValue)
-    debouncedSearch(newValue)
+    if (!isSelected.value && newValue !== props.modelValue) {
+      emit('update:modelValue', newValue)
+      debouncedSearch(newValue)
+    }
   },
-  { immediate: true },
 )
 </script>
 
@@ -80,7 +85,7 @@ watch(
     />
 
     <div
-      v-if="showSuggestions && suggestions.length"
+      v-if="showSuggestions && suggestions.length && !isSelected"
       class="suggestions absolute z-10 w-full shadow-lg rounded-lg max-h-[300px] overflow-y-auto dark:bg-gray-800 bg-white dark:border dark:border-gray-700 dark:text-gray-200 text-gray-800"
     >
       <div

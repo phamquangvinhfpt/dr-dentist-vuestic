@@ -150,6 +150,22 @@ export const useAuthStore = defineStore('auth', {
         return await Promise.reject(error)
       }
     },
+    async verifyByPhone(phone: string, code: string): Promise<any> {
+      try {
+        const response = await authService.verifyByPhone(phone, code)
+        return await Promise.resolve(response)
+      } catch (error) {
+        return await Promise.reject(error)
+      }
+    },
+    async resendPhoneConfirm(phone: string): Promise<any> {
+      try {
+        const response = await authService.resendPhoneConfirm(phone)
+        return await Promise.resolve(response)
+      } catch (error) {
+        return await Promise.reject(error)
+      }
+    },
     async forgotPassword(email: string): Promise<any> {
       try {
         const response = await authService.forgotPassword(email)

@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "npm run lint && vue-tsc --noEmit && vite build",
     "build:ci": "vite build",
+    "build:analyze": "vite build --mode analyze",
     "start:ci": "serve -s ./dist",
     "prelint": "npm run format",
     "lint": "eslint \"./src/**/*.{ts,js,vue}\" --fix",
@@ -53,7 +54,7 @@
     "sass": "^1.69.5",
     "serve": "^14.2.1",
     "swiper": "^11.1.15",
-    "vue": "^3.3.9",
+    "vue": "^3.5.13",
     "vue-chartjs": "^5.3.2",
     "vue-i18n": "^9.6.2",
     "vue-recaptcha-v3": "^2.0.1",
@@ -92,6 +93,9 @@
     "tailwindcss": "^3.4.0",
     "typescript": "^5.2.2",
     "vite": "^4.4.6",
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-imagemin": "^0.6.1",
+    "vite-plugin-webfont-dl": "^3.10.3",
     "vue-eslint-parser": "^9.3.2",
     "vue-tsc": "^1.8.22"
   }

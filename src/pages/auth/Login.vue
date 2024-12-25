@@ -142,6 +142,11 @@ const performBiometricLogin = async () => {
     isLoading.value = false
   }
 }
+
+const handleEnter = (e: KeyboardEvent) => {
+  e.preventDefault()
+  submit()
+}
 </script>
 
 <template>
@@ -162,6 +167,7 @@ const performBiometricLogin = async () => {
         class="mb-4"
         label="Email"
         type="email"
+        @keydown.enter="handleEnter"
       />
 
       <VaValue v-slot="isPasswordVisible" :default-value="false">
@@ -172,6 +178,7 @@ const performBiometricLogin = async () => {
           class="mb-4"
           :label="t('auth.password')"
           @clickAppendInner.stop="isPasswordVisible.value = !isPasswordVisible.value"
+          @keydown.enter="handleEnter"
         >
           <template #appendInner>
             <VaIcon
