@@ -787,7 +787,16 @@
     "notDeposited": "Chưa đặt cọc",
     "incomplete": "Chưa hoàn thành",
     "completed": "Đã hoàn thành",
-    "allStatus": "Tất Cả Trạng Thái"
+    "allStatus": "Tất Cả Trạng Thái",
+    "search": "Tìm kiếm",
+    "allMethods": "Tất Cả Phương Thức",
+    "cash": "Tiền Mặt",
+    "bank": "Ngân Hàng",
+    "card": "Thẻ",
+    "bankTransfer": "Chuyển Khoản",
+    "other": "Khác",
+    "myPayments": "Thanh Toán Của Tôi",
+    "noPaymentFound": "Không tìm thấy thanh toán"
   },
   "form": {
     "formManagement": "Quản Lý Phiếu Đăng Ký",

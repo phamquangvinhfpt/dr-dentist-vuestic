@@ -802,7 +802,8 @@
     "confirmDelete": "Confirm delete",
     "cancel": "Cancel",
     "unauthorized": "Unauthorized",
-    "errorOccurred": "An error occurred"
+    "errorOccurred": "An error occurred",
+    "search": "Search"
   },
   "payment": {
     "patientCode": "Patient Code",
@@ -829,7 +830,16 @@
     "notDeposited": "Not Deposited",
     "incomplete": "Incomplete",
     "completed": "Completed",
-    "allStatus": "All Status"
+    "allStatus": "All Status",
+    "search": "Search",
+    "allMethods": "All Methods",
+    "cash": "Cash",
+    "bank": "Bank",
+    "card": "Card",
+    "bankTransfer": "Bank Transfer",
+    "other": "Other",
+    "myPayments": "My Payments",
+    "noPaymentFound": "No payments found"
   },
   "form": {
     "formManagement": "Form Management",

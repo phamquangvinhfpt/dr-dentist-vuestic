@@ -184,11 +184,18 @@
       title="Change Status"
       ok-text="Confirm"
       cancel-text="Cancel"
+      class="status-change-modal"
+      size="medium"
       @ok="confirmStatusChange"
       @cancel="cancelStatusChange"
     >
+      <template #header>
+        <div class="modal-header">
+          <h3 class="modal-title">Change Status</h3>
+        </div>
+      </template>
       <div class="status-change-form">
-        <p>
+        <p class="status-change-text">
           Are you sure you want to change the status to <b>{{ getStatusText(newStatus) }}</b
           >?
         </p>
@@ -1257,5 +1264,216 @@ const statusFilterOptions = [
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+}
+
+/* CSS updates */
+.status-change-modal {
+  :deep(.va-modal__container) {
+    min-width: 600px;
+    background: var(--va-background-secondary);
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--va-background-border);
+    background: var(--va-background-element);
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--va-text-primary);
+    margin: 0;
+  }
+
+  :deep(.va-modal__content) {
+    padding: 1.5rem;
+    background: var(--va-background-secondary);
+  }
+
+  :deep(.va-modal__actions) {
+    padding: 1.5rem;
+    background: var(--va-background-element);
+    border-top: 1px solid var(--va-background-border);
+  }
+
+  :deep(.va-button--default) {
+    background: var(--va-background-element);
+    color: var(--va-text-primary);
+    border: 1px solid var(--va-background-border);
+
+    &:hover {
+      background: var(--va-background-primary);
+      border-color: var(--va-primary);
+    }
+  }
+
+  :deep(.va-button--primary) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--va-box-shadow);
+    }
+  }
+}
+
+.status-change-form {
+  padding: 1rem;
+  width: 100%;
+
+  .status-change-text {
+    font-size: 1.1rem;
+    color: var(--va-text-primary);
+    margin-bottom: 1.5rem;
+
+    b {
+      color: var(--va-primary);
+      font-weight: 600;
+    }
+  }
+
+  :deep(.va-textarea) {
+    width: 100%;
+
+    .va-input__container {
+      background: var(--va-background-element);
+      border: 1px solid var(--va-background-border);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      padding: 0.5rem;
+
+      &:hover {
+        border-color: var(--va-primary);
+      }
+
+      &:focus-within {
+        border-color: var(--va-primary);
+        box-shadow: 0 0 0 3px rgba(var(--va-primary-rgb), 0.1);
+      }
+    }
+
+    .va-input__label {
+      color: var(--va-text-primary);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      color: var(--va-text-primary);
+      background: var(--va-background-element);
+      border: none;
+      resize: vertical;
+      padding: 0.75rem;
+      font-size: 1rem;
+      line-height: 1.5;
+
+      &::placeholder {
+        color: var(--va-text-secondary);
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}
+
+/* Status dropdown styles */
+.status-dropdown-content {
+  min-width: 150px;
+  width: 150px;
+  padding: 8px;
+  border-radius: 15px;
+  background: var(--va-background-secondary);
+  box-shadow: var(--va-box-shadow);
+}
+
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-item {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--va-text-primary);
+  background: var(--va-background-element);
+
+  &:not(.status-item--disabled):hover {
+    background: var(--va-background-primary);
+    transform: translateX(5px);
+  }
+
+  &--disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.status-item-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Details modal styles */
+.details-modal {
+  :deep(.va-modal__container) {
+    max-width: 800px;
+    width: 90%;
+    background: var(--va-background-primary);
+  }
+
+  .form-details-container {
+    padding: 1.5rem;
+  }
+
+  .details-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+
+    &.warning {
+      background: var(--va-warning-lighter);
+      color: var(--va-warning-darker);
+    }
+
+    &.success {
+      background: var(--va-success-lighter);
+      color: var(--va-success-darker);
+    }
+
+    &.danger {
+      background: var(--va-danger-lighter);
+      color: var(--va-danger-darker);
+    }
+  }
+}
+
+/* Add transition for smooth theme switching */
+* {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 </style>

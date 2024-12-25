@@ -11,6 +11,7 @@ interface PaymentState {
   paymentList: PaginationResponse<PaymentDTO>
   isLoading: boolean
   currentPayment: PaymentDetailResponse | null
+  exportLoading: boolean
 }
 
 export const usePaymentStore = defineStore('payment', {
@@ -26,6 +27,7 @@ export const usePaymentStore = defineStore('payment', {
     },
     isLoading: false,
     currentPayment: null,
+    exportLoading: false,
   }),
 
   actions: {
@@ -76,6 +78,18 @@ export const usePaymentStore = defineStore('payment', {
         throw error
       } finally {
         this.isLoading = false
+      }
+    },
+
+    async exportPayments(params: any) {
+      try {
+        this.exportLoading = true
+        const response = await paymentService.exportPayments(params)
+        this.exportLoading = false
+        return response
+      } catch (error) {
+        this.exportLoading = false
+        return Promise.reject(error)
       }
     },
   },

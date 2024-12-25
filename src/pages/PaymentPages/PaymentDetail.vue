@@ -265,7 +265,7 @@ onMounted(async () => {
 .payment-card {
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  background: white;
+  background: var(--va-background-secondary);
 }
 
 .card-title {
@@ -284,7 +284,7 @@ onMounted(async () => {
 }
 
 .info-section {
-  background: #f8fafc;
+  background: var(--va-background-secondary);
   padding: 1.5rem;
   border-radius: 8px;
 }

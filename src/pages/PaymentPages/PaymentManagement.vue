@@ -8,65 +8,100 @@
 
       <VaCardContent>
         <div class="search-filter-container">
-          <!-- Search Box -->
-          <div class="search-box">
-            <VaInput
-              v-model="searchKeyword"
-              :placeholder="t('common.search')"
-              class="search-input"
-              @keyup.enter="handleSearch"
-            >
-              <template #append>
-                <i class="fas fa-search search-icon"></i>
-              </template>
-            </VaInput>
-          </div>
-
-          <!-- Status Filter Pills -->
-          <div class="status-filter">
-            <div class="status-tabs">
-              <button
-                v-for="status in statusFilterOptions"
-                :key="status.id"
-                class="status-tab"
-                :class="{ active: selectedStatusFilter === status.value }"
-                :data-status="status.id"
-                @click="handleStatusFilterChange(status.value)"
+          <div class="top-row">
+            <div class="search-box">
+              <VaInput
+                v-model="searchKeyword"
+                :placeholder="searchPlaceholder"
+                class="search-input"
+                @keyup.enter="handleSearch"
               >
-                {{ status.label }}
-              </button>
+                <template #append>
+                  <i class="fas fa-search search-icon"></i>
+                </template>
+              </VaInput>
+            </div>
+
+            <div class="date-range">
+              <div class="date-input-group">
+                <VaInput
+                  v-model="startDate"
+                  type="date"
+                  :max="maxDate"
+                  class="date-input"
+                  @update:modelValue="handleDateChange"
+                >
+                  <template #prepend>
+                    <i class="fas fa-calendar text-gray-500"></i>
+                  </template>
+                </VaInput>
+                <div class="date-separator">
+                  <div class="separator-line"></div>
+                </div>
+                <VaInput
+                  v-model="endDate"
+                  type="date"
+                  :min="startDate"
+                  :max="maxDate"
+                  class="date-input"
+                  @update:modelValue="handleDateChange"
+                >
+                  <template #prepend>
+                    <i class="fas fa-calendar text-gray-500"></i>
+                  </template>
+                </VaInput>
+              </div>
+            </div>
+
+            <div class="export-button-container">
+              <VaButton class="export-button" preset="secondary" :loading="isExporting" @click="handleExport">
+                <i class="va-icon material-icons">file_download</i>
+              </VaButton>
             </div>
           </div>
 
-          <!-- Date Range -->
-          <div class="date-range">
-            <div class="date-input-group">
-              <VaInput
-                v-model="startDate"
-                type="date"
-                :max="maxDate"
-                class="date-input"
-                @update:modelValue="handleDateChange"
-              >
-                <template #prepend>
-                  <i class="fas fa-calendar text-gray-500"></i>
-                </template>
-              </VaInput>
-              <div class="date-separator">
-                <div class="separator-line"></div>
+          <div class="bottom-row">
+            <div class="patient-selector">
+              <VaSelect
+                v-model="selectedPatient"
+                :options="patientOptions"
+                track-by="id"
+                text-by="name"
+                placeholder="Chọn bệnh nhân"
+                class="patient-select"
+                clearable
+                searchable
+              />
+            </div>
+
+            <div class="status-filter">
+              <div class="status-tabs">
+                <button
+                  v-for="status in statusFilterOptions"
+                  :key="status.id"
+                  class="status-tab"
+                  :class="{ active: selectedStatusFilter === status.value }"
+                  :data-status="status.id"
+                  @click="handleStatusFilterChange(status.value)"
+                >
+                  {{ status.label }}
+                </button>
               </div>
-              <VaInput
-                v-model="endDate"
-                type="date"
-                :min="startDate"
-                :max="maxDate"
-                class="date-input"
-                @update:modelValue="handleDateChange"
-              >
-                <template #prepend>
-                  <i class="fas fa-calendar text-gray-500"></i>
-                </template>
-              </VaInput>
+            </div>
+
+            <div class="method-filter">
+              <div class="method-tabs">
+                <button
+                  v-for="method in methodFilterOptions"
+                  :key="method.id"
+                  class="method-tab"
+                  :class="{ active: selectedMethodFilter === method.value }"
+                  :data-method="method.id"
+                  @click="handleMethodFilterChange(method.value)"
+                >
+                  {{ method.label }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -183,11 +218,15 @@ import { PaymentMethod, PaymentStatus } from './types'
 import type { PaginationFilter } from './types'
 import type { PaginationResponse, PaymentDTO } from './types'
 import { useAuthStore } from '@/stores/modules/auth.module'
+// import userService from '@/services/user.service'
+import apiService from '@/services/api.service'
+import { useUserProfileStore } from '@/stores/modules/user.module'
 
 const { t } = useI18n()
 const { init } = useToast()
 const paymentStore = usePaymentStore()
 const authStore = useAuthStore()
+const userStore = useUserProfileStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -266,6 +305,24 @@ const handleStatusFilterChange = async (status: PaymentStatus | null) => {
 
 const getAllPaymentsPagination = async () => {
   try {
+    const filters = []
+
+    if (selectedStatusFilter.value !== null) {
+      filters.push({
+        field: 'status',
+        operator: 'eq',
+        value: selectedStatusFilter.value.toString(),
+      })
+    }
+
+    if (selectedMethodFilter.value !== null) {
+      filters.push({
+        field: 'method',
+        operator: 'eq',
+        value: selectedMethodFilter.value.toString(),
+      })
+    }
+
     const res = await paymentStore.getAllPayments(
       {
         pageNumber: currentPage.value,
@@ -273,16 +330,10 @@ const getAllPaymentsPagination = async () => {
         orderBy: formData.orderBy,
         keyword: searchKeyword.value,
         advancedFilter:
-          selectedStatusFilter.value !== null
+          filters.length > 0
             ? {
                 logic: 'and',
-                filters: [
-                  {
-                    field: 'status',
-                    operator: 'eq',
-                    value: selectedStatusFilter.value.toString(),
-                  },
-                ],
+                filters: filters,
               }
             : undefined,
       },
@@ -432,6 +483,65 @@ watch(
   { deep: true },
 )
 
+const selectedMethodFilter = ref<PaymentMethod | null>(null)
+const isExporting = ref(false)
+
+const methodFilterOptions = [
+  { id: 'all', value: null, label: t('payment.allMethods') },
+  { id: 'cash', value: PaymentMethod.Cash, label: t('payment.cash') },
+  { id: 'bank', value: PaymentMethod.BankTransfer, label: t('payment.bankTransfer') },
+]
+
+const handleMethodFilterChange = async (method: PaymentMethod | null) => {
+  selectedMethodFilter.value = method
+  currentPage.value = 1
+  await getAllPaymentsPagination()
+}
+
+interface Patient {
+  id: string
+  fullName?: string
+  userName: string
+}
+
+const selectedPatient = ref<{ id: string; name: string } | null>(null)
+const patientOptions = ref<Array<{ id: string; name: string }>>([])
+
+const loadPatients = async () => {
+  try {
+    const response = await userStore.getPatients({
+      pageNumber: 1,
+      pageSize: 1000,
+      isActive: true,
+    })
+
+    if (response?.data) {
+      patientOptions.value = response.data
+        .map((patient: Patient) => ({
+          id: patient.id,
+          name: patient.fullName || patient.userName || 'Unknown Patient',
+        }))
+        .filter((option: { id: string; name: string }) => option.id)
+    }
+  } catch (error) {
+    console.error('Error loading patients:', error)
+    init({
+      message: 'Lỗi khi tải danh sách bệnh nhân',
+      color: 'danger',
+      duration: 3000,
+    })
+  }
+}
+
+// Watch for patient selection changes
+watch(selectedPatient, async (newValue) => {
+  if (newValue) {
+    console.log('Selected patient changed:', newValue)
+    currentPage.value = 1
+    await getAllPaymentsPagination()
+  }
+})
+
 onMounted(async () => {
   // Check if user is Admin
   if (!authStore.musHaveRole('Admin')) {
@@ -456,7 +566,102 @@ onMounted(async () => {
     }
   }
 
-  await getAllPaymentsPagination()
+  await Promise.all([getAllPaymentsPagination(), loadPatients()])
+})
+
+const handleExport = async () => {
+  try {
+    isExporting.value = true
+    console.log('Starting export...')
+
+    const exportParams = {
+      startDate: startDate.value,
+      endDate: endDate.value,
+      paymentStatus: selectedStatusFilter.value ?? 0,
+      paymentMethod: selectedMethodFilter.value ?? 0,
+      userID: selectedPatient.value?.id,
+    }
+    console.log('Export params:', exportParams)
+
+    // Gọi API trực tiếp với axios để có thể xử lý response dạng blob
+    const axiosInstance = apiService.getAxiosInstance()
+    const response = await axiosInstance.post('/v1/payment/export-payment', exportParams, {
+      responseType: 'arraybuffer',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    console.log('Export response received')
+
+    // Kiểm tra response
+    if (!response.data) {
+      throw new Error('No data received')
+    }
+
+    // Tạo blob với đúng MIME type cho Excel
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+
+    // Tạo URL và download
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    const fileName = selectedPatient.value
+      ? `lich-su-thanh-toan-${selectedPatient.value.name}-${startDate.value}-den-${endDate.value}.xlsx`
+      : `payments-${startDate.value}-to-${endDate.value}.xlsx`
+    link.setAttribute('download', fileName)
+    document.body.appendChild(link)
+    link.click()
+
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    }, 100)
+
+    init({
+      message: t('payment.exportSuccess'),
+      color: 'success',
+      duration: 3000,
+    })
+  } catch (error: unknown) {
+    console.error('Export failed:', error)
+
+    // Thử parse error message nếu có
+    let errorMessage = t('payment.exportError')
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { data?: ArrayBuffer } }
+      if (axiosError.response?.data) {
+        try {
+          const decoder = new TextDecoder('utf-8')
+          const jsonString = decoder.decode(axiosError.response.data)
+          const errorData = JSON.parse(jsonString)
+          errorMessage = errorData.message || errorMessage
+        } catch (e) {
+          // Ignore parse error
+        }
+      }
+    }
+
+    init({
+      message: errorMessage,
+      color: 'danger',
+      duration: 3000,
+    })
+  } finally {
+    isExporting.value = false
+  }
+}
+
+// Thay đổi placeholder của search input
+const searchPlaceholder = computed(() => {
+  try {
+    return t('common.search')
+  } catch {
+    return 'Tìm kiếm...'
+  }
 })
 </script>
 
@@ -468,7 +673,7 @@ onMounted(async () => {
 .payment-card {
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  background: white;
+  background: var(--va-background-primary);
 }
 
 .card-title {
@@ -555,31 +760,53 @@ onMounted(async () => {
 
 .search-filter-container {
   display: flex;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--va-background-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  margin: 1.5rem;
+  border: 1px solid var(--va-border-color);
+}
+
+.top-row {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bottom-row {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .search-box {
-  min-width: 280px;
   flex: 1;
-  position: relative;
 }
 
 .search-input :deep(input) {
   height: 42px;
   border-radius: 8px;
   padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.2s;
-  background: white;
+  border: 1px solid var(--va-border-color);
+  transition: all 0.3s;
+  background: var(--va-background-secondary);
+  font-size: 0.95rem;
+  color: var(--va-text-primary);
 }
 
-/* Bỏ viền và background mặc định của Vuestic */
+.search-input :deep(input:focus) {
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 .search-input :deep(.va-input-wrapper) {
   border: none;
   background: transparent;
@@ -589,213 +816,283 @@ onMounted(async () => {
   box-shadow: none;
 }
 
-/* Icon search */
 .search-icon {
-  color: #718096;
-  font-size: 14px;
-  margin-right: 12px;
-}
-
-/* Bỏ các style không cần thiết khác */
-
-/* Status Pills */
-.status-filter {
-  margin: 1rem 0;
-}
-
-.status-tabs {
-  display: inline-flex;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 4px;
-}
-
-.status-tab {
-  padding: 6px 16px;
-  border: none;
-  background: transparent;
   color: #64748b;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  position: relative;
-  min-width: 100px;
-  text-align: center;
-}
-
-.status-tab:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 1px;
-  height: 60%;
-  background: #e2e8f0;
-}
-
-/* All Status - Màu xanh */
-.status-tab[data-status='all'].active,
-.status-tab[data-status='all']:hover:not(.active) {
-  color: #2563eb;
-}
-
-/* Incomplete Status - Màu vàng */
-.status-tab[data-status='incomplete'].active,
-.status-tab[data-status='incomplete']:hover:not(.active) {
-  color: #eab308;
-}
-
-/* Completed Status - Màu xanh lá */
-.status-tab[data-status='completed'].active,
-.status-tab[data-status='completed']:hover:not(.active) {
-  color: #22c55e;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .status-tabs {
-    width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
+  font-size: 1rem;
+  margin-right: 12px;
 }
 
 /* Date Range */
 .date-range {
   display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .date-input-group {
   display: flex;
   align-items: center;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--va-background-secondary);
+  border: 1px solid var(--va-border-color);
   border-radius: 8px;
-  padding: 4px;
+  padding: 4px 8px;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.date-input-group:hover {
+  border-color: #3b82f6;
 }
 
 .date-input {
-  width: 160px;
+  flex: 1;
 }
 
 .date-input :deep(input) {
-  height: 38px;
+  height: 42px;
   border: none !important;
   background: transparent;
-  font-size: 14px;
-  color: #2d3748;
-  padding: 0 8px;
+  font-size: 0.95rem;
+  color: var(--va-text-primary);
+  padding: 0 12px;
 }
 
-/* Bỏ border và background mặc định của Vuestic */
-.date-input :deep(.va-input-wrapper) {
-  border: none;
-  background: transparent;
-}
-
-.date-input :deep(.va-input) {
-  box-shadow: none;
-}
-
-/* Icon calendar */
-.date-input :deep(.va-input__prepend-inner) {
-  padding-left: 8px;
-}
-
-/* Separator */
 .date-separator {
-  padding: 0 8px;
-  display: flex;
-  align-items: center;
+  padding: 0 12px;
 }
 
 .separator-line {
-  width: 16px;
+  width: 20px;
   height: 2px;
-  background: #cbd5e0;
+  background: var(--va-border-color);
   border-radius: 2px;
 }
 
-/* Hover & Focus states */
-.date-input-group:hover {
-  border-color: #cbd5e0;
+/* Export Button */
+.export-button-container {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: 1rem;
 }
 
-.date-input :deep(input:focus) {
-  background: #f7fafc;
+.export-button {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background: var(--va-background-secondary) !important;
+  color: var(--va-text-secondary) !important;
+  border: 1px solid var(--va-border-color) !important;
+  position: relative;
+}
+
+.export-button i {
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.export-button:hover {
+  background: #3b82f6 !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.15) !important;
+}
+
+.export-button:hover i {
+  transform: scale(1.1);
+}
+
+.export-button:active {
+  transform: translateY(0);
+  box-shadow: none !important;
+}
+
+/* Patient Selector */
+.patient-selector {
+  flex: 2;
+}
+
+.patient-select {
+  width: 100%;
+}
+
+.patient-select :deep(.va-select__value) {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--va-border-color);
+  background: var(--va-background-secondary);
+  transition: all 0.3s;
+  padding: 0 12px;
+}
+
+.patient-select :deep(.va-select__value:hover) {
+  border-color: #3b82f6;
+}
+
+/* Status Filter */
+.status-filter {
+  flex: 2;
+}
+
+.status-tabs {
+  display: flex;
+  background: var(--va-background-secondary);
+  border: 1px solid var(--va-border-color);
+  border-radius: 8px;
+  padding: 4px;
+  width: 100%;
+  height: 42px;
+}
+
+.status-tab {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--va-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  flex: 1;
+  text-align: center;
   border-radius: 6px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+}
+
+.status-tab.active {
+  background: var(--va-background-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  color: var(--va-primary);
+}
+
+/* Method Filter */
+.method-filter {
+  flex: 2;
+}
+
+.method-tabs {
+  display: flex;
+  background: var(--va-background-secondary);
+  border: 1px solid var(--va-border-color);
+  border-radius: 8px;
+  padding: 4px;
+  width: 100%;
+  height: 42px;
+}
+
+.method-tab {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--va-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  flex: 1;
+  text-align: center;
+  border-radius: 6px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+}
+
+.method-tab.active {
+  background: var(--va-background-primary);
+  color: var(--va-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.status-tab:hover:not(.active),
+.method-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .date-input-group {
-    width: 100%;
-  }
-
-  .date-input {
+@media (max-width: 1200px) {
+  .search-box,
+  .date-range,
+  .export-button-container {
     flex: 1;
   }
 }
 
-/* Animation */
-.status-pill {
-  transform: translateY(0);
-  transition: all 0.2s ease;
+@media (max-width: 768px) {
+  .search-filter-container {
+    gap: 1rem;
+  }
+
+  .top-row,
+  .bottom-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-box,
+  .date-range,
+  .export-button-container,
+  .patient-selector,
+  .status-filter,
+  .method-filter {
+    width: 100%;
+  }
+
+  .status-tabs,
+  .method-tabs {
+    width: 100%;
+  }
+
+  .status-tab,
+  .method-tab {
+    flex: 1;
+    min-width: auto;
+    padding: 8px 12px;
+  }
+
+  .date-input-group {
+    width: 100%;
+  }
+
+  .export-button {
+    width: 100%;
+  }
 }
 
-.status-pill:hover {
-  transform: translateY(-1px);
+/* Thêm styles cho table trong darkmode */
+:deep(.va-data-table) {
+  background: var(--va-background-primary);
+  color: var(--va-text-primary);
 }
 
-.status-pill.active {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+:deep(.va-data-table__thead) {
+  background: var(--va-background-secondary);
 }
 
-/* All Status - Màu xanh */
-.status-tab.active[data-status='all'] {
-  color: #2563eb; /* Màu xanh */
+:deep(.va-data-table__th) {
+  color: var(--va-text-primary);
 }
 
-.status-tab.active[data-status='all'] .status-count {
-  background: #3b82f6; /* Màu xanh */
-  color: white;
+:deep(.va-data-table__td) {
+  color: var(--va-text-primary);
+  border-bottom: 1px solid var(--va-border-color);
 }
 
-/* Incomplete Status - Màu vàng */
-.status-tab.active[data-status='incomplete'] {
-  color: #eab308; /* Màu vàng */
-}
-
-.status-tab.active[data-status='incomplete'] .status-count {
-  background: #eab308; /* Màu vàng */
-  color: white;
-}
-
-/* Completed Status - Màu xanh lá */
-.status-tab.active[data-status='completed'] {
-  color: #22c55e; /* Màu xanh lá */
-}
-
-.status-tab.active[data-status='completed'] .status-count {
-  background: #22c55e; /* Màu xanh lá */
-  color: white;
-}
-
-/* Hover effect theo màu tương ứng */
-.status-tab[data-status='all']:hover:not(.active) {
-  color: #2563eb;
-}
-
-.status-tab[data-status='incomplete']:hover:not(.active) {
-  color: #eab308;
-}
-
-.status-tab[data-status='completed']:hover:not(.active) {
-  color: #22c55e;
+/* Thêm hover effect cho table rows */
+:deep(.va-data-table__tr:hover) {
+  background: var(--va-background-secondary);
 }
 </style>

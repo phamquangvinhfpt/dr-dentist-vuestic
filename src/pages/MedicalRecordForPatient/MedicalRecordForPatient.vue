@@ -276,34 +276,40 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Base container */
 .medical-records-container {
   padding: 2rem;
-  background: #f8fafc;
+  background: var(--va-background-primary);
   min-height: 100vh;
 }
 
+/* Main card */
 .records-card {
   border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background: var(--va-background-secondary);
+  box-shadow: var(--va-box-shadow);
   overflow: hidden;
+  border: 1px solid var(--va-border-color);
 }
 
+/* Card header */
 .card-header {
   padding: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--va-border-color);
+  background: var(--va-background-secondary);
 }
 
 .header-left h1 {
   margin: 0;
   font-size: 1.8rem;
-  color: #1e293b;
+  color: var(--va-text-primary);
 }
 
 .subtitle {
-  color: #64748b;
+  color: var(--va-text-secondary);
   margin: 0.5rem 0 0;
 }
 
@@ -311,9 +317,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #f8fafc;
+  background: var(--va-background-primary);
   padding: 0.75rem;
   border-radius: 12px;
+  border: 1px solid var(--va-border-color);
 }
 
 .table-container {
@@ -346,7 +353,7 @@ onMounted(() => {
 .point {
   width: 16px;
   height: 16px;
-  background: #6366f1;
+  background: var(--va-primary);
   border-radius: 50%;
   position: relative;
   z-index: 2;
@@ -358,7 +365,7 @@ onMounted(() => {
   left: 7px;
   width: 2px;
   height: calc(100% + 2rem);
-  background: #e2e8f0;
+  background: var(--va-background-primary);
 }
 
 .timeline-item:last-child .line {
@@ -372,7 +379,7 @@ onMounted(() => {
 
 .timeline-date {
   margin-bottom: 0.5rem;
-  color: #64748b;
+  color: var(--va-text-secondary);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -380,25 +387,22 @@ onMounted(() => {
 }
 
 .timeline-card {
-  background: linear-gradient(145deg, #ffffff, #f3f4f6);
+  background: var(--va-background-secondary);
   border-radius: 20px;
-  box-shadow:
-    5px 5px 15px rgba(0, 0, 0, 0.05),
-    -5px -5px 15px rgba(255, 255, 255, 0.8);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: var(--va-box-shadow);
+  transition: all 0.3s ease;
+  border: 1px solid var(--va-border-color);
+  cursor: pointer;
 }
 
 .timeline-card:hover {
   transform: translateX(8px);
-  box-shadow:
-    8px 8px 20px rgba(0, 0, 0, 0.08),
-    -8px -8px 20px rgba(255, 255, 255, 0.9);
+  box-shadow: var(--va-box-shadow-lg);
 }
 
 .card-header {
   padding: 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--va-border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -407,11 +411,11 @@ onMounted(() => {
 .patient-name {
   margin: 0;
   font-size: 1.1rem;
-  color: #1e293b;
+  color: var(--va-text-primary);
 }
 
 .dentist {
-  color: #64748b;
+  color: var(--va-text-secondary);
   font-size: 0.9rem;
   display: flex;
   align-items: center;
@@ -432,15 +436,13 @@ onMounted(() => {
 .treatment-tag,
 .condition-tag,
 .indication-tag {
-  background: linear-gradient(145deg, #f3f4f6, #ffffff);
-  color: #4b5563;
+  background: var(--va-background-primary);
+  color: var(--va-text-primary);
   padding: 0.6rem 1.2rem;
   border-radius: 25px;
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow:
-    3px 3px 8px rgba(0, 0, 0, 0.05),
-    -3px -3px 8px rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--va-border-color);
   transition: all 0.3s ease;
 }
 
@@ -448,9 +450,7 @@ onMounted(() => {
 .condition-tag:hover,
 .indication-tag:hover {
   transform: translateY(-2px);
-  box-shadow:
-    4px 4px 10px rgba(0, 0, 0, 0.08),
-    -4px -4px 10px rgba(255, 255, 255, 0.9);
+  background: var(--va-background-secondary);
 }
 
 .loading-overlay {
@@ -458,42 +458,44 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   min-height: 200px;
+  background: var(--va-background-secondary);
 }
 
 .no-records {
   text-align: center;
   padding: 3rem;
-  color: #64748b;
+  color: var(--va-text-secondary);
+  background: var(--va-background-secondary);
 }
 
 .no-records i {
   font-size: 3rem;
   margin-bottom: 1rem;
+  color: var(--va-text-secondary);
 }
 
 /* Custom scrollbar */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f1f5f9;
+  scrollbar-color: var(--va-scrollbar-thumb) var(--va-scrollbar-track);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: var(--va-scrollbar-track);
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  background: var(--va-scrollbar-thumb);
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: var(--va-scrollbar-thumb-hover);
 }
 
 .custom-scrollbar {
@@ -501,15 +503,14 @@ onMounted(() => {
 }
 
 .detail-modal {
-  background: #f8fafc;
+  background: var(--va-background-primary);
 }
 
 .detail-header {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: var(--va-primary);
   padding: 2.5rem;
   color: white;
-  border-radius: 0 0 40px 40px;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+  border-radius: 20px 20px 40px 40px;
 }
 
 .patient-info {
@@ -533,6 +534,7 @@ onMounted(() => {
   margin: 0;
   font-size: 1.8rem;
   font-weight: 600;
+  color: white;
 }
 
 .info-meta {
@@ -546,49 +548,56 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .detail-content {
   padding: 2rem;
   max-height: calc(85vh - 200px);
   overflow-y: auto;
+  background: var(--va-background-primary);
 }
 
 .detail-section {
-  background: linear-gradient(145deg, #ffffff, #f3f4f6);
-  border-radius: 20px;
-  padding: 1.8rem;
-  margin-bottom: 1.8rem;
-  box-shadow:
-    5px 5px 15px rgba(0, 0, 0, 0.05),
-    -5px -5px 15px rgba(255, 255, 255, 0.8);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--va-background-secondary);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--va-box-shadow);
+  border: 1px solid var(--va-border-color);
+  transition: all 0.3s ease;
 }
 
 .detail-section:hover {
   transform: translateX(8px);
-  box-shadow:
-    8px 8px 20px rgba(0, 0, 0, 0.08),
-    -8px -8px 20px rgba(255, 255, 255, 0.9);
+  box-shadow: var(--va-box-shadow-lg);
 }
 
 .section-header {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--va-border-color);
 }
 
-.section-header i {
-  color: #6366f1;
-  font-size: 1.25rem;
+.header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--va-primary);
+  color: white;
+  margin-right: 1rem;
 }
 
 .section-header h3 {
+  color: var(--va-text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
   margin: 0;
-  color: #1e293b;
-  font-size: 1.2rem;
 }
 
 .tooth-info {
@@ -596,12 +605,15 @@ onMounted(() => {
 }
 
 .tooth-number {
-  background: #eef2ff;
-  color: #6366f1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--va-primary);
+  color: white;
   padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  border-radius: 8px;
   font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 .conditions-list,
@@ -614,7 +626,7 @@ onMounted(() => {
 
 .condition-tag,
 .indication-tag {
-  background: linear-gradient(145deg, #f3f4f6, #ffffff);
+  background: #f3f4f6;
   color: #4b5563;
   padding: 0.6rem 1.2rem;
   border-radius: 25px;
@@ -656,24 +668,24 @@ onMounted(() => {
 }
 
 .info-label {
-  color: #6b7280;
+  color: var(--va-text-secondary);
   font-weight: 500;
   font-size: 0.95rem;
   padding: 0.5rem 0;
 }
 
 .info-value {
-  color: #1f2937;
+  color: var(--va-text-primary);
   font-size: 0.95rem;
   line-height: 1.6;
   padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--va-background-primary);
   border-radius: 8px;
-  border: 1px solid rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--va-border-color);
 }
 
 .detail-section {
-  background: white;
+  background: var(--va-background-secondary);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -702,7 +714,7 @@ onMounted(() => {
 }
 
 .section-header h3 {
-  color: #374151;
+  color: var(--va-text-primary);
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
@@ -728,12 +740,12 @@ onMounted(() => {
 
 .condition-tag,
 .indication-tag {
-  background: #f3f4f6;
-  color: #4b5563;
+  background: var(--va-background-secondary);
+  color: var(--va-text-primary);
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   font-size: 0.9rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--va-border-color);
 }
 
 /* Cập nhật scrollbar styles */
@@ -764,7 +776,7 @@ onMounted(() => {
 .tooth-diagnosis {
   margin-bottom: 1rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--va-background-secondary);
   border-radius: 8px;
   border: 1px solid rgba(99, 102, 241, 0.1);
 }
@@ -811,7 +823,7 @@ onMounted(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #eef2ff;
+  background: var(--va-background-secondary);
   color: #6366f1;
   padding: 0.5rem 1rem;
   border-radius: 8px;

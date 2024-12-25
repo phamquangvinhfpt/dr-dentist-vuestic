@@ -175,6 +175,22 @@ class PaymentService {
       throw error
     }
   }
+
+  async exportPayments(params: any) {
+    try {
+      const response = await apiService.post('/v1/payment/export-payment', {
+        startDate: params.startDate,
+        endDate: params.endDate,
+        paymentStatus: params.paymentStatus,
+        paymentMethod: params.paymentMethod,
+        userID: params.userID,
+      })
+      return response.data
+    } catch (error) {
+      console.error('Export error:', error)
+      throw error
+    }
+  }
 }
 
 export default new PaymentService()

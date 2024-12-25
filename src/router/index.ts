@@ -367,6 +367,14 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
+        name: 'payment-export',
+        path: 'payment-export',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('@/pages/PaymentPages/PaymentExport.vue'),
+      },
+      {
         name: 'feedback',
         path: 'feedback/:appointmentID?',
         meta: {
