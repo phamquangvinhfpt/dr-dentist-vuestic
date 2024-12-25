@@ -179,7 +179,7 @@ const birthDayRules = computed(() => [
           class="mb-4"
           :label="t('auth.phone_number')"
         />
-        <AddressAutocomplete :rules="addressRules" />
+        <AddressAutocomplete v-model="formData.address" :rules="addressRules" />
         <VaInput v-model="formData.email" :rules="emailRules" class="mb-4" :label="t('auth.email')" type="email" />
         <VaValue v-slot="isPasswordVisible" :default-value="false">
           <VaInput

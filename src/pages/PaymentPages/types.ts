@@ -9,11 +9,31 @@ export interface PaginationFilter {
   keyword?: string
   advancedFilter?: {
     logic: string
-    filters: string[]
-    field?: string
-    operator?: string
-    value?: string
+    filters: Array<{
+      field: string
+      operator: string
+      value: string
+    }>
   }
+}
+
+export interface ExportPaymentRequest {
+  startDate: string
+  endDate: string
+  paymentStatus: number
+  paymentMethod: number
+  userID?: string
+}
+
+export interface PatientDTO {
+  id: string
+  code: string
+  fullName: string
+  phoneNumber: string
+  email: string
+  address: string
+  dateOfBirth: string
+  gender: number
 }
 
 export interface PaymentDTO {
@@ -106,4 +126,34 @@ export interface PaymentDetailResponse {
   errorId: string | null
   supportMessage: string | null
   statusCode: number
+}
+
+export interface PatientResponse {
+  data: {
+    data: Array<{
+      id: string
+      patientProfile: {
+        id: string
+        code: string
+      }
+      fullName: string
+      userName: string
+    }>
+    totalCount: number
+    pageSize: number
+    currentPage: number
+    totalPages: number
+  }
+}
+
+export interface FilterUser {
+  pageNumber: number
+  pageSize: number
+  isActive?: boolean
+  orderBy?: string[]
+  keyword?: string
+  advancedSearch?: {
+    fields: string[]
+    keyword?: string
+  }
 }

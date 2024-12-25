@@ -116,7 +116,7 @@
               v-for="(day, index) in weekDays"
               :key="index"
               :class="{
-                'h-20 p-4 text-center border-l sticky top-0 z-10': true,
+                'h-20 p-4 text-center border sticky top-0 z-10': true,
                 hidden: !role?.includes('Dentist'),
               }"
             >

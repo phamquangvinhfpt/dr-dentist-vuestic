@@ -478,7 +478,9 @@
     "form-management": "Form Management",
     "form-for-dentist": "My Forms",
     "services": "Service",
-    "doctors": "Doctors"
+    "doctors": "Doctors",
+    "medical-record-for-patient": "Medical Record",
+    "payment-for-patient": "Payment"
   },
   "bin": {
     "title": "Trash",
@@ -800,7 +802,8 @@
     "confirmDelete": "Confirm delete",
     "cancel": "Cancel",
     "unauthorized": "Unauthorized",
-    "errorOccurred": "An error occurred"
+    "errorOccurred": "An error occurred",
+    "search": "Search"
   },
   "payment": {
     "patientCode": "Patient Code",
@@ -824,7 +827,19 @@
     "noPaymentFound": "No payment found",
     "procedureName": "Procedure Name",
     "amount": "Amount",
-    "notDeposited": "Not Deposited"
+    "notDeposited": "Not Deposited",
+    "incomplete": "Incomplete",
+    "completed": "Completed",
+    "allStatus": "All Status",
+    "search": "Search",
+    "allMethods": "All Methods",
+    "cash": "Cash",
+    "bank": "Bank",
+    "card": "Card",
+    "bankTransfer": "Bank Transfer",
+    "other": "Other",
+    "myPayments": "My Payments",
+    "noPaymentFound": "No payments found"
   },
   "form": {
     "formManagement": "Form Management",
@@ -838,6 +853,16 @@
     "failed": "Failed",
     "workingDate": "Working Date",
     "workingTimes": "Working Times",
-    "description": "Description"
+    "description": "Description",
+    "MyForms": "My Forms",
+    "CreateApplication": "Create Application",
+    "SearchForms": "Search Forms",
+    "BasicInformation": "Basic Information",
+    "WorkingDate": "Working Date",
+    "WorkingHours": "Working Hours",
+    "Notes": "Notes",
+    "Close": "Close",
+    "Description": "Description",
+    "FormDetails": "Form Details"
   }
 }

@@ -61,7 +61,7 @@
 
           <template #cell(depositDate)="{ row }">
             <div class="flex items-center gap-2">
-              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(row.rowData.depositDate) }}</span>
+              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(new Date(row.rowData.depositDate)) }}</span>
             </div>
           </template>
 
@@ -99,7 +99,7 @@
                 preset="secondary"
                 size="small"
                 class="action-button"
-                @click="router.push(`/payment/${row.rowData.paymentId}`)"
+                @click="router.push(`/payment-detail/${row.rowData.paymentId}`)"
               />
             </div>
           </template>

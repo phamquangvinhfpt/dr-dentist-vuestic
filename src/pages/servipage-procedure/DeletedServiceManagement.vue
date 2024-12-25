@@ -15,19 +15,19 @@
   >
     <template #cell(id)="{ row }">
       <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ row.rowData.id }}</span>
+        <span class="w-24">{{ row.rowData.serviceID }}</span>
       </div>
     </template>
 
     <template #cell(serviceName)="{ row }">
       <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ row.rowData.serviceName }}</span>
+        <span class="w-24">{{ row.rowData.name }}</span>
       </div>
     </template>
 
     <template #cell(serviceDescription)="{ row }">
       <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-        <span class="w-24">{{ row.rowData.serviceDescription }}</span>
+        <span class="w-24">{{ row.rowData.description }}</span>
       </div>
     </template>
 
@@ -53,7 +53,7 @@
       <VaButton
         color="success"
         class="mr-6 mb-2 transition ease-in-out delay-150 bg-green-500 hover:-translate-y-1 hover:scale-110 hover:bg-green-600 duration-300"
-        @click="restoreService(row.rowData.id)"
+        @click="restoreService(row.rowData.serviceID)"
       >
         {{ t('common.restore') }}
       </VaButton>

@@ -136,6 +136,8 @@ export const useServiceStore = defineStore('service', {
           createdOn: serviceData.createdOn,
           typeServiceID: serviceData.typeServiceID,
           typeName: serviceData.typeName,
+          deletedOn: '',
+          deletedBy: '',
         }
 
         const mappedProcedures = serviceData.procedures.map((proc) => ({
@@ -146,8 +148,10 @@ export const useServiceStore = defineStore('service', {
             description: proc.description,
             price: proc.price,
             createBy: proc.createBy,
-            createdOn: new Date(proc.createdOn),
+            createdOn: proc.createdOn,
             isRemove: proc.isRemove,
+            deletedOn: '',
+            deletedBy: '',
           },
         }))
 

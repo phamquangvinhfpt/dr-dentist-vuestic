@@ -22,6 +22,8 @@ export interface ServiceDTO {
   createdOn: string
   typeServiceID: string
   typeName: string
+  deletedOn: string
+  deletedBy: string
 }
 
 export interface ProcedureDTO {
@@ -30,8 +32,10 @@ export interface ProcedureDTO {
   description: string
   price: number
   createBy?: string
-  createdOn: Date
+  createdOn: string
   isRemove: boolean
+  deletedOn: string
+  deletedBy: string
 }
 
 export interface ListServicePagination {

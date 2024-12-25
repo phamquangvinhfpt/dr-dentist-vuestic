@@ -19,7 +19,7 @@
 
         <!-- Không có dữ liệu -->
         <div v-else-if="!serviceDetails.length" class="text-center py-12">
-          <img src="/icons/no-data.svg" alt="No data" class="w-16 h-16 mx-auto mb-4" />
+          <!-- <img src="/icons/no-data.svg" alt="No data" class="w-16 h-16 mx-auto mb-4" /> -->
           <div class="text-gray-500 dark:text-gray-400">Không có thông tin chi tiết để hiển thị.</div>
         </div>
 

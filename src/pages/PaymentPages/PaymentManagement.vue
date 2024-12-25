@@ -7,33 +7,101 @@
       </VaCardTitle>
 
       <VaCardContent>
-        <div class="flex justify-between mb-4">
-          <div class="flex gap-2">
-            <VaInput v-model="searchKeyword" placeholder="Search..." @keyup.enter="handleSearch">
-              <template #appendInner>
-                <i class="va-icon material-icons">search</i>
-              </template>
-            </VaInput>
+        <div class="search-filter-container">
+          <div class="top-row">
+            <div class="search-box">
+              <VaInput
+                v-model="searchKeyword"
+                :placeholder="searchPlaceholder"
+                class="search-input"
+                @keyup.enter="handleSearch"
+              >
+                <template #append>
+                  <i class="fas fa-search search-icon"></i>
+                </template>
+              </VaInput>
+            </div>
 
-            <div class="date-range-picker flex items-center gap-2 p-2 border rounded">
-              <VaInput
-                v-model="startDate"
-                type="date"
-                :max="maxDate"
-                class="date-input"
-                placeholder="Start Date"
-                @update:modelValue="handleDateChange"
+            <div class="date-range">
+              <div class="date-input-group">
+                <VaInput
+                  v-model="startDate"
+                  type="date"
+                  :max="maxDate"
+                  class="date-input"
+                  @update:modelValue="handleDateChange"
+                >
+                  <template #prepend>
+                    <i class="fas fa-calendar text-gray-500"></i>
+                  </template>
+                </VaInput>
+                <div class="date-separator">
+                  <div class="separator-line"></div>
+                </div>
+                <VaInput
+                  v-model="endDate"
+                  type="date"
+                  :min="startDate"
+                  :max="maxDate"
+                  class="date-input"
+                  @update:modelValue="handleDateChange"
+                >
+                  <template #prepend>
+                    <i class="fas fa-calendar text-gray-500"></i>
+                  </template>
+                </VaInput>
+              </div>
+            </div>
+
+            <div class="export-button-container">
+              <VaButton class="export-button" preset="secondary" :loading="isExporting" @click="handleExport">
+                <i class="va-icon material-icons">file_download</i>
+              </VaButton>
+            </div>
+          </div>
+
+          <div class="bottom-row">
+            <div class="patient-selector">
+              <VaSelect
+                v-model="selectedPatient"
+                :options="patientOptions"
+                track-by="id"
+                text-by="name"
+                placeholder="Chọn bệnh nhân"
+                class="patient-select"
+                clearable
+                searchable
               />
-              <span class="mx-2">-</span>
-              <VaInput
-                v-model="endDate"
-                type="date"
-                :min="startDate"
-                :max="maxDate"
-                class="date-input"
-                placeholder="End Date"
-                @update:modelValue="handleDateChange"
-              />
+            </div>
+
+            <div class="status-filter">
+              <div class="status-tabs">
+                <button
+                  v-for="status in statusFilterOptions"
+                  :key="status.id"
+                  class="status-tab"
+                  :class="{ active: selectedStatusFilter === status.value }"
+                  :data-status="status.id"
+                  @click="handleStatusFilterChange(status.value)"
+                >
+                  {{ status.label }}
+                </button>
+              </div>
+            </div>
+
+            <div class="method-filter">
+              <div class="method-tabs">
+                <button
+                  v-for="method in methodFilterOptions"
+                  :key="method.id"
+                  class="method-tab"
+                  :class="{ active: selectedMethodFilter === method.value }"
+                  :data-method="method.id"
+                  @click="handleMethodFilterChange(method.value)"
+                >
+                  {{ method.label }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -150,11 +218,15 @@ import { PaymentMethod, PaymentStatus } from './types'
 import type { PaginationFilter } from './types'
 import type { PaginationResponse, PaymentDTO } from './types'
 import { useAuthStore } from '@/stores/modules/auth.module'
+// import userService from '@/services/user.service'
+import apiService from '@/services/api.service'
+import { useUserProfileStore } from '@/stores/modules/user.module'
 
 const { t } = useI18n()
 const { init } = useToast()
 const paymentStore = usePaymentStore()
 const authStore = useAuthStore()
+const userStore = useUserProfileStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -217,14 +289,53 @@ const startDate = ref((route.params.startDate as string) || new Date().toISOStri
 const endDate = ref((route.params.endDate as string) || new Date().toISOString().split('T')[0])
 const maxDate = ref(new Date().toISOString().split('T')[0])
 
+const selectedStatusFilter = ref<PaymentStatus | null>(null)
+
+const statusFilterOptions = [
+  { id: 'all', value: null, label: t('payment.allStatus') },
+  { id: 'incomplete', value: PaymentStatus.Incomplete, label: t('payment.incomplete') },
+  { id: 'completed', value: PaymentStatus.Completed, label: t('payment.completed') },
+]
+
+const handleStatusFilterChange = async (status: PaymentStatus | null) => {
+  selectedStatusFilter.value = status
+  currentPage.value = 1
+  await getAllPaymentsPagination()
+}
+
 const getAllPaymentsPagination = async () => {
   try {
+    const filters = []
+
+    if (selectedStatusFilter.value !== null) {
+      filters.push({
+        field: 'status',
+        operator: 'eq',
+        value: selectedStatusFilter.value.toString(),
+      })
+    }
+
+    if (selectedMethodFilter.value !== null) {
+      filters.push({
+        field: 'method',
+        operator: 'eq',
+        value: selectedMethodFilter.value.toString(),
+      })
+    }
+
     const res = await paymentStore.getAllPayments(
       {
         pageNumber: currentPage.value,
         pageSize: formData.pageSize,
         orderBy: formData.orderBy,
         keyword: searchKeyword.value,
+        advancedFilter:
+          filters.length > 0
+            ? {
+                logic: 'and',
+                filters: filters,
+              }
+            : undefined,
       },
       startDate.value,
       endDate.value,
@@ -295,18 +406,24 @@ const getStatusText = (status: number) => {
   }
 }
 
+// const getStatusDotClass = (status: PaymentStatus | null) => {
+//   if (status === null) return 'bg-gray-400'
+//   switch (status) {
+//     case PaymentStatus.Incomplete:
+//       return 'bg-yellow-500'  // Màu vàng
+//     case PaymentStatus.Completed:
+//       return 'bg-green-500'   // Màu xanh lá
+//     default:
+//       return 'bg-gray-400'
+//   }
+// }
+
 const getStatusClass = (status: number) => {
   switch (status) {
-    case PaymentStatus.Waiting:
-      return 'text-blue-500'
     case PaymentStatus.Incomplete:
-      return 'text-yellow-500'
+      return 'text-yellow-500' // Màu vàng
     case PaymentStatus.Completed:
-      return 'text-green-500'
-    case PaymentStatus.Canceled:
-      return 'text-red-500'
-    case PaymentStatus.Failed:
-      return 'text-red-700'
+      return 'text-green-500' // Màu xanh lá
     default:
       return ''
   }
@@ -366,6 +483,65 @@ watch(
   { deep: true },
 )
 
+const selectedMethodFilter = ref<PaymentMethod | null>(null)
+const isExporting = ref(false)
+
+const methodFilterOptions = [
+  { id: 'all', value: null, label: t('payment.allMethods') },
+  { id: 'cash', value: PaymentMethod.Cash, label: t('payment.cash') },
+  { id: 'bank', value: PaymentMethod.BankTransfer, label: t('payment.bankTransfer') },
+]
+
+const handleMethodFilterChange = async (method: PaymentMethod | null) => {
+  selectedMethodFilter.value = method
+  currentPage.value = 1
+  await getAllPaymentsPagination()
+}
+
+interface Patient {
+  id: string
+  fullName?: string
+  userName: string
+}
+
+const selectedPatient = ref<{ id: string; name: string } | null>(null)
+const patientOptions = ref<Array<{ id: string; name: string }>>([])
+
+const loadPatients = async () => {
+  try {
+    const response = await userStore.getPatients({
+      pageNumber: 1,
+      pageSize: 1000,
+      isActive: true,
+    })
+
+    if (response?.data) {
+      patientOptions.value = response.data
+        .map((patient: Patient) => ({
+          id: patient.id,
+          name: patient.fullName || patient.userName || 'Unknown Patient',
+        }))
+        .filter((option: { id: string; name: string }) => option.id)
+    }
+  } catch (error) {
+    console.error('Error loading patients:', error)
+    init({
+      message: 'Lỗi khi tải danh sách bệnh nhân',
+      color: 'danger',
+      duration: 3000,
+    })
+  }
+}
+
+// Watch for patient selection changes
+watch(selectedPatient, async (newValue) => {
+  if (newValue) {
+    console.log('Selected patient changed:', newValue)
+    currentPage.value = 1
+    await getAllPaymentsPagination()
+  }
+})
+
 onMounted(async () => {
   // Check if user is Admin
   if (!authStore.musHaveRole('Admin')) {
@@ -390,7 +566,102 @@ onMounted(async () => {
     }
   }
 
-  await getAllPaymentsPagination()
+  await Promise.all([getAllPaymentsPagination(), loadPatients()])
+})
+
+const handleExport = async () => {
+  try {
+    isExporting.value = true
+    console.log('Starting export...')
+
+    const exportParams = {
+      startDate: startDate.value,
+      endDate: endDate.value,
+      paymentStatus: selectedStatusFilter.value ?? 0,
+      paymentMethod: selectedMethodFilter.value ?? 0,
+      userID: selectedPatient.value?.id,
+    }
+    console.log('Export params:', exportParams)
+
+    // Gọi API trực tiếp với axios để có thể xử lý response dạng blob
+    const axiosInstance = apiService.getAxiosInstance()
+    const response = await axiosInstance.post('/v1/payment/export-payment', exportParams, {
+      responseType: 'arraybuffer',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    console.log('Export response received')
+
+    // Kiểm tra response
+    if (!response.data) {
+      throw new Error('No data received')
+    }
+
+    // Tạo blob với đúng MIME type cho Excel
+    const blob = new Blob([response.data], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+
+    // Tạo URL và download
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    const fileName = selectedPatient.value
+      ? `lich-su-thanh-toan-${selectedPatient.value.name}-${startDate.value}-den-${endDate.value}.xlsx`
+      : `payments-${startDate.value}-to-${endDate.value}.xlsx`
+    link.setAttribute('download', fileName)
+    document.body.appendChild(link)
+    link.click()
+
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    }, 100)
+
+    init({
+      message: t('payment.exportSuccess'),
+      color: 'success',
+      duration: 3000,
+    })
+  } catch (error: unknown) {
+    console.error('Export failed:', error)
+
+    // Thử parse error message nếu có
+    let errorMessage = t('payment.exportError')
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { data?: ArrayBuffer } }
+      if (axiosError.response?.data) {
+        try {
+          const decoder = new TextDecoder('utf-8')
+          const jsonString = decoder.decode(axiosError.response.data)
+          const errorData = JSON.parse(jsonString)
+          errorMessage = errorData.message || errorMessage
+        } catch (e) {
+          // Ignore parse error
+        }
+      }
+    }
+
+    init({
+      message: errorMessage,
+      color: 'danger',
+      duration: 3000,
+    })
+  } finally {
+    isExporting.value = false
+  }
+}
+
+// Thay đổi placeholder của search input
+const searchPlaceholder = computed(() => {
+  try {
+    return t('common.search')
+  } catch {
+    return 'Tìm kiếm...'
+  }
 })
 </script>
 
@@ -402,7 +673,7 @@ onMounted(async () => {
 .payment-card {
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  background: white;
+  background: var(--va-background-primary);
 }
 
 .card-title {
@@ -418,5 +689,410 @@ onMounted(async () => {
 
 .va-table-responsive {
   overflow: auto;
+}
+
+/* Filter Tabs Styles */
+.filter-tabs {
+  margin-bottom: 20px;
+}
+
+.tab-wrapper {
+  display: flex;
+  gap: 8px;
+  background: var(--va-background-element);
+  padding: 4px;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.tab-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  color: var(--va-text-secondary);
+}
+
+.tab-button:hover {
+  background: var(--va-background-secondary);
+}
+
+.tab-button.active {
+  background: var(--va-background-secondary);
+}
+
+.tab-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* Status Colors */
+.tab-button.active.tab-incomplete {
+  color: #eab308; /* Yellow-500 */
+}
+
+.tab-button.active.tab-completed {
+  color: #22c55e; /* Green-500 */
+}
+
+.tab-button.active.tab-all {
+  color: var(--va-primary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tab-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.search-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--va-background-primary);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  margin: 1.5rem;
+  border: 1px solid var(--va-border-color);
+}
+
+.top-row {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bottom-row {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.search-box {
+  flex: 1;
+}
+
+.search-input :deep(input) {
+  height: 42px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--va-border-color);
+  transition: all 0.3s;
+  background: var(--va-background-secondary);
+  font-size: 0.95rem;
+  color: var(--va-text-primary);
+}
+
+.search-input :deep(input:focus) {
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input :deep(.va-input-wrapper) {
+  border: none;
+  background: transparent;
+}
+
+.search-input :deep(.va-input) {
+  box-shadow: none;
+}
+
+.search-icon {
+  color: #64748b;
+  font-size: 1rem;
+  margin-right: 12px;
+}
+
+/* Date Range */
+.date-range {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.date-input-group {
+  display: flex;
+  align-items: center;
+  background: var(--va-background-secondary);
+  border: 1px solid var(--va-border-color);
+  border-radius: 8px;
+  padding: 4px 8px;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+.date-input-group:hover {
+  border-color: #3b82f6;
+}
+
+.date-input {
+  flex: 1;
+}
+
+.date-input :deep(input) {
+  height: 42px;
+  border: none !important;
+  background: transparent;
+  font-size: 0.95rem;
+  color: var(--va-text-primary);
+  padding: 0 12px;
+}
+
+.date-separator {
+  padding: 0 12px;
+}
+
+.separator-line {
+  width: 20px;
+  height: 2px;
+  background: var(--va-border-color);
+  border-radius: 2px;
+}
+
+/* Export Button */
+.export-button-container {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: 1rem;
+}
+
+.export-button {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  border-radius: 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  background: var(--va-background-secondary) !important;
+  color: var(--va-text-secondary) !important;
+  border: 1px solid var(--va-border-color) !important;
+  position: relative;
+}
+
+.export-button i {
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.export-button:hover {
+  background: #3b82f6 !important;
+  color: white !important;
+  border-color: #3b82f6 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.15) !important;
+}
+
+.export-button:hover i {
+  transform: scale(1.1);
+}
+
+.export-button:active {
+  transform: translateY(0);
+  box-shadow: none !important;
+}
+
+/* Patient Selector */
+.patient-selector {
+  flex: 2;
+}
+
+.patient-select {
+  width: 100%;
+}
+
+.patient-select :deep(.va-select__value) {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--va-border-color);
+  background: var(--va-background-secondary);
+  transition: all 0.3s;
+  padding: 0 12px;
+}
+
+.patient-select :deep(.va-select__value:hover) {
+  border-color: #3b82f6;
+}
+
+/* Status Filter */
+.status-filter {
+  flex: 2;
+}
+
+.status-tabs {
+  display: flex;
+  background: var(--va-background-secondary);
+  border: 1px solid var(--va-border-color);
+  border-radius: 8px;
+  padding: 4px;
+  width: 100%;
+  height: 42px;
+}
+
+.status-tab {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--va-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  flex: 1;
+  text-align: center;
+  border-radius: 6px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+}
+
+.status-tab.active {
+  background: var(--va-background-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  color: var(--va-primary);
+}
+
+/* Method Filter */
+.method-filter {
+  flex: 2;
+}
+
+.method-tabs {
+  display: flex;
+  background: var(--va-background-secondary);
+  border: 1px solid var(--va-border-color);
+  border-radius: 8px;
+  padding: 4px;
+  width: 100%;
+  height: 42px;
+}
+
+.method-tab {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--va-text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  flex: 1;
+  text-align: center;
+  border-radius: 6px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px;
+}
+
+.method-tab.active {
+  background: var(--va-background-primary);
+  color: var(--va-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.status-tab:hover:not(.active),
+.method-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .search-box,
+  .date-range,
+  .export-button-container {
+    flex: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-filter-container {
+    gap: 1rem;
+  }
+
+  .top-row,
+  .bottom-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-box,
+  .date-range,
+  .export-button-container,
+  .patient-selector,
+  .status-filter,
+  .method-filter {
+    width: 100%;
+  }
+
+  .status-tabs,
+  .method-tabs {
+    width: 100%;
+  }
+
+  .status-tab,
+  .method-tab {
+    flex: 1;
+    min-width: auto;
+    padding: 8px 12px;
+  }
+
+  .date-input-group {
+    width: 100%;
+  }
+
+  .export-button {
+    width: 100%;
+  }
+}
+
+/* Thêm styles cho table trong darkmode */
+:deep(.va-data-table) {
+  background: var(--va-background-primary);
+  color: var(--va-text-primary);
+}
+
+:deep(.va-data-table__thead) {
+  background: var(--va-background-secondary);
+}
+
+:deep(.va-data-table__th) {
+  color: var(--va-text-primary);
+}
+
+:deep(.va-data-table__td) {
+  color: var(--va-text-primary);
+  border-bottom: 1px solid var(--va-border-color);
+}
+
+/* Thêm hover effect cho table rows */
+:deep(.va-data-table__tr:hover) {
+  background: var(--va-background-secondary);
 }
 </style>

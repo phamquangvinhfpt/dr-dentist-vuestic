@@ -7,7 +7,7 @@
     <div class="chart-legend">
       <div class="legend-item">
         <div class="color-box affected"></div>
-        <span>Affected Teeth</span>
+        <span class="text-primary">Affected Teeth</span>
       </div>
     </div>
   </div>
@@ -151,7 +151,7 @@ onMounted(() => {
   transform: translateX(-50%);
   padding: 0.75rem 1rem;
   background: rgba(0, 0, 0, 0.8);
-  color: white;
+  color: var(--va-text-primary);
   border-radius: 8px;
   font-size: 0.875rem;
   white-space: nowrap;

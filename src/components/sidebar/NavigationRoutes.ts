@@ -28,6 +28,7 @@ export default {
       displayName: 'menu.services',
       meta: {
         icon: 'medical_services',
+        roles: ['Guest', 'Patient'],
       },
     },
     {
@@ -35,6 +36,7 @@ export default {
       displayName: 'menu.doctors',
       meta: {
         icon: 'person_pin_circle',
+        roles: ['Guest', 'Patient'],
       },
     },
     {
@@ -169,14 +171,14 @@ export default {
       },
     },
     //form application
-    {
-      name: 'form-application',
-      displayName: 'menu.form-application',
-      meta: {
-        icon: 'description',
-        roles: ['Dentist'],
-      },
-    },
+    // {
+    //   name: 'form-application',
+    //   displayName: 'menu.form-application',
+    //   meta: {
+    //     icon: 'description',
+    //     roles: ['Dentist'],
+    //   },
+    // },
     {
       name: 'form-management',
       displayName: 'menu.form-management',
@@ -191,6 +193,24 @@ export default {
       meta: {
         icon: 'fact_check',
         roles: ['Dentist'],
+      },
+    },
+    //payyment for patient
+    {
+      name: 'payment-for-patient',
+      displayName: 'menu.payment-for-patient',
+      meta: {
+        icon: 'payments',
+        roles: ['Patient'],
+      },
+    },
+    //medical record for patient
+    {
+      name: 'medical-record-for-patient',
+      displayName: 'menu.medical-record-for-patient',
+      meta: {
+        icon: 'assignment',
+        roles: ['Patient'],
       },
     },
   ] as INavigationRoute[],

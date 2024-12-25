@@ -13,6 +13,11 @@ const { t } = useI18n()
 const authStore = useAuthStore()
 const props = defineProps<{
   rules?: ValidationRule<string>[] | undefined
+  modelValue?: string
+}>()
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string]
 }>()
 
 // Type-safe debounce function
@@ -57,6 +62,7 @@ const selectSuggestion = (prediction: any) => {
 watch(
   () => addressInput.value,
   (newValue) => {
+    emit('update:modelValue', newValue)
     debouncedSearch(newValue)
   },
   { immediate: true },

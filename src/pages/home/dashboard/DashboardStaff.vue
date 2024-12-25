@@ -184,8 +184,8 @@ onMounted(async () => {
 
   // Fetch total patients
   try {
-    const patients = await userStore.getAllPatients()
-    totalPatients.value = patients.length || 0
+    const patients = await userStore.getAllPatients({ pageNumber: 1, pageSize: 20, isActive: true })
+    totalPatients.value = patients.data.length
   } catch (error) {
     console.error('Error fetching patients:', error)
     totalPatients.value = 0
