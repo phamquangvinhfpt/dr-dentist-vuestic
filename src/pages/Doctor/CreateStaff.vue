@@ -140,9 +140,6 @@ const birthDayRules = computed(() => [
   <div class="form-wrapper min-h-screen flex items-center justify-center bg-gray-100">
     <VaInnerLoading :loading="isLoading" :size="60" style="width: 60%">
       <VaCard class="form-container p-6 max-w-lg w-full shadow-md rounded-lg bg-white">
-        <h3 style="color: var(--va-primary); border-bottom-color: #154ec1" class="text-lg font-semibold mb-4">
-          Thông tin cơ bản
-        </h3>
         <VaForm ref="form" @submit.prevent="submit">
           <div class="grid grid-cols-2 gap-4 mb-4">
             <VaInput

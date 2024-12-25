@@ -4,11 +4,12 @@
       <div class="flex justify-between mb-3">
         <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">Dịch Vụ Nha Khoa</h1>
       </div>
-      <div style="margin-bottom: 3%; margin-top: 5px" class="flex justify-between items-center mt-6">
+      <div style="margin-bottom: 1%; margin-top: 5px" class="flex justify-between items-center mt-6">
         <p class="text-sm md:text-base text-left mb-0">Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi</p>
+
         <button
           v-if="isMobile"
-          class="bg-indigo-600 text-white font-semibold text-sm py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          class="bg-indigo-600 text-white font-semibold text-xs py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
           @click="bookAppointment"
         >
           Đặt Lịch Ngay
@@ -16,37 +17,56 @@
         <button
           v-else
           style="height: 4cap"
-          class="bg-indigo-600 text-white font-semibold text-sm py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
+          class="bg-indigo-600 text-white font-semibold text-xs py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
           @click="bookAppointment"
         >
           Đặt Lịch Ngay
         </button>
       </div>
-
+      <!-- Search and Filters -->
+      <div class="rounded-2xl p-4 shadow-md mb-6 space-y-4">
+        <VaInput
+          v-model="searchQuery"
+          type="text"
+          placeholder="Tìm dịch vụ..."
+          label="Tìm kiếm"
+          @input="onSearchChange"
+        />
+        <VaSelect
+          v-model="selectedTypeService"
+          :options="typeServiceOptions"
+          label="Lọc theo loại dịch vụ"
+          @change="onFilterChange"
+        />
+      </div>
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <div v-if="isLoading" class="col-span-full text-center">
           <VaProgressCircle indeterminate />
         </div>
-        <div v-if="services.length === 0" class="col-span-full text-center">Không có dịch vụ nào để hiển thị.</div>
-        <div v-for="service in services" :key="service.serviceID" class="service-card">
-          <VaCard style="padding-bottom: 0px" class="p-6 flex flex-col justify-between h-full">
-            <div style="padding-bottom: 30px" class="service-icon">🦷</div>
-            <div>
-              <h2 class="text-lg font-semibold dark:text-blue-500 text-blue-900">{{ service.name }}</h2>
-              <p class="text-xs mt-2">{{ truncateDescription(service.description) }}</p>
-            </div>
+        <div v-if="filteredServices.length === 0 && !isLoading" class="col-span-full text-center">
+          Không có dịch vụ nào để hiển thị.
+        </div>
+        <div v-for="service in paginatedServices" :key="service.serviceID" class="service-card">
+          <VaCard class="p-6 flex flex-col justify-between h-full">
+            <div class="service-icon">🦷</div>
+            <h2 class="text-lg font-semibold dark:text-blue-500 text-blue-900">{{ service.name }}</h2>
+            <p class="text-xs mt-2">{{ truncateDescription(service.description) }}</p>
             <div class="flex justify-between items-center mt-4">
-              <p class="text-xs md:text-sm font-bold text-blue-600">Giá: {{ formatCurrency(service.totalPrice) }}</p>
-
-              <button
-                class="text-xs md:text-xs font-bold text-blue-600 learn-more-button"
-                @click.prevent="getServicesDetailById(service.serviceID)"
-              >
+              <p class="text-sm font-bold text-blue-600">Giá: {{ formatCurrency(service.totalPrice) }}</p>
+              <button class="text-sm font-bold text-blue-600" @click.prevent="getServicesDetailById(service.serviceID)">
                 Chi Tiết
               </button>
             </div>
           </VaCard>
         </div>
+      </div>
+      <!-- Pagination -->
+      <div class="mt-6 flex justify-center">
+        <VaPagination
+          v-model="currentPage"
+          :total="Math.ceil(filteredServices.length / pageSize)"
+          @input="fetchPaginatedServices"
+        />
       </div>
     </div>
 
@@ -58,26 +78,36 @@
     />
   </VaCard>
 </template>
-
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useServiceStore } from '@/stores/modules/service.module'
-import { VaCard, VaProgressCircle } from 'vuestic-ui'
+import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router' // Để lấy tham số từ route
+import { VaCard, VaInput, VaSelect, VaPagination, VaProgressCircle } from 'vuestic-ui'
 import ServiceDetailsModal from './widgets/ServiceDetailsModal.vue'
-import { useRouter } from 'vue-router'
-const isMobile = computed(() => window.innerWidth < 768)
+import { useServiceStore } from '@/stores/modules/service.module'
+// Reactive variables
+const searchQuery = ref('')
+const selectedTypeService = ref({ value: null, text: 'Tất cả dịch vụ' })
+const currentPage = ref(1)
+const pageSize = 9
 const services = ref([])
+const filteredServices = ref([])
+const paginatedServices = ref([])
 const isLoading = ref(false)
-const serviceDetails = ref([])
-const isDetailsLoading = ref(false)
 const isModalOpen = ref(false)
-const router = useRouter()
+const serviceDetails = ref(null)
+const isDetailsLoading = ref(false)
+const serviceStore = useServiceStore()
+const typeServiceOptions = ref([]) // Để lưu các loại dịch vụ
+const route = useRoute()
+const defaultTypeServiceId = route.query.id || null // Giả sử 'id' là tham số trong query string
 
+// Fetch services from store
 const fetchServices = async () => {
   isLoading.value = true
   try {
-    const response = await useServiceStore().getAllServices({ pageNumber: 1, pageSize: 10, isActive: true })
+    const response = await serviceStore.getAllServices({ isActive: true })
     services.value = response.data
+    applyFilters()
   } catch (error) {
     console.error('Error fetching services:', error)
   } finally {
@@ -85,39 +115,77 @@ const fetchServices = async () => {
   }
 }
 
+onMounted(async () => {
+  try {
+    const response = await serviceStore.getServiceType({}) // Lấy dữ liệu từ API
+    const serviceTypes = response.data // Giả sử dữ liệu trả về có dạng { data: [...] }
+
+    if (Array.isArray(serviceTypes) && serviceTypes.length > 0) {
+      typeServiceOptions.value = [
+        { value: null, text: 'Tất cả dịch vụ' },
+        ...serviceTypes.map((service) => ({
+          value: service.id,
+          text: service.typeName,
+        })),
+      ]
+      console.log('Giá trị của defaultTypeServiceId:', defaultTypeServiceId)
+      selectedTypeService.value = typeServiceOptions.value.value.find(
+        (option) => option.value.value == defaultTypeServiceId,
+      ) || { value: null, text: 'Tất cả dịch vụ' }
+      // Kiểm tra nếu có tham số 'id' trong query string
+    } else {
+      console.warn('Không có loại dịch vụ nào để hiển thị')
+    }
+  } catch (error) {
+    console.error('Error fetching service types:', error)
+  }
+})
+
+// Apply search and filter
+const applyFilters = () => {
+  const query = searchQuery.value.toLowerCase()
+  const type = selectedTypeService.value.value
+  filteredServices.value = services.value.filter((service) => {
+    const matchesSearch = query === '' || service.name.toLowerCase().includes(query)
+    const matchesType = type === null || service.typeServiceID === type
+    return matchesSearch && matchesType
+  })
+  currentPage.value = 1 // Reset to first page after filtering
+  fetchPaginatedServices()
+}
+// Pagination logic
+const fetchPaginatedServices = () => {
+  const start = (currentPage.value - 1) * pageSize
+  const end = start + pageSize
+  paginatedServices.value = filteredServices.value.slice(start, end)
+}
+
+// Modal and details logic
 const getServicesDetailById = async (id) => {
-  isDetailsLoading.value = true
   isModalOpen.value = true
+  isDetailsLoading.value = true
   try {
     const response = await useServiceStore().getServiceDetail(id)
     serviceDetails.value = response.procedures
   } catch (error) {
-    console.error('Error fetching services details:', error)
+    console.error('Error fetching service details:', error)
   } finally {
     isDetailsLoading.value = false
   }
 }
-
 const closeModal = () => {
   isModalOpen.value = false
 }
-
+// Helper functions
 const formatCurrency = (value) => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-  }).format(value)
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 }
-
 const truncateDescription = (description) => {
   const words = description.split(' ')
-  return words.length > 13 ? words.slice(0, 15).join(' ') + '...' : description
+  return words.length > 13 ? words.slice(0, 13).join(' ') + '...' : description
 }
-
-const bookAppointment = () => {
-  router.push('/appointment/booking')
-}
-
+// Watchers and lifecycle hooks
+watch([searchQuery, selectedTypeService], applyFilters)
 onMounted(fetchServices)
 </script>
 
