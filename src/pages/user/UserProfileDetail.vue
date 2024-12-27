@@ -27,6 +27,13 @@ import AddressAutocomplete from '../auth/AddressAutocomplete.vue'
 
 const { t } = useI18n()
 
+interface VaFile {
+  name: string
+  size: number
+  type: string
+  lastModified: number
+}
+
 const props = defineProps({
   settingOption: {
     type: Object as () => SettingProfile | null,
@@ -609,11 +616,11 @@ const submit = async () => {
 const submitDoctorProfile = async () => {
   if (validate()) {
     const doctorProfileData: DoctorDetailsUpdate = {
-      education: formData.doctorProfile.education ?? null,
-      college: formData.doctorProfile.college ?? null,
-      certification: formData.doctorProfile.certification ?? null,
-      yearOfExp: formData.doctorProfile.yearOfExp ?? null,
-      seftDescription: formData.doctorProfile.certification ?? null,
+      education: formData.doctorProfile.education ?? '',
+      college: formData.doctorProfile.college ?? '',
+      certification: formData.doctorProfile.certification ?? '',
+      yearOfExp: formData.doctorProfile.yearOfExp ?? '',
+      seftDescription: formData.doctorProfile.seftDescription ?? '',
       workingType: formData.doctorProfile.workingType ?? WorkingType.None,
       typeServiceID: formData.doctorProfile.typeServiceID ?? '',
       isActive: formData.doctorProfile.isActive ?? true,
@@ -1148,6 +1155,39 @@ const workingTypeOptions = [
   { text: t('auth.part_time'), value: WorkingType.PartTime },
   { text: t('auth.none'), value: WorkingType.None },
 ]
+
+// Add handler for certification image upload
+const handleCertificationImageUpload = async (files: VaFile[]) => {
+  if (!files || files.length === 0) return
+
+  const formDataUpload = new FormData()
+  files.forEach((file: any) => {
+    formDataUpload.append('CertificationImages', file)
+  })
+
+  try {
+    // Upload certification images
+    const response = await userProfileStore.uploadCertificationImages(formDataUpload)
+    // Update the certificationImage array with the returned URLs
+    if (response && response.data && formData.doctorProfile) {
+      formData.doctorProfile.certificationImage = response.data
+    }
+    notify({
+      title: t('auth.success'),
+      message: t('auth.certification_images_uploaded'),
+      color: 'success',
+    })
+  } catch (error) {
+    const message = getErrorMessage(error)
+    notify({
+      title: t('auth.error'),
+      message: message,
+      color: 'danger',
+    })
+  }
+}
+
+const certificationFiles = ref<VaFile[]>([])
 </script>
 
 <template>
@@ -1373,6 +1413,16 @@ const workingTypeOptions = [
                 text-by="text"
                 value-by="value"
                 clearable
+              />
+            </VaField>
+            <VaField>
+              <VaFileUpload
+                v-model="certificationFiles"
+                :label="t('auth.certification_images')"
+                class="mb-3"
+                multiple
+                :placeholder="t('auth.upload_certification_images')"
+                @change="handleCertificationImageUpload"
               />
             </VaField>
           </div>

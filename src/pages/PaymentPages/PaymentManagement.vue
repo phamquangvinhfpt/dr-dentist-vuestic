@@ -452,10 +452,6 @@ const handleSearch = () => {
 }
 
 const handleDateChange = () => {
-  if (new Date(endDate.value) > new Date(maxDate.value)) {
-    endDate.value = maxDate.value
-  }
-
   if (new Date(endDate.value) < new Date(startDate.value)) {
     endDate.value = startDate.value
   }
@@ -560,10 +556,11 @@ onMounted(async () => {
     endDate.value = today
     await router.push(`/payment-management/${today}/${today}`)
   } else {
-    if (new Date(endDate.value) > new Date(maxDate.value)) {
-      endDate.value = maxDate.value
-      await router.push(`/payment-management/${startDate.value}/${maxDate.value}`)
-    }
+    // Remove this check since we want to allow end date to be today
+    // if (new Date(endDate.value) > new Date(maxDate.value)) {
+    //   endDate.value = maxDate.value
+    //   await router.push(`/payment-management/${startDate.value}/${maxDate.value}`)
+    // }
   }
 
   await Promise.all([getAllPaymentsPagination(), loadPatients()])

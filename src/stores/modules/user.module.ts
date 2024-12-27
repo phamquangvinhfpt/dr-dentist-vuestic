@@ -283,5 +283,17 @@ export const useUserProfileStore = defineStore('userProfile', {
         return await Promise.reject(error)
       }
     },
+
+    async uploadCertificationImages(data: FormData): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.uploadCertificationImages(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

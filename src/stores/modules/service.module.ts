@@ -39,6 +39,7 @@ export const useServiceStore = defineStore('service', {
           pageSize: filter.pageSize,
           isActive: filter.isActive,
           orderBy: filter.orderBy || [],
+          advancedFilter: filter.advancedFilter,
         })
         console.log('Store - GetAllServices response:', response)
         this.serviceList = response
@@ -78,6 +79,7 @@ export const useServiceStore = defineStore('service', {
           pageSize: filter.pageSize,
           isActive: filter.isActive,
           orderBy: filter.orderBy || [],
+          advancedFilter: filter.advancedFilter,
         })
         console.log('Store - GetDeletedServices response:', response)
         this.serviceList = response

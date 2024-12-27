@@ -3,6 +3,14 @@ export interface FilterService {
   pageSize: number
   isActive: boolean
   orderBy?: string[]
+  advancedFilter?: {
+    logic: string
+    filters: Array<{
+      field: string
+      operator: string
+      value: string
+    }>
+  } | null
 }
 
 export interface FilterProcedure {
