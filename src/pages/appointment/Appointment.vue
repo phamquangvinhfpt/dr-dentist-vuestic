@@ -455,109 +455,119 @@
             />
           </div>
           <div v-else>
-            <ListAppointment :date="formatDateForm(selectedDate)" />
+            <ListAppointment :is-appointment="true" :date="formatDateForm(selectedDate)" />
           </div>
         </div>
         <div v-if="isAppointment === 'followup'">
-          <VaDataTable
-            :items="followitems"
-            :columns="followColumns"
-            hoverable
-            class="my-table va-table--hoverable"
-            :style="{
-              '--va-data-table-thead-background': 'var(--va-background-element)',
-              '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-            }"
-            sticky-header
-            :class="['small-text']"
-          >
-            <template #cell(date)="{ value }"> {{ formatDate(value) }} </template>
-            <template #cell(status)="{ value }">
-              <VaChip :color="getFollowUpStatusColor(value)" class="text-sm">
-                {{ getFollowUpStatusText(value) }}
-              </VaChip>
-            </template>
-            <template #cell(actions)="{ rowData }">
-              <div class="space-x-2">
-                <VaButton
-                  v-if="rowData.status === 2 && role?.includes('Staff')"
-                  round
-                  icon="check"
-                  color="#b1fadc"
-                  icon-color="#812E9E"
-                  @click="checkedFollowupAppointment(rowData.appointmentId)"
-                />
-                <VaButton round icon="sync" color="warning" icon-color="#812E9E" @click="rescheduleModal(rowData)" />
-              </div>
-            </template>
-          </VaDataTable>
-          <VaPagination
-            v-model="paginationF.page"
-            class="items-center justify-end mt-4"
-            buttons-preset="secondary"
-            :pages="totalPagesF"
-            :visible-pages="5"
-            :boundary-links="true"
-            :direction-links="true"
-          />
+          <div v-if="!isMobile">
+            <VaDataTable
+              :items="followitems"
+              :columns="followColumns"
+              hoverable
+              class="my-table va-table--hoverable"
+              :style="{
+                '--va-data-table-thead-background': 'var(--va-background-element)',
+                '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
+              }"
+              sticky-header
+              :class="['small-text']"
+            >
+              <template #cell(date)="{ value }"> {{ formatDate(value) }} </template>
+              <template #cell(status)="{ value }">
+                <VaChip :color="getFollowUpStatusColor(value)" class="text-sm">
+                  {{ getFollowUpStatusText(value) }}
+                </VaChip>
+              </template>
+              <template #cell(actions)="{ rowData }">
+                <div class="space-x-2">
+                  <VaButton
+                    v-if="rowData.status === 2 && role?.includes('Staff')"
+                    round
+                    icon="check"
+                    color="#b1fadc"
+                    icon-color="#812E9E"
+                    @click="checkedFollowupAppointment(rowData.appointmentId)"
+                  />
+                  <VaButton round icon="sync" color="warning" icon-color="#812E9E" @click="rescheduleModal(rowData)" />
+                </div>
+              </template>
+            </VaDataTable>
+            <VaPagination
+              v-model="paginationF.page"
+              class="items-center justify-end mt-4"
+              buttons-preset="secondary"
+              :pages="totalPagesF"
+              :visible-pages="5"
+              :boundary-links="true"
+              :direction-links="true"
+            />
+          </div>
+          <div v-else>
+            <ListFollowUpAppointment :date="formatDateForm(selectedDate)" />
+          </div>
         </div>
         <!-- Unassigned -->
         <div v-if="isAppointment === 'unassigned'">
-          <VaDataTable
-            :items="unassigneditems"
-            :columns="unassignedColumns"
-            hoverable
-            class="my-table va-table--hoverable"
-            :style="{
-              '--va-data-table-thead-background': 'var(--va-background-element)',
-              '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
-            }"
-            sticky-header
-            :class="['small-text']"
-            @row:dblclick="(row) => openAssignListDialog(row.item)"
-          >
-            <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
-            <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
-            <template #cell(status)="{ value }">
-              <VaChip :color="getStatusColor(value)" class="text-sm">
-                {{ getStatusText(value) }}
-              </VaChip>
-            </template>
-            <template #cell(paymentStatus)="{ value }">
-              <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
-                {{ getPaymentStatusText(value) }}
-              </VaChip>
-            </template>
-            <template #cell(actions)="{ rowData }">
-              <div class="space-x-2">
-                <VaButton
-                  v-if="rowData.status === 2"
-                  round
-                  icon="sync"
-                  color="warning"
-                  icon-color="#812E9E"
-                  @click="rescheduleModal(rowData)"
-                />
-                <VaButton
-                  v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
-                  round
-                  icon="clear"
-                  color="danger"
-                  icon-color="#812E9E"
-                  @click="cancelModal(rowData)"
-                />
-              </div>
-            </template>
-          </VaDataTable>
-          <VaPagination
-            v-model="paginationN.page"
-            class="items-center justify-end mt-4"
-            buttons-preset="secondary"
-            :pages="totalPagesN"
-            :visible-pages="5"
-            :boundary-links="true"
-            :direction-links="true"
-          />
+          <div v-if="!isMobile">
+            <VaDataTable
+              :items="unassigneditems"
+              :columns="unassignedColumns"
+              hoverable
+              class="my-table va-table--hoverable"
+              :style="{
+                '--va-data-table-thead-background': 'var(--va-background-element)',
+                '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
+              }"
+              sticky-header
+              :class="['small-text']"
+              @row:dblclick="(row) => openAssignListDialog(row.item)"
+            >
+              <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
+              <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
+              <template #cell(status)="{ value }">
+                <VaChip :color="getStatusColor(value)" class="text-sm">
+                  {{ getStatusText(value) }}
+                </VaChip>
+              </template>
+              <template #cell(paymentStatus)="{ value }">
+                <VaChip :color="getPaymentStatusColor(value)" class="text-sm">
+                  {{ getPaymentStatusText(value) }}
+                </VaChip>
+              </template>
+              <template #cell(actions)="{ rowData }">
+                <div class="space-x-2">
+                  <VaButton
+                    v-if="rowData.status === 2"
+                    round
+                    icon="sync"
+                    color="warning"
+                    icon-color="#812E9E"
+                    @click="rescheduleModal(rowData)"
+                  />
+                  <VaButton
+                    v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
+                    round
+                    icon="clear"
+                    color="danger"
+                    icon-color="#812E9E"
+                    @click="cancelModal(rowData)"
+                  />
+                </div>
+              </template>
+            </VaDataTable>
+            <VaPagination
+              v-model="paginationN.page"
+              class="items-center justify-end mt-4"
+              buttons-preset="secondary"
+              :pages="totalPagesN"
+              :visible-pages="5"
+              :boundary-links="true"
+              :direction-links="true"
+            />
+          </div>
+          <div v-else>
+            <ListAppointment :is-appointment="false" :date="formatDateForm(selectedDate)" />
+          </div>
         </div>
       </div>
       <!-- Appointment Details Modal -->
@@ -888,6 +898,7 @@ import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { startOfWeek, addDays, format } from 'date-fns'
 import { debounce } from 'lodash'
 import ListAppointment from './widgets/list-appointment/ListAppointment.vue'
+import ListFollowUpAppointment from './widgets/list-appointment/ListFollowUpAppointment.vue'
 
 const selectedDate = ref(new Date())
 const showAllUnassignedModal = ref(false)
@@ -1042,7 +1053,7 @@ const getPatients = () => {
     .getPatients(request)
     .then((response) => {
       optionsPatients.value = response.data.map((patient: any) => ({
-        text: patient.phoneNumber,
+        text: `${patient.name} - ${patient.phoneNumber}`,
         value: patient.id,
       }))
     })
@@ -1236,9 +1247,9 @@ const submitCancel = () => {
 }
 
 const filteredTypes = computed(() => {
-  if (role?.includes('Patient') || role?.includes('Dentist')) {
-    return currentView.value === 'list' ? types.filter((type) => type.id !== 'unassigned') : []
-  }
+  // if (role?.includes('Patient') || role?.includes('Dentist')) {
+  //   return currentView.value === 'list' ? types.filter((type) => type.id !== 'unassigned') : []
+  // }
   return currentView.value === 'list' ? types : []
 })
 
