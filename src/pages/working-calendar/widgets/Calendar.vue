@@ -1,11 +1,11 @@
 <template>
   <VaInnerLoading :loading="loading">
     <VaCard class="flex min-h-screen">
-      <main class="flex-1 p-8">
+      <main class="flex-1 p-4 md:p-8">
         <!-- Calendar Header -->
-        <div class="flex justify-between items-center mb-8">
-          <div></div>
-          <div class="flex items-center gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4 md:mb-8">
+          <div class="mb-4 md:mb-0"></div>
+          <div class="flex items-center gap-2 md:gap-4">
             <div class="flex items-center gap-2">
               <div
                 v-if="
@@ -17,6 +17,7 @@
                 @click="
                   () => {
                     if (auth.musHaveRole('Admin') || auth.musHaveRole('Staff')) {
+                      getAllDoctors()
                       showModalSizeLarge = true
                     } else if (auth.musHaveRole('Dentist') && typeDoctor === 'PartTime') {
                       showAddModal = true
@@ -45,54 +46,53 @@
                   <path d="M18 16.5v1.5l.5 .5" />
                 </svg>
               </div>
-              <VaSelect v-model="currentYear" :options="years" class="w-[100px]" />
-              <VaSelect v-model="currentMonthValue" :options="monthTexts" class="w-[100px]" />
+              <VaSelect v-model="currentYear" :options="years" class="w-[100px] md:w-[100px]" />
+              <VaSelect v-model="currentMonthValue" :options="monthTexts" class="w-[130px] md:w-[130px]" />
             </div>
           </div>
         </div>
-        <div class="grid gap-6">
-          <div class="grid gap-6 lg:grid-cols-5">
-            <div v-if="!hideSwitcher">
+        <div class="grid gap-4 md:gap-6">
+          <div class="grid gap-4 md:gap-6 md:grid-cols-5">
+            <div v-if="!hideSwitcher" class="md:col-span-1">
               <div class="mb-4">
                 <VaButtonToggle
                   v-if="!hideSwitcher"
                   v-model="switcher"
                   preset="secondary"
-                  class="mb-3"
+                  class="mb-3 w-full"
                   border-color="primary"
                   :options="options"
                 />
-                <ul>
+                <ul class="space-y-2">
                   <li v-for="(dentist, index) in dentists?.data" :key="dentist.dentistUserID">
                     <div
-                      class="flex items-center justify-between gap-2 hover:cursor-pointer mb-3"
+                      class="flex items-center justify-between gap-2 hover:cursor-pointer p-2 rounded-lg hover:bg-gray-100"
                       @click="toggleDentistDetails(index)"
                     >
-                      <div class="flex flex-row-2 gap-2">
-                        <div class="w-fit">
-                          <VaAvatar
-                            :src="getSrcAvatar(dentist.dentistImage)"
-                            class="w-14 h-14 font-bold"
-                            :fallback-text="dentist.dentistName.charAt(0)?.toUpperCase()"
-                            :color="avatarColor(dentist.dentistName)"
-                          />
-                        </div>
-                        <div class="mt-1 w-full">
-                          <p class="text-sm">{{ dentist.dentistName }}</p>
-                          <p class="text-secondary">{{ workingTypeLabel(dentist.workingType) }}</p>
+                      <div class="flex items-center gap-2">
+                        <VaAvatar
+                          :src="getSrcAvatar(dentist.dentistImage)"
+                          class="w-10 h-10 md:w-14 md:h-14 font-bold"
+                          :fallback-text="dentist.dentistName.charAt(0)?.toUpperCase()"
+                          :color="avatarColor(dentist.dentistName)"
+                        />
+                        <div>
+                          <p class="text-sm font-medium">{{ dentist.dentistName }}</p>
+                          <p class="text-xs text-secondary">{{ workingTypeLabel(dentist.workingType) }}</p>
                         </div>
                       </div>
-                      <div class="flex items-end justify-end cursor-pointer">
+                      <div class="flex items-center">
                         <VaIcon
-                          size="large"
+                          size="small"
                           name="done_all"
                           color="#0081cf"
                           class="mr-2"
-                          @click="AutoSetRoomForPartTime(dentist.calendarDetails)"
+                          @click.stop="AutoSetRoomForPartTime(dentist.calendarDetails)"
                         />
                         <VaIcon
                           name="chevron_right"
                           color="primary"
+                          size="small"
                           class="transform transition-transform duration-300 ease-in-out"
                           :class="{ 'rotate-90': openDentistIndex === index }"
                         />
@@ -100,7 +100,7 @@
                     </div>
                     <VaScrollContainer
                       v-if="openDentistIndex === index"
-                      class="mt-2 space-y-2 md:min-h-[calc(100vh-435px)] lg:max-h-[calc(100vh-635px)] overflow-y-auto"
+                      class="mt-2 space-y-2 max-h-[300px] md:max-h-[calc(100vh-400px)] overflow-y-auto"
                       vertical
                       color="focus"
                     >
@@ -121,7 +121,6 @@
                       >
                         <div class="flex items-center justify-between">
                           <div class="flex items-center space-x-3">
-                            <!-- Date Icon -->
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               class="h-5 w-5 text-blue-500"
@@ -136,8 +135,6 @@
                             </svg>
                             <span class="text-sm font-medium text-gray-700">{{ formatDate(item.date) }}</span>
                           </div>
-
-                          <!-- Working Status Badge -->
                           <span
                             class="px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
                             :class="{
@@ -149,8 +146,6 @@
                             {{ workingStatusLabel(item.workingStatus) }}
                           </span>
                         </div>
-
-                        <!-- Note Section -->
                         <div class="flex items-center justify-between">
                           <div class="mt-2 text-sm text-gray-600 italic">
                             <svg
@@ -167,9 +162,6 @@
                             </svg>
                             {{ item.note || 'No additional notes' }}
                           </div>
-                          <!-- <VaButton preset="secondary" size="small" class="mt-2" @click="addPartTimeSchedule">
-                            Accpect!
-                          </VaButton> -->
                         </div>
                       </div>
                     </VaScrollContainer>
@@ -178,12 +170,12 @@
               </div>
             </div>
 
-            <div :class="[!hideSwitcher ? 'lg:col-span-4' : 'lg:col-span-5']">
+            <div :class="[!hideSwitcher ? 'md:col-span-4' : 'md:col-span-5']">
               <!-- Calendar Grid -->
-              <div class="relative border rounded-lg shadow">
+              <div class="relative border rounded-lg shadow overflow-hidden">
                 <!-- Days Header -->
                 <div class="grid grid-cols-7 border-b">
-                  <div v-for="day in weekDays" :key="day" class="py-2 text-center text-sm text-gray-600">
+                  <div v-for="day in weekDays" :key="day" class="py-2 text-center text-xs md:text-sm text-gray-600">
                     {{ day }}
                   </div>
                 </div>
@@ -193,40 +185,42 @@
                   <div
                     v-for="(day, index) in calendarDays"
                     :key="index"
-                    class="min-h-[120px] border-b border-r p-2 relative group"
+                    class="min-h-[60px] md:min-h-[120px] border-b border-r p-1 md:p-2 relative group"
+                    @click="openDayDetailsModal(day)"
                     @contextmenu.prevent="openAddEventModal($event, day)"
                     @dragover.prevent
                     @drop="handleDrop($event)"
                   >
-                    <span :class="{ 'text-gray-400': !day.isCurrentMonth }" class="text-sm">
+                    <span :class="{ 'text-gray-400': !day.isCurrentMonth }" class="text-xs md:text-sm">
                       {{ day.date }}
                     </span>
 
                     <!-- Events -->
-                    <div class="mt-2 space-y-1 max-h-[80px] overflow-y-auto">
+                    <div class="mt-1 md:mt-2 space-y-1 max-h-[40px] md:max-h-[80px] overflow-y-auto">
                       <div
                         v-for="event in day.events"
                         :key="event.id"
-                        class="text-xs p-1 rounded cursor-pointer flex items-center gap-1"
+                        class="text-[10px] md:text-xs p-1 rounded cursor-pointer flex items-center gap-1"
                         :class="getEventClass(event.type)"
                         draggable="true"
                         @mouseenter="showEventDetails(event, $event)"
                         @mouseleave="hideEventDetails"
                       >
-                        <div :class="getEventDotClass(event.type)" class="w-2 h-2 rounded-full flex-shrink-0"></div>
+                        <div
+                          :class="getEventDotClass(event.type)"
+                          class="w-1 h-1 md:w-2 md:h-2 rounded-full flex-shrink-0"
+                        ></div>
                         <span v-if="isStaffOrAdmin" class="truncate"
                           >{{ event.roomName ? event.roomName : '' }} {{ event.dentistName }}</span
                         >
                         <span v-else class="truncate">
-                          <span v-for="item in event.times" :key="item.timeID" class="flex m-2">
+                          <span v-for="item in event.times" :key="item.timeID" class="flex m-1 md:m-2">
                             {{ event.roomName ? event.roomName : '' }} {{ formatTime(item.startTime) }} -
                             {{ formatTime(item.endTime) }}
                           </span>
                         </span>
                       </div>
                     </div>
-
-                    <!-- Drag Overlay -->
                   </div>
                   <div
                     v-if="isDragging"
@@ -278,7 +272,6 @@
                       <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                   </button>
-                  <!-- <h2 class="text-2xl font-bold mb-4">Doctor's Working Hours</h2> -->
                   <div class="schedule-inputs flex space-x-4 mb-4">
                     <div v-if="isStaffOrAdmin">
                       <VaOptionList
@@ -316,9 +309,6 @@
                           :text-by="(option: any) => option.altText"
                           class="flex-grow"
                         />
-                        <!-- <VaButton preset="primary" :disabled="!canAddSchedule" @click="addPartTimeSchedule">
-                          Add Schedule
-                        </VaButton> -->
                       </div>
                       <div v-if="partTimeSchedules.length" class="mt-4">
                         <div
@@ -443,6 +433,35 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Mobile Day Details Modal -->
+              <VaModal
+                v-model="showMobileDayModal"
+                :title="formatDate(selectedDate)"
+                hide-default-actions
+                close-button
+                class="mobile-day-modal"
+              >
+                <div class="p-4 mobile-day-modal-content">
+                  <div v-if="selectedDayEvents.length === 0" class="text-center text-gray-500">
+                    No events for this day
+                  </div>
+                  <div v-else class="space-y-4">
+                    <div v-for="event in selectedDayEvents" :key="event.id" class="border-b pb-4">
+                      <div class="flex justify-between items-center">
+                        <span class="font-semibold">{{ event.dentistName }}</span>
+                        <span :class="getEventClass(event.type)" class="px-2 py-1 rounded-full text-xs">
+                          {{ workingStatusLabel(event.workingStatus) }}
+                        </span>
+                      </div>
+                      <div v-for="time in event.times" :key="time.timeID" class="text-sm text-gray-600">
+                        {{ formatTime(time.startTime) }} - {{ formatTime(time.endTime) }}
+                      </div>
+                      <div v-if="event.note" class="text-sm text-gray-500 mt-2">Note: {{ event.note }}</div>
+                    </div>
+                  </div>
+                </div>
+              </VaModal>
             </div>
           </div>
         </div>
@@ -480,7 +499,12 @@
             class="text-6xl text-green-500 hover:cursor-pointer"
             name="schedule"
             size="2rem"
-            @click="props.regist(rowData.id, current_date)"
+            @click="
+              () => {
+                props.regist(rowData.id, formatDateSend(new Date(currentYear, currentMonth, 1).toISOString()))
+                getAllDoctors()
+              }
+            "
           />
         </template>
       </VaDataTable>
@@ -513,7 +537,7 @@ const currentMonthValue = computed({
     }
   },
 })
-const current_date = new Date().toISOString().split('T')[0]
+// const current_date = new Date().toISOString().split('T')[0]
 const showAddModal = ref(false)
 const hideSwitcher = ref(false)
 const showModalSizeLarge = ref(false)
@@ -550,6 +574,8 @@ const listValue = ref([])
 const multiDragValues = ref<Record<string, string[]>>({})
 const openDentistIndex = ref(null)
 const selectedCalendarIndex = ref<number[]>([])
+const showMobileDayModal = ref(false)
+const selectedDayEvents = ref<any[]>([])
 const optionsTimes = [
   {
     text: '8:00 AM - 12:00 PM',
@@ -692,8 +718,9 @@ const calendarDays = computed(() => {
 
 const getAllDoctors = (): any => {
   loading.value = true
+  const date = formatDateSend(new Date(currentYear.value, currentMonth.value, 1).toISOString())
   calendarStore
-    .getDoctorHasNoCalendar('2025-01-20')
+    .getDoctorHasNoCalendar(date)
     .then((response) => {
       console.log(response)
       listDoctors.value = response
@@ -962,10 +989,6 @@ const saveSchedule = () => {
   }
 }
 
-// const canAddSchedule = computed(() => {
-//   return newScheduleDate.value && newScheduleTime.value
-// })
-
 function formatDateSend(date: any) {
   if (date === null || date === undefined) return ''
 
@@ -987,7 +1010,6 @@ function formatDateSend(date: any) {
   return `${year}-${month}-${day}`
 }
 
-// Method to add part-time schedule
 const addPartTimeSchedule = () => {
   if (newScheduleDate.value && newScheduleTime.value) {
     // Check for duplicate schedules
@@ -1056,6 +1078,23 @@ async function AutoSetRoomForPartTime(calendars: any) {
     .finally(() => {
       loading.value = false
     })
+}
+
+const openDayDetailsModal = (day: CalendarDay) => {
+  if (window.innerWidth < 768) {
+    selectedDate.value = new Date(currentYear.value, currentMonth.value, day.date)
+    selectedDayEvents.value = day.events
+    showMobileDayModal.value = true
+  } else {
+    if (day.events.length > 0) {
+      selectedEvent.value = day.events[0]
+      selectedDate.value = new Date(currentYear.value, currentMonth.value, day.date)
+      selectedDayEvents.value = day.events
+      showMobileDayModal.value = true
+    } else {
+      openAddEventModal({ clientX: 0, clientY: 0 } as MouseEvent, day)
+    }
+  }
 }
 
 watch(
@@ -1155,5 +1194,16 @@ onMounted(() => {
 
 .max-h-\[80px\]::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.mobile-day-modal {
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-day-modal-content {
+  flex-grow: 1;
+  overflow-y: auto;
 }
 </style>
