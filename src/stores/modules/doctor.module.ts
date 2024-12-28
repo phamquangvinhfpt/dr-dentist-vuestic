@@ -57,6 +57,30 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         return await Promise.reject(error)
       }
     },
+    async getDoctorDetailForAdmin(id: string): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.getDoctorDetail(id)
+        this.isLoading = false
+        // Lưu thông tin bác sĩ vào state nếu cần
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getDoctorDetailUpdate(id: string): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.getDoctorDetailUpdate(id)
+        this.isLoading = false
+        // Lưu thông tin bác sĩ vào state nếu cần
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
     async updateDoctor(id: string, doctorData: any): Promise<any> {
       try {
         this.isLoading = true

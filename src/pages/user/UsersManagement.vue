@@ -141,7 +141,7 @@ const getAllUsers = async () => {
 
 const viewDetails = (id: string) => {
   userStore.id = id
-  router.push({ name: 'user-detail', params: { id } })
+  router.push({ name: 'patients-detail', params: { id } })
 }
 
 const updateUser = (id: string) => {

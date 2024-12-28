@@ -238,28 +238,28 @@ watch(
   },
 )
 
+const newImage = ref<string | null>(null) // New reactive property for the image preview
+const emptyImage = 'path/to/placeholder/image.png' // Placeholder image path
+
 const handleAvatarUpload = (event: Event) => {
-  const input = event.target as HTMLInputElement // Cast event.target to HTMLInputElement
-  const files = input.files // Access the files property
+  const input = event.target as HTMLInputElement
+  const files = input.files
 
   if (files && files.length > 0) {
-    doctor.imageUrl = [] // Initialize as an empty array to store multiple files
+    const file = files[0] // Get the first selected file
+    const theReader = new FileReader()
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader()
+    theReader.onloadend = async () => {
+      newImage.value = (await theReader.result) as string // Set the new image for review
+    }
 
-      reader.onload = () => {
-        // Store the file directly in the imageUrl array
-        doctor.imageUrl.push(file) // Store the File object directly
-      }
-
-      reader.readAsDataURL(file) // Read the file as a data URL
-    })
-
-    fileName.value = files.length > 1 ? `${files.length} files selected` : files[0].name // Update fileName to show multiple files
+    theReader.readAsDataURL(file) // Read the file as a data URL
+    doctor.imageUrl = [file] // Store the file in doctor.imageUrl for later use
+    fileName.value = files.length > 1 ? `${files.length} files selected` : files[0].name // Update fileName
   } else {
-    doctor.imageUrl = [] // Reset if no files are selected
-    fileName.value = '' // Reset file name if no files are selected
+    doctor.imageUrl = []
+    newImage.value = null // Reset newImage if no files are selected
+    fileName.value = ''
   }
 }
 
@@ -291,7 +291,13 @@ const confirmAddDoctor = async () => {
       !validatePhoneNumber(doctor.phoneNumber) ||
       !validateFirstName(doctor.firstName) ||
       !validateLastName(doctor.lastName) ||
-      !validateUserName(doctor.userName)
+      !validateUserName(doctor.userName) ||
+      !validateTypeService() ||
+      !validateEducation() ||
+      !validateCollege() ||
+      !validateCertification() ||
+      !validateYearOfExp() ||
+      !validateSelfDescription()
     ) {
       throw new Error('Vui lòng điền đúng tất cả các trường bắt buộc')
     }
@@ -336,7 +342,7 @@ const confirmAddDoctor = async () => {
     showSuccess.value = true
   } catch (error: any) {
     console.error('Chi tiết lỗi:', error)
-    // ... existing error handling ...
+    toast({ message: error.message || 'Thêm thất bại', color: 'danger' }) // Hiển thị thông báo thêm thất bại
   } finally {
     isSubmitting.value = false
   }
@@ -366,6 +372,10 @@ const validateForm = () => {
   }
 
   if (!validateAge(doctor.birthDate)) {
+    isValid = false
+  }
+
+  if (!validateExperience(doctor.experience)) {
     isValid = false
   }
 
@@ -413,6 +423,78 @@ watch(
     validateSpecialization(newValue)
   },
 )
+
+const validateExperience = (experience: number): boolean => {
+  const age = new Date().getFullYear() - new Date(doctor.birthDate).getFullYear()
+  if (experience > age - 18) {
+    errors.experience = { error: true, message: 'Kinh nghiệm không hợp lí với độ tuổi' }
+    return false
+  }
+  errors.experience = { error: false, message: '' }
+  return true
+}
+
+watch(
+  () => doctor.experience,
+  (newValue) => {
+    validateExperience(newValue)
+  },
+)
+
+// Validation functions for new fields
+const validateTypeService = () => {
+  if (!doctor.typeServiceId) {
+    errors.typeServiceId = { error: true, message: 'Type service is unavailable.' }
+    return false
+  }
+  errors.typeServiceId = { error: false, message: '' }
+  return true
+}
+
+const validateEducation = () => {
+  if (!doctor.qualification) {
+    errors.qualification = { error: true, message: 'Education is required for Doctor.' }
+    return false
+  }
+  errors.qualification = { error: false, message: '' }
+  return true
+}
+
+const validateCollege = () => {
+  if (!doctor.qualification) {
+    errors.qualification = { error: true, message: 'College is required for Doctor.' }
+    return false
+  }
+  errors.qualification = { error: false, message: '' }
+  return true
+}
+
+const validateCertification = () => {
+  if (!doctor.qualification) {
+    errors.qualification = { error: true, message: 'Certification is required for Doctor.' }
+    return false
+  }
+  errors.qualification = { error: false, message: '' }
+  return true
+}
+
+const validateYearOfExp = () => {
+  if (!doctor.experience) {
+    errors.experience = { error: true, message: 'YearOfExp is required for Doctor.' }
+    return false
+  }
+  errors.experience = { error: false, message: '' }
+  return true
+}
+
+const validateSelfDescription = () => {
+  if (!doctor.description) {
+    errors.description = { error: true, message: 'SeftDescription is required for Doctor.' }
+    return false
+  }
+  errors.description = { error: false, message: '' }
+  return true
+}
 </script>
 
 <template>
@@ -534,11 +616,11 @@ watch(
           <div
             class="flex flex-col items-center justify-center w-full p-6 bg-white border-2 border-dashed border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition"
           >
-            <!-- Upload Icon -->
-
             <!-- Instructions -->
-            <p class="text-gray-600 text-sm mb-2">Drag & drop your file here</p>
-            <p class="text-gray-500 text-xs mb-4">or click to browse</p>
+            <div class="text-center mb-4">
+              <p class="text-gray-600 text-sm font-medium">Drag & drop your file here</p>
+              <p class="text-gray-500 text-xs">or click the button below to browse</p>
+            </div>
 
             <!-- File Input -->
             <label
@@ -550,15 +632,29 @@ watch(
             </label>
 
             <!-- Display selected file name -->
-            <div v-if="fileName" class="mt-4 text-sm text-gray-500">
+            <div v-if="fileName" class="mt-4 text-sm text-gray-600">
               Selected file: <span class="font-medium text-indigo-600">{{ fileName }}</span>
+            </div>
+
+            <!-- Image Review Section -->
+            <!-- Image Review Section -->
+            <div v-if="newImage" class="image-review">
+              <!-- Overlay to blur the background -->
+              <div class="overlay"></div>
+
+              <!-- Image with zoom effect -->
+              <img
+                alt="Preview"
+                :src="newImage || emptyImage"
+                class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
+              />
             </div>
           </div>
           <label
             for="serviceType"
             style="color: var(--va-primary)"
             class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-            >Chọn loại dịch vụ</label
+            >Chuyên Khoa</label
           >
           <select
             id="serviceType"
@@ -570,13 +666,6 @@ watch(
             </option>
           </select>
 
-          <VaInput
-            v-model="doctor.specialization"
-            label="Chuyên khoa"
-            :error="errors.specialization.error"
-            :error-messages="errors.specialization.message"
-            @blur="validateSpecialization(doctor.specialization)"
-          />
           <div class="input-group">
             <label
               for="workingType"
@@ -602,21 +691,31 @@ watch(
             </select>
           </div>
 
-          <VaInput
-            v-model.number="doctor.experience"
-            label="Số năm kinh nghiệm"
-            type="number"
-            min="0"
-            :error="errors.experience.error"
-          />
+          <div class="input-group">
+            <VaInput
+              v-model.number="doctor.experience"
+              label="Số năm kinh nghiệm"
+              type="number"
+              min="0"
+              :error="errors.experience.error"
+            />
+            <span v-if="errors.experience.error" class="text-red-500 text-sm">{{ errors.experience.message }}</span>
+          </div>
 
           <VaInput v-model="doctor.qualification" label="Bằng cấp" :error="errors.qualification.error" />
 
           <VaTextarea
             v-model="doctor.description"
+            :autosize="true"
+            style="
+              height: auto;
+              width: 520px;
+              overflow: hidden;
+              min-height: 50px; /* Chiều cao tối thiểu */
+              resize: none; /* Vô hiệu hóa kéo thủ công */
+            "
             label="Mô tả"
-            :error="errors.description.error"
-            :error-messages="errors.description.message"
+            class="auto-resize"
           />
         </div>
       </div>
@@ -800,5 +899,43 @@ h3 {
   background: #1cc88a;
   transform: translateY(-2px);
   transition: all 0.3s ease;
+}
+.image-review {
+  position: relative; /* Đảm bảo container này quản lý các phần tử con */
+}
+
+.hover\:zoom-image {
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease; /* Hiệu ứng mượt */
+  position: relative;
+  z-index: 1;
+}
+
+.hover\:zoom-image:hover {
+  transform: scale(6); /* Phóng to hình ảnh khi hover */
+  z-index: 2; /* Đưa hình ảnh lên trên overlay */
+}
+
+/* Overlay styling */
+.image-review .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7); /* Màu nền mờ */
+  z-index: 1;
+  pointer-events: none; /* Không chặn thao tác chuột */
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+  filter: blur(0px); /* Không làm mờ mặc định */
+  opacity: 0;
+}
+
+.image-review:hover .overlay {
+  filter: blur(5px); /* Làm mờ nền */
+  opacity: 1; /* Hiển thị overlay */
 }
 </style>

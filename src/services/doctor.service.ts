@@ -51,6 +51,26 @@ class DoctorService {
         return Promise.reject(error)
       })
   }
+  async getDoctorDetailForAdmin(id: string): Promise<any> {
+    return apiService
+      .get(`/users/get-user/${id}`) // Added an empty object as the second argument
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getDoctorDetailUpdate(id: string): Promise<any> {
+    return apiService
+      .get(`/users/get-user/${id}`) // Added an empty object as the second argument
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
   async updateDoctor(id: string, doctorData: any): Promise<any> {
     return apiService
       .post(`/users/customer/update-doctor/${id}`, doctorData) // Adjust the endpoint as necessary

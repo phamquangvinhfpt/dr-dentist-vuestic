@@ -67,7 +67,7 @@ const viewDetails = (id: string, event?: Event) => {
   }
   userStore.doctorId = id
   router.push({
-    name: 'doctor-detail',
+    name: 'doctor-detail-admin',
     params: { id },
   })
 }
@@ -100,10 +100,7 @@ const updateDoctor = (id: string, event?: Event) => {
   if (event) {
     event.stopPropagation()
   }
-  router.push({
-    name: 'doctor-update',
-    params: { id },
-  })
+  router.push(`/doctors/update/${id}`)
 }
 
 onMounted(() => {
@@ -227,9 +224,7 @@ watch(currentPage, () => {
         <!-- Phân trang -->
         <ul class="pagination flex items-center space-x-2">
           <li>
-            <button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">
-              ← Trang trước
-            </button>
+            <button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">←</button>
           </li>
           <li v-for="page in totalPages" :key="page">
             <button :class="['pagination-button', { active: currentPage === page }]" @click="currentPage = page">
@@ -237,9 +232,7 @@ watch(currentPage, () => {
             </button>
           </li>
           <li>
-            <button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">
-              Trang sau →
-            </button>
+            <button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">→</button>
           </li>
         </ul>
       </VaCard>

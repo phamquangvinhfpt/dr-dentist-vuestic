@@ -115,6 +115,14 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/user/UsersManagement.vue'),
       },
       {
+        name: 'patients-detail',
+        path: 'users-detail/:id',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/user/UserDetail.vue'),
+      },
+      {
         name: 'message',
         path: 'message',
         meta: {
@@ -134,6 +142,15 @@ const routes: Array<RouteRecordRaw> = [
         name: 'doctor-detail',
         path: 'doctors/:id',
         component: () => import('../pages/Doctor/DoctorDetail.vue'),
+        meta: {
+          requiresAuth: true,
+          title: 'Doctor Details',
+        },
+      },
+      {
+        name: 'doctor-detail-admin',
+        path: 'doctorsforadmin/:id',
+        component: () => import('../pages/Doctor/DoctorDetailForAdmin.vue'),
         meta: {
           requiresAuth: true,
           title: 'Doctor Details',

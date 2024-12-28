@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { ref, reactive, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 
 import { useToast } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
-
+const route = useRoute() // Get the current route
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()
 const { init: toast } = useToast()
 const serviceStore = useServiceStore()
 
 const goBack = () => router.back()
+const doctorId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
 
 interface DoctorForm {
   userName: string
@@ -76,7 +77,6 @@ const errors = reactive({
   consultationFee: { error: false, message: '' },
   description: { error: false, message: '' },
 })
-const fileName = ref('')
 const isSubmitting = ref(false)
 const showConfirmation = ref(false)
 const showSuccess = ref(false)
@@ -93,9 +93,37 @@ const fetchServiceTypes = async () => {
     toast({ message: 'Không thể tải loại dịch vụ', color: 'danger' })
   }
 }
+const getDoctorDetail = async () => {
+  try {
+    const response = await doctorStore.getDoctorDetailUpdate(doctorId) // Fetch doctor details by ID
+    if (response) {
+      // Assuming response contains the doctor's detailss
+      doctor.firstName = response.firstName || ''
+      doctor.lastName = response.lastName || '' // Fill in the last name
+      doctor.email = response.email || '' // Fill in the email
+      doctor.phoneNumber = response.phoneNumber || '' // Fill in the phone number
+      doctor.gender = response.gender // Adjust based on your API response
+      doctor.birthDate = response.birthDate || '' // Fill in the birth date
+      doctor.userName = response.userName || '' // Fill in the username
+      doctor.qualification = response.doctorProfile.education || '' // Fill in the qualification
+      doctor.experience = response.doctorProfile.yearOfExp || 0 // Fill in the experience
+      doctor.specialization = response.doctorProfile.specialization || '' // Fill in the specialization
+      doctor.description = response.doctorProfile.seftDescription || '' // Fill in the self-description
+      doctor.typeServiceId = response.doctorProfile.typeServiceID || '' // Fill in the type service ID
+      doctor.WorkingType = response.doctorProfile.workingType || 0 // Fill in the working type
+      // Populate other fields as necessary
+    }
+  } catch (error) {
+    console.error('Error fetching doctor details:', error)
+    toast({ message: 'Không thể tải thông tin bác sĩ', color: 'danger' })
+  }
+}
+
 onMounted(() => {
   fetchServiceTypes()
+  getDoctorDetail() // Gọi hàm để lấy thông tin bác sĩ khi component được khởi tạo
 })
+
 // Thêm các ref này cho trạng thái xác thực
 const validFields = reactive<Record<string, boolean>>({
   email: false,
@@ -239,32 +267,6 @@ watch(
     }
   },
 )
-
-const handleAvatarUpload = (event: Event) => {
-  const input = event.target as HTMLInputElement // Cast event.target to HTMLInputElement
-  const files = input.files // Access the files property
-
-  if (files && files.length > 0) {
-    doctor.imageUrl = [] // Initialize as an empty array to store multiple files
-
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader()
-
-      reader.onload = () => {
-        // Store the file directly in the imageUrl array
-        doctor.imageUrl.push(file) // Store the File object directly
-      }
-
-      reader.readAsDataURL(file) // Read the file as a data URL
-    })
-
-    fileName.value = files.length > 1 ? `${files.length} files selected` : files[0].name // Update fileName to show multiple files
-  } else {
-    doctor.imageUrl = [] // Reset if no files are selected
-    fileName.value = '' // Reset file name if no files are selected
-  }
-}
-
 const submitForm = async () => {
   console.log('Working Type:', doctor.WorkingType) // Kiểm tra giá trị
   if (
@@ -528,41 +530,14 @@ watch(
 
         <div class="space-y-4">
           <h3 class="text-lg font-semibold mb-4">Thông tin chuyên môn</h3>
-          <label
-            for="serviceType"
-            style="color: var(--va-primary)"
-            class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-            >Hình ảnh bằng cấp
-          </label>
+
           <!-- File Upload Container -->
-          <div
-            class="flex flex-col items-center justify-center w-full p-6 bg-white border-2 border-dashed border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition"
-          >
-            <!-- Upload Icon -->
 
-            <!-- Instructions -->
-            <p class="text-gray-600 text-sm mb-2">Drag & drop your file here</p>
-            <p class="text-gray-500 text-xs mb-4">or click to browse</p>
-
-            <!-- File Input -->
-            <label
-              for="fileUpload"
-              class="relative cursor-pointer bg-indigo-500 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-indigo-600 transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              Select File
-              <input id="fileUpload" type="file" class="sr-only" @change="handleAvatarUpload($event)" />
-            </label>
-
-            <!-- Display selected file name -->
-            <div v-if="fileName" class="mt-4 text-sm text-gray-500">
-              Selected file: <span class="font-medium text-indigo-600">{{ fileName }}</span>
-            </div>
-          </div>
           <label
             for="serviceType"
             style="color: var(--va-primary)"
             class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-            >Chọn loại dịch vụ</label
+            >Chuyên Khoa</label
           >
           <select
             id="serviceType"
@@ -574,13 +549,6 @@ watch(
             </option>
           </select>
 
-          <VaInput
-            v-model="doctor.specialization"
-            label="Chuyên khoa"
-            :error="errors.specialization.error"
-            :error-messages="errors.specialization.message"
-            @blur="validateSpecialization(doctor.specialization)"
-          />
           <div class="input-group">
             <label
               for="workingType"
@@ -618,15 +586,22 @@ watch(
 
           <VaTextarea
             v-model="doctor.description"
+            :autosize="true"
+            style="
+              height: auto;
+              width: 520px;
+              overflow: hidden;
+              min-height: 50px; /* Chiều cao tối thiểu */
+              resize: none; /* Vô hiệu hóa kéo thủ công */
+            "
             label="Mô tả"
-            :error="errors.description.error"
-            :error-messages="errors.description.message"
+            class="auto-resize"
           />
         </div>
       </div>
 
       <div class="flex justify-end mt-6">
-        <VaButton type="submit" color="primary">Thêm Bác Sĩ</VaButton>
+        <VaButton type="submit" color="primary">Hoàn Thành</VaButton>
       </div>
     </form>
 
