@@ -224,7 +224,9 @@
     "working_type": "Working Type",
     "verify": "Verification",
     "verify_message": "We have sent a code to your phone",
-    "verify_ask": "Didn't receive code?"
+    "verify_ask": "Didn't receive code?",
+    "type_service": "Type Service",
+    "certification_images": "Certification Images"
   },
   "doctor": {
     "education": "Education Level",
@@ -784,7 +786,8 @@
     "deleteItems": "Delete Items",
     "createService": "Create Service",
     "updateService": "Update Service",
-    "deleteConfirmMessage": "Are you sure want to delete this item?"
+    "deleteConfirmMessage": "Are you sure want to delete this item?",
+    "type": "Type"
   },
   "procedure": {
     "id": "ID",

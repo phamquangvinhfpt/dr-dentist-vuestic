@@ -11,8 +11,17 @@ import type {
 class ServiceService {
   async getAllServices(filter: FilterService): Promise<any> {
     console.log('GetAllServices - Request filter:', filter)
+    const requestBody = {
+      pageNumber: filter.pageNumber,
+      pageSize: filter.pageSize,
+      isActive: filter.isActive,
+      orderBy: filter.orderBy || [],
+      advancedFilter: filter.advancedFilter || null,
+    }
+    console.log('GetAllServices - Request body:', requestBody)
+
     return apiService
-      .post(`/service/pagination/get-all`, filter)
+      .post(`/service/pagination/get-all`, requestBody)
       .then((response) => {
         console.log('GetAllServices - Response:', response.data)
         return Promise.resolve(response.data)
@@ -65,8 +74,17 @@ class ServiceService {
 
   async getDeletedServices(filter: FilterService): Promise<any> {
     console.log('GetDeletedServices - Request filter:', filter)
+    const requestBody = {
+      pageNumber: filter.pageNumber,
+      pageSize: filter.pageSize,
+      isActive: filter.isActive,
+      orderBy: filter.orderBy || [],
+      advancedFilter: filter.advancedFilter || null,
+    }
+    console.log('GetDeletedServices - Request body:', requestBody)
+
     return apiService
-      .post(`/service/bin`, filter)
+      .post(`/service/bin`, requestBody)
       .then((response) => {
         console.log('GetDeletedServices - Response:', response.data)
         return Promise.resolve(response.data)

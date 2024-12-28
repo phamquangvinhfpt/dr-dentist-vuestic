@@ -111,8 +111,8 @@
           :items="paginatedPayments"
           :columns="columns"
           hoverable
-          :loading="isLoading"
           sticky-header
+          striped
           no-data-html="<div class='text-center'>No payments found</div>"
         >
           <template #cell(patientCode)="{ row }">
@@ -178,10 +178,7 @@
             class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2"
           >
             <div>
-              <b
-                >{{ searchKeyword.trim() ? filteredPayments.length : paymentListResponse?.totalCount ?? 0 }}
-                {{ t('common.result') }}.</b
-              >
+              <b>{{ filteredPayments.length }} {{ t('common.result') }}.</b>
               {{ t('common.resultPerPage') }}
               <VaSelect
                 v-model="formData.pageSize"
@@ -216,7 +213,7 @@ import { useI18n } from 'vue-i18n'
 import { useToast } from 'vuestic-ui'
 import { PaymentMethod, PaymentStatus } from './types'
 import type { PaginationFilter } from './types'
-import type { PaginationResponse, PaymentDTO } from './types'
+import type { PaymentDTO } from './types'
 import { useAuthStore } from '@/stores/modules/auth.module'
 // import userService from '@/services/user.service'
 import apiService from '@/services/api.service'
@@ -239,8 +236,6 @@ const formData = reactive<PaginationFilter>({
 
 const searchKeyword = ref('')
 const currentPage = ref(1)
-const isLoading = computed(() => paymentStore.isLoading)
-const paymentListResponse = ref<PaginationResponse<PaymentDTO> | null>(null)
 const paymentList = ref<PaymentDTO[]>([])
 
 const filteredPayments = computed(() => {
@@ -257,21 +252,14 @@ const filteredPayments = computed(() => {
   )
 })
 
-const totalPages = computed(() => {
-  if (searchKeyword.value.trim()) {
-    return Math.ceil(filteredPayments.value.length / formData.pageSize)
-  }
-  return paymentListResponse.value?.totalPages ?? 1
-})
+const totalItems = computed(() => filteredPayments.value.length)
+
+const totalPages = computed(() => Math.ceil(totalItems.value / formData.pageSize))
 
 const paginatedPayments = computed(() => {
-  const query = searchKeyword.value.trim()
-  if (query) {
-    const start = (currentPage.value - 1) * formData.pageSize
-    const end = start + formData.pageSize
-    return filteredPayments.value.slice(start, end)
-  }
-  return paymentList.value
+  const start = (currentPage.value - 1) * formData.pageSize
+  const end = start + formData.pageSize
+  return filteredPayments.value.slice(start, end)
 })
 
 const columns = [
@@ -325,10 +313,9 @@ const getAllPaymentsPagination = async () => {
 
     const res = await paymentStore.getAllPayments(
       {
-        pageNumber: currentPage.value,
-        pageSize: formData.pageSize,
+        pageNumber: 1,
+        pageSize: 100000,
         orderBy: formData.orderBy,
-        keyword: searchKeyword.value,
         advancedFilter:
           filters.length > 0
             ? {
@@ -341,11 +328,9 @@ const getAllPaymentsPagination = async () => {
       endDate.value,
     )
 
-    paymentListResponse.value = res
-    paymentList.value = res.data
+    paymentList.value = res.data || []
   } catch (error) {
     console.error('Error fetching payments:', error)
-    paymentListResponse.value = null
     paymentList.value = []
   }
 }
@@ -431,31 +416,21 @@ const getStatusClass = (status: number) => {
 
 const handlePageChange = (page: number) => {
   currentPage.value = page
-  if (!searchKeyword.value.trim()) {
-    getAllPaymentsPagination()
-  }
 }
 
-const handlePageSizeChange = (size: number) => {
-  formData.pageSize = size
-  currentPage.value = 1
-  if (!searchKeyword.value.trim()) {
-    getAllPaymentsPagination()
+const handlePageSizeChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement
+  if (target) {
+    formData.pageSize = parseInt(target.value, 10)
+    currentPage.value = 1
   }
 }
 
 const handleSearch = () => {
   currentPage.value = 1
-  if (!searchKeyword.value.trim()) {
-    getAllPaymentsPagination()
-  }
 }
 
 const handleDateChange = () => {
-  if (new Date(endDate.value) > new Date(maxDate.value)) {
-    endDate.value = maxDate.value
-  }
-
   if (new Date(endDate.value) < new Date(startDate.value)) {
     endDate.value = startDate.value
   }
@@ -464,15 +439,8 @@ const handleDateChange = () => {
   getAllPaymentsPagination()
 }
 
-let searchTimeout: NodeJS.Timeout
-watch(searchKeyword, (newValue) => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    if (!newValue.trim()) {
-      getAllPaymentsPagination()
-    }
-    currentPage.value = 1
-  }, 300)
+watch(searchKeyword, () => {
+  currentPage.value = 1
 })
 
 watch(
@@ -511,7 +479,7 @@ const loadPatients = async () => {
   try {
     const response = await userStore.getPatients({
       pageNumber: 1,
-      pageSize: 1000,
+      pageSize: 100000,
       isActive: true,
     })
 
@@ -560,10 +528,11 @@ onMounted(async () => {
     endDate.value = today
     await router.push(`/payment-management/${today}/${today}`)
   } else {
-    if (new Date(endDate.value) > new Date(maxDate.value)) {
-      endDate.value = maxDate.value
-      await router.push(`/payment-management/${startDate.value}/${maxDate.value}`)
-    }
+    // Remove this check since we want to allow end date to be today
+    // if (new Date(endDate.value) > new Date(maxDate.value)) {
+    //   endDate.value = maxDate.value
+    //   await router.push(`/payment-management/${startDate.value}/${maxDate.value}`)
+    // }
   }
 
   await Promise.all([getAllPaymentsPagination(), loadPatients()])

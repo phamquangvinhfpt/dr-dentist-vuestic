@@ -269,6 +269,7 @@ const columns = computed(() => [
 const columnsWithActions = computed(() => [...columns.value, { key: 'actions', label: 'Actions' }])
 
 const handleEdit = (procedure: ProcedureDTO) => {
+  resetForm()
   selectedProcedure.value = procedure
   formData.name = procedure.name
   formData.description = procedure.description
@@ -375,15 +376,9 @@ const toggleBin = () => {
 }
 
 const resetForm = () => {
-  filterData.pageNumber = 1
-  filterData.pageSize = 10
-  filterData.isActive = true
-  filterData.orderBy = []
-
   formData.name = ''
   formData.description = ''
   formData.price = 0
-
   selectedProcedure.value = null
 }
 
@@ -391,6 +386,14 @@ const validateDate = (dateString: string): boolean => {
   const date = new Date(dateString)
   return !isNaN(date.getTime()) && dateString !== null && dateString !== undefined
 }
+
+// Add watch for modal states to reset form
+watch([showCreateModal, showEditModal], (newValues, oldValues) => {
+  // If either modal is being closed (changing from true to false)
+  if (oldValues.includes(true) && !newValues.includes(true)) {
+    resetForm()
+  }
+})
 
 onMounted(async () => {
   // Check if user is Admin

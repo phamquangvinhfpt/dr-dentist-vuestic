@@ -8,13 +8,31 @@
 
       <VaCardContent>
         <div class="header-actions">
-          <div class="search-section">
-            <VaInput v-model="searchQuery" placeholder="Search services..." class="search-input">
-              <template #prepend>
-                <VaIcon name="search" />
-              </template>
-            </VaInput>
-          </div>
+          <VaInput
+            v-model="searchQuery"
+            :placeholder="t('common.search')"
+            class="search-input"
+            size="large"
+            style="flex: 1"
+            @keyup.enter="handleSearch"
+          >
+            <template #append>
+              <i class="fas fa-search search-icon"></i>
+            </template>
+          </VaInput>
+
+          <VaSelect
+            v-model="selectedTypeFilter"
+            :options="typeServices"
+            text-by="typeName"
+            value-by="id"
+            placeholder="Filter by type"
+            class="type-filter"
+            size="large"
+            style="flex: 1"
+            clearable
+            @update:modelValue="handleTypeFilter"
+          />
 
           <div class="button-group">
             <VaButton color="primary" class="action-button create-button" @click="showCreateModal = true">
@@ -34,7 +52,7 @@
 
         <VaDataTable
           class="custom-table"
-          :items="serviceList"
+          :items="paginatedServices"
           :columns="columns"
           hoverable
           select-mode="multiple"
@@ -232,9 +250,9 @@
 <script lang="ts" setup>
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useRouter } from 'vue-router'
-import { onMounted, Ref, ref, reactive, computed } from 'vue'
+import { onMounted, Ref, ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { ListServicePagination, ServiceDTO, TypeService } from './types'
+import type { ServiceDTO, TypeService } from './types'
 import { VaButton } from 'vuestic-ui'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
@@ -257,7 +275,6 @@ const formData = reactive({
   typeID: '',
 })
 
-const serviceListResponse: Ref<ListServicePagination | null> = ref(null)
 const serviceList: Ref<ServiceDTO[]> = ref([])
 
 const showDeleteModal = ref(false)
@@ -271,42 +288,90 @@ const isToggling = ref(false)
 
 const currentPage = ref(1)
 
-const totalPages = computed(() => {
-  return serviceListResponse.value?.totalPages || Math.ceil(serviceList.value.length / formData.pageSize)
+const searchQuery = ref('')
+const selectedTypeFilter = ref('')
+
+const filteredServices = computed(() => {
+  if (!serviceList.value || serviceList.value.length === 0) return []
+
+  const query = searchQuery.value.toLowerCase().trim()
+  if (!query) return serviceList.value
+
+  return serviceList.value.filter(
+    (service) =>
+      (service.name || '').toLowerCase().includes(query) ||
+      (service.description || '').toLowerCase().includes(query) ||
+      (service.typeName || '').toLowerCase().includes(query),
+  )
 })
+
+const totalItems = computed(() => filteredServices.value.length)
+
+const totalPages = computed(() => Math.ceil(totalItems.value / formData.pageSize))
+
+const paginatedServices = computed(() => {
+  const start = (currentPage.value - 1) * formData.pageSize
+  const end = start + formData.pageSize
+  return filteredServices.value.slice(start, end)
+})
+
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
+const handleSearch = () => {
+  currentPage.value = 1
+}
+
+const handleTypeFilter = () => {
+  console.log('Selected Type:', selectedTypeFilter.value)
+  currentPage.value = 1
+  getAllServicesPagination()
+}
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+}
+
+const handlePageSizeChange = (size: number) => {
+  formData.pageSize = size
+  currentPage.value = 1
+}
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('vi-VN')
+}
 
 const getAllServicesPagination = async () => {
   try {
-    const res = showBin.value
-      ? await serviceStore.getDeletedServices({
-          pageNumber: currentPage.value,
-          pageSize: formData.pageSize,
-          orderBy: formData.orderBy,
-          isActive: false,
-        })
-      : await serviceStore.getAllServices({
-          pageNumber: currentPage.value,
-          pageSize: formData.pageSize,
-          isActive: formData.isActive,
-          orderBy: formData.orderBy,
-        })
+    const filters = []
 
-    serviceListResponse.value = {
-      data:
-        res.data.map((service) => ({
-          ...service,
-          id: service.serviceID,
-          serviceName: service.name,
-          serviceDescription: service.description,
-          typeServiceID: service.typeServiceID || '',
-        })) || [],
-      currentPage: res.currentPage || 1,
-      totalPages: res.totalPages || Math.ceil((res.data?.length || 0) / formData.pageSize),
-      totalCount: res.totalCount || res.data?.length || 0,
-      pageSize: res.pageSize || formData.pageSize,
-      hasPreviousPage: res.hasPreviousPage || false,
-      hasNextPage: res.hasNextPage || false,
+    // Add type filter
+    if (selectedTypeFilter.value) {
+      filters.push({
+        field: 'typeServiceID',
+        operator: 'eq',
+        value: selectedTypeFilter.value,
+      })
     }
+
+    const filterParams = {
+      pageNumber: 1, // Get all data by using a large page size
+      pageSize: 1000, // Large enough to get all data
+      isActive: formData.isActive,
+      orderBy: formData.orderBy,
+      advancedFilter:
+        filters.length > 0
+          ? {
+              logic: 'and',
+              filters: filters,
+            }
+          : null,
+    }
+
+    const res = showBin.value
+      ? await serviceStore.getDeletedServices(filterParams)
+      : await serviceStore.getAllServices(filterParams)
 
     serviceList.value =
       res.data.map((service) => ({
@@ -316,19 +381,8 @@ const getAllServicesPagination = async () => {
         serviceDescription: service.description,
         typeServiceID: service.typeServiceID || '',
       })) || []
-
-    console.log('Processed Response:', {
-      isRecycleBin: showBin.value,
-      data: serviceList.value,
-      totalCount: serviceListResponse.value.totalCount,
-      totalPages: serviceListResponse.value.totalPages,
-      currentPage: serviceListResponse.value.currentPage,
-    })
-
-    console.log('API Response:', res)
   } catch (error) {
     console.error('Error fetching services:', error)
-    serviceListResponse.value = null
     serviceList.value = []
   }
 }
@@ -559,24 +613,6 @@ const handleToggleStatus = async (service: ServiceDTO) => {
   }
 }
 
-// Thêm các hàm xử lý pagination
-const handlePageChange = (page: number) => {
-  currentPage.value = page
-  getAllServicesPagination()
-}
-
-const handlePageSizeChange = (size: number) => {
-  formData.pageSize = size
-  currentPage.value = 1
-  getAllServicesPagination()
-}
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('vi-VN')
-}
-
-const searchQuery = ref('')
-
 onMounted(async () => {
   // Check if user is Admin
   if (!authStore.musHaveRole('Admin')) {
@@ -623,27 +659,103 @@ onMounted(async () => {
 
 .header-actions {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
   gap: 1rem;
-  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
 
 .search-section {
   flex: 1;
-  max-width: 400px;
+  min-width: 300px;
 }
 
 .search-input {
+  width: 100%;
+}
+
+.search-input :deep(input) {
+  height: 42px;
   border-radius: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--va-border-color);
+  transition: all 0.3s;
+  background: var(--va-background-secondary);
+  font-size: 0.95rem;
+  color: var(--va-text-primary);
+}
+
+.search-input :deep(input:focus) {
+  border-color: #3b82f6;
+  background: var(--va-background-secondary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input :deep(.va-input-wrapper) {
+  border: none;
+  background: transparent;
+}
+
+.search-input :deep(.va-input) {
+  box-shadow: none;
+}
+
+.search-icon {
+  color: #64748b;
+  font-size: 1rem;
+  margin-right: 12px;
+}
+
+.filter-section {
+  flex: 1;
+  min-width: 300px;
+}
+
+.type-filter {
+  width: 100%;
+}
+
+.type-filter :deep(.va-select__value) {
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid var(--va-border-color);
+  background: var(--va-background-secondary);
+  transition: all 0.3s;
+  padding: 8px 16px;
+  font-size: 0.95rem;
+  color: var(--va-text-primary);
+  display: flex;
+  align-items: center;
+}
+
+.type-filter :deep(.va-select) {
+  height: 42px;
+  box-shadow: none;
+}
+
+.type-filter :deep(.va-select__value-container) {
+  padding: 0;
+}
+
+.type-filter :deep(.va-select__input) {
+  height: 42px;
+  min-height: 42px;
+}
+
+.type-filter :deep(.va-select__tags) {
+  margin: 0;
+  padding: 0;
+}
+
+.type-filter :deep(.va-select__dropdown-toggle) {
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
 }
 
 .button-group {
   display: flex;
   gap: 0.75rem;
   align-items: center;
-  margin-left: auto;
 }
 
 .action-button {

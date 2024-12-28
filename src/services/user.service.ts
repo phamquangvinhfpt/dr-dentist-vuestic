@@ -158,7 +158,7 @@ class UserService {
   // update doctor profile
   async updateDoctorProfile(data: DoctorDetailsUpdate): Promise<any> {
     return apiService
-      .put(`/personal/update-doctor-profile`, data)
+      .post(`/personal/update-doctor-profile`, data)
       .then((response) => {
         return Promise.resolve(response)
       })
@@ -259,6 +259,22 @@ class UserService {
       .get(`/users/get-doctors`)
       .then((response) => {
         return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+
+  async uploadCertificationImages(data: FormData): Promise<any> {
+    const axiosInstance = apiService.getAxiosInstance()
+    return axiosInstance
+      .put(`/personal/update-doctor-certification-images`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      .then((response) => {
+        return Promise.resolve(response)
       })
       .catch((error) => {
         return Promise.reject(error)
