@@ -68,11 +68,6 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/appointment/widgets/list-appointment/AppointmentDetail.vue'),
           },
           {
-            name: 'followup-detail',
-            path: 'followup/:id',
-            component: () => import('../pages/appointment/widgets/list-appointment/FollowupDetail.vue'),
-          },
-          {
             name: 'view-appointment',
             path: '',
             component: () => import('../pages/appointment/Appointment.vue'),
@@ -91,7 +86,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'profile',
         path: 'profile',
         meta: {
-          requiresAuth: false,
+          requiresAuth: true,
         },
         component: () => import('../pages/user/UserProfile.vue'),
       },
@@ -120,7 +115,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/user/UsersManagement.vue'),
       },
       {
-        name: 'patients-detail',
+        name: 'c',
         path: 'users-detail/:id',
         meta: {
           requiresAuth: true,
@@ -413,7 +408,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'services',
         path: '/services/:id?',
         meta: {
-          requiresAuth: false,
+          requiresAuth: true,
         },
         component: ServiceForUser,
       },

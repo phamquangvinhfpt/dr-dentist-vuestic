@@ -97,9 +97,9 @@ const isModalOpen = ref(false)
 const serviceDetails = ref(null)
 const isDetailsLoading = ref(false)
 const serviceStore = useServiceStore()
-const typeServiceOptions = ref([]) // Để lưu các loại dịch vụ
 const route = useRoute()
-const defaultTypeServiceId = route.query.id || null // Giả sử 'id' là tham số trong query string
+const typeServiceOptions = ref([]) // Để lưu các loại dịch vụ
+const defaultTypeServiceId = route.params.id
 
 // Fetch services from store
 const fetchServices = async () => {
@@ -129,10 +129,12 @@ onMounted(async () => {
         })),
       ]
       console.log('Giá trị của defaultTypeServiceId:', defaultTypeServiceId)
-      selectedTypeService.value = typeServiceOptions.value.value.find(
-        (option) => option.value.value == defaultTypeServiceId,
-      ) || { value: null, text: 'Tất cả dịch vụ' }
-      // Kiểm tra nếu có tham số 'id' trong query string
+
+      // Sử dụng `.find` để tìm option phù hợp
+      selectedTypeService.value = typeServiceOptions.value.find((option) => option.value == defaultTypeServiceId) || {
+        value: null,
+        text: 'Tất cả dịch vụ',
+      }
     } else {
       console.warn('Không có loại dịch vụ nào để hiển thị')
     }
