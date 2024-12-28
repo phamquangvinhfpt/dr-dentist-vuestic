@@ -249,7 +249,7 @@
               </div>
 
               <!-- Add Event Modal -->
-              <div
+              <VaCard
                 v-if="showAddModal"
                 class="fixed z-50 bg-white rounded-lg shadow-xl p-4 min-w-[300px]"
                 :style="modalStyle"
@@ -300,7 +300,12 @@
                     </div>
                     <div v-else-if="auth.musHaveRole('Dentist') && typeDoctor === 'PartTime'">
                       <div class="flex flex-col space-y-2">
-                        <VaDateInput v-model="newScheduleDate" label="Select Date" />
+                        <VaDateInput
+                          v-model="newScheduleDate"
+                          :format="formatDateInput"
+                          :parse="parseDate"
+                          label="Select Date"
+                        />
                         <VaOptionList
                           v-model="newScheduleTime"
                           :options="optionsTimes"
@@ -328,15 +333,15 @@
                     <VaButton preset="primary" @click="saveSchedule"> Save Schedule </VaButton>
                   </div>
                 </div>
-              </div>
+              </VaCard>
 
               <!-- Calendar Details Modal -->
-              <div
+              <VaCard
                 v-if="showDetailsModal && !showAddModal"
-                class="fixed z-50 bg-white rounded-lg shadow-xl p-6 min-w-[300px] max-w-md"
+                class="fixed z-50 rounded-lg shadow-xl p-6 min-w-[300px] max-w-md"
                 :style="detailsModalStyle"
               >
-                <button class="absolute top-2 right-2 text-gray-400 hover:text-gray-600" @click="hideEventDetails">
+                <button class="absolute top-2 right-2" @click="hideEventDetails">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     class="h-6 w-6"
@@ -361,7 +366,7 @@
                         clip-rule="evenodd"
                       />
                     </svg>
-                    <span class="text-sm font-medium text-gray-600">{{ formatDate(selectedEvent?.date) }}</span>
+                    <span class="text-sm font-medium">{{ formatDate(selectedEvent?.date) }}</span>
                   </div>
                   <div class="flex items-center">
                     <svg
@@ -376,7 +381,7 @@
                         clip-rule="evenodd"
                       />
                     </svg>
-                    <span class="text-sm font-medium text-gray-600"
+                    <span class="text-sm font-medium"
                       >Working Status: {{ workingStatusLabel(selectedEvent?.workingStatus) }}</span
                     >
                   </div>
@@ -393,10 +398,10 @@
                         clip-rule="evenodd"
                       />
                     </svg>
-                    <span class="text-sm text-gray-600">{{ selectedEvent.note }}</span>
+                    <span class="text-sm">{{ selectedEvent.note }}</span>
                   </div>
                   <div class="mt-4">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Working Hours</h4>
+                    <h4 class="text-sm font-semibold mb-2">Working Hours</h4>
                     <div class="space-y-2">
                       <div
                         v-for="time in selectedEvent?.times"
@@ -432,7 +437,7 @@
                     </div>
                   </div>
                 </div>
-              </div>
+              </VaCard>
 
               <!-- Mobile Day Details Modal -->
               <VaModal
@@ -443,9 +448,7 @@
                 class="mobile-day-modal"
               >
                 <div class="p-4 mobile-day-modal-content">
-                  <div v-if="selectedDayEvents.length === 0" class="text-center text-gray-500">
-                    No events for this day
-                  </div>
+                  <div v-if="selectedDayEvents.length === 0" class="text-center">No events for this day</div>
                   <div v-else class="space-y-4">
                     <div v-for="event in selectedDayEvents" :key="event.id" class="border-b pb-4">
                       <div class="flex justify-between items-center">
@@ -454,10 +457,10 @@
                           {{ workingStatusLabel(event.workingStatus) }}
                         </span>
                       </div>
-                      <div v-for="time in event.times" :key="time.timeID" class="text-sm text-gray-600">
+                      <div v-for="time in event.times" :key="time.timeID" class="text-sm">
                         {{ formatTime(time.startTime) }} - {{ formatTime(time.endTime) }}
                       </div>
-                      <div v-if="event.note" class="text-sm text-gray-500 mt-2">Note: {{ event.note }}</div>
+                      <div v-if="event.note" class="text-sm mt-2">Note: {{ event.note }}</div>
                     </div>
                   </div>
                 </div>
@@ -501,8 +504,30 @@
             size="2rem"
             @click="
               () => {
-                props.regist(rowData.id, formatDateSend(new Date(currentYear, currentMonth, 1).toISOString()))
-                getAllDoctors()
+                props
+                  .regist(rowData.id, formatDateSend(new Date(currentYear, currentMonth, 1).toISOString()))
+                  .then(() => {
+                    getAllDoctors()
+                  })
+                  .catch((error) => {
+                    const errorMessage = getErrorMessage(error)
+                    notify({
+                      title: 'error',
+                      message: errorMessage,
+                      color: 'danger',
+                    })
+                  })
+              }
+            "
+          />
+          <VaIcon
+            v-if="rowData.doctorProfile.workingType === 1"
+            class="text-6xl text-green-500 hover:cursor-pointer"
+            name="notification_important"
+            size="2rem"
+            @click="
+              () => {
+                props.reminder(rowData.id, formatDateSend(new Date(currentYear, currentMonth, 1).toISOString()))
               }
             "
           />
@@ -520,6 +545,7 @@ import { watch } from 'vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useToast } from 'vuestic-ui/web-components'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
+import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 
 const auth = useAuthStore()
 const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
@@ -616,12 +642,14 @@ const props = defineProps<{
   getWorkingCalendar: (day: any, year: any) => void
   getFullTimeNon: (day: any, year: any) => void
   getPartTimeNon: (day: any, year: any) => void
-  regist: (id: any, date: any) => void
+  regist: (id: any, date: any) => Promise<void>
+  reminder: (id: any, date: any) => void
+  load: boolean
   workingCalendar: SearchResponse | null
   fullTimeNon: SearchResponse | null
   partTimeNon: SearchResponse | null
 }>()
-const emit = defineEmits(['update:updateWorkingCalendar', 'update:regist'])
+const emit = defineEmits(['update:updateWorkingCalendar', 'update:regist', 'update:GetNewWorkingCalendar'])
 
 const years = Array.from({ length: 10 }, (_, i) => currentYear.value - 3 + i)
 const months = [
@@ -722,7 +750,6 @@ const getAllDoctors = (): any => {
   calendarStore
     .getDoctorHasNoCalendar(date)
     .then((response) => {
-      console.log(response)
       listDoctors.value = response
     })
     .catch((error) => {
@@ -750,7 +777,6 @@ const detailsModalStyle = computed(() => ({
 }))
 
 function openAddEventModal(event: MouseEvent, day: CalendarDay) {
-  console.log(auth.user?.type)
   if (auth.user?.type !== 'PartTime') {
     return
   }
@@ -813,7 +839,6 @@ function selectedCalendar(item: any, index: number) {
     selectedCalendarIndex.value = selectedCalendarIndex.value.filter((i) => i !== index)
   } else {
     selectedCalendarIndex.value.push(index)
-    console.log(selectedCalendarIndex.value)
   }
 }
 
@@ -822,9 +847,7 @@ function getListValueForDate(date: any) {
 }
 
 function updateListValueForDate(date: any, newValue: string[]) {
-  console.log(date, newValue)
   multiDragValues.value[date] = newValue
-  console.log(multiDragValues.value)
 }
 
 const formatDate = (date: any): string => {
@@ -846,6 +869,34 @@ const formatDate = (date: any): string => {
   const year = dateObj.getFullYear()
 
   return `${day}/${month}/${year}`
+}
+
+const formatDateInput = (date: DateInputModelValue): string => {
+  if (date === null || date === undefined) return ''
+
+  const dateObj =
+    date instanceof Date
+      ? date
+      : typeof date === 'string'
+        ? new Date(date)
+        : date instanceof Number
+          ? new Date(Number(date))
+          : new Date()
+
+  if (isNaN(dateObj.getTime())) return ''
+
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+  const day = dateObj.getDate().toString().padStart(2, '0')
+  const year = dateObj.getFullYear()
+
+  return `${day}/${month}/${year}`
+}
+
+const parseDate = (dateStr: string): DateInputValue => {
+  if (!dateStr) return null
+
+  const date = new Date(dateStr)
+  return isNaN(date.getTime()) ? null : date
 }
 
 const formatScheduleTime = (time: any): string => {
@@ -902,7 +953,6 @@ function handleDrop(event: DragEvent) {
     const item = JSON.parse(event.dataTransfer?.getData('text/plain') || '')
     selectedDentistId.value = item.dentist.dentistUserID
     multiselectedDate.value = item.items.map((item: any) => item.date)
-    console.log(multiselectedDate.value)
   }
   showAddModal.value = true
 }
@@ -1046,7 +1096,6 @@ function getAllRoom() {
     .getAllRoom({})
     .then((response) => {
       getAllRooms.value = response.data
-      console.log('get all', getAllRooms.value)
     })
     .finally(() => {
       loading.value = false
@@ -1064,6 +1113,14 @@ async function AutoSetRoomForPartTime(calendars: any) {
         message: 'Phân lịch thành công!',
         color: 'success',
       })
+      const firstDay = new Date(currentYear.value, currentMonth.value, 2).toISOString().split('T')[0]
+      const lastDay = new Date(currentYear.value, currentMonth.value + 1, 1).toISOString().split('T')[0]
+      props.getWorkingCalendar(firstDay, lastDay)
+      if (switcher.value === 'full-time') {
+        props.getFullTimeNon(firstDay, lastDay)
+      } else {
+        props.getPartTimeNon(firstDay, lastDay)
+      }
       loading.value = false
     })
     .catch((error) => {
@@ -1157,6 +1214,17 @@ watch(
   { immediate: false },
 )
 
+watch(
+  () => props.load,
+  () => {
+    if (props.load) {
+      loading.value = true
+    } else {
+      loading.value = false
+    }
+  },
+)
+
 onMounted(() => {
   if (typeDoctor.value === 'FullTime') {
     switcher.value = 'full-time'
@@ -1173,7 +1241,6 @@ onMounted(() => {
   }
   getAllDoctors()
   getAllRoom()
-  console.log(auth.musHaveRole('Dentist'), auth.user?.type)
 })
 </script>
 

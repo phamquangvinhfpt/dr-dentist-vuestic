@@ -27,7 +27,7 @@
     "@capacitor/clipboard": "^6.0.2",
     "@capacitor/core": "^6.1.2",
     "@capacitor/local-notifications": "^6.1.1",
-    "@capgo/capacitor-native-biometric": "^6.0.4",
+    "@capgo/capacitor-native-biometric": "^5.0.0",
     "@gtm-support/vue-gtm": "^2.0.0",
     "@headlessui/vue": "^1.7.23",
     "@heroicons/vue": "^2.2.0",

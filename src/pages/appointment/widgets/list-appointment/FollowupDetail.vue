@@ -122,12 +122,12 @@ import { FollowUpAppointment, CalendarStatus } from '../../types'
 import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
-import { useAppointmentStore } from '@/stores/modules/appointment.module'
+import { useCalendarStore } from '@/stores/modules/calendar.module'
 
 const route = useRoute()
 const router = useRouter()
 const { init } = useToast()
-const store = useAppointmentStore()
+const store = useCalendarStore()
 const followup = ref<FollowUpAppointment | null>(null)
 const authStore = useAuthStore()
 const role = computed(() => authStore.user?.roles)
@@ -193,7 +193,7 @@ const rescheduleFollowup = () => {
 onMounted(async () => {
   const id = route.params.id as string
   try {
-    followup.value = await store.getAppointmentById(id)
+    followup.value = await store.getFollowupDetail(id)
   } catch (error) {
     const message = getErrorMessage(error)
     init({

@@ -80,6 +80,10 @@ const submit = async () => {
 // Save credentials securely for biometric login
 const saveCredentialsForBiometrics = async () => {
   try {
+    await NativeBiometric.deleteCredentials({
+      server: window.location.origin,
+    })
+
     await NativeBiometric.setCredentials({
       username: formData.email,
       password: formData.password,

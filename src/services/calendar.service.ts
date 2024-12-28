@@ -111,6 +111,26 @@ class CalendarService {
         return Promise.reject(error)
       })
   }
+  async getFollowupDetail(data: any): Promise<any> {
+    return apiService
+      .post(`/calendar/detail/${data}`, {})
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async reminderPartTime(id: any, date: any): Promise<any> {
+    return apiService
+      .post(`/workingcalendar/part-time/reminder/${id}?date=${date}`, {})
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new CalendarService()

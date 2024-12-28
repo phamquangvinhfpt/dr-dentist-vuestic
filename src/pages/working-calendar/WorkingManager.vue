@@ -3,7 +3,9 @@
     v-model:working-calendar="workingCalendar"
     v-model:full-time-non="fullTimeNonAccpet"
     v-model:part-time-non="partTimeNonAccpet"
-    v-model:regist="registerCalendar"
+    :load="loading"
+    :regist="registerCalendar"
+    :reminder="reminderPartime"
     :get-working-calendar="getWorkingCalendar"
     :get-full-time-non="getFullTimeNonAcceptWorkingCalendar"
     :get-part-time-non="getPartTimeNonAcceptWorkingCalendar"
@@ -32,10 +34,10 @@ const partTimeNonAccpet = ref<SearchResponse | null>(null)
 let firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 2).toISOString().split('T')[0]
 let lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split('T')[0]
 
-const registerCalendar = (id: any, date: any) => {
+const registerCalendar = async (id: any, date: any): Promise<void> => {
   console.log(id, date)
   loading.value = true
-  storeCalendar
+  await storeCalendar
     .registerFullTime(id, date)
     .then(() => {
       loading.value = false
@@ -167,6 +169,27 @@ const updateWorkingCalendar = (id: string, data: any) => {
         })
       })
   }
+}
+
+const reminderPartime = async (id: any, date: any) => {
+  loading.value = true
+  await storeCalendar
+    .reminderPartTime(id, date)
+    .then((response) => {
+      notify({
+        title: 'success',
+        message: response,
+        color: 'success',
+      })
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: errorMessage,
+        color: 'danger',
+      })
+    })
 }
 
 const fetch = () => {

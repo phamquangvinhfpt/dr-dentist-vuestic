@@ -1,57 +1,59 @@
 <template>
-  <div class="p-4 max-w-md mx-auto">
-    <VaScrollContainer class="max-h-screen" vertical>
-      <VaList v-if="followups.length > 0" class="space-y-6">
-        <VaListItem
-          v-for="followup in followups"
-          :key="followup.appointmentId"
-          class="rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-          @click="navigateToDetail(followup.appointmentId)"
-        >
-          <VaListItemSection avatar class="mr-4">
-            <VaAvatar
-              size="small"
-              :src="getSrcAvatar(followup.patientAvatar)"
-              :fallback-text="followup.patientName?.charAt(0).toUpperCase()"
-              class="border-2 border-primary"
-            />
-          </VaListItemSection>
+  <VaInnerLoading :loading="loading">
+    <div class="p-4 max-w-md mx-auto">
+      <VaScrollContainer class="max-h-screen" vertical>
+        <VaList v-if="followups.length > 0" class="space-y-3">
+          <VaListItem
+            v-for="followup in followups"
+            :key="followup.appointmentId"
+            class="rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+            @click="navigateToDetail(followup.calendarID)"
+          >
+            <VaListItemSection avatar class="mr-4">
+              <VaAvatar
+                size="medium"
+                :src="getSrcAvatar(followup.patientAvatar)"
+                :fallback-text="followup.patientName?.charAt(0).toUpperCase()"
+              />
+            </VaListItemSection>
 
-          <VaListItemSection class="flex-1 min-w-0 space-y-2">
-            <div class="flex items-center gap-3">
-              <span class="font-medium truncate">
-                {{ role?.includes('Patient') ? followup.doctorName : followup.patientName }}
-              </span>
-              <span :class="getStatusColorClass(followup.status)" class="text-sm font-medium">
-                {{ getStatusLabel(followup.status) }}
-              </span>
-            </div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+            <VaListItemSection class="flex-1 min-w-0 space-y-2">
               <div class="flex items-center gap-3">
-                <VaIcon name="room" size="small" />
-                <span>{{ followup.roomName }}</span>
-                <span>•</span>
-                <span>{{ followup.startTime.slice(0, 5) }}</span>
+                <span class="font-medium truncate">
+                  {{ role?.includes('Patient') ? followup.doctorName : followup.patientName }}
+                </span>
+                <span :class="getStatusColorClass(followup.status)" class="text-sm font-medium">
+                  {{ getStatusLabel(followup.status) }}
+                </span>
               </div>
-              <div class="truncate">{{ followup.serviceName }}</div>
-            </div>
-          </VaListItemSection>
+              <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <div class="flex items-center gap-3">
+                  <VaIcon name="room" size="small" />
+                  <span>{{ followup.roomName }}</span>
+                  <span>•</span>
+                  <span>{{ followup.startTime.slice(0, 5) }}</span>
+                </div>
+                <div class="truncate">{{ followup.serviceName }}</div>
+              </div>
+            </VaListItemSection>
 
-          <VaListItemSection icon class="ml-4">
-            <VaIcon name="chevron_right" color="gray" />
-          </VaListItemSection>
-        </VaListItem>
-      </VaList>
+            <VaListItemSection icon class="ml-4">
+              <VaIcon name="chevron_right" color="gray" />
+            </VaListItemSection>
+          </VaListItem>
+        </VaList>
 
-      <div v-else class="flex flex-col items-center justify-center py-12">
-        <VaIcon name="event_busy" size="large" color="gray" class="mb-4 text-5xl" />
-        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Không có cuộc hẹn nào</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
-          Không tìm thấy cuộc hẹn nào cho ngày {{ formatDate(props.date) }}
-        </p>
-      </div>
-    </VaScrollContainer>
-  </div>
+        <div v-else class="flex flex-col items-center justify-center py-12">
+          <VaIcon name="event_busy" size="large" color="gray" class="mb-4 text-5xl" />
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Không có cuộc hẹn nào</h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+            {{ props.date ? 'Không tìm thấy cuộc hẹn nào cho ngày' : '' }}
+            {{ props.date ? formatDate(props.date) : '' }}
+          </p>
+        </div>
+      </VaScrollContainer>
+    </div>
+  </VaInnerLoading>
 </template>
 
 <script setup lang="ts">

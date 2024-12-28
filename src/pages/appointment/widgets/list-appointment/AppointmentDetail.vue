@@ -33,8 +33,8 @@
             <VaIcon name="event" />
             <div class="info-content">
               <span class="info-label">Date & Time</span>
-              <span class="info-value">{{ appointment.appointmentDate }}</span>
-              <span class="info-value">{{ appointment.startTime.slice(0, 5) }} ({{ appointment.duration }})</span>
+              <span class="info-value">{{ formatDate(appointment.appointmentDate) }}</span>
+              <span class="info-value">{{ appointment.startTime.slice(0, 5) }}</span>
             </div>
           </div>
 
@@ -177,6 +177,13 @@ const formatPrice = (price: number) => {
     style: 'currency',
     currency: 'VND',
   }).format(price)
+}
+
+const formatDate = (date: string | Date) => {
+  if (typeof date === 'string') {
+    date = new Date(date)
+  }
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
 }
 
 const canCancel = computed(() => {

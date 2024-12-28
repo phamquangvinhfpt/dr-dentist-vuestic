@@ -838,7 +838,7 @@
         cancel-text="Cancel"
         ok-text="Yes"
         @close="handleCloseCancel"
-        @ok="submitCancel"
+        @ok="submitCancel(isAppointment)"
       >
         <h3 class="va-h3">Cancel Appointment</h3>
         <VaCard>
@@ -1205,9 +1205,13 @@ const submitReschedule = (isAppointment: any) => {
         color: 'success',
       })
       showModalReschedule.value = false
-      fetchAppointments(searchValueA.value)
-      fetchFollowUpAppointments(searchValueF.value)
-      fetchNonDoctorAppointments(searchValueN.value)
+      if (isAppointment === 'appointment') {
+        fetchAppointments(searchValueA.value)
+      } else if (isAppointment === 'unassigned') {
+        fetchNonDoctorAppointments(searchValueN.value)
+      } else {
+        fetchFollowUpAppointments(searchValueF.value)
+      }
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -1219,7 +1223,7 @@ const submitReschedule = (isAppointment: any) => {
     })
 }
 
-const submitCancel = () => {
+const submitCancel = (isAppointment: any) => {
   const request = {
     appointmentID: appointmentId.value,
     userID: userId.value,
@@ -1233,8 +1237,11 @@ const submitCancel = () => {
         color: 'success',
       })
       showModalCancel.value = false
-      fetchAppointments(searchValueA.value)
-      fetchNonDoctorAppointments(searchValueN.value)
+      if (isAppointment === 'appointment') {
+        fetchAppointments(searchValueA.value)
+      } else if (isAppointment === 'unassigned') {
+        fetchNonDoctorAppointments(searchValueN.value)
+      }
     })
     .catch((error) => {
       const message = getErrorMessage(error)
@@ -1989,6 +1996,7 @@ watch(
     () => paginationF.value.perPage,
     () => paginationN.value.page,
     () => paginationN.value.perPage,
+    () => isAppointment.value,
   ],
   ([newDate, newTime, newView, newPageA, newPerPageA, newPageF, newPerPageF, newPageN, newPerPageN]) => {
     // update request
@@ -2022,26 +2030,37 @@ watch(
       pageSize: getPageSize(newPerPageN),
     }
 
-    // Use debounced functions to fetch data
-    debouncedFetchAppointments(searchValueA.value)
-    debouncedFetchFollowUpAppointments(searchValueF.value)
-    debouncedFetchNonDoctorAppointments(searchValueN.value)
-    searchDoctor()
+    if (role?.includes('Admin') || (role?.includes('Staff') && newView === 'calendar')) {
+      searchDoctor()
+    }
+    if (isAppointment.value === 'appointment') {
+      console.log('appointment')
+      debouncedFetchAppointments(searchValueA.value)
+    } else if (isAppointment.value === 'unassigned') {
+      console.log('unassigned')
+      debouncedFetchNonDoctorAppointments(searchValueN.value)
+    } else {
+      console.log('follow')
+      debouncedFetchFollowUpAppointments(searchValueF.value)
+    }
 
     // Handle view changes
-    if (newView !== currentView.value) {
-      handleViewChange()
+    if (newView !== 'list') {
+      console.log('check')
+      debouncedFetchAppointments(searchValueA.value)
+      debouncedFetchNonDoctorAppointments(searchValueN.value)
+      debouncedFetchFollowUpAppointments(searchValueF.value)
     }
   },
   { deep: true },
 )
 
 // Add this function to handle view changes
-const handleViewChange = () => {
-  debouncedFetchAppointments(searchValueA.value)
-  debouncedFetchFollowUpAppointments(searchValueF.value)
-  debouncedFetchNonDoctorAppointments(searchValueN.value)
-}
+// const handleViewChange = () => {
+//   debouncedFetchAppointments(searchValueA.value)
+//   debouncedFetchNonDoctorAppointments(searchValueN.value)
+//   debouncedFetchFollowUpAppointments(searchValueF.value)
+// }
 
 // Use a single watcher for search results
 watch(

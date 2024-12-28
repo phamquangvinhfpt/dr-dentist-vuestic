@@ -129,5 +129,27 @@ export const useCalendarStore = defineStore('calendar', {
         return await Promise.reject(error)
       }
     },
+    async getFollowupDetail(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.getFollowupDetail(data)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async reminderPartTime(id: any, date: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.reminderPartTime(id, date)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })
