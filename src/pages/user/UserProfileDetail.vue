@@ -20,6 +20,7 @@ import { VaAvatar, useForm, useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { AvatarFiles, OTP } from './UserProfile.enum'
 import { useUserProfileStore } from '@/stores/modules/user.module'
+import { useServiceStore } from '@/stores/modules/service.module'
 
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
@@ -27,12 +28,12 @@ import AddressAutocomplete from '../auth/AddressAutocomplete.vue'
 
 const { t } = useI18n()
 
-interface VaFile {
-  name: string
-  size: number
-  type: string
-  lastModified: number
-}
+// interface VaFile {
+//   name: string
+//   size: number
+//   type: string
+//   lastModified: number
+// }
 
 const props = defineProps({
   settingOption: {
@@ -51,6 +52,7 @@ const { init: notify } = useToast()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const authStores = useAuthStore()
 const userProfileStore = useUserProfileStore()
+const serviceStore = useServiceStore()
 const isShowProfile = ref(false)
 const isMobile = computed(() => window.innerWidth < 768)
 const isShowDoctorProfile = ref(false)
@@ -289,8 +291,9 @@ watch(
 //     }
 //   }
 // }, { immediate: true })
-onMounted(() => {
-  getUserDetail()
+onMounted(async () => {
+  await getUserDetail()
+  await serviceStore.getServiceTypes()
   isShowProfile.value = props.settingOption?.id === '1'
   isShowDoctorProfile.value = props.settingOption?.id === '3'
   isShowPatientFamily.value = props.settingOption?.id === '4'
@@ -394,17 +397,17 @@ const isFormHasNotChanged = computed(() => {
   })
 })
 
-const isFormHasNotChangedDoctor = computed(() => {
-  const doctorProfiles = userDetail.value.doctorProfile
+// const isFormHasNotChangedDoctor = computed(() => {
+//   const doctorProfiles = userDetail.value.doctorProfile
 
-  if (!doctorProfiles || typeof doctorProfiles !== 'object') {
-    return false
-  }
+//   if (!doctorProfiles || typeof doctorProfiles !== 'object') {
+//     return false
+//   }
 
-  return Object.entries(doctorProfiles).every(([key, value]) => {
-    return doctorProfile.value[key] === value
-  })
-})
+//   return Object.entries(doctorProfiles).every(([key, value]) => {
+//     return doctorProfile.value[key] === value
+//   })
+// })
 
 const isFormHasNotChangedPatientFamily = computed(() => {
   const patientFamilies = userDetail.value.patientFamily
@@ -469,20 +472,20 @@ const isDisabledButtonChangePassword = computed(() => {
   return false
 })
 //isdisabled button change doctor profile
-const isDisabledButtonChangeDoctorProfile = computed(() => {
-  if (isFormHasNotChangedDoctor.value) return true
-  else if (!isValid) return true
-  else if (
-    checkEmptyField(formData.doctorProfile.education) ||
-    checkEmptyField(formData.doctorProfile.college) ||
-    checkEmptyField(formData.doctorProfile.certification) ||
-    checkEmptyField(formData.doctorProfile.yearOfExp) ||
-    checkEmptyField(formData.doctorProfile.seftDescription)
-  ) {
-    return true
-  }
-  return false
-})
+// const isDisabledButtonChangeDoctorProfile = computed(() => {
+//   if (isFormHasNotChangedDoctor.value) return true
+//   else if (!isValid) return true
+//   else if (
+//     checkEmptyField(formData.doctorProfile.education) ||
+//     checkEmptyField(formData.doctorProfile.college) ||
+//     checkEmptyField(formData.doctorProfile.certification) ||
+//     checkEmptyField(formData.doctorProfile.yearOfExp) ||
+//     checkEmptyField(formData.doctorProfile.seftDescription)
+//   ) {
+//     return true
+//   }
+//   return false
+// })
 
 const isDisabledButtonChangePatientFamily = computed(() => {
   if (!isValid) {
@@ -1156,38 +1159,27 @@ const workingTypeOptions = [
   { text: t('auth.none'), value: WorkingType.None },
 ]
 
-// Add handler for certification image upload
-const handleCertificationImageUpload = async (files: VaFile[]) => {
-  if (!files || files.length === 0) return
+const typeServiceOptions = computed(() => {
+  return serviceStore.typeServices.map((type) => ({
+    text: type.typeName,
+    value: type.id,
+  }))
+})
 
-  const formDataUpload = new FormData()
-  files.forEach((file: any) => {
-    formDataUpload.append('CertificationImages', file)
-  })
-
-  try {
-    // Upload certification images
-    const response = await userProfileStore.uploadCertificationImages(formDataUpload)
-    // Update the certificationImage array with the returned URLs
-    if (response && response.data && formData.doctorProfile) {
-      formData.doctorProfile.certificationImage = response.data
-    }
-    notify({
-      title: t('auth.success'),
-      message: t('auth.certification_images_uploaded'),
-      color: 'success',
-    })
-  } catch (error) {
-    const message = getErrorMessage(error)
-    notify({
-      title: t('auth.error'),
-      message: message,
-      color: 'danger',
-    })
-  }
+const getCertificationImageUrl = (imagePath: string) => {
+  if (!imagePath) return ''
+  const url = import.meta.env.VITE_APP_BASE_URL as string
+  const url_without_api = url.slice(0, -3)
+  return `${url_without_api}${imagePath}`
 }
 
-const certificationFiles = ref<VaFile[]>([])
+const showImagePreview = ref(false)
+const selectedImage = ref('')
+
+const openImagePreview = (image: string) => {
+  selectedImage.value = image
+  showImagePreview.value = true
+}
 </script>
 
 <template>
@@ -1367,6 +1359,8 @@ const certificationFiles = ref<VaFile[]>([])
                 :label="t('auth.education')"
                 class="mb-3"
                 :placeholder="t('auth.enter_education')"
+                readonly
+                preset="solid"
               />
             </VaField>
             <VaField>
@@ -1375,6 +1369,8 @@ const certificationFiles = ref<VaFile[]>([])
                 :label="t('auth.college')"
                 class="mb-3"
                 :placeholder="t('auth.enter_college')"
+                readonly
+                preset="solid"
               />
             </VaField>
             <VaField>
@@ -1383,6 +1379,8 @@ const certificationFiles = ref<VaFile[]>([])
                 :label="t('auth.certification')"
                 class="mb-3"
                 :placeholder="t('auth.enter_certification')"
+                readonly
+                preset="solid"
               />
             </VaField>
             <VaField>
@@ -1392,6 +1390,8 @@ const certificationFiles = ref<VaFile[]>([])
                 :label="t('auth.year_of_experience')"
                 class="mb-3"
                 :placeholder="t('auth.enter_year_of_experience')"
+                readonly
+                preset="solid"
               />
             </VaField>
             <VaField>
@@ -1401,6 +1401,22 @@ const certificationFiles = ref<VaFile[]>([])
                 class="mb-3"
                 :placeholder="t('auth.enter_self_description')"
                 textarea
+                readonly
+                preset="solid"
+              />
+            </VaField>
+            <!-- VaField typeServiceID -->
+            <VaField>
+              <VaSelect
+                v-model="formData.doctorProfile.typeServiceID"
+                :label="t('auth.type_service')"
+                class="mb-3"
+                :placeholder="t('auth.choose_type_service')"
+                :options="typeServiceOptions"
+                text-by="text"
+                value-by="value"
+                readonly
+                preset="solid"
               />
             </VaField>
             <VaField>
@@ -1412,22 +1428,37 @@ const certificationFiles = ref<VaFile[]>([])
                 :options="workingTypeOptions"
                 text-by="text"
                 value-by="value"
-                clearable
+                readonly
+                preset="solid"
               />
             </VaField>
-            <VaField>
-              <VaFileUpload
-                v-model="certificationFiles"
-                :label="t('auth.certification_images')"
-                class="mb-3"
-                multiple
-                :placeholder="t('auth.upload_certification_images')"
-                @change="handleCertificationImageUpload"
-              />
+
+            <!-- Display certification images -->
+            <VaField
+              v-if="formData.doctorProfile?.certificationImage && formData.doctorProfile.certificationImage.length > 0"
+              class="col-span-2"
+            >
+              <label class="block uppercase text-primary font-bold mb-2" style="font-size: 0.57rem">
+                {{ t('auth.certification_images') }}
+              </label>
+              <div class="image-gallery">
+                <div
+                  v-for="(image, index) in formData.doctorProfile.certificationImage"
+                  :key="index"
+                  class="image-container"
+                  @click="openImagePreview(image)"
+                >
+                  <img
+                    :src="getCertificationImageUrl(image)"
+                    class="gallery-image"
+                    :alt="`Certification ${index + 1}`"
+                  />
+                </div>
+              </div>
             </VaField>
           </div>
 
-          <div class="flex justify-end">
+          <!-- <div class="flex justify-end">
             <VaButton
               class="w-fit rounded mb-3"
               :disabled="isDisabledButtonChangeDoctorProfile"
@@ -1435,9 +1466,21 @@ const certificationFiles = ref<VaFile[]>([])
             >
               {{ t('auth.update') }}
             </VaButton>
-          </div>
+          </div> -->
         </VaForm>
       </VaCard>
+
+      <!-- Image Preview Modal -->
+      <VaModal v-model="showImagePreview" class="image-preview-modal" hide-default-actions>
+        <div class="image-preview-container">
+          <img :src="getCertificationImageUrl(selectedImage)" alt="Preview" class="preview-image" />
+        </div>
+        <template #footer>
+          <div class="flex justify-end gap-2 p-4">
+            <VaButton color="gray" @click="showImagePreview = false">Close</VaButton>
+          </div>
+        </template>
+      </VaModal>
 
       <!-- Hiển thị form thông tin patienFamily khi id === 4 -->
       <!-- Tab patientFamily Fields -->
@@ -1894,3 +1937,49 @@ const certificationFiles = ref<VaFile[]>([])
     </div>
   </VaInnerLoading>
 </template>
+
+<style scoped>
+.preview-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.image-container {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.image-container:hover {
+  transform: scale(1.05);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-preview-modal {
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+}
+
+.image-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+</style>

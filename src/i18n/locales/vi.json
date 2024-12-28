@@ -216,7 +216,9 @@
     "working_type": "Loại công việc",
     "verify": "Xác thực",
     "verify_message": "Chúng tôi đã gửi mã xác thực đến số",
-    "verify_ask": "Không nhận được OTP?"
+    "verify_ask": "Không nhận được OTP?",
+    "type_service": "Loại dịch vụ",
+    "certification_images": "Chứng chỉ"
   },
   "doctor": {
     "education": "Trình độ học vấn",
@@ -740,7 +742,8 @@
     "description": "Mô Tả",
     "price": "Giá",
     "status": "Trạng Thái",
-    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa dịch vụ này không?"
+    "deleteConfirmMessage": "Bạn có chắc chắn muốn xóa dịch vụ này không?",
+    "type": "Loại Dịch Vụ"
   },
   "procedure": {
     "id": "Mã",

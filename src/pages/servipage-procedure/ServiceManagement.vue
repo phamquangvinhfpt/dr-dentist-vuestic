@@ -30,6 +30,7 @@
             class="type-filter"
             size="large"
             style="flex: 1"
+            clearable
             @update:modelValue="handleTypeFilter"
           />
 
@@ -251,7 +252,7 @@ import { useServiceStore } from '@/stores/modules/service.module'
 import { useRouter } from 'vue-router'
 import { onMounted, Ref, ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { ListServicePagination, ServiceDTO, TypeService } from './types'
+import type { ServiceDTO, TypeService } from './types'
 import { VaButton } from 'vuestic-ui'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
@@ -274,7 +275,6 @@ const formData = reactive({
   typeID: '',
 })
 
-const serviceListResponse: Ref<ListServicePagination | null> = ref(null)
 const serviceList: Ref<ServiceDTO[]> = ref([])
 
 const showDeleteModal = ref(false)
@@ -289,31 +289,7 @@ const isToggling = ref(false)
 const currentPage = ref(1)
 
 const searchQuery = ref('')
-const searchTimeout = ref<number | null>(null)
-
-const handleSearch = () => {
-  if (searchTimeout.value) {
-    window.clearTimeout(searchTimeout.value)
-  }
-
-  searchTimeout.value = window.setTimeout(() => {
-    currentPage.value = 1
-    getAllServicesPagination()
-  }, 300)
-}
-
-// Add watch for search
-watch(searchQuery, (newValue) => {
-  if (searchTimeout.value) {
-    window.clearTimeout(searchTimeout.value)
-  }
-  searchTimeout.value = window.setTimeout(() => {
-    if (!newValue.trim()) {
-      getAllServicesPagination()
-    }
-    currentPage.value = 1
-  }, 300)
-})
+const selectedTypeFilter = ref('')
 
 const filteredServices = computed(() => {
   if (!serviceList.value || serviceList.value.length === 0) return []
@@ -329,29 +305,41 @@ const filteredServices = computed(() => {
   )
 })
 
+const totalItems = computed(() => filteredServices.value.length)
+
+const totalPages = computed(() => Math.ceil(totalItems.value / formData.pageSize))
+
 const paginatedServices = computed(() => {
-  const query = searchQuery.value.trim()
-  if (query) {
-    const start = (currentPage.value - 1) * formData.pageSize
-    const end = start + formData.pageSize
-    return filteredServices.value.slice(start, end)
-  }
-  return serviceList.value
+  const start = (currentPage.value - 1) * formData.pageSize
+  const end = start + formData.pageSize
+  return filteredServices.value.slice(start, end)
 })
 
-const totalPages = computed(() => {
-  if (searchQuery.value.trim()) {
-    return Math.ceil(filteredServices.value.length / formData.pageSize)
-  }
-  return serviceListResponse.value?.totalPages ?? 1
+watch(searchQuery, () => {
+  currentPage.value = 1
 })
 
-const selectedTypeFilter = ref('')
+const handleSearch = () => {
+  currentPage.value = 1
+}
 
 const handleTypeFilter = () => {
   console.log('Selected Type:', selectedTypeFilter.value)
   currentPage.value = 1
   getAllServicesPagination()
+}
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+}
+
+const handlePageSizeChange = (size: number) => {
+  formData.pageSize = size
+  currentPage.value = 1
+}
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('vi-VN')
 }
 
 const getAllServicesPagination = async () => {
@@ -367,18 +355,9 @@ const getAllServicesPagination = async () => {
       })
     }
 
-    // Add search filter
-    if (searchQuery.value) {
-      filters.push({
-        field: 'name',
-        operator: 'contains',
-        value: searchQuery.value,
-      })
-    }
-
     const filterParams = {
-      pageNumber: currentPage.value,
-      pageSize: formData.pageSize,
+      pageNumber: 1, // Get all data by using a large page size
+      pageSize: 1000, // Large enough to get all data
       isActive: formData.isActive,
       orderBy: formData.orderBy,
       advancedFilter:
@@ -390,28 +369,9 @@ const getAllServicesPagination = async () => {
           : null,
     }
 
-    console.log('Calling getAllServicesPagination with filter:', filterParams)
-
     const res = showBin.value
       ? await serviceStore.getDeletedServices(filterParams)
       : await serviceStore.getAllServices(filterParams)
-
-    serviceListResponse.value = {
-      data:
-        res.data.map((service) => ({
-          ...service,
-          id: service.serviceID,
-          serviceName: service.name,
-          serviceDescription: service.description,
-          typeServiceID: service.typeServiceID || '',
-        })) || [],
-      currentPage: res.currentPage || 1,
-      totalPages: res.totalPages || Math.ceil((res.data?.length || 0) / formData.pageSize),
-      totalCount: res.totalCount || res.data?.length || 0,
-      pageSize: res.pageSize || formData.pageSize,
-      hasPreviousPage: res.hasPreviousPage || false,
-      hasNextPage: res.hasNextPage || false,
-    }
 
     serviceList.value =
       res.data.map((service) => ({
@@ -421,17 +381,8 @@ const getAllServicesPagination = async () => {
         serviceDescription: service.description,
         typeServiceID: service.typeServiceID || '',
       })) || []
-
-    console.log('Processed Response:', {
-      isRecycleBin: showBin.value,
-      data: serviceList.value,
-      totalCount: serviceListResponse.value.totalCount,
-      totalPages: serviceListResponse.value.totalPages,
-      currentPage: serviceListResponse.value.currentPage,
-    })
   } catch (error) {
     console.error('Error fetching services:', error)
-    serviceListResponse.value = null
     serviceList.value = []
   }
 }
@@ -660,22 +611,6 @@ const handleToggleStatus = async (service: ServiceDTO) => {
   } finally {
     isToggling.value = false
   }
-}
-
-// Thêm các hàm xử lý pagination
-const handlePageChange = (page: number) => {
-  currentPage.value = page
-  getAllServicesPagination()
-}
-
-const handlePageSizeChange = (size: number) => {
-  formData.pageSize = size
-  currentPage.value = 1
-  getAllServicesPagination()
-}
-
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('vi-VN')
 }
 
 onMounted(async () => {
