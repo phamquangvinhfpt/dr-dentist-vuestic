@@ -56,6 +56,9 @@ const registerCalendar = async (id: any, date: any): Promise<void> => {
         color: 'danger',
       })
     })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 const searchValue = ref<Search>({
@@ -80,6 +83,9 @@ const getWorkingCalendar = (newfirst?: any, newlast?: any) => {
         color: 'danger',
       })
     })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 const getFullTimeNonAcceptWorkingCalendar = (newfirst?: any, newlast?: any) => {
@@ -100,6 +106,9 @@ const getFullTimeNonAcceptWorkingCalendar = (newfirst?: any, newlast?: any) => {
         color: 'danger',
       })
     })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 const getPartTimeNonAcceptWorkingCalendar = (newfirst?: any, newlast?: any) => {
@@ -119,6 +128,9 @@ const getPartTimeNonAcceptWorkingCalendar = (newfirst?: any, newlast?: any) => {
         message: errorMessage,
         color: 'danger',
       })
+    })
+    .finally(() => {
+      loading.value = false
     })
 }
 
@@ -146,6 +158,9 @@ const updateWorkingCalendar = (id: string, data: any) => {
           color: 'danger',
         })
       })
+      .finally(() => {
+        loading.value = false
+      })
   } else if (auth.musHaveRole('Dentist') && typeDoctor.value === 'PartTime') {
     storeCalendar
       .createWorkingCalendar(id, data)
@@ -168,6 +183,9 @@ const updateWorkingCalendar = (id: string, data: any) => {
           color: 'danger',
         })
       })
+      .finally(() => {
+        loading.value = false
+      })
   }
 }
 
@@ -189,6 +207,9 @@ const reminderPartime = async (id: any, date: any) => {
         message: errorMessage,
         color: 'danger',
       })
+    })
+    .finally(() => {
+      loading.value = false
     })
 }
 

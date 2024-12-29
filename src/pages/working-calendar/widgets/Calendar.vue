@@ -1036,6 +1036,7 @@ const saveSchedule = () => {
     showAddModal.value = false
     newScheduleDate.value = null
     newScheduleTime.value = null
+    partTimeSchedules.value = []
   }
 }
 

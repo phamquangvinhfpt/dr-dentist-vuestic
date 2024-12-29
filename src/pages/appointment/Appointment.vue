@@ -767,9 +767,9 @@
         </Dialog>
       </TransitionRoot>
       <!-- Create Appointment Modal -->
-      <VaModal v-model="showModalAppointment" ok-text="Submit" @ok="submitAppointment">
+      <VaModal v-model="showModalAppointment" close-button hide-default-actions>
         <h3 class="va-h3">Appointment Details</h3>
-        <VaCard>
+        <VaForm ref="create_appointment_form">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <VaSelect
               v-model="patientId"
@@ -778,6 +778,7 @@
               :options="optionsPatients"
               autocomplete
               highlight-matched-text
+              :rules="[(v) => !!v || 'Patient is required']"
             />
             <VaSelect
               v-model="serviceId"
@@ -786,6 +787,7 @@
               :options="optionsServices"
               autocomplete
               highlight-matched-text
+              :rules="[(v) => !!v || 'Service is required']"
             />
             <VaDateInput
               v-model="date"
@@ -795,6 +797,7 @@
               class="col-span-1"
               label="Date"
               clearable
+              :rules="[(v) => !!v || 'Date is required']"
             />
             <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
             <VaSelect
@@ -804,15 +807,21 @@
               :options="optionsDoctors"
               autocomplete
               highlight-matched-text
+              :rules="[(v) => !!v || 'Doctor is required']"
             />
             <VaTextarea v-model="notes" label="Notes" />
           </div>
-        </VaCard>
+          <div class="flex items-end justify-end mt-5">
+            <VaButton class="mr-6" color="#ECF0F1" @click="showModalAppointment = false">Cancel</VaButton>
+            <VaButton :disabled="!isValid" @click="submitAppointment">Submit</VaButton>
+          </div>
+        </VaForm>
       </VaModal>
       <!-- Reschedule Appointment Modal -->
       <VaModal
         v-model="showModalReschedule"
         ok-text="Reschedule"
+        close-button
         @close="handleCloseReschedule"
         @ok="submitReschedule(isAppointment)"
       >
@@ -836,6 +845,7 @@
       <VaModal
         v-model="showModalCancel"
         cancel-text="Cancel"
+        close-button
         ok-text="Yes"
         @close="handleCloseCancel"
         @ok="submitCancel(isAppointment)"
@@ -856,6 +866,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, Ref, nextTick, onBeforeMount } from 'vue'
 import { Dialog, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {
+  useForm,
   useToast,
   VaAlert,
   VaButton,
@@ -934,6 +945,7 @@ const role = usersStore.user?.roles
 const items = ref<Appointment[]>([])
 const followitems = ref<FollowUpAppointment[]>([])
 const unassigneditems = ref<Appointment[]>([])
+const { isValid } = useForm('create_appointment_form')
 
 const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -1154,6 +1166,7 @@ const checkedFollowupAppointment = async (appointmentId: any) => {
 const rescheduleModal = (appointment: any) => {
   appointmentId.value = appointment.appointmentId
   date.value = appointment.appointmentDate
+  startTime.value = ''
   showModalReschedule.value = true
   if (isAppointment.value === 'followup') {
     current_follow_up.value = appointment
@@ -2088,7 +2101,7 @@ const debouncedFetchAvailableDoctors = debounce(fetchAvailableDoctors, 300)
 watch(
   [serviceId, date, startTime],
   ([newServiceId, newDate, newStartTime]) => {
-    if (newServiceId && newDate && newStartTime) {
+    if (newServiceId?.value !== '' && newDate && newStartTime && showModalAppointment) {
       debouncedFetchAvailableDoctors()
     }
   },
