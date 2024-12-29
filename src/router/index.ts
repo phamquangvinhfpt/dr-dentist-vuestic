@@ -68,6 +68,11 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../pages/appointment/widgets/list-appointment/AppointmentDetail.vue'),
           },
           {
+            name: 'followup-detail',
+            path: 'appointment/:id',
+            component: () => import('../pages/appointment/widgets/list-appointment/FollowupDetail.vue'),
+          },
+          {
             name: 'view-appointment',
             path: '',
             component: () => import('../pages/appointment/Appointment.vue'),
