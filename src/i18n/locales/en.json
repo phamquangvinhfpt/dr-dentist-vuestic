@@ -809,7 +809,8 @@
     "cancel": "Cancel",
     "unauthorized": "Unauthorized",
     "errorOccurred": "An error occurred",
-    "search": "Search"
+    "search": "Search",
+    "Back": "Back"
   },
   "payment": {
     "patientCode": "Patient Code",
@@ -845,7 +846,9 @@
     "bankTransfer": "Bank Transfer",
     "other": "Other",
     "myPayments": "My Payments",
-    "noPaymentFound": "No payments found"
+    "paymentDetails": "Payment Details",
+    "statusIncomplete": "Incomplete",
+    "statusCompleted": "Completed"
   },
   "form": {
     "formManagement": "Form Management",
@@ -869,6 +872,20 @@
     "Notes": "Notes",
     "Close": "Close",
     "Description": "Description",
-    "FormDetails": "Form Details"
+    "FormDetails": "Form Details",
+    "PleaseDetails": "Please describe your reason for the application...",
+    "TimeRequired": "Please select a time slot",
+    "SelectWorkingDate": "Please select a working date",
+    "LeaveType": "Leave Type",
+    "SelectTimeSlot": "Please select a time slot",
+    "TimeSlot": "Time Slots",
+    "AllDay": "All Day",
+    "DescriptionPlaceholder": "Please describe your reason for the application...",
+    "SubmitApplication": "Submit",
+    "ApplicationSuccess": "Application submitted successfully",
+    "ApplicationSubmitted": "Application submitted",
+    "ApplicationFailed": "Application submitted failed",
+    "GotIt": "Got it",
+    "ApplicationForm": "Application Form"
   }
 }

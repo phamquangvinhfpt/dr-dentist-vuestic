@@ -9,10 +9,12 @@
       <VaCardContent>
         <div class="header-actions">
           <div class="button-group">
-            <VaButton :color="showNonStaff ? 'warning' : 'secondary'" class="toggle-button" @click="toggleNonStaff">
-              <i class="va-icon material-icons mr-2">{{ showNonStaff ? 'list' : 'person_off' }}</i>
-              <span class="ml-1">{{ showNonStaff ? 'Staff List' : 'Non-Staff List' }}</span>
-            </VaButton>
+            <div class="toggle-container">
+              <button class="toggle-btn" :class="{ active: !showNonStaff }" @click="toggleNonStaff">Staff List</button>
+              <button class="toggle-btn" :class="{ active: showNonStaff }" @click="toggleNonStaff">
+                Non-Staff List
+              </button>
+            </div>
 
             <VaInput v-model="filterData.keyword" placeholder="Search..." class="flex-grow search-input" clearable>
               <template #appendInner>
@@ -499,15 +501,22 @@ const getImageSrc = (imageUrl: string) => {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .search-input {
-  margin-right: 1rem;
-  width: 1250px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
   border-radius: 8px;
   padding: 0.5rem;
-  background: var(--va-background-element);
+  background: var(--va-background-secondary) !important;
   color: var(--va-text-primary);
+}
+
+.search-input:focus-within {
+  border-color: var(--va-primary);
 }
 
 .action-button {
@@ -528,8 +537,9 @@ const getImageSrc = (imageUrl: string) => {
 
 .toggle-button {
   border-radius: 8px;
-  padding: -2rem 3rem;
+  padding: 0.5rem 1rem;
   transition: background-color 0.3s ease;
+  white-space: nowrap;
 }
 
 .toggle-button:hover {
@@ -540,7 +550,7 @@ const getImageSrc = (imageUrl: string) => {
 .custom-table {
   margin-top: 1rem;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .custom-table :deep(th) {
@@ -561,10 +571,19 @@ const getImageSrc = (imageUrl: string) => {
   margin-top: 1.5rem;
   padding: 1rem 0;
   border-top: 1px solid var(--va-border-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .records-info {
   color: var(--va-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 /* Modal styles */
@@ -601,7 +620,8 @@ const getImageSrc = (imageUrl: string) => {
 }
 
 .contact-details-modal {
-  max-width: 900px !important;
+  max-width: min(900px, 95vw) !important;
+  margin: 1rem;
 }
 
 .section-title {
@@ -639,6 +659,7 @@ const getImageSrc = (imageUrl: string) => {
 
 .info-value {
   color: var(--va-text-primary);
+  word-break: break-word;
 }
 
 .content-box {
@@ -651,11 +672,12 @@ const getImageSrc = (imageUrl: string) => {
   color: var(--va-text-primary);
   line-height: 1.6;
   margin-top: 0.5rem;
+  word-break: break-word;
 }
 
 .image-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -680,8 +702,9 @@ const getImageSrc = (imageUrl: string) => {
 }
 
 .image-preview-modal {
-  max-width: 90vw !important;
-  max-height: 90vh !important;
+  max-width: 95vw !important;
+  max-height: 95vh !important;
+  margin: 1rem;
 }
 
 .image-preview-container {
@@ -699,5 +722,95 @@ const getImageSrc = (imageUrl: string) => {
 
 .status-tag {
   width: fit-content;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 1024px) {
+  .service-management-container {
+    padding: 16px;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    padding: 1rem;
+  }
+
+  .button-group {
+    gap: 0.5rem;
+  }
+
+  .toggle-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .grid.grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-section {
+    padding: 1rem;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .records-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .service-management-container {
+    padding: 8px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .action-button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.toggle-container {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--va-primary);
+}
+
+.toggle-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--va-primary);
+  font-weight: 500;
+}
+
+.toggle-btn.active {
+  background: var(--va-primary);
+  color: white;
+}
+
+.toggle-btn:hover:not(.active) {
+  background: rgba(var(--va-primary-rgb), 0.1);
 }
 </style>

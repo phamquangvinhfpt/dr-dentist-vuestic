@@ -766,7 +766,8 @@
     "search": "Tìm kiếm",
     "reset": "Đặt lại",
     "unauthorized": "Bạn không có quyền truy cập",
-    "errorOccurred": "Đã xảy ra lỗi"
+    "errorOccurred": "Đã xảy ra lỗi",
+    "Back": "Trở lại"
   },
   "payment": {
     "patientCode": "Mã Bệnh Nhân",
@@ -802,7 +803,9 @@
     "bankTransfer": "Chuyển Khoản",
     "other": "Khác",
     "myPayments": "Thanh Toán Của Tôi",
-    "noPaymentFound": "Không tìm thấy thanh toán"
+    "paymentDetails": "Chi Tiết Thanh Toán",
+    "statusIncomplete": "Chưa Hoàn Thành",
+    "statusCompleted": "Đã Hoàn Thành"
   },
   "form": {
     "formManagement": "Quản Lý Phiếu Đăng Ký",
@@ -826,6 +829,20 @@
     "Notes": "Ghi Chú",
     "Close": "Đóng",
     "Description": "Mô Tả",
-    "FormDetails": "Chi Tiết Phiếu Đăng Ký"
+    "FormDetails": "Chi Tiết Phiếu Đăng Ký",
+    "PleaseDetails": "Vui lòng mô tả lý do của bạn cho phiếu đăng ký...",
+    "TimeRequired": "Vui lòng chọn một giờ làm việc",
+    "SelectWorkingDate": "Vui lòng chọn một ngày làm việc",
+    "LeaveType": "Loại Phiếu Đăng Ký",
+    "SelectTimeSlot": "Vui lòng chọn một giờ làm việc",
+    "TimeSlot": "Giờ Làm Việc",
+    "AllDay": "Cả Ngày",
+    "DescriptionPlaceholder": "Vui lòng mô tả lý do của bạn cho phiếu đăng ký...",
+    "SubmitApplication": "Nộp Phiếu Đăng Ký",
+    "ApplicationSuccess": "Phiếu đăng ký đã được nộp thành công",
+    "ApplicationSubmitted": "Phiếu đăng ký đã được nộp",
+    "ApplicationFailed": "Phiếu đăng ký đã được nộp thất bại",
+    "GotIt": "Đã hiểu",
+    "ApplicationForm": "Phiếu Đăng Ký"
   }
 }

@@ -720,11 +720,176 @@ const searchPlaceholder = computed(() => {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .tab-wrapper {
-    width: 100%;
-    justify-content: center;
+@media (max-width: 1200px) {
+  .search-filter-container {
+    padding: 1rem;
+    margin: 1rem;
   }
+
+  .top-row {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .search-box {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .date-range {
+    flex: 1 1 calc(100% - 60px);
+  }
+
+  .export-button-container {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-management-container {
+    padding: 12px;
+  }
+
+  .search-filter-container {
+    padding: 0.75rem;
+    margin: 0.75rem;
+  }
+
+  .top-row,
+  .bottom-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-box,
+  .date-range,
+  .patient-selector,
+  .status-filter,
+  .method-filter {
+    width: 100%;
+  }
+
+  .date-input-group {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .date-separator {
+    display: none;
+  }
+
+  .date-input {
+    width: 100%;
+  }
+
+  .status-tabs,
+  .method-tabs {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 42px;
+  }
+
+  .status-tab,
+  .method-tab {
+    flex: 1 1 auto;
+    min-width: 100px;
+    padding: 8px;
+    font-size: 0.875rem;
+  }
+
+  .card-title {
+    font-size: 1.4rem;
+    padding: 1rem;
+  }
+
+  /* Table responsive adjustments */
+  :deep(.va-data-table) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.va-data-table__th),
+  :deep(.va-data-table__td) {
+    padding: 8px;
+  }
+}
+
+/* Add smooth scaling for larger screens */
+@media (min-width: 1201px) {
+  .payment-management-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .search-filter-container {
+    transition: all 0.3s ease;
+  }
+
+  .search-box,
+  .date-range,
+  .patient-selector,
+  .status-filter,
+  .method-filter {
+    transition: all 0.3s ease;
+  }
+
+  .card-title {
+    transition: font-size 0.3s ease;
+  }
+}
+
+/* Improve table responsiveness */
+:deep(.va-data-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:deep(.va-data-table__table) {
+  min-width: 800px;
+}
+
+/* Improve dark mode contrast */
+.dark {
+  :deep(.va-data-table__th) {
+    background: var(--va-background-secondary);
+  }
+
+  :deep(.va-data-table__tr:hover) {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .search-input :deep(input),
+  .date-input-group,
+  .status-tabs,
+  .method-tabs {
+    background: var(--va-background-element);
+  }
+}
+
+/* Add fluid typography */
+html {
+  font-size: clamp(14px, 1vw, 16px);
+}
+
+.card-title {
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+}
+
+.search-input :deep(input),
+.date-input :deep(input),
+.status-tab,
+.method-tab {
+  font-size: clamp(0.875rem, 1.5vw, 0.95rem);
+}
+
+/* Improve button responsiveness */
+.export-button {
+  width: clamp(42px, 5vw, 48px) !important;
+  height: clamp(42px, 5vw, 48px) !important;
+}
+
+.export-button i {
+  font-size: clamp(18px, 2.5vw, 20px);
 }
 
 .search-filter-container {
@@ -772,7 +937,7 @@ const searchPlaceholder = computed(() => {
 
 .search-input :deep(input:focus) {
   border-color: #3b82f6;
-  background: white;
+  background: var(--va-background-secondary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -786,7 +951,7 @@ const searchPlaceholder = computed(() => {
 }
 
 .search-icon {
-  color: #64748b;
+  color: var(--va-text-primary);
   font-size: 1rem;
   margin-right: 12px;
 }
@@ -988,7 +1153,7 @@ const searchPlaceholder = computed(() => {
 
 .status-tab:hover:not(.active),
 .method-tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--va-background-secondary);
 }
 
 /* Responsive */

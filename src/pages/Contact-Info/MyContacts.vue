@@ -1,20 +1,32 @@
 <template>
   <div class="my-contacts">
     <div class="flex justify-between mb-4">
-      <div class="flex gap-2 w-full">
-        <VaInput v-model="filterData.keyword" placeholder="Search..." class="flex-grow" clearable>
+      <div class="flex flex-col md:flex-row gap-2 w-full">
+        <VaInput v-model="filterData.keyword" placeholder="Search..." class="w-full md:w-[75%]" clearable>
           <template #appendInner>
             <i class="va-icon material-icons">search</i>
           </template>
         </VaInput>
 
-        <VaButton :color="showAdvancedSearch ? 'primary' : 'gray'" @click="showAdvancedSearch = !showAdvancedSearch">
-          <i class="va-icon material-icons">tune</i>
-        </VaButton>
+        <div class="flex gap-2 w-full md:w-[25%]">
+          <VaButton
+            :color="showAdvancedSearch ? 'primary' : 'gray'"
+            class="w-12"
+            @click="showAdvancedSearch = !showAdvancedSearch"
+          >
+            <i class="va-icon material-icons">tune</i>
+          </VaButton>
 
-        <VaButton color="primary" @click="handleRefresh">
-          <i class="va-icon material-icons">refresh</i>
-        </VaButton>
+          <VaButton color="primary" class="w-12" @click="handleRefresh">
+            <i class="va-icon material-icons">refresh</i>
+          </VaButton>
+
+          <VaButton color="success" class="flex-1" @click="showAvailableContacts = true">
+            <i class="va-icon material-icons">person_add</i>
+            <span class="hidden md:inline">Get New</span>
+            <span class="md:hidden">New</span>
+          </VaButton>
+        </div>
       </div>
     </div>
 
@@ -53,20 +65,20 @@
       no-data-html="<div class='text-center'>No contacts found</div>"
     >
       <template #cell(title)="{ row }">
-        <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-          <span class="w-24">{{ row.rowData.title }}</span>
+        <div class="flex items-center gap-2">
+          <span>{{ row.rowData.title }}</span>
         </div>
       </template>
 
       <template #cell(email)="{ row }">
-        <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-          <span class="w-24">{{ row.rowData.email }}</span>
+        <div class="flex items-center gap-2">
+          <span>{{ row.rowData.email }}</span>
         </div>
       </template>
 
       <template #cell(phone)="{ row }">
-        <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-          <span class="w-24">{{ row.rowData.phone }}</span>
+        <div class="flex items-center gap-2">
+          <span>{{ row.rowData.phone }}</span>
         </div>
       </template>
 
@@ -311,6 +323,77 @@
         </div>
       </template>
     </VaModal>
+
+    <!-- Available Contacts Modal test Tuan -->
+    <VaModal
+      v-model="showAvailableContacts"
+      title="AVAILABLE CONTACTS"
+      hide-default-actions
+      class="available-contacts-modal"
+    >
+      <div class="p-4">
+        <VaInput v-model="availableContactsSearch" placeholder="Search available contacts..." class="mb-4" clearable>
+          <template #appendInner>
+            <i class="va-icon material-icons">search</i>
+          </template>
+        </VaInput>
+
+        <VaDataTable
+          class="custom-table"
+          :items="availableContacts"
+          :columns="availableContactsColumns"
+          hoverable
+          sticky-header
+          striped
+          no-data-html="<div class='text-center'>No available contacts found</div>"
+        >
+          <template #cell(title)="{ row }">
+            <div class="flex items-center">
+              <span class="truncate">{{ row.rowData.title }}</span>
+            </div>
+          </template>
+
+          <template #cell(email)="{ row }">
+            <div class="flex items-center">
+              <span class="truncate">{{ row.rowData.email }}</span>
+            </div>
+          </template>
+
+          <template #cell(phone)="{ row }">
+            <div class="flex items-center">
+              <span class="truncate">{{ row.rowData.phone }}</span>
+            </div>
+          </template>
+
+          <template #cell(actions)="{ row }">
+            <VaButton small color="primary" @click="handleTakeContact(row.rowData as ContactInfo)"> Take </VaButton>
+          </template>
+        </VaDataTable>
+
+        <div class="flex justify-between items-center mt-4">
+          <div>
+            <b>{{ totalAvailableContacts }} results.</b>
+            Results per page
+            <VaSelect v-model="availableContactsPageSize" class="!w-20" :options="[10, 50, 100]" />
+          </div>
+          <VaPagination
+            v-if="totalAvailablePages > 1"
+            v-model="availableContactsPage"
+            :pages="totalAvailablePages"
+            :visible-pages="5"
+            buttons-preset="secondary"
+            :boundary-links="true"
+            :direction-links="true"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2 p-4">
+          <VaButton color="gray" @click="showAvailableContacts = false">Close</VaButton>
+        </div>
+      </template>
+    </VaModal>
+    <!-- End of test Tuan -->
   </div>
 </template>
 
@@ -318,10 +401,12 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useToast } from 'vuestic-ui'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useContactStaffStore } from '@/stores/modules/contact-staff.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import type { ContactInfo, AdvancedSearch } from './types'
 
+const { t } = useI18n()
 const { init } = useToast()
 const contactStaffStore = useContactStaffStore()
 const authStore = useAuthStore()
@@ -335,10 +420,10 @@ const totalPages = ref(0)
 const totalContacts = ref(0)
 
 const columns = [
-  { key: 'title', title: 'Title' },
-  { key: 'email', title: 'Email' },
-  { key: 'phone', title: 'Phone' },
-  { key: 'actions', title: 'Actions' },
+  { key: 'title', title: 'Title', width: '30%' },
+  { key: 'email', title: 'Email', width: '30%' },
+  { key: 'phone', title: 'Phone', width: '25%' },
+  { key: 'actions', title: 'Actions', width: '15%' },
 ]
 
 const showAdvancedSearch = ref(false)
@@ -448,8 +533,8 @@ const isSubmitting = ref(false)
 const selectedContactId = ref('')
 
 // Thêm hàm để tạo template email
-const generateDentalEmailTemplate = (patientName: string) => {
-  return `Dear ${patientName},
+const generateDentalEmailTemplate = (title: string) => {
+  return `We reply from your title "${title}",
 
 Thank you for contacting Dental Clinic. We have received your inquiry and would like to provide you with the following information:
 
@@ -672,6 +757,101 @@ const isDragging = ref(false)
 
 // Thêm vào phần đầu của script, cùng với các ref khác
 const imagePreviewUrls = ref<string[]>([])
+
+// Available Contacts Modal test Tuan
+const showAvailableContacts = ref(false)
+const availableContactsSearch = ref('')
+const availableContacts = ref<ContactInfo[]>([])
+const availableContactsPage = ref(1)
+const availableContactsPageSize = ref(10)
+const totalAvailablePages = ref(0)
+const totalAvailableContacts = ref(0)
+
+const availableContactsColumns = [
+  { key: 'title', title: 'Title', width: '30%' },
+  { key: 'email', title: 'Email', width: '30%' },
+  { key: 'phone', title: 'Phone', width: '25%' },
+  { key: 'actions', title: 'Actions', width: '15%' },
+]
+
+// Fetch available contacts that have no staff assigned
+const fetchAvailableContacts = async () => {
+  try {
+    const response = await contactStaffStore.getAllContacts({
+      pageNumber: availableContactsPage.value - 1,
+      pageSize: availableContactsPageSize.value,
+      hasStaff: false,
+      orderBy: [],
+      keyword: availableContactsSearch.value,
+      advancedSearch: {
+        fields: [],
+        keyword: '',
+      },
+    })
+
+    availableContacts.value = response.data
+    availableContactsPage.value = response.currentPage + 1
+    totalAvailablePages.value = response.totalPages
+    totalAvailableContacts.value = response.totalCount
+  } catch (error) {
+    init({
+      message: 'Failed to fetch available contacts',
+      color: 'danger',
+      duration: 3000,
+    })
+  }
+}
+
+// Handle taking a contact
+const handleTakeContact = async (contact: ContactInfo) => {
+  try {
+    await contactStaffStore.addStaffContact(authStore.user?.id || '', contact.contactId)
+
+    init({
+      message: 'Contact taken successfully',
+      color: 'success',
+      duration: 3000,
+    })
+
+    // Refresh both contact lists
+    await fetchAvailableContacts()
+    await fetchContacts()
+  } catch (error) {
+    init({
+      message: 'Failed to take contact',
+      color: 'danger',
+      duration: 3000,
+    })
+  }
+}
+
+// Watch for changes in available contacts search and pagination
+watch([availableContactsSearch, availableContactsPage, availableContactsPageSize], () => {
+  fetchAvailableContacts()
+})
+
+// Update onMounted to check for Staff role instead of Admin
+onMounted(async () => {
+  if (!authStore.musHaveRole('Staff')) {
+    init({
+      message: t('common.unauthorized'),
+      color: 'danger',
+      duration: 3000,
+    })
+    router.push({ name: 'dashboard' })
+    return
+  }
+
+  await fetchContacts()
+})
+
+// Watch for modal open to fetch available contacts
+watch(showAvailableContacts, (newValue) => {
+  if (newValue) {
+    fetchAvailableContacts()
+  }
+})
+// End of test Tuan
 </script>
 
 <style scoped>
@@ -685,6 +865,11 @@ const imagePreviewUrls = ref<string[]>([])
 
 .contact-details-modal {
   max-width: 900px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .section-title {
@@ -765,6 +950,11 @@ const imagePreviewUrls = ref<string[]>([])
 .image-preview-modal {
   max-width: 90vw !important;
   max-height: 90vh !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .image-preview-container {
@@ -829,6 +1019,11 @@ const imagePreviewUrls = ref<string[]>([])
 /* Thêm vào phần style hiện có */
 .email-modal {
   max-width: 600px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .email-modal :deep(.va-input__content) {
@@ -857,6 +1052,11 @@ const imagePreviewUrls = ref<string[]>([])
 
 .upload-modal {
   max-width: 500px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .upload-area {
@@ -918,5 +1118,140 @@ const imagePreviewUrls = ref<string[]>([])
 .border-primary {
   border-color: var(--va-primary) !important;
   background-color: var(--va-background-secondary) !important;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .my-contacts {
+    padding: 16px;
+  }
+
+  .contact-details-modal {
+    max-width: 95% !important;
+    margin: 10px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .email-modal {
+    max-width: 95% !important;
+    margin: 10px;
+  }
+
+  .upload-modal {
+    max-width: 95% !important;
+    margin: 10px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .my-contacts {
+    padding: 12px;
+  }
+
+  .flex.justify-between.mb-4 {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .flex.gap-2.w-full {
+    flex-wrap: wrap;
+  }
+
+  .flex.gap-2.w-full .va-button {
+    flex: 1 1 auto;
+    min-width: calc(50% - 5px);
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+
+  .contact-section {
+    padding: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .info-label {
+    font-size: 0.85rem;
+  }
+
+  .content-box {
+    padding: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .flex.gap-2.w-full .va-button {
+    min-width: 100%;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+
+  .contact-section {
+    padding: 0.75rem;
+  }
+}
+
+:deep(.va-modal__overlay) {
+  background-color: transparent !important;
+}
+
+:deep(.va-modal__container) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  background: var(--va-background-primary) !important;
+}
+
+.available-contacts-modal {
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+:deep(.va-data-table__table-td) {
+  padding: 8px 16px !important;
+}
+
+:deep(.va-data-table__table-th) {
+  padding: 12px 16px !important;
+  font-weight: 600 !important;
+}
+
+.custom-table {
+  width: 100%;
 }
 </style>

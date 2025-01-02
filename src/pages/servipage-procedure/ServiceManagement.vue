@@ -1112,4 +1112,144 @@ onMounted(async () => {
     background-color 0.3s ease,
     color 0.3s ease;
 }
+
+/* Responsive adjustments - Mobile only */
+@media (max-width: 1024px) {
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .search-section,
+  .type-filter {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 250px;
+  }
+
+  .button-group {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .service-management-container {
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    padding: 1.2rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-section,
+  .type-filter {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .button-group {
+    justify-content: stretch;
+    gap: 0.5rem;
+  }
+
+  .action-button {
+    flex: 1;
+  }
+
+  .custom-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .custom-table :deep(th),
+  .custom-table :deep(td) {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .records-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-size-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .service-management-container {
+    padding: 0.5rem;
+  }
+
+  .service-card {
+    border-radius: 10px;
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+    padding: 1rem;
+  }
+
+  .action-button {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    height: 36px;
+  }
+
+  .action-button i {
+    font-size: 1rem;
+  }
+
+  .action-button-circle {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .action-button-circle i {
+    font-size: 1.1rem;
+  }
+
+  .custom-table :deep(th),
+  .custom-table :deep(td) {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  :deep(.va-modal) {
+    width: 95% !important;
+    margin: 1rem !important;
+  }
+
+  :deep(.va-modal__title) {
+    font-size: 1.3rem;
+    padding: 1rem;
+  }
+
+  :deep(.va-modal__content) {
+    padding: 1rem;
+  }
+
+  :deep(.va-modal__actions) {
+    padding: 0.8rem;
+  }
+}
 </style>

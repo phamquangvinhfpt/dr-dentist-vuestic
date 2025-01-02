@@ -852,4 +852,102 @@ onMounted(() => {
   font-size: 1rem;
   font-weight: 600;
 }
+
+/* Responsive Styles */
+@media screen and (max-width: 1200px) {
+  .card-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .header-right {
+    width: 100%;
+  }
+
+  .date-filters {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .medical-records-container {
+    padding: 1rem;
+  }
+
+  .timeline {
+    padding: 1rem;
+  }
+
+  .timeline-point {
+    width: 30px;
+    margin-right: 1rem;
+  }
+
+  .timeline-card {
+    width: 100%;
+  }
+
+  .card-header {
+    padding: 1rem;
+  }
+
+  .treatment-tags {
+    gap: 0.25rem;
+  }
+
+  .treatment-tag {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .detail-header {
+    padding: 1.5rem;
+  }
+
+  .patient-info {
+    gap: 1rem;
+  }
+
+  .patient-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .info-main h2 {
+    font-size: 1.5rem;
+  }
+
+  .info-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .date-filters {
+    flex-direction: column;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .images-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-content {
+    padding: 1rem;
+  }
+
+  .detail-section {
+    padding: 1rem;
+  }
+
+  .tooth-diagnosis {
+    padding: 0.75rem;
+  }
+}
 </style>

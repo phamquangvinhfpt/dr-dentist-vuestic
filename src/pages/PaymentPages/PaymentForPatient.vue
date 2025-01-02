@@ -8,7 +8,7 @@
 
       <VaCardContent>
         <div class="flex justify-between mb-4">
-          <div class="flex gap-2">
+          <div class="flex flex-col md:flex-row gap-2">
             <VaInput v-model="searchKeyword" placeholder="Search..." @keyup.enter="handleSearch">
               <template #appendInner>
                 <i class="va-icon material-icons">search</i>
@@ -24,7 +24,7 @@
                 placeholder="Start Date"
                 @update:modelValue="handleDateChange"
               />
-              <span class="mx-2">-</span>
+              <span class="mx-2 hidden md:block">-</span>
               <VaInput
                 v-model="endDate"
                 type="date"
@@ -38,72 +38,132 @@
           </div>
         </div>
 
-        <VaDataTable
-          class="my-table va-table--hoverable"
-          :items="paginatedPayments"
-          :columns="columns"
-          hoverable
-          :loading="isLoading"
-          sticky-header
-          no-data-html="<div class='text-center'>No payments found</div>"
-        >
-          <template #cell(serviceName)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ row.rowData.serviceName }}</span>
-            </div>
-          </template>
+        <!-- Desktop View -->
+        <div class="hidden md:block">
+          <VaDataTable
+            class="my-table va-table--hoverable"
+            :items="paginatedPayments"
+            :columns="columns"
+            hoverable
+            :loading="isLoading"
+            sticky-header
+            no-data-html="<div class='text-center'>No payments found</div>"
+          >
+            <template #cell(serviceName)="{ row }">
+              <div class="flex items-center gap-2">
+                <span>{{ row.rowData.serviceName }}</span>
+              </div>
+            </template>
 
-          <template #cell(depositAmount)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ formatPrice(row.rowData.depositAmount) }}</span>
-            </div>
-          </template>
+            <template #cell(depositAmount)="{ row }">
+              <div class="flex items-center gap-2">
+                <span>{{ formatPrice(row.rowData.depositAmount) }}</span>
+              </div>
+            </template>
 
-          <template #cell(depositDate)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(new Date(row.rowData.depositDate)) }}</span>
-            </div>
-          </template>
+            <template #cell(depositDate)="{ row }">
+              <div class="flex items-center gap-2">
+                <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(new Date(row.rowData.depositDate)) }}</span>
+              </div>
+            </template>
 
-          <template #cell(remainingAmount)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ formatPrice(row.rowData.remainingAmount) }}</span>
-            </div>
-          </template>
+            <template #cell(remainingAmount)="{ row }">
+              <div class="flex items-center gap-2">
+                <span>{{ formatPrice(row.rowData.remainingAmount) }}</span>
+              </div>
+            </template>
 
-          <template #cell(totalAmount)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ formatPrice(row.rowData.totalAmount) }}</span>
-            </div>
-          </template>
+            <template #cell(totalAmount)="{ row }">
+              <div class="flex items-center gap-2">
+                <span>{{ formatPrice(row.rowData.totalAmount) }}</span>
+              </div>
+            </template>
 
-          <template #cell(method)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ getPaymentMethod(row.rowData.method) }}</span>
-            </div>
-          </template>
+            <template #cell(method)="{ row }">
+              <div class="flex items-center gap-2">
+                <span>{{ getPaymentMethod(row.rowData.method) }}</span>
+              </div>
+            </template>
 
-          <template #cell(status)="{ row }">
-            <div class="flex items-center gap-2">
-              <span :class="getStatusClass(row.rowData.status)">
-                {{ getStatusText(row.rowData.status) }}
-              </span>
-            </div>
-          </template>
+            <template #cell(status)="{ row }">
+              <div class="flex items-center gap-2">
+                <span :class="getStatusClass(row.rowData.status)">
+                  {{ getStatusText(row.rowData.status) }}
+                </span>
+              </div>
+            </template>
 
-          <template #cell(actions)="{ row }">
-            <div class="flex items-center gap-2">
-              <VaButton
-                v-tooltip="t('common.view')"
-                icon="visibility"
-                preset="secondary"
-                size="small"
-                class="action-button"
-                @click="router.push(`/payment-detail/${row.rowData.paymentId}`)"
-              />
+            <template #cell(actions)="{ row }">
+              <div class="flex items-center gap-2">
+                <VaButton
+                  v-tooltip="t('common.view')"
+                  icon="visibility"
+                  preset="secondary"
+                  size="small"
+                  class="action-button"
+                  @click="router.push(`/payment-detail/${row.rowData.paymentId}`)"
+                />
+              </div>
+            </template>
+          </VaDataTable>
+        </div>
+
+        <!-- Mobile View -->
+        <div class="md:hidden">
+          <VaScrollContainer class="max-h-screen" vertical>
+            <VaList v-if="paginatedPayments.length > 0" class="space-y-3">
+              <VaListItem
+                v-for="payment in paginatedPayments"
+                :key="payment.paymentId"
+                class="rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors payment-list-item"
+                @click="router.push(`/payment-detail/${payment.paymentId}`)"
+              >
+                <VaListItemSection class="flex-1 min-w-0 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium truncate">{{ payment.serviceName }}</span>
+                    <span :class="getStatusClass(payment.status)" class="text-sm font-medium">
+                      {{ getStatusText(payment.status) }}
+                    </span>
+                  </div>
+
+                  <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span>{{ t('payment.totalAmount') }}:</span>
+                      <span class="font-semibold">{{ formatPrice(payment.totalAmount) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>{{ t('payment.depositAmount') }}:</span>
+                      <span>{{ formatPrice(payment.depositAmount) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span>{{ t('payment.remainingAmount') }}:</span>
+                      <span>{{ formatPrice(payment.remainingAmount) }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                      <span>{{ t('payment.method') }}:</span>
+                      <span>{{ getPaymentMethod(payment.method) }}</span>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      {{ !payment.depositDate ? 'N/A' : formatDate(new Date(payment.depositDate)) }}
+                    </div>
+                  </div>
+                </VaListItemSection>
+
+                <VaListItemSection icon class="ml-4">
+                  <VaIcon name="chevron_right" color="gray" />
+                </VaListItemSection>
+              </VaListItem>
+            </VaList>
+
+            <div v-else class="flex flex-col items-center justify-center py-12">
+              <VaIcon name="payments" size="large" color="gray" class="mb-4 text-5xl" />
+              <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{{ t('payment.noPayments') }}</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+                {{ t('payment.noPaymentsDesc') }}
+              </p>
             </div>
-          </template>
-        </VaDataTable>
+          </VaScrollContainer>
+        </div>
 
         <VaCardContent>
           <div
@@ -403,13 +463,106 @@ watch(searchKeyword, (newValue) => {
   gap: 1rem;
 }
 
-.va-table-responsive {
-  overflow: auto;
+.payment-list-item {
+  border: 1px solid var(--va-background-border);
+  margin-bottom: 0.5rem;
+  padding: 1rem;
 }
 
-.action-button {
-  min-width: 32px;
-  height: 32px;
-  padding: 0;
+.date-range-picker {
+  display: flex;
+  align-items: center;
+  background: var(--va-background-secondary);
+  border-radius: 8px;
+  border-color: var(--va-border-color);
+}
+
+.date-input {
+  width: 130px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .payment-management-container {
+    padding: 16px;
+  }
+
+  .card-title {
+    font-size: 1.6rem;
+    padding: 1.2rem;
+  }
+
+  .date-input {
+    width: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-management-container {
+    padding: 12px;
+  }
+
+  .card-title {
+    font-size: 1.4rem;
+    padding: 1rem;
+  }
+
+  .date-range-picker {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .date-input {
+    width: 100%;
+  }
+
+  .flex.justify-between.mb-4 {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .flex.gap-2 {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .va-input {
+    width: 100%;
+  }
+
+  .va-pagination {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 576px) {
+  .payment-management-container {
+    padding: 8px;
+  }
+
+  .payment-card {
+    border-radius: 10px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+    padding: 0.8rem;
+  }
+
+  .title-icon {
+    font-size: 1.2rem;
+  }
+
+  .va-pagination {
+    font-size: 0.9rem;
+  }
+
+  .va-pagination :deep(button) {
+    min-width: 30px;
+    height: 30px;
+    padding: 0;
+  }
 }
 </style>

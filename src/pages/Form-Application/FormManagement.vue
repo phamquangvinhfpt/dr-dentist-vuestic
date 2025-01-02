@@ -1476,4 +1476,79 @@ const statusFilterOptions = [
     border-color 0.3s ease,
     box-shadow 0.3s ease;
 }
+
+/* Responsive adjustments - Mobile only */
+@media (max-width: 768px) {
+  .form-management-container {
+    padding: 1rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-section {
+    width: 100%;
+  }
+
+  .button-group {
+    width: 100%;
+  }
+
+  .filter-tabs .tab-wrapper {
+    width: 100%;
+  }
+
+  .tab-button {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .custom-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .working-times-cell {
+    max-width: 180px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .status-change-modal :deep(.va-modal__container) {
+    width: 95%;
+    margin: 0.5rem;
+  }
+
+  .details-modal :deep(.va-modal__container) {
+    width: 95%;
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-management-container {
+    padding: 0.5rem;
+  }
+
+  .tab-button {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  .status-button {
+    min-width: 110px;
+    width: 110px;
+  }
+
+  .action-button-circle {
+    width: 32px;
+    height: 32px;
+  }
+}
 </style>
