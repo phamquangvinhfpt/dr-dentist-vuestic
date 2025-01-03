@@ -115,12 +115,20 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/user/UsersManagement.vue'),
       },
       {
-        name: 'c',
+        name: 'user-detail',
         path: 'users-detail/:id',
         meta: {
           requiresAuth: true,
         },
         component: () => import('../pages/user/UserDetail.vue'),
+      },
+      {
+        name: 'user-update',
+        path: 'user-update/:id',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Doctor/UpdateUser.vue'),
       },
       {
         name: 'message',

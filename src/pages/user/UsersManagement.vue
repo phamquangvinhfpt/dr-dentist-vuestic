@@ -55,8 +55,37 @@
       </ul>
 
       <!-- Pagination -->
-      <div class="flex justify-center mt-6">
-        <VaPagination v-model="currentPage" :total-pages="totalPages" :visible-pages="5" color="primary" />
+      <div class="flex flex-col sm:flex-row items-center justify-between mt-6 mx-3 space-y-4 sm:space-y-0">
+        <div class="flex items-center space-x-2">
+          <label for="pageSize" class="text-sm font-medium">Số mục mỗi trang:</label>
+          <select
+            id="pageSize"
+            v-model="itemsPerPage"
+            class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option v-for="size in pageSizeOptions" :key="size" :value="size">{{ size }}</option>
+          </select>
+        </div>
+
+        <!-- Phân trang -->
+        <ul class="pagination flex items-center space-x-2">
+          <!-- Nút quay lại -->
+          <li>
+            <Button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">←</Button>
+          </li>
+
+          <!-- Số trang -->
+          <li v-for="page in totalPages" :key="page">
+            <Button :class="['pagination-button', { active: currentPage === page }]" @click="currentPage = page">
+              {{ page }}
+            </Button>
+          </li>
+
+          <!-- Nút tiếp tục -->
+          <li>
+            <button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">→</button>
+          </li>
+        </ul>
       </div>
     </VaCard>
   </VaCard>
@@ -66,7 +95,7 @@
 import { useUserProfileStore } from '@stores/modules/user.module'
 import { useRouter } from 'vue-router'
 import { ref, computed, onMounted, watch } from 'vue'
-import { VaButton, VaAvatar, VaInput, VaPagination } from 'vuestic-ui'
+import { VaButton, VaAvatar, VaInput } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
 
 const userStore = useUserProfileStore()
@@ -108,13 +137,18 @@ const filteredUsers = computed(() => {
 })
 
 const currentPage = ref(1)
-const itemsPerPage = ref(6)
-const totalPages = computed(() => Math.ceil(filteredUsers.value.length / itemsPerPage.value))
+const itemsPerPage = ref(5)
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+const pageSizeOptions = ref([5, 10, 20, 50])
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
-  return filteredUsers.value.slice(start, start + itemsPerPage.value)
+  const end = start + itemsPerPage.value
+  return userList.value.slice(start, end)
 })
+
+// Tổng số mục sau khi áp dụng tìm kiếm
+const totalItems = computed(() => userList.value.length)
 
 const getAllUsers = async () => {
   try {
@@ -141,7 +175,7 @@ const getAllUsers = async () => {
 
 const viewDetails = (id: string) => {
   userStore.id = id
-  router.push({ name: 'patients-detail', params: { id } })
+  router.push({ name: 'user-detail', params: { id } })
 }
 
 const updateUser = (id: string) => {
@@ -161,11 +195,54 @@ onMounted(() => {
   getAllUsers()
 })
 
-watch(currentPage, getAllUsers)
+watch([userList, itemsPerPage], () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = 1
+  }
+})
+watch(itemsPerPage, () => {
+  currentPage.value = 1
+})
 </script>
 
 <style scoped>
 .bg-gray-50 {
   background-color: #f9fafb;
+}
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination-button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.pagination-button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.pagination-button:disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: default;
 }
 </style>

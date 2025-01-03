@@ -342,7 +342,15 @@ const confirmAddDoctor = async () => {
     showSuccess.value = true
   } catch (error: any) {
     console.error('Chi tiết lỗi:', error)
-    toast({ message: error.message || 'Thêm thất bại', color: 'danger' }) // Hiển thị thông báo thêm thất bại
+    // Thay đổi thông báo lỗi cho trường hợp 400
+    if (error.response && error.response.status === 400) {
+      toast({ message: 'Email hoặc số điện thoại đã tồn tại', color: 'danger' })
+    }
+    if ((error.response && error.response.status === 405) || error.response.status === 500) {
+      toast({ message: 'máy chủ đang không hoạt động', color: 'danger' })
+    } else {
+      toast({ message: error.message || 'Thêm thất bại', color: 'danger' }) // Hiển thị thông báo thêm thất bại
+    }
   } finally {
     isSubmitting.value = false
   }

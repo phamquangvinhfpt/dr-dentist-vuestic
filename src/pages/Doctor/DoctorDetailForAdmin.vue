@@ -17,10 +17,18 @@
               <span v-for="i in 5" :key="i" class="text-yellow-400">
                 <Star :class="i <= Math.round(doctor.rating || 0) ? 'fill-current' : 'stroke-current'" />
               </span>
-              <span class="ml-2 text-sm">({{ doctor.totalFeedback }} đánh giá)</span>
+              <span class="ml-2 text-sm font-semibold">({{ doctor.totalFeedback }} đánh giá)</span>
             </div>
-            <p class="mt-4"><Mail class="inline mr-2" /> {{ doctor.email }}</p>
-            <p><Phone class="inline mr-2" /> {{ doctor.phoneNumber }}</p>
+            <div class="mt-4">
+              <p class="font-bold">
+                <Mail class="inline mr-2" /> Email:
+                <span class="font-normal">{{ doctor.email }}</span>
+              </p>
+              <p class="font-bold">
+                <Phone class="inline mr-2" /> Số điện thoại:
+                <span class="font-normal">{{ doctor.phoneNumber }}</span>
+              </p>
+            </div>
           </div>
         </div>
       </VaCard>
@@ -30,17 +38,17 @@
         <h2 class="text-2xl font-semibold mb-6 va-h2">Thông Tin Chuyên Môn</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <h3 class="text-sm font-medium">Học Vấn:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
-            <p>{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">Học Vấn:</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
+            <p class="font-normal">{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Số Năm Kinh Nghiệm:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">Số Năm Kinh Nghiệm:</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Loại Hình Làm Việc:</h3>
-            <p class="mt-1">
+            <h3 class="text-sm font-bold">Loại Hình Làm Việc:</h3>
+            <p class="mt-1 font-normal">
               {{
                 doctor.doctorProfile?.workingType === 2
                   ? 'Toàn Thời Gian'
@@ -51,13 +59,13 @@
             </p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Chứng Chỉ:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">Chứng Chỉ:</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
           </div>
         </div>
         <div class="mt-6">
-          <h3 class="text-sm font-medium">Về Tôi:</h3>
-          <p class="mt-1">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
+          <h3 class="text-sm font-bold">Về Tôi:</h3>
+          <p class="mt-1 font-normal">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
         </div>
         <h2 class="text-2xl font-semibold mb-6 va-h2">Hình ảnh chứng nhận</h2>
         <img
@@ -448,5 +456,13 @@ const setRating = (rating: number) => {
 .image-review:hover .overlay {
   filter: blur(5px); /* Làm mờ nền */
   opacity: 1; /* Hiển thị overlay */
+}
+.text-sm.font-bold {
+  font-weight: bold;
+  margin-bottom: 0.5rem; /* Tăng khoảng cách giữa các nhóm thông tin */
+}
+
+.text-sm.font-normal {
+  font-weight: normal;
 }
 </style>

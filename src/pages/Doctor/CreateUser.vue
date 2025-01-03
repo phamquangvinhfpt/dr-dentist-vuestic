@@ -138,7 +138,7 @@ const birthDayRules = computed(() => [
 </script>
 <template>
   <div class="form-wrapper min-h-screen flex items-center justify-center bg-gray-100">
-    <VaInnerLoading :loading="isLoading" :size="60" style="width: 60%">
+    <VaInnerLoading :loading="isLoading" :size="60" style="width: 10%; height: 10%">
       <VaCard class="form-container p-6 max-w-lg w-full shadow-md rounded-lg bg-white">
         <h3
           style="color: var(--va-primary); border-bottom-color: #154ec1; border-bottom: 2px"
