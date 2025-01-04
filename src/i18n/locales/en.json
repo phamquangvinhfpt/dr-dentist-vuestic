@@ -744,7 +744,93 @@
     "message": "Message",
     "send": "Send",
     "sending": "Sending",
-    "success": "Your message has been sent successfully!"
+    "success": "Your message has been sent successfully!",
+    "createDate": "Create Date",
+    "status": "Status",
+    "staffName": "Staff Name",
+    "actions": "Actions",
+    "management": {
+      "title": "Contact Information",
+      "staff_list": "Staff List",
+      "non_staff_list": "Non-Staff List",
+      "search_placeholder": "Search...",
+      "no_contacts": "No contacts found",
+      "assigned": "Assigned",
+      "pending": "Pending",
+      "not_assigned": "Not assigned",
+      "assign_staff": "Assign Staff",
+      "select_staff": "Select Staff",
+      "choose_staff": "Choose a staff member",
+      "staff_assigned_success": "Staff assigned successfully",
+      "staff_assigned_error": "Failed to assign staff",
+      "fetch_staff_error": "Failed to fetch staff list",
+      "fetch_contacts_error": "Failed to fetch contacts",
+      "contact_details": "CONTACT DETAILS",
+      "personal_info": "Personal Information",
+      "status_info": "Status Information",
+      "contact_content": "Contact Content",
+      "attached_images": "Attached Images",
+      "created_date": "Created Date",
+      "staff_name": "Staff Name",
+      "email_context": "Email Context",
+      "close": "Close",
+      "cancel": "Cancel",
+      "assign": "Assign",
+      "view_details": "View Details",
+      "results_info": "{count} results.",
+      "results_per_page": "Results per page",
+      "preview": {
+        "title": "Image Preview",
+        "alt_text": "Contact image {index}",
+        "preview_alt": "Preview"
+      },
+      "tooltips": {
+        "assign_staff": "Assign staff",
+        "view_details": "View details"
+      },
+
+      "loading": "Loading...",
+      "unauthorized_access": "You don't have permission to access this page",
+      "image_preview": "Image Preview",
+      "fields": {
+        "title": "Title",
+        "email": "Email",
+        "phone": "Phone",
+        "status": "Status",
+        "message": "Message",
+        "email_context": "Email Context"
+      },
+      "image": {
+        "alt": "Contact image {index}",
+        "preview": "Image Preview"
+      },
+      "status": {
+        "assigned": "Assigned",
+        "pending": "Pending",
+        "not_assigned": "Not assigned"
+      },
+      "table": {
+        "title": "Title",
+        "email": "Email",
+        "phone": "Phone",
+        "created_date": "Created Date",
+        "status": "Status",
+        "staff_name": "Staff Name",
+        "actions": "Actions"
+      },
+      "management": {
+        "staff_list": "Staff List",
+        "non_staff_list": "Non-Staff List",
+        "search_placeholder": "Search...",
+        "title": "Title",
+        "email": "Email",
+        "phone": "Phone",
+        "created_date": "Created Date",
+        "status": "Status",
+        "staff_name": "Staff Name",
+        "actions": "Actions"
+      }
+    }
   },
   "service": {
     "id": "ID",
@@ -848,7 +934,18 @@
     "myPayments": "My Payments",
     "paymentDetails": "Payment Details",
     "statusIncomplete": "Incomplete",
-    "statusCompleted": "Completed"
+    "statusCompleted": "Completed",
+    "selectPatient": "Select patient",
+    "exportFileName": "payment-history-{name}-{startDate}-to-{endDate}.xlsx",
+    "exportFileNameAll": "all-payments-{startDate}-to-{endDate}.xlsx",
+    "exportSuccess": "Export successful",
+    "exportError": "Export failed. Please try again later",
+    "noDataReceived": "No data received from server",
+    "loadPatientError": "Failed to load patient list",
+    "waiting": "Waiting",
+    "canceled": "Canceled",
+    "failed": "Failed",
+    "none": "None"
   },
   "form": {
     "formManagement": "Form Management",
@@ -866,6 +963,8 @@
     "MyForms": "My Forms",
     "CreateApplication": "Create Application",
     "SearchForms": "Search Forms",
+    "pageTitle": "FORM MANAGEMENT",
+    "searchFormsPlaceholder": "Search forms...",
     "BasicInformation": "Basic Information",
     "WorkingDate": "Working Date",
     "WorkingHours": "Working Hours",
@@ -886,6 +985,49 @@
     "ApplicationSubmitted": "Application submitted",
     "ApplicationFailed": "Application submitted failed",
     "GotIt": "Got it",
-    "ApplicationForm": "Application Form"
+    "ApplicationForm": "Application Form",
+    "fetchError": "Failed to fetch forms",
+    "noteRequired": "Note is required",
+    "statusUpdateSuccess": "Status updated successfully",
+    "statusUpdateError": "Failed to update status",
+    "searchPlaceholder": "Search forms...",
+    "noFormsFound": "No forms found",
+    "changeStatus": "Change Status",
+    "confirmStatusChange": "Are you sure you want to change the status to",
+    "statusNote": "Note",
+    "statusNotePlaceholder": "Enter a note for this status change...",
+    "viewDetails": "View Details",
+    "basicInfo": "Basic Information",
+    "workingHours": "Working Hours",
+    "noDescription": "No description provided",
+    "noNotes": "No notes available"
+  },
+  "medicalRecord": {
+    "title": "Medical Records",
+    "subtitle": "View your complete medical history and treatment records",
+    "noRecords": "No medical records found",
+    "error": {
+      "userNotAuth": "User not authenticated",
+      "fetchFailed": "Failed to fetch medical records"
+    },
+    "dateRange": {
+      "from": "From",
+      "to": "To"
+    },
+    "basicExamination": {
+      "title": "Basic Examination",
+      "result": "Examination Result",
+      "treatmentPlan": "Treatment Plan"
+    },
+    "diagnosis": {
+      "title": "Diagnosis",
+      "affectedTeeth": "Affected Teeth"
+    },
+    "treatment": {
+      "title": "Treatment Indications",
+      "types": "Treatment Types",
+      "description": "Treatment Description",
+      "images": "Treatment Images"
+    }
   }
 }

@@ -3,7 +3,7 @@
     <VaCard class="payment-card">
       <VaCardTitle class="card-title">
         <i class="fas fa-money-bill-wave title-icon"></i>
-        Payment Management
+        {{ t('payment.management') }}
       </VaCardTitle>
 
       <VaCardContent>
@@ -67,7 +67,7 @@
                 :options="patientOptions"
                 track-by="id"
                 text-by="name"
-                placeholder="Chọn bệnh nhân"
+                :placeholder="t('payment.selectPatient')"
                 class="patient-select"
                 clearable
                 searchable
@@ -113,7 +113,7 @@
           hoverable
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No payments found</div>"
+          :no-data-html="`<div class='text-center'>${t('payment.noPaymentFound')}</div>`"
         >
           <template #cell(patientCode)="{ row }">
             <div class="flex items-center gap-2">
@@ -141,7 +141,9 @@
 
           <template #cell(depositDate)="{ row }">
             <div class="flex items-center gap-2">
-              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(row.rowData.depositDate) }}</span>
+              <span>{{
+                !row.rowData.depositDate ? t('payment.notDeposited') : formatDate(row.rowData.depositDate)
+              }}</span>
             </div>
           </template>
 
@@ -364,30 +366,30 @@ const formatDate = (date: string | null) => {
 const getPaymentMethod = (method: number) => {
   switch (method) {
     case PaymentMethod.None:
-      return 'None'
+      return t('payment.other')
     case PaymentMethod.Cash:
-      return 'Cash'
+      return t('payment.cash')
     case PaymentMethod.BankTransfer:
-      return 'Bank Transfer'
+      return t('payment.bankTransfer')
     default:
-      return 'Unknown'
+      return t('payment.other')
   }
 }
 
 const getStatusText = (status: number) => {
   switch (status) {
     case PaymentStatus.Waiting:
-      return 'Waiting'
+      return t('form.waiting')
     case PaymentStatus.Incomplete:
-      return 'Incomplete'
+      return t('payment.incomplete')
     case PaymentStatus.Completed:
-      return 'Completed'
+      return t('payment.completed')
     case PaymentStatus.Canceled:
-      return 'Canceled'
+      return t('validateUtils.Cancel')
     case PaymentStatus.Failed:
-      return 'Failed'
+      return t('form.failed')
     default:
-      return 'Unknown'
+      return t('payment.other')
   }
 }
 
@@ -487,18 +489,27 @@ const loadPatients = async () => {
       patientOptions.value = response.data
         .map((patient: Patient) => ({
           id: patient.id,
-          name: patient.fullName || patient.userName || 'Unknown Patient',
+          name: patient.fullName || formatUserName(patient.userName) || 'Unknown Patient',
         }))
         .filter((option: { id: string; name: string }) => option.id)
     }
   } catch (error) {
     console.error('Error loading patients:', error)
     init({
-      message: 'Lỗi khi tải danh sách bệnh nhân',
+      message: t('payment.loadPatientError'),
       color: 'danger',
       duration: 3000,
     })
   }
+}
+
+const formatUserName = (userName: string): string => {
+  if (!userName) return ''
+  // Split by dot and capitalize each part
+  return userName
+    .split('.')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
 }
 
 // Watch for patient selection changes
@@ -552,7 +563,6 @@ const handleExport = async () => {
     }
     console.log('Export params:', exportParams)
 
-    // Gọi API trực tiếp với axios để có thể xử lý response dạng blob
     const axiosInstance = apiService.getAxiosInstance()
     const response = await axiosInstance.post('/v1/payment/export-payment', exportParams, {
       responseType: 'arraybuffer',
@@ -563,28 +573,31 @@ const handleExport = async () => {
 
     console.log('Export response received')
 
-    // Kiểm tra response
     if (!response.data) {
-      throw new Error('No data received')
+      throw new Error(t('payment.noDataReceived'))
     }
 
-    // Tạo blob với đúng MIME type cho Excel
     const blob = new Blob([response.data], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     })
 
-    // Tạo URL và download
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     const fileName = selectedPatient.value
-      ? `lich-su-thanh-toan-${selectedPatient.value.name}-${startDate.value}-den-${endDate.value}.xlsx`
-      : `payments-${startDate.value}-to-${endDate.value}.xlsx`
+      ? t('payment.exportFileName', {
+          name: selectedPatient.value.name,
+          startDate: startDate.value,
+          endDate: endDate.value,
+        })
+      : t('payment.exportFileNameAll', {
+          startDate: startDate.value,
+          endDate: endDate.value,
+        })
     link.setAttribute('download', fileName)
     document.body.appendChild(link)
     link.click()
 
-    // Cleanup
     setTimeout(() => {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
@@ -598,7 +611,6 @@ const handleExport = async () => {
   } catch (error: unknown) {
     console.error('Export failed:', error)
 
-    // Thử parse error message nếu có
     let errorMessage = t('payment.exportError')
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as { response?: { data?: ArrayBuffer } }
@@ -626,17 +638,15 @@ const handleExport = async () => {
 
 // Thay đổi placeholder của search input
 const searchPlaceholder = computed(() => {
-  try {
-    return t('common.search')
-  } catch {
-    return 'Tìm kiếm...'
-  }
+  return t('common.search')
 })
 </script>
 
 <style scoped>
 .payment-management-container {
-  padding: 24px;
+  padding: 2rem;
+  background: var(--va-background-primary);
+  min-height: 100vh;
 }
 
 .payment-card {
@@ -817,8 +827,7 @@ const searchPlaceholder = computed(() => {
 /* Add smooth scaling for larger screens */
 @media (min-width: 1201px) {
   .payment-management-container {
-    max-width: 1400px;
-    margin: 0 auto;
+    padding: 2rem;
   }
 
   .search-filter-container {

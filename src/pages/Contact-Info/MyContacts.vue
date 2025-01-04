@@ -9,18 +9,6 @@
         </VaInput>
 
         <div class="flex gap-2 w-full md:w-[25%]">
-          <VaButton
-            :color="showAdvancedSearch ? 'primary' : 'gray'"
-            class="w-12"
-            @click="showAdvancedSearch = !showAdvancedSearch"
-          >
-            <i class="va-icon material-icons">tune</i>
-          </VaButton>
-
-          <VaButton color="primary" class="w-12" @click="handleRefresh">
-            <i class="va-icon material-icons">refresh</i>
-          </VaButton>
-
           <VaButton color="success" class="flex-1" @click="showAvailableContacts = true">
             <i class="va-icon material-icons">person_add</i>
             <span class="hidden md:inline">Get New</span>
@@ -30,7 +18,7 @@
       </div>
     </div>
 
-    <div v-if="showAdvancedSearch" class="mb-4 p-4 border rounded-lg">
+    <!-- <div v-if="showAdvancedSearch" class="mb-4 p-4 border rounded-lg">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label class="block mb-2">Search Fields</label>
@@ -50,7 +38,7 @@
           <VaSelect v-model="filterData.orderBy" multiple :options="sortFields" placeholder="Select sort fields" />
         </div>
       </div>
-    </div>
+    </div> -->
 
     <VaDataTable
       class="my-table va-table--hoverable"
@@ -168,7 +156,7 @@
                 <span class="info-label">Message</span>
                 <p class="content-text">{{ selectedContact.content }}</p>
               </div>
-              <div>
+              <div v-if="selectedContact.emailContext">
                 <span class="info-label">Email Context</span>
                 <p class="content-text">{{ selectedContact.emailContext }}</p>
               </div>
@@ -426,9 +414,8 @@ const columns = [
   { key: 'actions', title: 'Actions', width: '15%' },
 ]
 
-const showAdvancedSearch = ref(false)
-const searchFields = ['title', 'email', 'phone', 'content']
-const sortFields = ['title', 'email', 'phone', 'createdAt']
+// const searchFields = ['title', 'email', 'phone', 'content']
+// const sortFields = ['title', 'email', 'phone', 'createdAt']
 
 const filterData = reactive({
   pageNumber: 1,
@@ -469,20 +456,6 @@ const fetchContacts = async () => {
 const handleViewDetails = (contact: ContactInfo) => {
   selectedContact.value = contact
   showDetailsModal.value = true
-}
-
-// Handle refresh
-const handleRefresh = () => {
-  currentPage.value = 1
-  filterData.pageNumber = 1
-  filterData.pageSize = 10
-  filterData.keyword = ''
-  filterData.advancedSearch = {
-    fields: [],
-    keyword: '',
-  }
-  filterData.orderBy = []
-  fetchContacts()
 }
 
 // Watch effects

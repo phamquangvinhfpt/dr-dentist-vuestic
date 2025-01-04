@@ -211,7 +211,6 @@
         <form class="flex flex-col gap-4" @submit.prevent="handleCreate">
           <VaInput v-model="formData.name" label="Service Name" required />
           <VaTextarea v-model="formData.description" label="Description" required />
-          <VaCheckbox v-model="formData.isModify" label="Is Modifiable" />
           <VaSelect
             v-model="selectedTypeID"
             label="Type Service"
@@ -271,7 +270,7 @@ const formData = reactive({
   orderBy: [],
   name: '',
   description: '',
-  isModify: true,
+  isModify: false,
   typeID: '',
 })
 
@@ -579,9 +578,8 @@ const resetForm = () => {
   // Reset form
   formData.name = ''
   formData.description = ''
-  formData.isModify = true
+  formData.isModify = false // Set to false tuan test
   formData.typeID = ''
-
   selectedService.value = null
 }
 

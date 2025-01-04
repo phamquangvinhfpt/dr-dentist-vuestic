@@ -4,14 +4,19 @@
       <VaCardTitle class="card-title">
         <div class="flex items-center gap-4">
           <i class="fas fa-file-alt title-icon"></i>
-          <h2 class="text-2xl font-semibold">Form Management</h2>
+          <h2 class="text-2xl font-semibold">{{ t('form.pageTitle') }}</h2>
         </div>
       </VaCardTitle>
 
       <VaCardContent>
         <div class="header-actions">
           <div class="search-section">
-            <VaInput v-model="searchQuery" placeholder="Search forms..." class="search-input" size="medium">
+            <VaInput
+              v-model="searchQuery"
+              :placeholder="t('form.searchFormsPlaceholder')"
+              class="search-input"
+              size="medium"
+            >
               <template #prepend>
                 <VaIcon name="search" color="primary" class="search-icon" />
               </template>
@@ -53,7 +58,7 @@
           :disable-client-side-sorting="false"
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No forms found</div>"
+          :no-data-html="`<div class='text-center'>${t('form.noFormsFound')}</div>`"
         >
           <template #cell(name)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">

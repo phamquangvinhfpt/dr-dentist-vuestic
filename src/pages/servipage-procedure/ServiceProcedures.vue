@@ -1,6 +1,17 @@
 <template>
   <VaCard>
-    <VaCardTitle>Service Details</VaCardTitle>
+    <VaCardTitle>
+      <div class="flex items-center gap-4">
+        <VaButton
+          class="back-btn"
+          icon="arrow_back"
+          color="primary"
+          size="small"
+          @click="$router.push('/service-management')"
+        />
+        <span class="text-2xl font-bold">Service Details</span>
+      </div>
+    </VaCardTitle>
     <VaCardContent v-if="!isLoading">
       <!-- Service Details Section -->
       <div class="service-info mb-4">

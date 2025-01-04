@@ -734,7 +734,93 @@
     "message": "Nội dung",
     "send": "Gửi",
     "sending": "Đang gửi",
-    "success": "Tin nhắn của bạn đã được gửi thành công!"
+    "success": "Tin nhắn của bạn đã được gửi thành công!",
+    "createDate": "Ngày Tạo",
+    "status": "Trạng Thái",
+    "staffName": "Tên Nhân Viên",
+    "actions": "Thao Tác",
+    "management": {
+      "title": "Thông Tin Liên Hệ",
+      "staff_list": "Danh Sách Nhân Viên",
+      "non_staff_list": "Danh Sách Chưa Phân Công",
+      "search_placeholder": "Tìm kiếm...",
+      "no_contacts": "Không tìm thấy liên hệ nào",
+      "assigned": "Đã Phân Công",
+      "pending": "Đang Chờ",
+      "not_assigned": "Chưa phân công",
+      "assign_staff": "Phân Công Nhân Viên",
+      "select_staff": "Chọn Nhân Viên",
+      "choose_staff": "Chọn một nhân viên",
+      "staff_assigned_success": "Phân công nhân viên thành công",
+      "staff_assigned_error": "Phân công nhân viên thất bại",
+      "fetch_staff_error": "Không thể tải danh sách nhân viên",
+      "fetch_contacts_error": "Không thể tải danh sách liên hệ",
+      "contact_details": "CHI TIẾT LIÊN HỆ",
+      "personal_info": "Thông Tin Cá Nhân",
+      "status_info": "Thông Tin Trạng Thái",
+      "created_date": "Ngày Tạo",
+      "staff_name": "Tên Nhân Viên",
+      "contact_content": "Nội Dung Liên Hệ",
+      "email_context": "Nội Dung Email",
+      "attached_images": "Hình Ảnh Đính Kèm",
+      "close": "Đóng",
+      "cancel": "Hủy",
+      "assign": "Phân Công",
+      "view_details": "Xem Chi Tiết",
+      "results_info": "{count} kết quả.",
+      "results_per_page": "kết quả mỗi trang",
+      "preview": {
+        "title": "Xem Trước Hình Ảnh",
+        "alt_text": "Hình ảnh liên hệ {index}",
+        "preview_alt": "Xem trước"
+      },
+      "tooltips": {
+        "assign_staff": "Phân công nhân viên",
+        "view_details": "Xem chi tiết"
+      },
+      "table": {
+        "title": "Tiêu đề",
+        "email": "Email",
+        "phone": "Điện thoại",
+        "created_date": "Ngày Tạo",
+        "status": "Trạng Thái",
+        "staff_name": "Tên Nhân Viên",
+        "actions": "Thao Tác"
+      },
+      "loading": "Đang tải...",
+      "unauthorized_access": "Bạn không có quyền truy cập trang này",
+      "image_preview": "Xem Trước Hình Ảnh",
+      "fields": {
+        "title": "Tiêu đề",
+        "email": "Email",
+        "phone": "Điện thoại",
+        "status": "Trạng Thái",
+        "message": "Tin nhắn",
+        "email_context": "Nội dung email"
+      },
+      "image": {
+        "alt": "Hình ảnh liên hệ {index}",
+        "preview": "Xem trước hình ảnh"
+      },
+      "status": {
+        "assigned": "Đã phân công",
+        "pending": "Đang chờ",
+        "not_assigned": "Chưa phân công"
+      },
+      "management": {
+        "staff_list": "Danh Sách Nhân Viên",
+        "non_staff_list": "Danh Sách Chưa Phân Công",
+        "search_placeholder": "Tìm kiếm...",
+        "title": "Tiêu đề",
+        "email": "Email",
+        "phone": "Điện thoại",
+        "created_date": "Ngày Tạo",
+        "status": "Trạng Thái",
+        "staff_name": "Tên Nhân Viên",
+        "actions": "Thao Tác",
+        "no_contacts": "Không tìm thấy liên hệ nào"
+      }
+    }
   },
   "service": {
     "id": "Mã",
@@ -805,7 +891,18 @@
     "myPayments": "Thanh Toán Của Tôi",
     "paymentDetails": "Chi Tiết Thanh Toán",
     "statusIncomplete": "Chưa Hoàn Thành",
-    "statusCompleted": "Đã Hoàn Thành"
+    "statusCompleted": "Đã Hoàn Thành",
+    "selectPatient": "Chọn bệnh nhân",
+    "exportFileName": "lich-su-thanh-toan-{name}-{startDate}-den-{endDate}.xlsx",
+    "exportFileNameAll": "tat-ca-thanh-toan-{startDate}-den-{endDate}.xlsx",
+    "exportSuccess": "Xuất file thành công",
+    "exportError": "Xuất file thất bại. Vui lòng thử lại sau",
+    "noDataReceived": "Không nhận được dữ liệu từ máy chủ",
+    "loadPatientError": "Không thể tải danh sách bệnh nhân",
+    "waiting": "Đang chờ",
+    "canceled": "Đã hủy",
+    "failed": "Thất bại",
+    "none": "Không có"
   },
   "form": {
     "formManagement": "Quản Lý Phiếu Đăng Ký",
@@ -823,6 +920,8 @@
     "MyForms": "Phiếu Đăng Ký Của Tôi",
     "CreateApplication": "Tạo Phiếu Đăng Ký",
     "SearchForms": "Tìm Phiếu Đăng Ký",
+    "pageTitle": "QUẢN LÝ PHIẾU ĐĂNG KÝ",
+    "searchFormsPlaceholder": "Tìm kiếm phiếu đăng ký...",
     "BasicInformation": "Thông Tin Cơ Bản",
     "WorkingDate": "Ngày Làm Việc",
     "WorkingHours": "Giờ Làm Việc",
@@ -843,6 +942,49 @@
     "ApplicationSubmitted": "Phiếu đăng ký đã được nộp",
     "ApplicationFailed": "Phiếu đăng ký đã được nộp thất bại",
     "GotIt": "Đã hiểu",
-    "ApplicationForm": "Phiếu Đăng Ký"
+    "ApplicationForm": "Phiếu Đăng Ký",
+    "fetchError": "Không thể tải danh sách phiếu đăng ký",
+    "noteRequired": "Ghi chú là bắt buộc",
+    "statusUpdateSuccess": "Cập nhật trạng thái thành công",
+    "statusUpdateError": "Cập nhật trạng thái thất bại",
+    "searchPlaceholder": "Tìm kiếm phiếu đăng ký...",
+    "noFormsFound": "Không tìm thấy phiếu đăng ký",
+    "changeStatus": "Thay Đổi Trạng Thái",
+    "confirmStatusChange": "Bạn có chắc chắn muốn thay đổi trạng thái thành",
+    "statusNote": "Ghi Chú",
+    "statusNotePlaceholder": "Nhập ghi chú cho việc thay đổi trạng thái...",
+    "viewDetails": "Xem Chi Tiết",
+    "basicInfo": "Thông Tin Cơ Bản",
+    "workingHours": "Giờ Làm Việc",
+    "noDescription": "Không có mô tả",
+    "noNotes": "Không có ghi chú"
+  },
+  "medicalRecord": {
+    "title": "Hồ Sơ Bệnh Án",
+    "subtitle": "Xem lịch sử bệnh án và điều trị của bạn",
+    "noRecords": "Không tìm thấy hồ sơ bệnh án",
+    "error": {
+      "userNotAuth": "Người dùng chưa được xác thực",
+      "fetchFailed": "Không thể tải hồ sơ bệnh án"
+    },
+    "dateRange": {
+      "from": "Từ ngày",
+      "to": "Đến ngày"
+    },
+    "basicExamination": {
+      "title": "Khám Cơ Bản",
+      "result": "Kết Quả Khám",
+      "treatmentPlan": "Kế Hoạch Điều Trị"
+    },
+    "diagnosis": {
+      "title": "Chẩn Đoán",
+      "affectedTeeth": "Răng Bị Ảnh Hưởng"
+    },
+    "treatment": {
+      "title": "Chỉ Định Điều Trị",
+      "types": "Loại Điều Trị",
+      "description": "Mô Tả Điều Trị",
+      "images": "Hình Ảnh Điều Trị"
+    }
   }
 }
