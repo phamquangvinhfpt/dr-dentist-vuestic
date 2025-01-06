@@ -71,9 +71,25 @@ class DoctorService {
         return Promise.reject(error)
       })
   }
-  async updateDoctor(id: string, doctorData: any): Promise<any> {
+  async updateDoctor(doctorData: any): Promise<any> {
+    console.log('thông tin gửi về api', doctorData)
+    const formData = new FormData()
+    // Thêm các field thông thường
+    formData.append('DoctorID', doctorData?.DoctorID || '')
+    formData.append('TypeServiceID', doctorData?.TypeServiceID || '')
+    formData.append('Education', doctorData.Education || '')
+    formData.append('College', doctorData.College || '')
+    formData.append('Certification', doctorData.Certification || '')
+    formData.append('YearOfExp', doctorData.YearOfExp !== undefined ? doctorData.YearOfExp.toString() : '0')
+    formData.append('SeftDescription', doctorData.SeftDescription || '')
+    formData.append('WorkingType', doctorData.WorkingType !== undefined ? doctorData.WorkingType.toString() : '0')
+    if (Array.isArray(doctorData.CertificationImage)) {
+      doctorData.CertificationImage.forEach((image: File) => {
+        formData.append(`CertificationImage`, image)
+      })
+    }
     return apiService
-      .post(`/users/customer/update-doctor/${id}`, doctorData) // Adjust the endpoint as necessary
+      .post(`/personal/update-doctor-profile`, formData)
       .then((response) => {
         return Promise.resolve(response.data)
       })

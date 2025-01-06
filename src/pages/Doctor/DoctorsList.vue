@@ -80,22 +80,6 @@ const getSrcAvatar = (row: any) => {
   return ''
 }
 
-const deleteDoctor = async (id: string, doctorName: string, event?: Event) => {
-  if (event) {
-    event.stopPropagation()
-  }
-
-  const confirmDelete = confirm(`Bạn có thực sự muốn xóa bác sĩ ${doctorName}?`)
-  if (confirmDelete) {
-    try {
-      await userStore.deleteDoctor(id) // Call the delete function from the store
-      await getAllDoctors() // Refresh the doctor list
-    } catch (error) {
-      console.error('Error deleting doctor:', error)
-    }
-  }
-}
-
 const updateDoctor = (id: string, event?: Event) => {
   if (event) {
     event.stopPropagation()
@@ -192,9 +176,6 @@ watch(currentPage, () => {
               v-if="selectedDoctorId === doctor.id"
               class="bg-indigo-100/80 px-6 py-3 flex gap-4 justify-end items-center text-sm"
             >
-              <VaButton color="danger" @click="deleteDoctor(doctor.id, doctor.userName, $event)">
-                <i class="mdi mdi-delete h-4 w-4 text-red"> </i>
-              </VaButton>
               <VaButton color="warning" @click="updateDoctor(doctor.id, $event)">
                 <i class="mdi mdi-pencil h-4 w-4 text-yellow"></i>
               </VaButton>

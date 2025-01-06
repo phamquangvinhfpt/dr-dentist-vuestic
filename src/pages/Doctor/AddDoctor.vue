@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 
-import { useToast } from 'vuestic-ui'
+import { useToast, VaButton, VaCard, VaForm } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
 
 const router = useRouter()
@@ -507,17 +507,17 @@ const validateSelfDescription = () => {
 
 <template>
   <VaCard class="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-    <form class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow" @submit.prevent="submitForm">
-      <div class="flex justify-between mb-6">
+    <VaForm class="form-container max-w-6xl mx-auto p-6 rounded-lg shadow" @submit.prevent="submitForm">
+      <VaCard class="flex justify-between mb-6">
         <VaButton @click="goBack">
           <template #prepend>
             <i class="mdi mdi-arrow-left mr-2"></i>
           </template>
           Quay lại
         </VaButton>
-      </div>
+      </VaCard>
 
-      <div class="grid grid-cols-2 gap-8">
+      <VaCard class="grid grid-cols-2 gap-8">
         <div class="space-y-4">
           <h3 class="text-lg font-semibold mb-4">Thông tin cơ bản</h3>
 
@@ -621,7 +621,7 @@ const validateSelfDescription = () => {
             >Hình ảnh bằng cấp
           </label>
           <!-- File Upload Container -->
-          <div
+          <VaCard
             class="flex flex-col items-center justify-center w-full p-6 bg-white border-2 border-dashed border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition"
           >
             <!-- Instructions -->
@@ -657,7 +657,7 @@ const validateSelfDescription = () => {
                 class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
               />
             </div>
-          </div>
+          </VaCard>
           <label
             for="serviceType"
             style="color: var(--va-primary)"
@@ -726,12 +726,12 @@ const validateSelfDescription = () => {
             class="auto-resize"
           />
         </div>
-      </div>
+      </VaCard>
 
-      <div class="flex justify-end mt-6">
+      <VaCard class="flex justify-end mt-6">
         <VaButton type="submit" color="primary">Thêm Bác Sĩ</VaButton>
-      </div>
-    </form>
+      </VaCard>
+    </VaForm>
 
     <!-- Modal xác nhận -->
     <VaModal v-model="showConfirmation" class="text-center" overlay hide-default-actions>

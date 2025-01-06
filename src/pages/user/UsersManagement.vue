@@ -21,9 +21,9 @@
         <div>Gender</div>
         <div>Email</div>
         <div>Phone</div>
-        <div>Actions</div>
       </div>
-      <div v-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">No matching users found.</div>
+      <div v-if="isLoading" class="py-10 text-center text-gray-500">Loading...</div>
+      <div v-else-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">No matching users found.</div>
 
       <ul v-else>
         <li
@@ -40,12 +40,6 @@
             <div class="truncate">{{ maskEmail(user.email) }}</div>
             <div>{{ maskPhone(user.phoneNumber) }}</div>
             <div class="flex gap-2 justify-end items-center text-sm">
-              <VaButton color="danger">
-                <i class="mdi mdi-delete h-4 w-4 text-red"></i>
-              </VaButton>
-              <VaButton color="warning" @click.stop="updateUser(user.id)">
-                <i class="mdi mdi-pencil h-4 w-4 text-yellow"></i>
-              </VaButton>
               <VaButton color="info" @click.stop="viewDetails(user.id)">
                 <i class="mdi mdi-open-in-new h-4 w-4 text-blue"></i>
               </VaButton>
@@ -71,7 +65,9 @@
         <ul class="pagination flex items-center space-x-2">
           <!-- Nút quay lại -->
           <li>
-            <Button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">←</Button>
+            <Button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">
+              <i class="mdi mdi-arrow-left h-4 w-4 text-blue"></i>
+            </Button>
           </li>
 
           <!-- Số trang -->
@@ -83,12 +79,15 @@
 
           <!-- Nút tiếp tục -->
           <li>
-            <button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">→</button>
+            <Button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">
+              <i class="mdi mdi-arrow-right h-4 w-4 text-blue"></i>
+            </Button>
           </li>
         </ul>
       </div>
     </VaCard>
   </VaCard>
+  <link rel="stylesheet" href="@mdi/font/css/materialdesignicons.css" />
 </template>
 
 <script lang="ts" setup>
@@ -100,6 +99,7 @@ import '@mdi/font/css/materialdesignicons.css'
 
 const userStore = useUserProfileStore()
 const router = useRouter()
+const isLoading = ref(true) // Thêm biến trạng thái loading
 
 const userList = ref<
   {
@@ -121,19 +121,13 @@ const userList = ref<
 const searchQuery = ref('')
 
 const filteredUsers = computed(() => {
+  if (!userList.value || userList.value.length === 0) return []
+
   const query = searchQuery.value.toLowerCase().trim()
-  return query
-    ? userList.value.filter((user) => {
-        console.log('User role:', user.role)
-        return (
-          user.role.roleName === 'Patient' &&
-          (user.email?.toLowerCase().includes(query) || user.userName?.toLowerCase().includes(query))
-        )
-      })
-    : userList.value.filter((user) => {
-        console.log('User role:', user.role)
-        return user.role.roleName === 'Patient'
-      })
+
+  return userList.value.filter(
+    (user) => user.email?.toLowerCase().includes(query) || user.userName?.toLowerCase().includes(query),
+  )
 })
 
 const currentPage = ref(1)
@@ -144,7 +138,8 @@ const pageSizeOptions = ref([5, 10, 20, 50])
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
-  return userList.value.slice(start, end)
+  // Apply filter to the userList before slicing for pagination
+  return filteredUsers.value.slice(start, end)
 })
 
 // Tổng số mục sau khi áp dụng tìm kiếm
@@ -152,7 +147,7 @@ const totalItems = computed(() => userList.value.length)
 
 const getAllUsers = async () => {
   try {
-    const res = await userStore.getAllPatients({ isActive: true, pageNumber: 1, pageSize: 10 })
+    const res = await userStore.getAllPatients({ isActive: true, pageNumber: 1, pageSize: 100 })
     userList.value = res.data.map((user) => ({
       id: user.id,
       userName: user.userName,
@@ -170,16 +165,14 @@ const getAllUsers = async () => {
     }))
   } catch (error) {
     console.error('Error fetching users:', error)
+  } finally {
+    isLoading.value = false // Kết thúc loading
   }
 }
 
 const viewDetails = (id: string) => {
   userStore.id = id
   router.push({ name: 'user-detail', params: { id } })
-}
-
-const updateUser = (id: string) => {
-  router.push({ name: 'user-update', params: { id } })
 }
 
 const maskEmail = (email: string) => email.replace(/(\w{3})[\w.-]+(@[\w.]+)/, '$1***$2')

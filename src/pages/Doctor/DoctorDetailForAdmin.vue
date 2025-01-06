@@ -189,7 +189,12 @@
           </div>
           <div v-else-if="currentTab === 'history'" class="space-y-4">
             <h2 class="text-xl font-semibold">Lịch Sử Khám</h2>
-            <p>Thông tin về lịch sử khám của người dùng sẽ hiển thị ở đây.</p>
+            <p v-if="filteredAppointments.length === 0">Không có lịch sử khám nào.</p>
+            <ul v-else>
+              <li v-for="appointment in filteredAppointments" :key="appointment.id">
+                {{ appointment.appointmentDate }} - {{ appointment.patientName }} ({{ appointment.status }})
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -253,10 +258,13 @@ import { useAuthStore } from '@/stores/modules/auth.module'
 import userService from '@/services/user.service'
 import { Star, Mail, Phone, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { getSrcAvatar } from '@/services/utils'
+import { useAppointmentStore } from '@/stores/modules/appointment.module'
 
 const route = useRoute()
 const doctorStore = useDoctorProfileStore()
 const authStore = useAuthStore()
+const appointmentStore = useAppointmentStore()
+const doctorid = route.params.id as string
 const currentTab = ref('reviews') // Mặc định tab "Đánh Giá" được chọn
 const tabs = [
   { name: 'reviews', label: 'Đánh Giá' },
@@ -279,6 +287,7 @@ interface Doctor {
     seftDescription: string
     certification: string
     certificationImage: string
+    id: string
   }
   doctorFeedback: any[]
 }
@@ -299,6 +308,7 @@ const doctor = ref<Doctor>({
     seftDescription: '',
     certification: '',
     certificationImage: '',
+    id: '',
   },
   doctorFeedback: [],
 })
@@ -314,13 +324,36 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options)
 }
 
+interface Appointment {
+  id: string
+  dentistId: string
+  appointmentDate: string
+  patientName: string
+  status: string
+  // Add other relevant properties
+}
+
+const appointments = ref<Appointment[]>([])
+const filteredAppointments = computed(() => {
+  return appointments.value.filter((appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id)
+})
+
 onMounted(async () => {
   try {
-    const id = route.params.id as string
-    const response = await doctorStore.getDoctorDetailForAdmin(id)
+    const response = await doctorStore.getDoctorDetailForAdmin(doctorid)
     doctor.value = {
       ...response,
       doctorFeedback: (response.doctorFeedback || []).flatMap((feedback: any) => feedback.feedbacks),
+    }
+    const appointmentsResponse = await appointmentStore.getAppointments({})
+    console.log('danh sách medical', appointmentsResponse)
+
+    // Check if appointmentsResponse is an array
+    if (Array.isArray(appointmentsResponse)) {
+      appointments.value = appointmentsResponse as Appointment[] // Assign the response directly
+      console.log('danh sách medical filterfilter', appointments.value)
+    } else {
+      appointments.value = [] // Assign an empty array if not an array
     }
   } catch (error) {
     console.error('Error fetching doctor data:', error)

@@ -19,3 +19,13 @@ export type ResetPassword = {
   token: string
   captchaToken: string
 }
+
+export type UserDetailsUpdate = {
+  userId: string
+  firstName: string
+  lastName: string
+  gender: boolean
+  birthDate: string
+  job: string
+  address: string
+}

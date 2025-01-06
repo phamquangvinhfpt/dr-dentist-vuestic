@@ -27,7 +27,6 @@
               <li>
                 <strong>Phone:</strong>
                 <a :href="'tel:' + user.phone">{{ user.phone }}</a>
-                <span v-if="user.phoneStatus" class="status confirmed">Confirmed</span>
               </li>
               <li><strong>Address:</strong> {{ user.address }}</li>
               <li><strong>Born:</strong> {{ user.birthDate }}</li>
@@ -47,44 +46,12 @@
             <span v-if="user.emailStatus" class="status confirmed">Confirmed</span>
             <span v-else class="status not-confirmed">Not Confirm</span>
           </li>
-
           <li>
             <strong>Phone Status:</strong>
             <span v-if="user.phoneStatus" class="status confirmed">Confirmed</span>
             <span v-else class="status not-confirmed">Not Confirm</span>
           </li>
         </ul>
-      </div>
-
-      <!-- Activity History Section -->
-      <div class="section activity-history">
-        <h2>Activity History</h2>
-        <div class="tabs">
-          <button :class="{ active: showTransactionHistory }" @click="showTransactions">Transaction History</button>
-          <button :class="{ active: !showTransactionHistory }" @click="showAppointments">Appointment History</button>
-        </div>
-        <div class="content">
-          <div v-if="showTransactionHistory">
-            <ul class="transactions">
-              <li v-for="transaction in user.transactions" :key="transaction.id" class="transaction">
-                <span class="type">{{ transaction.type }}</span>
-                <span class="date">{{ transaction.date }}</span>
-                <span class="amount" :class="transaction.amount > 0 ? 'positive' : 'negative'">
-                  {{ transaction.amount > 0 ? '+' : '' }}{{ transaction.amount }}
-                </span>
-              </li>
-            </ul>
-          </div>
-          <div v-else>
-            <ul class="appointments">
-              <li v-for="appointment in user.appointments" :key="appointment.id" class="appointment">
-                <span class="details">{{ appointment.doctor }} - {{ appointment.specialty }}</span>
-                <span class="date-time">{{ appointment.date }} at {{ appointment.time }}</span>
-                <span class="status" :class="appointment.status.toLowerCase()">{{ appointment.status }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
       </div>
     </VaInnerLoading>
     <VaButton class="btn-back" @click="$router.go(-1)"> Back </VaButton>
@@ -116,7 +83,6 @@ interface User {
 const route = useRoute()
 const userId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
 const user = ref<User>({} as User)
-const showTransactionHistory = ref(true)
 const loading = ref(true)
 
 const getUserDetail = async () => {
@@ -143,14 +109,6 @@ const getUserDetail = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const showTransactions = () => {
-  showTransactionHistory.value = true
-}
-
-const showAppointments = () => {
-  showTransactionHistory.value = false
 }
 
 onMounted(() => {
@@ -260,5 +218,10 @@ onMounted(() => {
 .status.cancelled {
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.status.not-confirmed {
+  color: rgba(255, 0, 0, 0.822);
+  background-color: #eeb7b0a6;
 }
 </style>

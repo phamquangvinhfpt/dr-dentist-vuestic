@@ -74,6 +74,7 @@
       :is-open="isModalOpen"
       :service-details="serviceDetails"
       :is-loading="isDetailsLoading"
+      :reviews="reviews"
       @close="closeModal"
     />
   </VaCard>
@@ -95,6 +96,7 @@ const paginatedServices = ref([])
 const isLoading = ref(false)
 const isModalOpen = ref(false)
 const serviceDetails = ref(null)
+const reviews = ref(null)
 const isDetailsLoading = ref(false)
 const serviceStore = useServiceStore()
 const route = useRoute()
@@ -168,7 +170,9 @@ const getServicesDetailById = async (id) => {
   isDetailsLoading.value = true
   try {
     const response = await useServiceStore().getServiceDetail(id)
-    serviceDetails.value = response.procedures
+    serviceDetails.value = response.serviceDTO
+    reviews.value = response.feedbacks
+    console.log('Giá trị của serviceDetails USER :', response.feedbacks)
   } catch (error) {
     console.error('Error fetching service details:', error)
   } finally {

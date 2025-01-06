@@ -142,7 +142,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'find-doctors',
         path: 'find-doctors',
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
         },
         component: () => import('../pages/Doctor/DoctorListForUser.vue'),
       },
@@ -151,8 +151,17 @@ const routes: Array<RouteRecordRaw> = [
         path: 'doctors/:id',
         component: () => import('../pages/Doctor/DoctorDetail.vue'),
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
           title: 'Doctor Details',
+        },
+      },
+      {
+        name: 'staff-detail',
+        path: 'staff/:id',
+        component: () => import('../pages/user/StaffDetail.vue'),
+        meta: {
+          requiresAuth: true,
+          title: 'Staff Details',
         },
       },
       {
@@ -416,7 +425,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'services',
         path: '/services/:id?',
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
         },
         component: ServiceForUser,
       },
