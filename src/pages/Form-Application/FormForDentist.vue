@@ -852,31 +852,6 @@ const updateDisplayedForms = () => {
   max-width: 600px;
 }
 
-.search-input {
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input) {
-  height: 40px;
-  font-size: 0.95rem;
-  background: var(--va-background-element) !important;
-  border: none !important;
-  border-radius: 8px;
-  padding: 0 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input):focus {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.search-input:deep(input)::placeholder {
-  color: var(--va-text-secondary);
-  opacity: 0.7;
-}
-
 .search-icon {
   font-size: 1.1rem;
   margin-left: 1rem;
@@ -1315,13 +1290,13 @@ const updateDisplayedForms = () => {
 
 .status-tab:hover {
   color: var(--va-text-primary);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--va-background-element);
 }
 
 .status-tab.active {
   background: var(--va-background-secondary);
   color: var(--va-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px var(--va-background-primary);
 }
 
 /* Responsive */
@@ -1357,6 +1332,9 @@ const updateDisplayedForms = () => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  background: var(--va-background-element);
+  padding: 4px;
+  border-radius: 8px;
 }
 
 /* Thêm responsive styles */

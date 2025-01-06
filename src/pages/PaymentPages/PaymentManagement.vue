@@ -906,7 +906,7 @@ html {
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: var(--va-background-primary);
+  background: var(--va-background-secondary);
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   margin: 1.5rem;
@@ -1085,7 +1085,7 @@ html {
 
 .status-tabs {
   display: flex;
-  background: var(--va-background-secondary);
+  background: var(--va-background-primary);
   border: 1px solid var(--va-border-color);
   border-radius: 8px;
   padding: 4px;
@@ -1097,7 +1097,7 @@ html {
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--va-text-secondary);
+  color: var(--va-text-primary);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -1111,11 +1111,12 @@ html {
   align-items: center;
   justify-content: center;
   margin: 0 2px;
+  border-color: var(--va-border-color);
 }
 
 .status-tab.active {
-  background: var(--va-background-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--va-background-secondary);
+  box-shadow: 0 2px 4px var(--va-background-primary);
   color: var(--va-primary);
 }
 
@@ -1126,7 +1127,7 @@ html {
 
 .method-tabs {
   display: flex;
-  background: var(--va-background-secondary);
+  background: var(--va-background-primary);
   border: 1px solid var(--va-border-color);
   border-radius: 8px;
   padding: 4px;
@@ -1138,7 +1139,7 @@ html {
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--va-text-secondary);
+  color: var(--va-text-primary);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -1152,12 +1153,13 @@ html {
   align-items: center;
   justify-content: center;
   margin: 0 2px;
+  border-color: var(--va-border-color);
 }
 
 .method-tab.active {
-  background: var(--va-background-primary);
+  background: var(--va-background-secondary);
   color: var(--va-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px var(--va-background-primary);
 }
 
 .status-tab:hover:not(.active),

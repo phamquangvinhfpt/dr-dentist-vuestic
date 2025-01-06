@@ -67,7 +67,7 @@
             </div>
           </template>
 
-          <template v-if="showBin" #cell(deletedOn)="{ row }">
+          <!-- <template v-if="showBin" #cell(deletedOn)="{ row }">
             <div class="flex items-center gap-2">
               <span>{{ formatDate(row.rowData.deletedOn) }}</span>
             </div>
@@ -77,7 +77,7 @@
             <div class="flex items-center gap-2">
               <span>{{ row.rowData.deletedBy }}</span>
             </div>
-          </template>
+          </template> -->
 
           <template #cell(serviceDescription)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
@@ -337,9 +337,9 @@ const handlePageSizeChange = (size: number) => {
   currentPage.value = 1
 }
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('vi-VN')
-}
+// const formatDate = (date: string) => {
+//   return new Date(date).toLocaleDateString('vi-VN')
+// }
 
 const getAllServicesPagination = async () => {
   try {
@@ -405,14 +405,8 @@ const columns = computed(() => {
     { key: 'totalPrice', label: t('service.price') },
   ]
 
-  if (showBin.value) {
-    baseColumns.push(
-      { key: 'deletedOn', label: t('common.deletedOn') },
-      { key: 'deletedBy', label: t('common.deletedBy') },
-    )
-  } else {
-    baseColumns.push({ key: 'status', label: t('service.status') })
-  }
+  if (showBin.value) baseColumns.push()
+  baseColumns.push({ key: 'status', label: t('service.status') })
 
   baseColumns.push({ key: 'action', label: t('common.actions') })
   return baseColumns
@@ -665,42 +659,6 @@ onMounted(async () => {
 .search-section {
   flex: 1;
   min-width: 300px;
-}
-
-.search-input {
-  width: 100%;
-}
-
-.search-input :deep(input) {
-  height: 42px;
-  border-radius: 8px;
-  padding: 8px 16px;
-  border: 1px solid var(--va-border-color);
-  transition: all 0.3s;
-  background: var(--va-background-secondary);
-  font-size: 0.95rem;
-  color: var(--va-text-primary);
-}
-
-.search-input :deep(input:focus) {
-  border-color: #3b82f6;
-  background: var(--va-background-secondary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.search-input :deep(.va-input-wrapper) {
-  border: none;
-  background: transparent;
-}
-
-.search-input :deep(.va-input) {
-  box-shadow: none;
-}
-
-.search-icon {
-  color: #64748b;
-  font-size: 1rem;
-  margin-right: 12px;
 }
 
 .filter-section {

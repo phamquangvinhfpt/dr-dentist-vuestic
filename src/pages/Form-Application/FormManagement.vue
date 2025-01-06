@@ -571,7 +571,7 @@ onMounted(async () => {
   align-items: center;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  background: var(--va-background-element);
+  background: var(--va-background-secondary);
   border-radius: 15px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
@@ -580,28 +580,6 @@ onMounted(async () => {
   width: 70%;
   max-width: 800px;
   transition: all 0.3s ease;
-}
-
-.search-input {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input) {
-  height: 45px;
-  font-size: 1rem;
-  padding: 0 1.2rem;
-  background: var(--va-background-secondary);
-  color: var(--va-text-primary);
-  border: 2px solid var(--va-border-color);
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input):focus {
-  border-color: var(--va-primary);
-  box-shadow: 0 0 0 4px rgba(var(--va-primary-rgb), 0.1);
 }
 
 .search-icon {

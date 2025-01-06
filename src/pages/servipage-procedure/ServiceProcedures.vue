@@ -159,9 +159,18 @@
     </template>
 
     <div class="p-4">
+      <!-- Search input -->
+      <div class="mb-4">
+        <VaInput v-model="searchQuery" :placeholder="t('common.search')" removable class="w-full">
+          <template #prependInner>
+            <i class="va-icon material-icons">search</i>
+          </template>
+        </VaInput>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <VaCard
-          v-for="procedure in availableProcedures"
+          v-for="procedure in filteredProcedures"
           :key="procedure.id"
           class="procedure-card border-black"
           :class="{
@@ -182,6 +191,11 @@
             </div>
           </VaCardContent>
         </VaCard>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-center mt-4">
+        <VaPagination v-model="currentPage" :pages="totalPages" :visible-pages="5" class="justify-center" />
       </div>
     </div>
 
@@ -214,7 +228,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { storeToRefs } from 'pinia'
@@ -240,6 +254,9 @@ const showAddModal = ref(false)
 const isAdding = ref(false)
 const selectedNewProcedures = ref<string[]>([])
 const allProcedures = ref<ProcedureDTO[]>([])
+const searchQuery = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 9 // 3x3 grid
 
 // Separate active and removed procedures
 const activeProcedures = computed(() => serviceProcedures.value.filter((proc) => !proc.procedureDetail.isRemove))
@@ -355,7 +372,36 @@ const handleAddProcedures = async () => {
     isAdding.value = false
   }
 }
+// Filter procedures based on search query and pagination
+const filteredProcedures = computed(() => {
+  const filtered = availableProcedures.value.filter((procedure) => {
+    const searchLower = searchQuery.value.toLowerCase()
+    return (
+      procedure.name.toLowerCase().includes(searchLower) || procedure.description.toLowerCase().includes(searchLower)
+    )
+  })
 
+  // Pagination
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filtered.slice(start, end)
+})
+
+const totalPages = computed(() => {
+  const filtered = availableProcedures.value.filter((procedure) => {
+    const searchLower = searchQuery.value.toLowerCase()
+    return (
+      procedure.name.toLowerCase().includes(searchLower) || procedure.description.toLowerCase().includes(searchLower)
+    )
+  })
+  return Math.ceil(filtered.length / itemsPerPage)
+})
+
+// Reset pagination when search changes
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+//end filter procedures
 onMounted(async () => {
   try {
     const id = route.params.id as string

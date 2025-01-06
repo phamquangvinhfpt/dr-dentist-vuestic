@@ -2,7 +2,7 @@
   <div class="my-contacts">
     <div class="flex justify-between mb-4">
       <div class="flex flex-col md:flex-row gap-2 w-full">
-        <VaInput v-model="filterData.keyword" placeholder="Search..." class="w-full md:w-[75%]" clearable>
+        <VaInput v-model="filterData.keyword" :placeholder="$t('common.search')" class="w-full md:w-[75%]" clearable>
           <template #appendInner>
             <i class="va-icon material-icons">search</i>
           </template>
@@ -11,8 +11,8 @@
         <div class="flex gap-2 w-full md:w-[25%]">
           <VaButton color="success" class="flex-1" @click="showAvailableContacts = true">
             <i class="va-icon material-icons">person_add</i>
-            <span class="hidden md:inline">Get New</span>
-            <span class="md:hidden">New</span>
+            <span class="hidden md:inline">{{ $t('contact.getNew') }}</span>
+            <span class="md:hidden">{{ $t('contact.getNew') }}</span>
           </VaButton>
         </div>
       </div>
@@ -50,7 +50,7 @@
         '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
       }"
       sticky-header
-      no-data-html="<div class='text-center'>No contacts found</div>"
+      :no-data-html="`<div class='text-center'>{$t('contact.management.no_contacts')}</div>`"
     >
       <template #cell(title)="{ row }">
         <div class="flex items-center gap-2">
@@ -88,8 +88,8 @@
     <VaCardContent>
       <div class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2">
         <div>
-          <b>{{ totalContacts }} results.</b>
-          Results per page
+          <b>{{ totalContacts }} {{ $t('contact.results') }}.</b>
+          {{ $t('contact.resultsPerPage') }}
           <VaSelect v-model="filterData.pageSize" class="!w-20" :options="[10, 50, 100]" />
         </div>
         <VaPagination
@@ -105,23 +105,28 @@
     </VaCardContent>
 
     <!-- View Details Modal -->
-    <VaModal v-model="showDetailsModal" title="CONTACT DETAILS" hide-default-actions class="contact-details-modal">
+    <VaModal
+      v-model="showDetailsModal"
+      :title="$t('contact.management.title')"
+      hide-default-actions
+      class="contact-details-modal"
+    >
       <div v-if="selectedContact" class="p-6">
         <div class="grid grid-cols-2 gap-6">
           <!-- Thông tin cá nhân -->
           <div class="contact-section">
-            <h3 class="section-title">Personal Information</h3>
+            <h3 class="section-title">{{ $t('contact.management.personalInformation') }}</h3>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Title</span>
+                <span class="info-label">{{ $t('contact.title') }}</span>
                 <span class="info-value">{{ selectedContact.title }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Email</span>
+                <span class="info-label">{{ $t('contact.email') }}</span>
                 <span class="info-value">{{ selectedContact.email }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Phone</span>
+                <span class="info-label">{{ $t('contact.phone') }}</span>
                 <span class="info-value">{{ selectedContact.phone }}</span>
               </div>
             </div>
@@ -129,20 +134,20 @@
 
           <!-- Thông tin trạng thái -->
           <div class="contact-section">
-            <h3 class="section-title">Status Information</h3>
+            <h3 class="section-title">{{ $t('contact.management.statusInformation') }}</h3>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Created Date</span>
+                <span class="info-label">{{ $t('contact.management.createdDate') }}</span>
                 <span class="info-value">{{ new Date(selectedContact.createDate).toLocaleString() }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Status</span>
+                <span class="info-label">{{ $t('contact.management.Status') }}</span>
                 <VaTag :color="selectedContact.staffId ? 'success' : 'warning'" class="status-tag">
                   {{ selectedContact.staffId ? 'Assigned' : 'Pending' }}
                 </VaTag>
               </div>
               <div class="info-item">
-                <span class="info-label">Staff Name</span>
+                <span class="info-label">{{ $t('contact.management.staffName') }}</span>
                 <span class="info-value">{{ selectedContact.staffName || 'Not assigned' }}</span>
               </div>
             </div>
@@ -150,14 +155,14 @@
 
           <!-- Nội dung liên hệ -->
           <div class="contact-section col-span-2">
-            <h3 class="section-title">Contact Content</h3>
+            <h3 class="section-title">{{ $t('contact.management.contactContent') }}</h3>
             <div class="content-box">
               <div class="mb-4">
-                <span class="info-label">Message</span>
+                <span class="info-label">{{ $t('contact.content') }}</span>
                 <p class="content-text">{{ selectedContact.content }}</p>
               </div>
               <div v-if="selectedContact.emailContext">
-                <span class="info-label">Email Context</span>
+                <span class="info-label">{{ $t('contact.emailContext') }}</span>
                 <p class="content-text">{{ selectedContact.emailContext }}</p>
               </div>
             </div>
@@ -165,7 +170,7 @@
 
           <!-- Hình ảnh -->
           <div v-if="selectedContact.imageUrl?.length" class="contact-section col-span-2">
-            <h3 class="section-title">Attached Images</h3>
+            <h3 class="section-title">{{ $t('contact.management.attachedImages') }}</h3>
             <div class="image-gallery">
               <div v-for="(url, index) in selectedContact.imageUrl" :key="index" class="image-container">
                 <img
@@ -181,18 +186,23 @@
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 p-4">
-          <VaButton color="gray" @click="showDetailsModal = false">Close</VaButton>
+          <VaButton color="gray" @click="showDetailsModal = false">{{ $t('common.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
 
     <!-- Send Email Modal -->
-    <VaModal v-model="showEmailModal" title="Send Email" hide-default-actions class="email-modal">
+    <VaModal
+      v-model="showEmailModal"
+      :title="$t('contact.management.sendEmail')"
+      hide-default-actions
+      class="email-modal"
+    >
       <div class="p-6">
         <!-- Email field -->
         <div class="mb-6">
           <div class="flex items-center border-b border-gray-200 pb-2">
-            <span class="text-sm font-medium w-16 text-gray-600">Email:</span>
+            <span class="text-sm font-medium w-16 text-gray-600">{{ $t('contact.email') }}:</span>
             <VaInput
               v-model="emailData.to"
               type="email"
@@ -209,10 +219,10 @@
         <!-- Subject field -->
         <div class="mb-6">
           <div class="flex items-center border-b border-gray-200 pb-2">
-            <span class="text-sm font-medium w-16 text-gray-600">Subject:</span>
+            <span class="text-sm font-medium w-16 text-gray-600">{{ $t('contact.management.subject') }}:</span>
             <VaInput
               v-model="emailData.subject"
-              placeholder="Enter subject"
+              :placeholder="$t('contact.management.subject')"
               class="flex-grow"
               :style="{
                 '--va-input-wrapper-border-color': 'transparent',
@@ -227,7 +237,7 @@
           <VaTextarea
             v-model="emailData.content"
             rows="12"
-            placeholder="Write your message here..."
+            :placeholder="$t('contact.management.writeMessage')"
             class="w-full"
             autosize
             :style="{
@@ -241,17 +251,22 @@
       <template #footer>
         <div class="flex justify-end items-center px-6 py-4 border-t">
           <div class="flex gap-4">
-            <VaButton color="gray" @click="showEmailModal = false">Cancel</VaButton>
-            <VaButton color="primary" :loading="isSubmitting" @click="submitEmail"> Send </VaButton>
+            <VaButton color="gray" @click="showEmailModal = false">{{ $t('common.cancel') }}</VaButton>
+            <VaButton color="primary" :loading="isSubmitting" @click="submitEmail"> {{ $t('common.send') }} </VaButton>
           </div>
         </div>
       </template>
     </VaModal>
 
     <!-- Update Call Image Modal -->
-    <VaModal v-model="showImageModal" title="Upload Images" hide-default-actions class="upload-modal">
+    <VaModal
+      v-model="showImageModal"
+      :title="$t('contact.management.uploadImages')"
+      hide-default-actions
+      class="upload-modal"
+    >
       <div class="p-6">
-        <p class="text-sm text-gray-600 mb-4">Upload images to update call image</p>
+        <p class="text-sm text-gray-600 mb-4">{{ $t('contact.management.uploadImages') }}</p>
 
         <div
           class="upload-area mb-6"
@@ -266,8 +281,8 @@
             <div class="mb-4">
               <i class="va-icon material-icons text-4xl text-gray-400">cloud_upload</i>
             </div>
-            <p class="text-center mb-2">Drag and drop image files to upload</p>
-            <p class="text-sm text-gray-500 mb-4">Or click the button below</p>
+            <p class="text-center mb-2">{{ $t('contact.management.dragAndDrop') }}</p>
+            <p class="text-sm text-gray-500 mb-4">{{ $t('contact.management.orClick') }}</p>
             <VaFileUpload
               v-model="selectedImages"
               multiple
@@ -276,7 +291,7 @@
               class="upload-btn"
               @paste="handlePaste"
             >
-              <VaButton color="primary">Select files</VaButton>
+              <VaButton color="primary">{{ $t('contact.management.selectFiles') }}</VaButton>
             </VaFileUpload>
           </div>
         </div>
@@ -294,8 +309,10 @@
 
       <template #footer>
         <div class="flex justify-end gap-4 p-4 border-t">
-          <VaButton color="gray" @click="closeImageModal">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="submitImages"> Add to profile </VaButton>
+          <VaButton color="gray" @click="closeImageModal">{{ $t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="submitImages">
+            {{ $t('contact.management.addToProfile') }}
+          </VaButton>
         </div>
       </template>
     </VaModal>
@@ -307,7 +324,7 @@
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 p-4">
-          <VaButton color="gray" @click="showImagePreview = false">Close</VaButton>
+          <VaButton color="gray" @click="showImagePreview = false">{{ $t('common.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -315,12 +332,12 @@
     <!-- Available Contacts Modal test Tuan -->
     <VaModal
       v-model="showAvailableContacts"
-      title="AVAILABLE CONTACTS"
+      :title="$t('contact.management.availableContacts')"
       hide-default-actions
       class="available-contacts-modal"
     >
       <div class="p-4">
-        <VaInput v-model="availableContactsSearch" placeholder="Search available contacts..." class="mb-4" clearable>
+        <VaInput v-model="availableContactsSearch" :placeholder="$t('common.search')" class="mb-4" clearable>
           <template #appendInner>
             <i class="va-icon material-icons">search</i>
           </template>
@@ -333,7 +350,7 @@
           hoverable
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No available contacts found</div>"
+          :no-data-html="`<div class='text-center'>${t('contact.management.no_contacts')}</div>`"
         >
           <template #cell(title)="{ row }">
             <div class="flex items-center">
@@ -354,14 +371,16 @@
           </template>
 
           <template #cell(actions)="{ row }">
-            <VaButton small color="primary" @click="handleTakeContact(row.rowData as ContactInfo)"> Take </VaButton>
+            <VaButton small color="primary" @click="handleTakeContact(row.rowData as ContactInfo)">
+              {{ $t('common.take') }}
+            </VaButton>
           </template>
         </VaDataTable>
 
         <div class="flex justify-between items-center mt-4">
           <div>
-            <b>{{ totalAvailableContacts }} results.</b>
-            Results per page
+            <b>{{ totalAvailableContacts }} {{ $t('contact.results') }}.</b>
+            {{ $t('contact.resultsPerPage') }}
             <VaSelect v-model="availableContactsPageSize" class="!w-20" :options="[10, 50, 100]" />
           </div>
           <VaPagination
@@ -377,7 +396,7 @@
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 p-4">
-          <VaButton color="gray" @click="showAvailableContacts = false">Close</VaButton>
+          <VaButton color="gray" @click="showAvailableContacts = false">{{ $t('common.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -393,6 +412,7 @@ import { useI18n } from 'vue-i18n'
 import { useContactStaffStore } from '@/stores/modules/contact-staff.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import type { ContactInfo, AdvancedSearch } from './types'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 const { init } = useToast()
@@ -407,12 +427,12 @@ const currentPage = ref(1)
 const totalPages = ref(0)
 const totalContacts = ref(0)
 
-const columns = [
-  { key: 'title', title: 'Title', width: '30%' },
-  { key: 'email', title: 'Email', width: '30%' },
-  { key: 'phone', title: 'Phone', width: '25%' },
-  { key: 'actions', title: 'Actions', width: '15%' },
-]
+const columns = computed(() => [
+  { key: 'title', label: t('contact.title'), width: '30%' },
+  { key: 'email', label: t('contact.email'), width: '30%' },
+  { key: 'phone', label: t('contact.phone'), width: '25%' },
+  { key: 'actions', label: t('contact.actions'), width: '15%' },
+])
 
 // const searchFields = ['title', 'email', 'phone', 'content']
 // const sortFields = ['title', 'email', 'phone', 'createdAt']
@@ -445,7 +465,7 @@ const fetchContacts = async () => {
     totalContacts.value = response.totalCount
   } catch (error) {
     init({
-      message: 'Failed to fetch contacts',
+      message: t('contact.failedToFetchContacts'),
       color: 'danger',
       duration: 3000,
     })
@@ -537,7 +557,7 @@ const handleSendEmail = (contact: ContactInfo) => {
 const submitEmail = async () => {
   if (!emailData.content.trim()) {
     init({
-      message: 'Please enter email content',
+      message: t('contact.pleaseEnterEmailContent'),
       color: 'warning',
       duration: 3000,
     })
@@ -554,13 +574,13 @@ const submitEmail = async () => {
     emailData.content = ''
 
     init({
-      message: 'Email sent successfully',
+      message: t('contact.emailSentSuccessfully'),
       color: 'success',
       duration: 3000,
     })
   } catch (error) {
     init({
-      message: 'Failed to send email',
+      message: t('contact.failedToSendEmail'),
       color: 'danger',
       duration: 3000,
     })
@@ -578,7 +598,7 @@ const handleUpdateCallImage = (contact: ContactInfo) => {
 const submitImages = async () => {
   if (!selectedImages.value.length) {
     init({
-      message: 'Please select at least one image',
+      message: t('contact.pleaseSelectAtLeastOneImage'),
       color: 'warning',
       duration: 3000,
     })
@@ -600,7 +620,7 @@ const submitImages = async () => {
     showImageModal.value = false
     selectedImages.value = []
     init({
-      message: 'Images updated successfully',
+      message: t('contact.imagesUpdatedSuccessfully'),
       color: 'success',
       duration: 3000,
     })
@@ -609,7 +629,7 @@ const submitImages = async () => {
   } catch (error) {
     console.error('Error uploading images:', error)
     init({
-      message: error instanceof Error ? error.message : 'Failed to update images',
+      message: error instanceof Error ? error.message : t('contact.failedToUpdateImages'),
       color: 'danger',
       duration: 3000,
     })
@@ -625,7 +645,7 @@ onMounted(async () => {
     // Redirect or show error if user is not Staff
     router.push({ name: 'dashboard' })
     init({
-      message: 'Access denied. Staff role required.',
+      message: t('common.unauthorized'),
       color: 'danger',
       duration: 3000,
     })
@@ -740,12 +760,12 @@ const availableContactsPageSize = ref(10)
 const totalAvailablePages = ref(0)
 const totalAvailableContacts = ref(0)
 
-const availableContactsColumns = [
-  { key: 'title', title: 'Title', width: '30%' },
-  { key: 'email', title: 'Email', width: '30%' },
-  { key: 'phone', title: 'Phone', width: '25%' },
-  { key: 'actions', title: 'Actions', width: '15%' },
-]
+const availableContactsColumns = computed(() => [
+  { key: 'title', label: t('contact.management.title'), width: '30%' },
+  { key: 'email', label: t('contact.management.email'), width: '30%' },
+  { key: 'phone', label: t('contact.management.phone'), width: '25%' },
+  { key: 'actions', label: t('contact.management.actions'), width: '15%' },
+])
 
 // Fetch available contacts that have no staff assigned
 const fetchAvailableContacts = async () => {
@@ -768,7 +788,7 @@ const fetchAvailableContacts = async () => {
     totalAvailableContacts.value = response.totalCount
   } catch (error) {
     init({
-      message: 'Failed to fetch available contacts',
+      message: t('contact.failedToFetchAvailableContacts'),
       color: 'danger',
       duration: 3000,
     })
@@ -781,7 +801,7 @@ const handleTakeContact = async (contact: ContactInfo) => {
     await contactStaffStore.addStaffContact(authStore.user?.id || '', contact.contactId)
 
     init({
-      message: 'Contact taken successfully',
+      message: t('contact.contactTakenSuccessfully'),
       color: 'success',
       duration: 3000,
     })
@@ -791,7 +811,7 @@ const handleTakeContact = async (contact: ContactInfo) => {
     await fetchContacts()
   } catch (error) {
     init({
-      message: 'Failed to take contact',
+      message: t('contact.failedToTakeContact'),
       color: 'danger',
       duration: 3000,
     })

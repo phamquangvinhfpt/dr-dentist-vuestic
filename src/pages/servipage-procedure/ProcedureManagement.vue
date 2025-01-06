@@ -8,6 +8,19 @@
 
       <VaCardContent>
         <div class="header-actions">
+          <VaInput
+            v-model="searchQuery"
+            :placeholder="t('common.search')"
+            class="search-input"
+            size="large"
+            style="flex: 1"
+            @keyup.enter="handleSearch"
+          >
+            <template #append>
+              <i class="fas fa-search search-icon"></i>
+            </template>
+          </VaInput>
+
           <div class="button-group">
             <VaButton color="primary" class="action-button create-button" @click="showCreateModal = true">
               <i class="va-icon material-icons mr-2">{{ t('procedure.add') }}</i>
@@ -24,97 +37,96 @@
           </div>
         </div>
 
-        <VaDataTable
-          class="custom-table"
-          :items="procedureList"
-          :columns="columnsWithActions"
-          hoverable
-          select-mode="multiple"
-          :disable-client-side-sorting="false"
-          sticky-header
-          striped
-          :no-data-html="`<div class='text-center'>${t('procedure.noProceduresFound')}</div>`"
-        >
-          <template #cell(name)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.name }}</span>
-            </div>
-          </template>
+        <div class="table-wrapper">
+          <VaDataTable
+            class="custom-table"
+            :items="paginatedProcedures"
+            :columns="columnsWithActions"
+            hoverable
+            select-mode="multiple"
+            :disable-client-side-sorting="false"
+            sticky-header
+            striped
+            :no-data-html="`<div class='text-center'>${t('procedure.noProceduresFound')}</div>`"
+          >
+            <template #cell(name)="{ row }">
+              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                <span class="w-24">{{ row.rowData.name }}</span>
+              </div>
+            </template>
 
-          <template #cell(description)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.description }}</span>
-            </div>
-          </template>
+            <template #cell(description)="{ row }">
+              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                <span class="w-24">{{ row.rowData.description }}</span>
+              </div>
+            </template>
 
-          <template #cell(price)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ formatPrice(row.rowData.price) }}</span>
-            </div>
-          </template>
+            <template #cell(price)="{ row }">
+              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                <span class="w-24">{{ formatPrice(row.rowData.price) }}</span>
+              </div>
+            </template>
 
-          <template #cell(createdOn)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">
-                {{ validateDate(row.rowData.createdOn) ? formatDate(row.rowData.createdOn) : 'Ngày không hợp lệ' }}
-              </span>
-            </div>
-          </template>
+            <template #cell(createdOn)="{ row }">
+              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                <span class="w-24">
+                  {{ validateDate(row.rowData.createdOn) ? formatDate(row.rowData.createdOn) : 'Ngày không hợp lệ' }}
+                </span>
+              </div>
+            </template>
 
-          <template #cell(actions)="{ row }">
-            <div class="flex gap-2">
-              <template v-if="!showBin">
-                <VaButton
-                  small
-                  round
-                  color="primary"
-                  class="action-button-circle"
-                  @click="handleEdit(row.rowData as ProcedureDTO)"
-                >
-                  <i class="va-icon material-icons">{{ t('procedure.edit') }}</i>
-                </VaButton>
-                <VaButton
-                  small
-                  round
-                  color="danger"
-                  class="action-button-circle"
-                  @click="confirmDelete(row.rowData as ProcedureDTO)"
-                >
-                  <i class="va-icon material-icons">{{ t('procedure.delete') }}</i>
-                </VaButton>
-              </template>
-              <template v-else>
-                <VaButton
-                  small
-                  round
-                  color="success"
-                  class="action-button-circle"
-                  @click="handleRestore(row.rowData as ProcedureDTO)"
-                >
-                  <i class="va-icon material-icons">{{ t('procedure.restore') }}</i>
-                </VaButton>
-              </template>
-            </div>
-          </template>
-        </VaDataTable>
+            <template #cell(actions)="{ row }">
+              <div class="flex gap-2">
+                <template v-if="!showBin">
+                  <VaButton
+                    small
+                    round
+                    color="danger"
+                    class="action-button-circle"
+                    @click="confirmDelete(row.rowData as ProcedureDTO)"
+                  >
+                    <i class="va-icon material-icons">{{ t('procedure.delete') }}</i>
+                  </VaButton>
+                </template>
+                <template v-else>
+                  <VaButton
+                    small
+                    round
+                    color="success"
+                    class="action-button-circle"
+                    @click="handleRestore(row.rowData as ProcedureDTO)"
+                  >
+                    <i class="va-icon material-icons">{{ t('procedure.restore') }}</i>
+                  </VaButton>
+                </template>
+              </div>
+            </template>
+          </VaDataTable>
+        </div>
 
         <div class="table-footer">
-          <div v-if="procedureList.length > 0 && procedureListResponse" class="footer-content">
+          <div v-if="procedureList.length > 0" class="footer-content">
             <div class="records-info">
-              <b>{{ procedureListResponse.totalCount }} {{ t('common.result') }}</b>
+              <b>{{ totalItems }} {{ t('common.result') }}</b>
               <span class="page-size-selector">
                 {{ t('common.resultPerPage') }}
-                <VaSelect v-model="filterData.pageSize" class="page-size-select" :options="[10, 50, 100]" />
+                <VaSelect
+                  v-model="formData.pageSize"
+                  class="page-size-select"
+                  :options="[10, 50, 100]"
+                  @update:modelValue="handlePageSizeChange"
+                />
               </span>
             </div>
-            <div v-if="procedureListResponse && procedureListResponse.totalPages > 1" class="pagination-container">
+            <div v-if="totalPages > 1" class="pagination-container">
               <VaPagination
-                v-model="procedureListResponse.currentPage"
+                v-model="currentPage"
                 buttons-preset="primary"
-                :pages="procedureListResponse.totalPages"
+                :pages="totalPages"
                 :visible-pages="5"
                 :boundary-links="true"
                 :direction-links="true"
+                @update:modelValue="handlePageChange"
               />
             </div>
           </div>
@@ -138,22 +150,6 @@
       </template>
     </VaModal>
 
-    <VaModal v-model="showEditModal" :title="$t('procedure.editProcedure')" hide-default-actions>
-      <div class="p-4">
-        <form class="flex flex-col gap-4" @submit.prevent="handleUpdate">
-          <VaInput v-model="formData.name" :label="$t('procedure.name')" required />
-          <VaTextarea v-model="formData.description" :label="$t('procedure.description')" required />
-          <VaInput v-model="formData.price" :label="$t('procedure.price')" type="number" required />
-        </form>
-      </div>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showEditModal = false">{{ t('common.cancel') }}</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate">{{ t('common.update') }}</VaButton>
-        </div>
-      </template>
-    </VaModal>
-
     <VaModal v-model="showDeleteModal" :title="t('common.confirmDelete')" hide-default-actions>
       <div class="p-4">{{ t('procedure.deleteConfirmMessage') }}</div>
       <template #footer>
@@ -173,7 +169,7 @@ import { useI18n } from 'vue-i18n'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useRouter } from 'vue-router'
-import type { ListProcedurePagination, ProcedureDTO, FilterProcedure, ProcedureFormData } from './types'
+import type { ProcedureDTO } from './types'
 
 const { t } = useI18n()
 const { init } = useToast()
@@ -181,68 +177,86 @@ const serviceStore = useServiceStore()
 const authStore = useAuthStore()
 const router = useRouter()
 
-const filterData = reactive<FilterProcedure>({
+const formData = reactive({
   pageNumber: 1,
   pageSize: 10,
   isActive: true,
   orderBy: [],
-})
-
-const formData = reactive<ProcedureFormData>({
   name: '',
   description: '',
   price: 0,
 })
 
-const procedureListResponse: Ref<ListProcedurePagination | null> = ref(null)
 const procedureList: Ref<ProcedureDTO[]> = ref([])
+const currentPage = ref(1)
+const searchQuery = ref('')
+
+const filteredProcedures = computed(() => {
+  if (!procedureList.value || procedureList.value.length === 0) return []
+
+  const query = searchQuery.value.toLowerCase().trim()
+  if (!query) return procedureList.value
+
+  return procedureList.value.filter(
+    (procedure) =>
+      (procedure.name || '').toLowerCase().includes(query) ||
+      (procedure.description || '').toLowerCase().includes(query) ||
+      (procedure.price?.toString() || '').includes(query),
+  )
+})
+
+const totalItems = computed(() => filteredProcedures.value.length)
+
+const totalPages = computed(() => Math.ceil(totalItems.value / formData.pageSize))
+
+const paginatedProcedures = computed(() => {
+  const start = (currentPage.value - 1) * formData.pageSize
+  const end = start + formData.pageSize
+  return filteredProcedures.value.slice(start, end)
+})
+
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+
+const handleSearch = () => {
+  currentPage.value = 1
+}
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+}
+
+const handlePageSizeChange = (size: number) => {
+  formData.pageSize = size
+  currentPage.value = 1
+}
 
 const showBin = ref(false)
 const showCreateModal = ref(false)
 const showDeleteModal = ref(false)
-const showEditModal = ref(false)
 const isSubmitting = ref(false)
 const isDeleting = ref(false)
 const selectedProcedure = ref<ProcedureDTO | null>(null)
-
-watch(
-  () => procedureListResponse.value?.currentPage,
-  (newPage) => {
-    if (newPage && newPage !== filterData.pageNumber) {
-      filterData.pageNumber = newPage
-      getAllProceduresPagination()
-    }
-  },
-)
-
-watch(
-  () => filterData.pageSize,
-  () => {
-    filterData.pageNumber = 1 // Reset về trang 1 khi đổi page size
-    getAllProceduresPagination()
-  },
-)
 
 const getAllProceduresPagination = async () => {
   try {
     const res = showBin.value
       ? await serviceStore.getDeletedProcedures({
-          pageNumber: filterData.pageNumber,
-          pageSize: filterData.pageSize,
-          isActive: filterData.isActive,
-          orderBy: filterData.orderBy,
+          pageNumber: 1,
+          pageSize: 1000,
+          isActive: formData.isActive,
+          orderBy: formData.orderBy,
         })
       : await serviceStore.getAllProcedures({
-          pageNumber: filterData.pageNumber,
-          pageSize: filterData.pageSize,
-          isActive: filterData.isActive,
-          orderBy: filterData.orderBy,
+          pageNumber: 1,
+          pageSize: 1000,
+          isActive: formData.isActive,
+          orderBy: formData.orderBy,
         })
-    procedureListResponse.value = res
     procedureList.value = res.data
   } catch (error) {
     console.error('Error fetching procedures:', error)
-    procedureListResponse.value = null
     procedureList.value = []
   }
 }
@@ -268,15 +282,6 @@ const columns = computed(() => [
 
 const columnsWithActions = computed(() => [...columns.value, { key: 'actions', label: t('procedure.actions') }])
 
-const handleEdit = (procedure: ProcedureDTO) => {
-  resetForm()
-  selectedProcedure.value = procedure
-  formData.name = procedure.name
-  formData.description = procedure.description
-  formData.price = procedure.price
-  showEditModal.value = true
-}
-
 const handleCreate = async () => {
   try {
     isSubmitting.value = true
@@ -300,30 +305,6 @@ const handleCreate = async () => {
   }
 }
 
-const handleUpdate = async () => {
-  if (!selectedProcedure.value) return
-  try {
-    isSubmitting.value = true
-    await serviceStore.updateProcedure(selectedProcedure.value.id, formData)
-    init({
-      message: 'Procedure updated successfully',
-      color: 'success',
-      duration: 3000,
-    })
-    showEditModal.value = false
-    resetForm()
-    getAllProceduresPagination()
-  } catch (error) {
-    init({
-      message: 'Update failed',
-      color: 'danger',
-      duration: 3000,
-    })
-  } finally {
-    isSubmitting.value = false
-  }
-}
-
 const confirmDelete = (procedure: ProcedureDTO) => {
   selectedProcedure.value = procedure
   showDeleteModal.value = true
@@ -335,7 +316,7 @@ const handleDelete = async () => {
     isDeleting.value = true
     await serviceStore.deleteProcedure(selectedProcedure.value.id)
     init({
-      message: 'Procedure deleted successfully',
+      message: t('procedure.procedureDeleteSuccess'),
       color: 'success',
       duration: 3000,
     })
@@ -343,7 +324,7 @@ const handleDelete = async () => {
     getAllProceduresPagination()
   } catch (error) {
     init({
-      message: 'Delete failed',
+      message: t('procedure.procedureDeleteFailed'),
       color: 'danger',
       duration: 3000,
     })
@@ -356,14 +337,14 @@ const handleRestore = async (procedure: ProcedureDTO) => {
   try {
     await serviceStore.restoreProcedure(procedure.id)
     init({
-      message: 'Procedure restored successfully',
+      message: t('procedure.procedureRestoreSuccess'),
       color: 'success',
       duration: 3000,
     })
     getAllProceduresPagination()
   } catch (error) {
     init({
-      message: 'Restore failed',
+      message: t('procedure.procedureRestoreFailed'),
       color: 'danger',
       duration: 3000,
     })
@@ -388,7 +369,7 @@ const validateDate = (dateString: string): boolean => {
 }
 
 // Add watch for modal states to reset form
-watch([showCreateModal, showEditModal], (newValues, oldValues) => {
+watch([showCreateModal], (newValues, oldValues) => {
   // If either modal is being closed (changing from true to false)
   if (oldValues.includes(true) && !newValues.includes(true)) {
     resetForm()
@@ -480,10 +461,39 @@ onMounted(async () => {
   color: var(--va-text-primary);
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  position: relative;
+}
+
+/* Custom scrollbar styles */
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: var(--va-background-element);
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--va-primary);
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--va-primary-dark);
+}
+
 .custom-table {
   margin-top: 1rem;
-  border-radius: 8px;
-  overflow: hidden;
+  width: 100%;
+}
+
+.custom-table :deep(.va-data-table__table) {
+  min-width: 1000px; /* Increased minimum width to force scrolling */
 }
 
 .custom-table :deep(th) {
@@ -495,15 +505,13 @@ onMounted(async () => {
   letter-spacing: 0.5px;
   padding: 1rem;
   text-align: center;
+  white-space: nowrap; /* Prevent header text wrapping */
 }
 
 .custom-table :deep(td) {
   padding: 1rem;
   color: var(--va-text-primary);
-}
-
-.custom-table :deep(tr:hover) {
-  background-color: var(--va-background-element) !important;
+  white-space: nowrap; /* Prevent cell content wrapping */
 }
 
 .table-footer {
