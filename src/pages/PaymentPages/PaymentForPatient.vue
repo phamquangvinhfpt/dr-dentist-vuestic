@@ -271,7 +271,7 @@ const columns = [
   { key: 'totalAmount', label: t('payment.totalAmount') },
   { key: 'method', label: t('payment.method') },
   { key: 'status', label: t('payment.status') },
-  { key: 'actions', label: '' },
+  { key: 'actions', label: t('payment.actions') },
 ]
 
 // Methods
@@ -439,7 +439,7 @@ watch(searchKeyword, (newValue) => {
 
 .payment-card {
   border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px var(--va-background-secondary);
   background: var(--va-background-secondary);
 }
 
@@ -475,7 +475,7 @@ watch(searchKeyword, (newValue) => {
 :deep(.search-input .va-input-wrapper:hover),
 :deep(.search-input .va-input-wrapper:focus-within) {
   background: var(--va-background-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--va-background-secondary);
 }
 
 .date-range {
@@ -489,7 +489,7 @@ watch(searchKeyword, (newValue) => {
 
 .date-range:hover {
   background: var(--va-background-primary);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px var(--va-background-secondary);
 }
 
 .date-separator {

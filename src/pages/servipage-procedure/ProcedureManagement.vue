@@ -3,15 +3,15 @@
     <VaCard class="service-card">
       <VaCardTitle class="card-title">
         <i class="fas fa-cog title-icon"></i>
-        Procedure Management
+        {{ t('procedure.ProcedureManagement') }}
       </VaCardTitle>
 
       <VaCardContent>
         <div class="header-actions">
           <div class="button-group">
             <VaButton color="primary" class="action-button create-button" @click="showCreateModal = true">
-              <i class="va-icon material-icons mr-2">add</i>
-              <span class="ml-1">Create</span>
+              <i class="va-icon material-icons mr-2">{{ t('procedure.add') }}</i>
+              <span class="ml-1">{{ t('procedure.create') }}</span>
             </VaButton>
             <VaButton
               :color="showBin ? 'warning' : 'secondary'"
@@ -19,7 +19,7 @@
               @click="toggleBin"
             >
               <i class="va-icon material-icons mr-2">{{ showBin ? 'list' : 'delete' }}</i>
-              <span class="ml-1">{{ showBin ? 'Active' : 'Bin' }}</span>
+              <span class="ml-1">{{ showBin ? $t('procedure.active') : $t('procedure.bin') }}</span>
             </VaButton>
           </div>
         </div>
@@ -33,7 +33,7 @@
           :disable-client-side-sorting="false"
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No procedures found</div>"
+          :no-data-html="`<div class='text-center'>${t('procedure.noProceduresFound')}</div>`"
         >
           <template #cell(name)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
@@ -71,7 +71,7 @@
                   class="action-button-circle"
                   @click="handleEdit(row.rowData as ProcedureDTO)"
                 >
-                  <i class="va-icon material-icons">edit</i>
+                  <i class="va-icon material-icons">{{ t('procedure.edit') }}</i>
                 </VaButton>
                 <VaButton
                   small
@@ -80,7 +80,7 @@
                   class="action-button-circle"
                   @click="confirmDelete(row.rowData as ProcedureDTO)"
                 >
-                  <i class="va-icon material-icons">delete</i>
+                  <i class="va-icon material-icons">{{ t('procedure.delete') }}</i>
                 </VaButton>
               </template>
               <template v-else>
@@ -91,7 +91,7 @@
                   class="action-button-circle"
                   @click="handleRestore(row.rowData as ProcedureDTO)"
                 >
-                  <i class="va-icon material-icons">restore</i>
+                  <i class="va-icon material-icons">{{ t('procedure.restore') }}</i>
                 </VaButton>
               </template>
             </div>
@@ -122,44 +122,44 @@
       </VaCardContent>
     </VaCard>
 
-    <VaModal v-model="showCreateModal" title="Create New Procedure" hide-default-actions>
+    <VaModal v-model="showCreateModal" :title="$t('procedure.createNewProcedure')" hide-default-actions>
       <div class="p-4">
         <form class="flex flex-col gap-4" @submit.prevent="handleCreate">
-          <VaInput v-model="formData.name" label="Name" required />
-          <VaTextarea v-model="formData.description" label="Description" required />
-          <VaInput v-model="formData.price" label="Price" type="number" required />
+          <VaInput v-model="formData.name" :label="$t('procedure.name')" required />
+          <VaTextarea v-model="formData.description" :label="$t('procedure.description')" required />
+          <VaInput v-model="formData.price" :label="$t('procedure.price')" type="number" required />
         </form>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showCreateModal = false">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="handleCreate"> Create </VaButton>
+          <VaButton color="gray" @click="showCreateModal = false">{{ t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleCreate">{{ t('common.create') }}</VaButton>
         </div>
       </template>
     </VaModal>
 
-    <VaModal v-model="showEditModal" title="Edit Procedure" hide-default-actions>
+    <VaModal v-model="showEditModal" :title="$t('procedure.editProcedure')" hide-default-actions>
       <div class="p-4">
         <form class="flex flex-col gap-4" @submit.prevent="handleUpdate">
-          <VaInput v-model="formData.name" label="Name" required />
-          <VaTextarea v-model="formData.description" label="Description" required />
-          <VaInput v-model="formData.price" label="Price" type="number" required />
+          <VaInput v-model="formData.name" :label="$t('procedure.name')" required />
+          <VaTextarea v-model="formData.description" :label="$t('procedure.description')" required />
+          <VaInput v-model="formData.price" :label="$t('procedure.price')" type="number" required />
         </form>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showEditModal = false">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate"> Update </VaButton>
+          <VaButton color="gray" @click="showEditModal = false">{{ t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate">{{ t('common.update') }}</VaButton>
         </div>
       </template>
     </VaModal>
 
-    <VaModal v-model="showDeleteModal" title="Confirm Delete" hide-default-actions>
-      <div class="p-4">Are you sure you want to delete this procedure?</div>
+    <VaModal v-model="showDeleteModal" :title="t('common.confirmDelete')" hide-default-actions>
+      <div class="p-4">{{ t('procedure.deleteConfirmMessage') }}</div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showDeleteModal = false">Cancel</VaButton>
-          <VaButton color="danger" :loading="isDeleting" @click="handleDelete"> Delete </VaButton>
+          <VaButton color="gray" @click="showDeleteModal = false">{{ t('common.cancel') }}</VaButton>
+          <VaButton color="danger" :loading="isDeleting" @click="handleDelete">{{ t('common.delete') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -266,7 +266,7 @@ const columns = computed(() => [
   { key: 'createdOn', label: t('procedure.createDate') },
 ])
 
-const columnsWithActions = computed(() => [...columns.value, { key: 'actions', label: 'Actions' }])
+const columnsWithActions = computed(() => [...columns.value, { key: 'actions', label: t('procedure.actions') }])
 
 const handleEdit = (procedure: ProcedureDTO) => {
   resetForm()

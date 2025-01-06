@@ -3,7 +3,7 @@
     <VaCard class="service-card">
       <VaCardTitle class="card-title">
         <i class="fas fa-cog title-icon"></i>
-        Service Management
+        {{ t('service.serviceManagement') }}
       </VaCardTitle>
 
       <VaCardContent>
@@ -26,7 +26,7 @@
             :options="typeServices"
             text-by="typeName"
             value-by="id"
-            placeholder="Filter by type"
+            :placeholder="t('service.filterByType')"
             class="type-filter"
             size="large"
             style="flex: 1"
@@ -37,7 +37,7 @@
           <div class="button-group">
             <VaButton color="primary" class="action-button create-button" @click="showCreateModal = true">
               <i class="va-icon material-icons mr-2">add</i>
-              <span class="ml-1">Create</span>
+              <span class="ml-1">{{ t('common.create') }}</span>
             </VaButton>
             <VaButton
               :color="showBin ? 'warning' : 'secondary'"
@@ -45,7 +45,7 @@
               @click="toggleBin"
             >
               <i class="va-icon material-icons mr-2">{{ showBin ? 'list' : 'delete' }}</i>
-              <span class="ml-1">{{ showBin ? 'Active' : 'Bin' }}</span>
+              <span class="ml-1">{{ showBin ? t('common.active') : t('common.bin') }}</span>
             </VaButton>
           </div>
         </div>
@@ -59,7 +59,7 @@
           :disable-client-side-sorting="false"
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No services found</div>"
+          :no-data-html="`<div class='text-center'>${t('service.noServicesFound')}</div>`"
         >
           <template #cell(serviceName)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
@@ -206,25 +206,25 @@
       </template>
     </VaModal>
 
-    <VaModal v-model="showCreateModal" title="Create New Service" hide-default-actions>
+    <VaModal v-model="showCreateModal" :title="t('service.createNewService')" hide-default-actions>
       <div class="p-4">
         <form class="flex flex-col gap-4" @submit.prevent="handleCreate">
-          <VaInput v-model="formData.name" label="Service Name" required />
-          <VaTextarea v-model="formData.description" label="Description" required />
+          <VaInput v-model="formData.name" :label="t('service.name')" required />
+          <VaTextarea v-model="formData.description" :label="t('service.description')" required />
           <VaSelect
             v-model="selectedTypeID"
-            label="Type Service"
+            :label="t('service.typeService')"
             :options="typeServices"
             text-by="typeName"
             value-by="id"
-            placeholder="Choose a service type"
+            :placeholder="t('service.chooseServiceType')"
           />
         </form>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showCreateModal = false">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="handleCreate">Create</VaButton>
+          <VaButton color="gray" @click="showCreateModal = false">{{ t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleCreate">{{ t('common.create') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -232,14 +232,14 @@
     <VaModal v-model="showEditModal" title="Edit Service" hide-default-actions>
       <div class="p-4">
         <form class="flex flex-col gap-4" @submit.prevent="handleUpdate">
-          <VaInput v-model="formData.name" label="Service Name" required />
-          <VaTextarea v-model="formData.description" label="Description" required />
+          <VaInput v-model="formData.name" :label="t('service.name')" required />
+          <VaTextarea v-model="formData.description" :label="t('service.description')" required />
         </form>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showEditModal = false">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate">Update</VaButton>
+          <VaButton color="gray" @click="showEditModal = false">{{ t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate">{{ t('common.update') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -595,14 +595,14 @@ const handleToggleStatus = async (service: ServiceDTO) => {
     await getAllServicesPagination()
 
     init({
-      message: 'Status updated successfully',
+      message: t('service.statusUpdatedSuccessfully'),
       color: 'success',
       duration: 3000,
     })
   } catch (error) {
     console.error('Toggle status error:', error)
     init({
-      message: 'Failed to update status',
+      message: t('service.statusUpdatedFailed'),
       color: 'danger',
       duration: 3000,
     })

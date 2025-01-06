@@ -161,7 +161,7 @@
           <div class="detail-section full-width">
             <h3 class="section-title"><i class="fas fa-align-left mr-2"></i>{{ t('form.Description') }}</h3>
             <div class="detail-content">
-              <p class="description-text">{{ selectedForm.description || 'No description provided' }}</p>
+              <p class="description-text">{{ selectedForm.description || $t('form.noDescription') }}</p>
             </div>
           </div>
 
@@ -169,7 +169,7 @@
             <h3 class="section-title"><i class="fas fa-sticky-note mr-2"></i>{{ t('form.Notes') }}</h3>
             <div class="detail-content">
               <div class="note-container">
-                <p class="note-text">{{ selectedForm.note || 'No notes available' }}</p>
+                <p class="note-text">{{ selectedForm.note || $t('form.noNotes') }}</p>
               </div>
             </div>
           </div>
@@ -365,6 +365,7 @@ const formData = reactive({
 })
 
 const formList = ref<FormDTO[]>([])
+const allForms = ref<FormDTO[]>([])
 const searchQuery = ref('')
 const currentPage = ref(1)
 const selectedStatusFilter = ref<number | null>(null)
@@ -393,9 +394,32 @@ const applicationFormErrors = reactive({
 })
 
 // Computed properties
-const totalPages = computed(() => {
-  return Math.ceil(formList.value.length / formData.pageSize)
+const filteredForms = computed(() => {
+  let filtered = [...allForms.value]
+
+  if (selectedStatusFilter.value !== null) {
+    filtered = filtered.filter((form) => form.status === selectedStatusFilter.value)
+  }
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter((form) => {
+      const description = form.description.toLowerCase()
+      const date = formatDate(form.workingDate)
+      const dateVariants = [date, date.split('/')[0], date.split('/').slice(0, 2).join('/'), date.replace(/\//g, '')]
+
+      if (description.includes(query)) {
+        return true
+      }
+
+      return dateVariants.some((variant) => variant.includes(query.replace(/\//g, '')))
+    })
+  }
+
+  return filtered
 })
+
+const totalPages = computed(() => Math.ceil(filteredForms.value.length / formData.pageSize))
 
 const columns = computed(() => [
   { key: 'workingDate', label: t('form.workingDate') },
@@ -501,8 +525,8 @@ const getAllForms = async () => {
     }
 
     const filter: FilterForm = {
-      pageNumber: currentPage.value,
-      pageSize: formData.pageSize,
+      pageNumber: 1,
+      pageSize: 1000, // Get all forms at once
       isActive: formData.isActive,
       orderBy: formData.orderBy,
       advancedFilter: {
@@ -513,21 +537,13 @@ const getAllForms = async () => {
             operator: 'eq',
             value: currentUserID,
           },
-          ...(selectedStatusFilter.value !== null
-            ? [
-                {
-                  field: 'status',
-                  operator: 'eq',
-                  value: selectedStatusFilter.value.toString(),
-                },
-              ]
-            : []),
         ],
       },
     }
 
     const response = await formStore.getAllForms(filter)
-    formList.value = response.data
+    allForms.value = response.data
+    updateDisplayedForms()
   } catch (error) {
     console.error('Error fetching forms:', error)
     init({
@@ -570,13 +586,15 @@ const fetchWorkingCalendars = async () => {
 // Event handlers
 const handlePageChange = (page: number) => {
   currentPage.value = page
-  getAllForms()
+  formData.pageNumber = page
+  updateDisplayedForms()
 }
 
 const handlePageSizeChange = (size: number) => {
   formData.pageSize = size
+  formData.pageNumber = 1
   currentPage.value = 1
-  getAllForms()
+  updateDisplayedForms()
 }
 
 const handleCalendarChange = async (calendarID: string) => {
@@ -594,7 +612,14 @@ const handleCalendarChange = async (calendarID: string) => {
       })
 
       if (response) {
-        timeSlots.value = response
+        // Filter out time slots that are already in existing forms
+        const existingForms = formList.value.filter(
+          (form) => form.calendarID === calendarID && form.status !== 2, // Exclude rejected forms
+        )
+
+        const usedTimeSlots = new Set(existingForms.flatMap((form) => form.workingTimes.map((time) => time.timeID)))
+
+        timeSlots.value = response.filter((timeSlot: any) => !usedTimeSlots.has(timeSlot.timeID))
       }
     }
   } catch (error) {
@@ -608,7 +633,9 @@ const handleCalendarChange = async (calendarID: string) => {
 
 const handleStatusFilterChange = (status: number | null) => {
   selectedStatusFilter.value = status
-  getAllForms()
+  formData.pageNumber = 1
+  currentPage.value = 1
+  updateDisplayedForms()
 }
 
 const viewDetails = (form: FormDTO) => {
@@ -623,40 +650,6 @@ const statusFilterOptions = [
   { id: 'accepted', value: 1, label: t('form.accepted') },
   { id: 'failed', value: 2, label: t('form.failed') },
 ]
-
-// Search functionality
-const handleSearch = (query: string) => {
-  if (!query) {
-    getAllForms()
-    return
-  }
-
-  const searchTerms = query
-    .toLowerCase()
-    .split(' ')
-    .filter((term) => term)
-
-  const filteredForms = formList.value.filter((form) => {
-    const description = form.description.toLowerCase()
-
-    if (description.includes(query.toLowerCase())) {
-      return true
-    }
-
-    const matchedTerms = searchTerms.filter((term) => description.includes(term))
-
-    return matchedTerms.length > 0
-  })
-
-  formList.value = filteredForms
-}
-
-const debouncedSearch = (query: string) => {
-  clearTimeout(searchTimeout.value)
-  searchTimeout.value = setTimeout(() => {
-    handleSearch(query)
-  }, 300)
-}
 
 // Form validation and submission
 function validateApplicationForm(): boolean {
@@ -673,6 +666,50 @@ function validateApplicationForm(): boolean {
   if (applicationFormData.leaveType === LeaveType.TIME_SLOT && !applicationFormData.timeID) {
     applicationFormErrors.timeID = t('form.TimeRequired')
     isValid = false
+  }
+
+  // Check for existing forms on the same date
+  const existingForms = formList.value.filter(
+    (form) =>
+      form.status !== 2 && // Exclude rejected forms
+      form.calendarID === applicationFormData.calendarID,
+  )
+
+  if (existingForms.length > 0) {
+    // Check if there's any ALL_DAY form
+    const hasAllDayForm = existingForms.some((form) => {
+      // If the form has multiple time slots, it's likely an ALL_DAY form
+      return form.workingTimes.length > 1
+    })
+
+    // Check if there's any TIME_SLOT form
+    const hasTimeSlotForm = existingForms.some((form) => {
+      // If the form has exactly one time slot, it's a TIME_SLOT form
+      return form.workingTimes.length === 1
+    })
+
+    if (applicationFormData.leaveType === LeaveType.ALL_DAY) {
+      // If trying to create ALL_DAY form but TIME_SLOT forms exist
+      if (hasTimeSlotForm || hasAllDayForm) {
+        applicationFormErrors.calendarID = t('form.HasTimeSlotError')
+        isValid = false
+      }
+    } else {
+      // If trying to create TIME_SLOT form but ALL_DAY form exists
+      if (hasAllDayForm) {
+        applicationFormErrors.timeID = t('form.HasAllDayError')
+        isValid = false
+      } else {
+        // Check for duplicate time slot
+        const hasTimeConflict = existingForms.some((form) =>
+          form.workingTimes.some((time) => time.timeID === applicationFormData.timeID),
+        )
+        if (hasTimeConflict) {
+          applicationFormErrors.timeID = t('form.DuplicateTimeError')
+          isValid = false
+        }
+      }
+    }
   }
 
   if (!applicationFormData.description) {
@@ -737,8 +774,10 @@ onBeforeUnmount(() => {
 })
 
 // Watchers
-watch(searchQuery, (newValue) => {
-  debouncedSearch(newValue)
+watch(searchQuery, () => {
+  formData.pageNumber = 1
+  currentPage.value = 1
+  updateDisplayedForms()
 })
 
 watch(
@@ -755,6 +794,13 @@ const searchTimeout = ref<NodeJS.Timeout>()
 const handleCreateButtonClick = async () => {
   showApplicationModal.value = true
   await fetchWorkingCalendars()
+}
+
+// Add new function to update displayed forms
+const updateDisplayedForms = () => {
+  const startIndex = (formData.pageNumber - 1) * formData.pageSize
+  const endIndex = startIndex + formData.pageSize
+  formList.value = filteredForms.value.slice(startIndex, endIndex)
 }
 </script>
 
@@ -1346,4 +1392,146 @@ const handleCreateButtonClick = async () => {
 }
 
 /* Add any additional styles needed for the application form */
+
+/* Add responsive styles */
+@media screen and (max-width: 1400px) {
+  .form-dentist-container {
+    padding: 1.5rem;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .header-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-section {
+    width: 100%;
+  }
+
+  .button-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .custom-table {
+    overflow-x: auto;
+  }
+
+  .custom-table:deep(table) {
+    min-width: 800px;
+  }
+
+  .status-tabs {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .form-dentist-container {
+    padding: 1rem;
+  }
+
+  .card-title {
+    padding: 1.2rem;
+  }
+
+  .title-icon {
+    font-size: 1.8rem;
+  }
+
+  .records-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .page-size-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .details-modal :deep(.va-modal__container),
+  .application-modal :deep(.va-modal__container) {
+    width: 95%;
+    margin: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .form-dentist-container {
+    padding: 0.5rem;
+  }
+
+  .card-title h2 {
+    font-size: 1.5rem;
+  }
+
+  .status-tabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .status-tab {
+    width: calc(50% - 0.25rem);
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .table-footer {
+    padding: 1rem;
+  }
+
+  .form-details-container,
+  .application-form-container {
+    padding: 1rem;
+  }
+
+  .detail-section {
+    padding: 1rem;
+  }
+
+  .time-slot {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  :deep(.va-modal__dialog) {
+    margin: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .create-button {
+    width: 100%;
+  }
+
+  .status-tabs {
+    width: 100%;
+  }
+
+  .status-tab {
+    width: 100%;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+}
 </style>

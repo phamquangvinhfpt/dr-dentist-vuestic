@@ -9,7 +9,7 @@
           size="small"
           @click="$router.push('/service-management')"
         />
-        <span class="text-2xl font-bold">Service Details</span>
+        <span class="text-2xl font-bold">{{ t('service.serviceDetails') }}</span>
       </div>
     </VaCardTitle>
     <VaCardContent v-if="!isLoading">
@@ -18,22 +18,22 @@
         <VaCard class="border-black">
           <VaCardContent>
             <div class="flex flex-col gap-2">
-              <h2 class="text-xl font-bold">Service Information</h2>
+              <h2 class="text-xl font-bold">{{ t('service.serviceInformation') }}</h2>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <p class="font-semibold">Name:</p>
+                  <p class="font-semibold">{{ t('service.name') }}:</p>
                   <p>{{ serviceDetail?.name || 'N/A' }}</p>
                 </div>
                 <div>
-                  <p class="font-semibold">Description:</p>
+                  <p class="font-semibold">{{ t('service.description') }}:</p>
                   <p>{{ serviceDetail?.description || 'N/A' }}</p>
                 </div>
                 <div>
-                  <p class="font-semibold">Total Price:</p>
+                  <p class="font-semibold">{{ t('service.totalPrice') }}:</p>
                   <p>{{ formatPrice(serviceDetail?.totalPrice || 0) }}</p>
                 </div>
                 <div>
-                  <p class="font-semibold">Status:</p>
+                  <p class="font-semibold">{{ t('common.status') }}:</p>
                   <p :class="serviceDetail?.isActive ? 'text-success' : 'text-danger'">
                     {{ serviceDetail?.isActive ? 'Active' : 'Inactive' }}
                   </p>
@@ -47,17 +47,17 @@
       <!-- Procedures List Section -->
       <div class="procedures-list">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Procedures List</h2>
+          <h2 class="text-xl font-bold">{{ t('procedure.ProcedureManagement') }}</h2>
 
           <div class="flex gap-2">
-            <VaButton color="success" @click="showAddModal = true"> Add Procedure </VaButton>
+            <VaButton color="success" @click="showAddModal = true"> {{ t('procedure.addProcedure') }} </VaButton>
 
             <VaButton
               v-if="!showRemovedProcedures"
               :color="isMultiSelectMode ? 'danger' : 'primary'"
               @click="isMultiSelectMode = !isMultiSelectMode"
             >
-              {{ isMultiSelectMode ? 'Cancel Selection' : 'Select Multiple' }}
+              {{ isMultiSelectMode ? t('common.cancel') : t('procedure.selectMultiple') }}
             </VaButton>
 
             <VaButton
@@ -65,7 +65,7 @@
               color="danger"
               @click="deleteSelectedProcedures"
             >
-              Delete Selected ({{ selectedProcedures.length }})
+              {{ t('common.delete') }} ({{ selectedProcedures.length }})
             </VaButton>
           </div>
         </div>
@@ -110,11 +110,11 @@
                 </div>
                 <div class="procedure-body">
                   <div class="mb-2">
-                    <p class="font-semibold text-gray-700">Description:</p>
+                    <p class="font-semibold text-gray-700">{{ $t('procedure.description') }}:</p>
                     <p>{{ item.procedureDetail.description }}</p>
                   </div>
                   <div class="mb-2">
-                    <p class="font-semibold text-gray-700">Price:</p>
+                    <p class="font-semibold text-gray-700">{{ $t('procedure.price') }}:</p>
                     <p class="text-success font-medium">{{ formatPrice(item.procedureDetail.price) }}</p>
                   </div>
                 </div>
@@ -155,7 +155,7 @@
 
   <VaModal v-model="showAddModal" size="large" hide-default-actions>
     <template #header>
-      <h3>Add Procedures</h3>
+      <h3>{{ t('procedure.addProcedure') }}</h3>
     </template>
 
     <div class="p-4">
@@ -196,7 +196,7 @@
           :disabled="selectedNewProcedures.length === 0"
           @click="handleAddProcedures"
         >
-          Add Selected ({{ selectedNewProcedures.length }})
+          {{ t('procedure.addSelected') }} ({{ selectedNewProcedures.length }})
         </VaButton>
       </div>
     </template>
