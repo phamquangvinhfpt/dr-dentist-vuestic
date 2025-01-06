@@ -890,7 +890,8 @@
     "restoreSuccess": "Khôi phục dịch vụ thành công",
     "restoreError": "Khôi phục dịch vụ thất bại",
     "deleteSuccess": "Xóa dịch vụ thành công",
-    "deleteError": "Xóa dịch vụ thất bại"
+    "deleteError": "Xóa dịch vụ thất bại",
+    "serviceDeleteSuccess": "Dịch vụ đã được xóa thành công"
   },
   "procedure": {
     "id": "Mã",
@@ -1095,5 +1096,47 @@
       "description": "Mô Tả Điều Trị",
       "images": "Hình Ảnh Điều Trị"
     }
+  },
+  "booking": {
+    "title": "Đặt Lịch Khám",
+    "description": "Đặt lịch khám với chuyên gia của chúng tôi",
+    "search": "Tìm kiếm",
+    "serviceType": "Loại Dịch Vụ",
+    "selectService": "Chọn một dịch vụ",
+    "searchService": "Tìm dịch vụ",
+    "gotIt": "Đã hiểu",
+    "importantNote": "Lưu ý quan trọng",
+    "pleaseArriveBeforeAppointment": "Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục",
+    "bringPersonalDocuments": "Mang theo giấy tờ tùy thân và thẻ bảo hiểm y tế (nếu có)",
+    "depositWillBeDeducted": "Khoản đặt cọc sẽ được trừ vào tổng chi phí khám",
+    "thankYou": "Cảm ơn bạn đã đặt lịch khám",
+    "weHaveReceived": "Chúng tôi đã nhận được khoản đặt cọc giữ chỗ của bạn",
+    "pleaseCheckEmail": "Vui lòng kiểm tra email của bạn để biết thông tin và hướng dẫn tiếp theo",
+    "selectDate": "Chọn ngày",
+    "selectTime": "Chọn mốc thời gian",
+    "selectDoctor": "Chọn bác sĩ",
+    "bookNow": "Đặt lịch khám ngay",
+    "success": "Đặt lịch khám thành công",
+    "bookDoctor": "Thêm bác sĩ",
+    "removeDoctor": "Xóa bác sĩ",
+    "deposit": "Đặt cọc",
+    "service": "Dịch vụ",
+    "date": "Ngày",
+    "time": "Thời gian",
+    "doctor": "Bác sĩ",
+    "confirm": "Xác nhận đặt lịch",
+    "confirmDescription": "Lịch khám của bạn đã được đặt thành công.",
+    "rulesBanking": "QUY ĐỊNH NẠP TIỀN",
+    "rulesBankingDescription": "Vui lòng nạp đúng nội dung như hướng dẫn bên dưới hoặc quét mã QR sẽ tự động điền cú pháp.",
+    "rulesBankingDescription2": "Nếu nạp sai nội dung, chúng tôi không chịu trách nhiệm và không hoàn trả tiền.",
+    "timeRemaining": "Thời gian còn lại",
+    "bankName": "Tên Ngân Hàng",
+    "accountNumber": "Số Tài Khoản",
+    "accountHolder": "Tên Chủ Tài Khoản",
+    "amount": "Số Tiền",
+    "Description": "Mô Tả",
+    "scanQrCode": "Quét mã QR để thanh toán đặt cọc.",
+    "qrCode": "Mã QR",
+    "bankInformation": "Thông Tin Ngân Hàng"
   }
 }

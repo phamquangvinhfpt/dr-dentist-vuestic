@@ -237,8 +237,8 @@ defineExpose({
       <div class="min-h-screen bg-white dark:bg-gray-900">
         <div class="mx-auto max-w-4xl p-6">
           <div class="relative overflow-hidden rounded-t-xl bg-emerald-400 py-16 text-center shadow-xl mb-8">
-            <h1 class="text-3xl font-bold text-white md:text-5xl">Book an appointment</h1>
-            <p class="mt-4 text-lg text-white">Get an appointment with our experienced professionals</p>
+            <h1 class="text-3xl font-bold text-white md:text-5xl">{{ $t('booking.title') }}</h1>
+            <p class="mt-4 text-lg text-white">{{ $t('booking.description') }}</p>
             <img
               class="absolute top-0 left-0 -z-10 h-full w-full object-cover"
               src="https://images.unsplash.com/photo-1504672281656-e4981d70414b?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
@@ -265,7 +265,7 @@ defineExpose({
                 class="w-full border border-dashed border-emerald-500 bg-white text-emerald-600 px-4 py-2 rounded-lg mb-4 hover:bg-emerald-50 transition-colors mt-3"
                 @click="toggleDoctorsList"
               >
-                {{ showDoctorsList ? 'Remove Doctor' : 'Book Doctor?' }}
+                {{ showDoctorsList ? $t('booking.removeDoctor') : $t('booking.bookDoctor') }}
               </button>
 
               <DoctorSelection
@@ -283,7 +283,7 @@ defineExpose({
               :disabled="!selectedService || !selectedDate || !selectedTime"
               @click="bookAppointment"
             >
-              Book Now
+              {{ $t('booking.bookNow') }}
             </button>
 
             <SubmitSelection
@@ -340,21 +340,24 @@ defineExpose({
                 data-original="#000000"
               />
             </svg>
-            <h4 class="text-xl text-gray-800 font-semibold mt-4">Đặt khám thành công!</h4>
-            <p className="text-sm text-gray-600 leading-relaxed mt-4">
-              Cảm ơn bạn đã đặt lịch khám. Chúng tôi đã nhận được khoản đặt cọc giữ chỗ của bạn. Vui lòng kiểm tra email
-              để xem chi tiết cuộc hẹn và hướng dẫn tiếp theo.
+            <h4 class="text-xl text-gray-800 font-semibold mt-4">
+              {{ $t('booking.success') }}
+            </h4>
+            <p class="text-sm text-gray-600 leading-relaxed mt-4">
+              {{ $t('booking.thankYou') }}
+              {{ $t('booking.weHaveReceived') }}
+              {{ $t('booking.pleaseCheckEmail') }}
             </p>
           </div>
 
           <div className="mt-6 bg-gray-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">
-              <strong>Lưu ý quan trọng:</strong>
+            <p class="text-sm text-gray-600 mb-2">
+              <strong>{{ $t('booking.importantNote') }}:</strong>
             </p>
-            <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
-              <li>Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục</li>
-              <li>Mang theo giấy tờ tùy thân và thẻ bảo hiểm y tế (nếu có)</li>
-              <li>Khoản đặt cọc sẽ được trừ vào tổng chi phí khám</li>
+            <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
+              <li>{{ $t('booking.pleaseArriveBeforeAppointment') }}</li>
+              <li>{{ $t('booking.bringPersonalDocuments') }}</li>
+              <li>{{ $t('booking.depositWillBeDeducted') }}</li>
             </ul>
           </div>
 
@@ -363,7 +366,7 @@ defineExpose({
             class="px-5 py-2.5 mt-6 text-center w-full rounded-lg text-white text-sm border-none outline-none bg-gray-800 hover:bg-gray-700"
             href="/appointment"
           >
-            Got it
+            {{ $t('booking.gotIt') }}
           </a>
         </div>
       </div>

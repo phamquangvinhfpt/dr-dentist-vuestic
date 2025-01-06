@@ -34,9 +34,22 @@
                 </div>
                 <div>
                   <p class="font-semibold">{{ t('common.status') }}:</p>
-                  <p :class="serviceDetail?.isActive ? 'text-success' : 'text-danger'">
-                    {{ serviceDetail?.isActive ? 'Active' : 'Inactive' }}
-                  </p>
+                  <div class="flex items-center gap-2">
+                    <VaButton
+                      color="warning"
+                      size="small"
+                      class="action-button-circle"
+                      :disabled="isToggling"
+                      :loading="isToggling"
+                      round
+                      @click="handleToggleStatus"
+                    >
+                      <VaIcon :name="serviceDetail?.isActive ? 'toggle_off' : 'toggle_on'" />
+                    </VaButton>
+                    <p :class="serviceDetail?.isActive ? 'text-success' : 'text-danger'">
+                      {{ serviceDetail?.isActive ? 'Active' : 'Inactive' }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -246,6 +259,7 @@ const { init } = useToast()
 const showDeleteModal = ref(false)
 const selectedProcedureId = ref<string | null>(null)
 const isDeleting = ref(false)
+const isToggling = ref(false)
 const isRemove = ref(false)
 const showRemovedProcedures = ref(false)
 const selectedProcedures = ref<string[]>([])
@@ -418,6 +432,37 @@ onMounted(async () => {
     console.error('Error loading data:', error)
   }
 })
+
+const handleToggleStatus = async () => {
+  if (!serviceDetail.value) return
+
+  try {
+    isToggling.value = true
+
+    await serviceStore.toggleServiceStatus({
+      id: route.params.id as string,
+      activate: !serviceDetail.value.isActive,
+    })
+
+    // Refresh service detail data after toggling
+    await serviceStore.getServiceDetail(route.params.id as string)
+
+    init({
+      message: t('service.statusUpdatedSuccessfully'),
+      color: 'success',
+      duration: 3000,
+    })
+  } catch (error) {
+    console.error('Toggle status error:', error)
+    init({
+      message: t('service.statusUpdatedFailed'),
+      color: 'danger',
+      duration: 3000,
+    })
+  } finally {
+    isToggling.value = false
+  }
+}
 </script>
 <style scoped>
 .procedure-card {

@@ -165,7 +165,7 @@ onMounted(() => {
         @click="toggleSection"
       >
         <p class="text-xl font-bold text-blue-900 dark:text-blue-100">
-          Select a service
+          {{ $t('booking.selectService') }}
           <span v-if="currentSelectedService" class="text-sm font-normal text-gray-600 dark:text-gray-300">
             ({{ currentSelectedService.name }})
           </span>
@@ -187,11 +187,11 @@ onMounted(() => {
           <div class="flex flex-col md:flex-row gap-4">
             <VaInput
               v-model="filters.keyword"
-              placeholder="Search service"
+              :placeholder="$t('booking.searchService')"
               icon="search"
               class="mb-4"
               clearable
-              label="Search"
+              :label="$t('booking.search')"
               @clear="filters.keyword = ''"
             />
             <VaSelect
@@ -200,7 +200,7 @@ onMounted(() => {
               :options="resourceType"
               text-by="label"
               value-by="value"
-              label="Service type"
+              :label="$t('booking.serviceType')"
               @update:modelValue="handleChangeResource"
             />
           </div>

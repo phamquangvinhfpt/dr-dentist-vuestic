@@ -436,8 +436,6 @@ const handleDateChange = () => {
   if (new Date(endDate.value) < new Date(startDate.value)) {
     endDate.value = startDate.value
   }
-
-  router.push(`/payment-management/${startDate.value}/${endDate.value}`)
   getAllPaymentsPagination()
 }
 
@@ -533,18 +531,13 @@ onMounted(async () => {
     return
   }
 
-  if (!route.params.startDate || !route.params.endDate) {
-    const today = new Date().toISOString().split('T')[0]
-    startDate.value = today
-    endDate.value = today
-    await router.push(`/payment-management/${today}/${today}`)
-  } else {
-    // Remove this check since we want to allow end date to be today
-    // if (new Date(endDate.value) > new Date(maxDate.value)) {
-    //   endDate.value = maxDate.value
-    //   await router.push(`/payment-management/${startDate.value}/${maxDate.value}`)
-    // }
-  }
+  // Initialize dates
+  const today = new Date()
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
+  const currentDate = today.toISOString().split('T')[0]
+
+  startDate.value = (route.params.startDate as string) || firstDayOfMonth
+  endDate.value = (route.params.endDate as string) || currentDate
 
   await Promise.all([getAllPaymentsPagination(), loadPatients()])
 })

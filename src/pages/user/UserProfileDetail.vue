@@ -1352,7 +1352,7 @@ const openImagePreview = (image: string) => {
       <!-- Tab Doctor Fields -->
       <VaCard v-if="isShowDoctorProfile" class="p-2 ml-1 rounded">
         <VaForm ref="form" @submit.prevent="submitDoctorProfile">
-          <div class="grid md:grid-cols-2 gap-4">
+          <div class="grid md:grid-cols-2 gap-4 p-3">
             <VaField>
               <VaInput
                 v-model="formData.doctorProfile.education"
@@ -1394,17 +1394,6 @@ const openImagePreview = (image: string) => {
                 preset="solid"
               />
             </VaField>
-            <VaField>
-              <VaInput
-                v-model="formData.doctorProfile.seftDescription"
-                :label="t('auth.self_description')"
-                class="mb-3"
-                :placeholder="t('auth.enter_self_description')"
-                textarea
-                readonly
-                preset="solid"
-              />
-            </VaField>
             <!-- VaField typeServiceID -->
             <VaField>
               <VaSelect
@@ -1432,7 +1421,18 @@ const openImagePreview = (image: string) => {
                 preset="solid"
               />
             </VaField>
-
+            <VaField class="col-span-2" width="100%">
+              <VaTextarea
+                v-model="formData.doctorProfile.seftDescription"
+                :label="t('auth.self_description')"
+                class="mb-3"
+                :placeholder="t('auth.enter_self_description')"
+                readonly
+                preset="solid"
+                rows="4"
+                style="width: 100%"
+              />
+            </VaField>
             <!-- Display certification images -->
             <VaField
               v-if="formData.doctorProfile?.certificationImage && formData.doctorProfile.certificationImage.length > 0"

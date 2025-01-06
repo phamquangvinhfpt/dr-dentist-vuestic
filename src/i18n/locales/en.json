@@ -926,7 +926,8 @@
     "restoreSuccess": "Restore service successfully",
     "restoreError": "Failed to restore service",
     "deleteSuccess": "Delete service successfully",
-    "deleteError": "Failed to delete service"
+    "deleteError": "Failed to delete service",
+    "statusUpdatedSuccessfully": "Status updated successfully"
   },
   "procedure": {
     "id": "ID",
@@ -1136,5 +1137,47 @@
       "description": "Treatment Description",
       "images": "Treatment Images"
     }
+  },
+  "booking": {
+    "title": "Book an appointment",
+    "description": "Get an appointment with our experienced professionals",
+    "search": "Search",
+    "serviceType": "Service Type",
+    "selectService": "Select a service",
+    "searchService": "Search service",
+    "gotIt": "Got it",
+    "importantNote": "Important Note",
+    "pleaseArriveBeforeAppointment": "Please arrive before appointment",
+    "bringPersonalDocuments": "Bring personal documents",
+    "depositWillBeDeducted": "Deposit will be deducted",
+    "thankYou": "Thank you for booking an appointment",
+    "weHaveReceived": "We have received your deposit",
+    "pleaseCheckEmail": "Please check your email for appointment details and next steps",
+    "selectDate": "Select a date",
+    "selectTime": "Select a time",
+    "selectDoctor": "Select a doctor",
+    "bookNow": "Book Now",
+    "success": "Appointment Booked Successfully",
+    "bookDoctor": "Book Doctor",
+    "removeDoctor": "Remove Doctor",
+    "deposit": "Deposit",
+    "service": "Service",
+    "date": "Date",
+    "time": "Time",
+    "doctor": "Doctor",
+    "confirm": "Booking Confirmation",
+    "confirmDescription": "Your appointment has been booked successfully.",
+    "rulesBanking": "BANKING RULES",
+    "rulesBankingDescription": "Please deposit the correct content as below or scan the QR code will automatically fill in the syntax.",
+    "rulesBankingDescription2": "If you deposit the wrong content, we are not responsible and will not refund the money.",
+    "timeRemaining": "Time Remaining",
+    "bankName": "Bank Name",
+    "accountNumber": "Account Number",
+    "accountHolder": "Account Holder",
+    "amount": "Amount",
+    "Description": "Description",
+    "scanQrCode": "Scan the QR code to pay the deposit.",
+    "qrCode": "QR Code",
+    "bankInformation": "Bank Information"
   }
 }

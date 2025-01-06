@@ -84,7 +84,7 @@ onMounted(() => {
         @click="toggleSection"
       >
         <p class="text-xl font-bold text-blue-900 dark:text-blue-100">
-          Select a doctor
+          {{ $t('booking.selectDoctor') }}
           <span v-if="selectedPractitioner" class="text-sm font-normal text-gray-600 dark:text-gray-300">
             ({{ selectedPractitioner.firstName }} {{ selectedPractitioner.lastName }})
           </span>
