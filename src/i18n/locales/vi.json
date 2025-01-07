@@ -1030,6 +1030,7 @@
   "calendar": {
     "working_status": "Trạng Thái Làm Việc",
     "working_hours": "Giờ Làm Việc",
+    "schedule_success": "Lịch làm việc đã được cập nhật!",
     "doctor_table": {
       "no_items_found": "Không tìm thấy bác sĩ nào trống lịch",
       "avatar": "Ảnh đại diện",

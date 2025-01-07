@@ -1,5 +1,5 @@
 <template>
-  <VaLayout v-if="breakpoint.lgUp" class="h-screen bg-[var(--va-background-secondary)]">
+  <VaLayout v-if="breakpoint.lgUp" class="h-[calc(100vh+180px)] bg-[var(--va-background-secondary)]">
     <template #left>
       <RouterLink
         class="bg-primary h-full flex items-center justify-center"

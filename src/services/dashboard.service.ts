@@ -164,6 +164,70 @@ class DashboardService {
         return Promise.reject(error)
       })
   }
+  async getTotalAppointments(data?: any): Promise<any> {
+    let url
+    if (!data) {
+      url = `/v1/dashboard/staff/appointments`
+    } else {
+      url = `/v1/dashboard/staff/appointments?date=${data}`
+    }
+    return apiService
+      .get(url)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getNewContacts(data?: any): Promise<any> {
+    let url
+    if (!data) {
+      url = `/v1/dashboard/staff/new-contact`
+    } else {
+      url = `/v1/dashboard/staff/new-contact?date=${data}`
+    }
+    return apiService
+      .get(url)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getFollowUp(data?: any): Promise<any> {
+    let url
+    if (!data) {
+      url = `/v1/dashboard/staff/follow-up`
+    } else {
+      url = `/v1/dashboard/staff/follow-up?date=${data}`
+    }
+    return apiService
+      .get(url)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getUnassign(data?: any): Promise<any> {
+    let url
+    if (!data) {
+      url = `/v1/dashboard/staff/un-assign`
+    } else {
+      url = `/v1/dashboard/staff/un-assign?date=${data}`
+    }
+    return apiService
+      .get(url)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new DashboardService()

@@ -11,6 +11,10 @@ export const useDashboardStore = defineStore('Dashboard', {
     totalServiceData: null as any,
     appointmentDoneData: null as any,
     feedbackData: null as any,
+    total_appointment: 0,
+    new_contacts: 0,
+    follow_up: 0,
+    unassign: 0,
   }),
   actions: {
     async getChartRevenue(data: any): Promise<any> {
@@ -132,6 +136,54 @@ export const useDashboardStore = defineStore('Dashboard', {
         this.isLoading = true
         const response = await dashboardService.getPatientTestimonials()
         this.feedbackData = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getTotalAppointments(data?: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getTotalAppointments(data)
+        this.total_appointment = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getNewContacts(data?: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getNewContacts(data)
+        this.new_contacts = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getFollowUp(data?: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getFollowUp(data)
+        this.follow_up = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getUnassign(data?: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getUnassign(data)
+        this.unassign = response
         this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {

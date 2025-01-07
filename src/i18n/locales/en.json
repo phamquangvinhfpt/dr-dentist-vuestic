@@ -441,6 +441,10 @@
     "service_report": "Service Report",
     "view_details": "View Details",
     "trigger": "Book an appointment",
+    "total_appointments": "Total Appointments",
+    "new_contacts": "New Contacts",
+    "follow_up": "Follow Up",
+    "unassign": "Non Assign Doctor",
     "doctor_rating": {
       "title": "Doctor Rating",
       "avatar": "Avatar",
@@ -1072,6 +1076,7 @@
   "calendar": {
     "working_status": "Working Status",
     "working_hours": "Working Hours",
+    "schedule_success": "Schedule successfully",
     "doctor_table": {
       "no_items_found": "No items found",
       "avatar": "Avatar",

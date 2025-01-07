@@ -864,15 +864,16 @@ const getDateKey = (day: CalendarDay) => {
 
 const getOptionsForDate = (dateKey: string) => {
   if (!optionsState.value.has(dateKey)) {
-    const selectedDatesCount = Object.values(selectedTimes.value).filter((times) => times.length > 0).length
+    // const selectedDatesCount = Object.values(selectedTimes.value).filter((times) => times.length > 0).length
 
-    if (selectedDatesCount >= MAX_SELECTED_DAYS) {
-      return optionsTimes.map((option) => ({
-        ...option,
-        disabled: true,
-        altDisabled: true,
-      }))
-    }
+    // if (selectedDatesCount >= MAX_SELECTED_DAYS) {
+    //   return optionsTimes.map((option) => ({
+    //     ...option,
+    //     disabled: true,
+    //     altDisabled: true,
+    //   }))
+    // }
+    // return optionsTimes
     return optionsTimes
   }
 
@@ -1223,8 +1224,8 @@ async function AutoSetRoomForPartTime(calendars: any) {
     .addRoom(roomAssignments)
     .then(() => {
       notify({
-        title: 'Thành công',
-        message: 'Phân lịch thành công!',
+        title: 'success',
+        message: t('calendar.schedule_success'),
         color: 'success',
       })
       const firstDay = new Date(currentYear.value, currentMonth.value, 2).toISOString().split('T')[0]
@@ -1369,58 +1370,58 @@ watch(
   { immediate: false }, // Prevents running on initial load
 )
 
-const MAX_SELECTED_DAYS = 5
+// const MAX_SELECTED_DAYS = 5
 
-watch(
-  selectedTimes.value,
-  (newSelectedTimes) => {
-    // Create a Map to store options state for each date
-    const optionsPerDate = new Map<string, typeof optionsTimes>()
+// watch(
+//   selectedTimes.value,
+//   (newSelectedTimes) => {
+//     // Create a Map to store options state for each date
+//     const optionsPerDate = new Map<string, typeof optionsTimes>()
 
-    // Count dates with selections
-    const selectedDatesCount = Object.entries(newSelectedTimes).filter(([, times]) => times.length > 0).length
+//     // Count dates with selections
+//     const selectedDatesCount = Object.entries(newSelectedTimes).filter(([, times]) => times.length > 0).length
 
-    // Process each date's selections
-    Object.entries(newSelectedTimes).forEach(([dateKey, selectedOptions]) => {
-      // Create a copy of options for this date
-      const dateOptions = optionsTimes.map((option) => ({ ...option }))
+//     // Process each date's selections
+//     Object.entries(newSelectedTimes).forEach(([dateKey, selectedOptions]) => {
+//       // Create a copy of options for this date
+//       const dateOptions = optionsTimes.map((option) => ({ ...option }))
 
-      // If this date has selections
-      if (selectedOptions.length > 0) {
-        if (selectedOptions.length === 1) {
-          dateOptions.forEach((option) => {
-            if (option.altValue !== selectedOptions[0]) {
-              option.disabled = true
-              option.altDisabled = true
-            }
-          })
-        }
-      } else {
-        // If we've reached the maximum number of days and this date has no selections,
-        // disable all options for this date
-        if (selectedDatesCount >= MAX_SELECTED_DAYS) {
-          dateOptions.forEach((option) => {
-            option.disabled = true
-            option.altDisabled = true
-          })
-        } else {
-          // Otherwise, enable all options
-          dateOptions.forEach((option) => {
-            option.disabled = false
-            option.altDisabled = false
-          })
-        }
-      }
+//       // If this date has selections
+//       if (selectedOptions.length > 0) {
+//         if (selectedOptions.length === 1) {
+//           dateOptions.forEach((option) => {
+//             if (option.altValue !== selectedOptions[0]) {
+//               option.disabled = true
+//               option.altDisabled = true
+//             }
+//           })
+//         }
+//       } else {
+//         // If we've reached the maximum number of days and this date has no selections,
+//         // disable all options for this date
+//         if (selectedDatesCount >= MAX_SELECTED_DAYS) {
+//           dateOptions.forEach((option) => {
+//             option.disabled = true
+//             option.altDisabled = true
+//           })
+//         } else {
+//           // Otherwise, enable all options
+//           dateOptions.forEach((option) => {
+//             option.disabled = false
+//             option.altDisabled = false
+//           })
+//         }
+//       }
 
-      // Store the options state for this date
-      optionsPerDate.set(dateKey, dateOptions)
-    })
+//       // Store the options state for this date
+//       optionsPerDate.set(dateKey, dateOptions)
+//     })
 
-    // Update your component's data structure to use these per-date options
-    optionsState.value = optionsPerDate
-  },
-  { deep: true },
-)
+//     // Update your component's data structure to use these per-date options
+//     optionsState.value = optionsPerDate
+//   },
+//   { deep: true },
+// )
 
 watch(
   () => [currentMonth.value, currentYear.value],

@@ -493,7 +493,14 @@
                     icon-color="#812E9E"
                     @click="checkedFollowupAppointment(rowData.calendarID)"
                   />
-                  <VaButton round icon="sync" color="warning" icon-color="#812E9E" @click="rescheduleModal(rowData)" />
+                  <VaButton
+                    v-if="rowData.status === 2"
+                    round
+                    icon="sync"
+                    color="warning"
+                    icon-color="#812E9E"
+                    @click="rescheduleModal(rowData)"
+                  />
                 </div>
               </template>
             </VaDataTable>
