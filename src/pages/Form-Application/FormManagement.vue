@@ -4,14 +4,19 @@
       <VaCardTitle class="card-title">
         <div class="flex items-center gap-4">
           <i class="fas fa-file-alt title-icon"></i>
-          <h2 class="text-2xl font-semibold">Form Management</h2>
+          <h2 class="text-2xl font-semibold">{{ t('form.pageTitle') }}</h2>
         </div>
       </VaCardTitle>
 
       <VaCardContent>
         <div class="header-actions">
           <div class="search-section">
-            <VaInput v-model="searchQuery" placeholder="Search forms..." class="search-input" size="medium">
+            <VaInput
+              v-model="searchQuery"
+              :placeholder="t('form.searchFormsPlaceholder')"
+              class="search-input"
+              size="medium"
+            >
               <template #prepend>
                 <VaIcon name="search" color="primary" class="search-icon" />
               </template>
@@ -53,7 +58,7 @@
           :disable-client-side-sorting="false"
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No forms found</div>"
+          :no-data-html="`<div class='text-center'>${t('form.noFormsFound')}</div>`"
         >
           <template #cell(name)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
@@ -152,7 +157,7 @@
         <div class="table-footer">
           <div v-if="formList.length > 0" class="footer-content">
             <div class="records-info">
-              <b>{{ formList.length }} {{ t('common.result') }}</b>
+              <b>{{ totalCount }} {{ t('common.result') }}</b>
               <span class="page-size-selector">
                 {{ t('common.resultPerPage') }}
                 <VaSelect
@@ -182,8 +187,8 @@
     <VaModal
       v-model="showStatusDialog"
       title="Change Status"
-      ok-text="Confirm"
-      cancel-text="Cancel"
+      :ok-text="$t('form.confirm')"
+      :cancel-text="$t('form.cancel')"
       class="status-change-modal"
       size="medium"
       @ok="confirmStatusChange"
@@ -191,25 +196,25 @@
     >
       <template #header>
         <div class="modal-header">
-          <h3 class="modal-title">Change Status</h3>
+          <h3 class="modal-title">{{ $t('form.changeStatus') }}</h3>
         </div>
       </template>
       <div class="status-change-form">
         <p class="status-change-text">
-          Are you sure you want to change the status to <b>{{ getStatusText(newStatus) }}</b
+          {{ $t('form.confirmMessage') }} <b>{{ getStatusText(newStatus) }}</b
           >?
         </p>
         <VaTextarea
           v-model="statusNote"
-          label="Note"
-          placeholder="Enter a note for this status change..."
+          :label="$t('form.statusNote')"
+          :placeholder="$t('form.notePlaceholder')"
           class="mt-4"
-          :rules="[(value: string) => !!value || 'Note is required']"
+          :rules="[(value: string) => !!value || $t('form.noteRequired')]"
         />
       </div>
     </VaModal>
 
-    <VaModal v-model="showDetailsModal" title="Form Details" hide-default-actions class="details-modal">
+    <VaModal v-model="showDetailsModal" :title="$t('form.viewDetails')" hide-default-actions class="details-modal">
       <div v-if="selectedForm" class="form-details-container">
         <div class="details-header">
           <div class="status-badge" :class="getStatusColor(selectedForm.status)">
@@ -220,21 +225,21 @@
 
         <div class="details-grid">
           <div class="detail-section">
-            <h3 class="section-title"><i class="fas fa-info-circle mr-2"></i>Basic Information</h3>
+            <h3 class="section-title"><i class="fas fa-info-circle mr-2"></i>{{ $t('form.basicInfo') }}</h3>
             <div class="detail-content">
               <div class="detail-item">
-                <span class="detail-label">Name</span>
+                <span class="detail-label">{{ $t('form.name') }}</span>
                 <span class="detail-value">{{ selectedForm.name }}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">Working Date</span>
+                <span class="detail-label">{{ $t('form.workingDate') }}</span>
                 <span class="detail-value">{{ formatDate(selectedForm.workingDate) }}</span>
               </div>
             </div>
           </div>
 
           <div class="detail-section">
-            <h3 class="section-title"><i class="fas fa-clock mr-2"></i>Working Hours</h3>
+            <h3 class="section-title"><i class="fas fa-clock mr-2"></i>{{ $t('form.workingHours') }}</h3>
             <div class="detail-content">
               <div class="working-times-grid">
                 <div v-for="time in selectedForm.workingTimes" :key="time.timeID" class="time-slot">
@@ -246,17 +251,17 @@
           </div>
 
           <div class="detail-section full-width">
-            <h3 class="section-title"><i class="fas fa-align-left mr-2"></i>Description</h3>
+            <h3 class="section-title"><i class="fas fa-align-left mr-2"></i>{{ $t('form.description') }}</h3>
             <div class="detail-content">
-              <p class="description-text">{{ selectedForm.description || 'No description provided' }}</p>
+              <p class="description-text">{{ selectedForm.description || $t('form.noDescription') }}</p>
             </div>
           </div>
 
           <div class="detail-section full-width">
-            <h3 class="section-title"><i class="fas fa-sticky-note mr-2"></i>Notes</h3>
+            <h3 class="section-title"><i class="fas fa-sticky-note mr-2"></i>{{ $t('form.notes') }}</h3>
             <div class="detail-content">
               <div class="note-container">
-                <p class="note-text">{{ selectedForm.note || 'No notes available' }}</p>
+                <p class="note-text">{{ selectedForm.note || $t('form.noNotes') }}</p>
               </div>
             </div>
           </div>
@@ -265,7 +270,7 @@
       <template #footer>
         <div class="modal-footer">
           <VaButton color="gray" class="close-button" @click="showDetailsModal = false">
-            <i class="fas fa-times mr-2"></i>Close
+            <i class="fas fa-times mr-2"></i>{{ $t('form.Close') }}
           </VaButton>
         </div>
       </template>
@@ -275,9 +280,9 @@
 
 <script lang="ts" setup>
 import { useFormStore } from '@/stores/modules/form.module'
-import { onMounted, ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
+import { onMounted, ref, reactive, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { FormDTO, FilterForm } from './types'
+import type { FormDTO } from './types'
 import { useToast } from 'vuestic-ui'
 
 const { t } = useI18n()
@@ -292,13 +297,11 @@ const formData = reactive({
 })
 
 const formList = ref<FormDTO[]>([])
+const allForms = ref<FormDTO[]>([])
 const searchQuery = ref('')
 const currentPage = ref(1)
 const selectedStatusFilter = ref<number | null>(null)
-
-const totalPages = computed(() => {
-  return Math.ceil(formList.value.length / formData.pageSize)
-})
+const totalCount = ref(0)
 
 const columns = computed(() => [
   { key: 'name', label: t('form.name') },
@@ -309,30 +312,81 @@ const columns = computed(() => [
   { key: 'action', label: t('common.actions') },
 ])
 
+const filteredForms = computed(() => {
+  let filtered = [...allForms.value]
+
+  if (selectedStatusFilter.value !== null) {
+    filtered = filtered.filter((form) => form.status === selectedStatusFilter.value)
+  }
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter((form) => {
+      const name = form.name.toLowerCase()
+      const description = form.description.toLowerCase()
+      const date = formatDate(form.workingDate)
+      const dateVariants = [date, date.split('/')[0], date.split('/').slice(0, 2).join('/'), date.replace(/\//g, '')]
+
+      if (name.includes(query) || description.includes(query)) {
+        return true
+      }
+
+      return dateVariants.some((variant) => variant.includes(query.replace(/\//g, '')))
+    })
+  }
+
+  return filtered
+})
+
+watch(filteredForms, () => {
+  totalCount.value = filteredForms.value.length
+  updateDisplayedForms()
+})
+
+const totalPages = computed(() => Math.ceil(totalCount.value / formData.pageSize))
+
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  formData.pageNumber = page
+  updateDisplayedForms()
+}
+
+const handlePageSizeChange = (size: number) => {
+  formData.pageSize = size
+  formData.pageNumber = 1
+  currentPage.value = 1
+  updateDisplayedForms()
+}
+
+const handleStatusFilterChange = (status: number | null) => {
+  selectedStatusFilter.value = status
+  formData.pageNumber = 1
+  currentPage.value = 1
+  updateDisplayedForms()
+}
+
+watch(searchQuery, () => {
+  formData.pageNumber = 1
+  currentPage.value = 1
+  updateDisplayedForms()
+})
+
+const updateDisplayedForms = () => {
+  const startIndex = (formData.pageNumber - 1) * formData.pageSize
+  const endIndex = startIndex + formData.pageSize
+  formList.value = filteredForms.value.slice(startIndex, endIndex)
+}
+
 const getAllForms = async () => {
   try {
-    const filter: FilterForm = {
-      pageNumber: currentPage.value,
-      pageSize: formData.pageSize,
+    const response = await formStore.getAllForms({
+      pageNumber: 1,
+      pageSize: 1000,
       isActive: formData.isActive,
       orderBy: formData.orderBy,
-      advancedFilter:
-        selectedStatusFilter.value !== null
-          ? {
-              logic: 'and',
-              filters: [
-                {
-                  field: 'status',
-                  operator: 'eq',
-                  value: selectedStatusFilter.value.toString(),
-                },
-              ],
-            }
-          : undefined,
-    }
-
-    const response = await formStore.getAllForms(filter)
-    formList.value = response.data
+    })
+    allForms.value = response.data
+    updateDisplayedForms()
   } catch (error) {
     console.error('Error fetching forms:', error)
     init({
@@ -351,17 +405,6 @@ const formatDate = (date: string) => {
   })
 }
 
-// const getStatusClass = (status: number) => {
-//   switch (status) {
-//     case 0:
-//       return 'text-yellow-500'
-//     case 1:
-//       return 'text-green-500'
-//     case 2:
-//       return 'text-red-500'
-//   }
-// }
-
 const getStatusText = (status: number) => {
   switch (status) {
     case 0:
@@ -378,98 +421,23 @@ const viewDetails = (form: FormDTO) => {
   showDetailsModal.value = true
 }
 
-const handlePageChange = (page: number) => {
-  currentPage.value = page
-  getAllForms()
-}
-
-const handlePageSizeChange = (size: number) => {
-  formData.pageSize = size
-  currentPage.value = 1
-  getAllForms()
-}
-
-// Search functionality
-const handleSearch = (query: string) => {
-  if (!query) {
-    getAllForms()
-    return
-  }
-
-  const searchTerms = query
-    .toLowerCase()
-    .split(' ')
-    .filter((term) => term)
-
-  const filteredForms = formList.value.filter((form) => {
-    const name = form.name.toLowerCase()
-    const description = form.description.toLowerCase()
-    const date = formatDate(form.workingDate) // VD: "23/02/2024"
-    const dateVariants = [
-      date, // 23/02/2024
-      date.split('/')[0], // 23
-      date.split('/').slice(0, 2).join('/'), // 23/02
-      date.replace(/\//g, ''), // 23022024
-    ]
-
-    // Tìm kiếm chính xác cụm từ
-    if (name.includes(query.toLowerCase()) || description.includes(query.toLowerCase())) {
-      return true
-    }
-
-    // Tìm kiếm theo ngày
-    if (dateVariants.some((variant) => variant.includes(query.toLowerCase().replace(/\//g, '')))) {
-      return true
-    }
-
-    // Tìm kiếm theo từng từ riêng lẻ
-    return searchTerms.some((term) => {
-      // Tìm trong name và description
-      if (name.includes(term) || description.includes(term)) {
-        return true
-      }
-
-      // Tìm trong các dạng ngày
-      const termWithoutSlash = term.replace(/\//g, '')
-      return dateVariants.some((variant) => variant.includes(termWithoutSlash))
-    })
-  })
-
-  formList.value = filteredForms
-}
-
-// Debounce search để tránh gọi quá nhiều lần
-const debouncedSearch = (query: string) => {
-  clearTimeout(searchTimeout.value)
-  searchTimeout.value = setTimeout(() => {
-    handleSearch(query)
-  }, 300)
-}
-
-// Watch search query với debounce
-watch(searchQuery, (newValue) => {
-  debouncedSearch(newValue)
-})
-
-// Thêm ref cho timeout
-const searchTimeout = ref<NodeJS.Timeout>()
-
-// Cleanup khi component unmount
-onBeforeUnmount(() => {
-  if (searchTimeout.value) {
-    clearTimeout(searchTimeout.value)
-  }
-})
-
 const showStatusDialog = ref(false)
 const statusNote = ref('')
 const newStatus = ref(0)
 const selectedForm = ref<FormDTO | null>(null)
+const showDetailsModal = ref(false)
 
 const statusOptions = [
   { value: 0, label: t('form.waiting') },
   { value: 1, label: t('form.accepted') },
   { value: 2, label: t('form.failed') },
+]
+
+const statusFilterOptions = [
+  { id: 'all', value: null, label: t('form.allStatus') },
+  { id: 'waiting', value: 0, label: t('form.waiting') },
+  { id: 'accepted', value: 1, label: t('form.accepted') },
+  { id: 'failed', value: 2, label: t('form.failed') },
 ]
 
 const getStatusColor = (status: number) => {
@@ -485,8 +453,28 @@ const getStatusColor = (status: number) => {
   }
 }
 
+const getStatusDotClass = (status: number) => {
+  switch (status) {
+    case 0:
+      return 'warning'
+    case 1:
+      return 'success'
+    case 2:
+      return 'danger'
+    default:
+      return ''
+  }
+}
+
+const formatTime = (time: string) => {
+  if (!time) return ''
+  return new Date(`1970-01-01T${time}`).toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 const openStatusChangeDialog = (form: FormDTO, status: number) => {
-  console.log('Form being changed:', form)
   selectedForm.value = form
   newStatus.value = status
   statusNote.value = ''
@@ -504,12 +492,6 @@ const confirmStatusChange = async () => {
   }
 
   try {
-    console.log('Request payload:', {
-      formID: selectedForm.value.formID,
-      status: newStatus.value,
-      note: statusNote.value.trim(),
-    })
-
     await formStore.toggleFormStatus({
       formID: selectedForm.value.formID,
       status: newStatus.value,
@@ -527,7 +509,6 @@ const confirmStatusChange = async () => {
     selectedForm.value = null
     await getAllForms()
   } catch (error: any) {
-    console.error('Error updating status:', error)
     const errorMessage =
       error.response?.data?.messages?.[0] || error.response?.data?.exception || t('form.statusUpdateError')
 
@@ -548,72 +529,6 @@ const cancelStatusChange = () => {
 onMounted(async () => {
   await getAllForms()
 })
-
-const getStatusDotClass = (status: number) => {
-  switch (status) {
-    case 0:
-      return 'warning'
-    case 1:
-      return 'success'
-    case 2:
-      return 'danger'
-    default:
-      return ''
-  }
-}
-
-const showDetailsModal = ref(false)
-
-const formatTime = (time: string) => {
-  if (!time) return ''
-  return new Date(`1970-01-01T${time}`).toLocaleTimeString('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-const handleStatusFilterChange = async (status: number | null) => {
-  selectedStatusFilter.value = status
-
-  const filter: FilterForm = {
-    pageNumber: currentPage.value,
-    pageSize: formData.pageSize,
-    isActive: formData.isActive,
-    orderBy: formData.orderBy,
-    advancedFilter:
-      status !== null
-        ? {
-            logic: 'and',
-            filters: [
-              {
-                field: 'status',
-                operator: 'eq',
-                value: status.toString(),
-              },
-            ],
-          }
-        : undefined,
-  }
-
-  try {
-    const response = await formStore.getAllForms(filter)
-    formList.value = response.data
-  } catch (error) {
-    console.error('Error filtering forms:', error)
-    init({
-      message: t('form.fetchError'),
-      color: 'danger',
-      duration: 3000,
-    })
-  }
-}
-
-const statusFilterOptions = [
-  { id: 'all', value: null, label: t('form.allStatus') },
-  { id: 'waiting', value: 0, label: t('form.waiting') },
-  { id: 'accepted', value: 1, label: t('form.accepted') },
-  { id: 'failed', value: 2, label: t('form.failed') },
-]
 </script>
 
 <style scoped>
@@ -656,7 +571,7 @@ const statusFilterOptions = [
   align-items: center;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  background: var(--va-background-element);
+  background: var(--va-background-secondary);
   border-radius: 15px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
@@ -665,28 +580,6 @@ const statusFilterOptions = [
   width: 70%;
   max-width: 800px;
   transition: all 0.3s ease;
-}
-
-.search-input {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input) {
-  height: 45px;
-  font-size: 1rem;
-  padding: 0 1.2rem;
-  background: var(--va-background-secondary);
-  color: var(--va-text-primary);
-  border: 2px solid var(--va-border-color);
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input):focus {
-  border-color: var(--va-primary);
-  box-shadow: 0 0 0 4px rgba(var(--va-primary-rgb), 0.1);
 }
 
 .search-icon {
@@ -1475,5 +1368,80 @@ const statusFilterOptions = [
     color 0.3s ease,
     border-color 0.3s ease,
     box-shadow 0.3s ease;
+}
+
+/* Responsive adjustments - Mobile only */
+@media (max-width: 768px) {
+  .form-management-container {
+    padding: 1rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-section {
+    width: 100%;
+  }
+
+  .button-group {
+    width: 100%;
+  }
+
+  .filter-tabs .tab-wrapper {
+    width: 100%;
+  }
+
+  .tab-button {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .custom-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .working-times-cell {
+    max-width: 180px;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .status-change-modal :deep(.va-modal__container) {
+    width: 95%;
+    margin: 0.5rem;
+  }
+
+  .details-modal :deep(.va-modal__container) {
+    width: 95%;
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .form-management-container {
+    padding: 0.5rem;
+  }
+
+  .tab-button {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  .status-button {
+    min-width: 110px;
+    width: 110px;
+  }
+
+  .action-button-circle {
+    width: 32px;
+    height: 32px;
+  }
 }
 </style>

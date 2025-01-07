@@ -3,7 +3,7 @@
     <VaCard class="payment-card">
       <VaCardTitle class="card-title">
         <i class="fas fa-money-bill-wave title-icon"></i>
-        Payment Management
+        {{ t('payment.management') }}
       </VaCardTitle>
 
       <VaCardContent>
@@ -67,7 +67,7 @@
                 :options="patientOptions"
                 track-by="id"
                 text-by="name"
-                placeholder="Chọn bệnh nhân"
+                :placeholder="t('payment.selectPatient')"
                 class="patient-select"
                 clearable
                 searchable
@@ -113,7 +113,7 @@
           hoverable
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No payments found</div>"
+          :no-data-html="`<div class='text-center'>${t('payment.noPaymentFound')}</div>`"
         >
           <template #cell(patientCode)="{ row }">
             <div class="flex items-center gap-2">
@@ -141,7 +141,9 @@
 
           <template #cell(depositDate)="{ row }">
             <div class="flex items-center gap-2">
-              <span>{{ !row.rowData.depositDate ? 'N/A' : formatDate(row.rowData.depositDate) }}</span>
+              <span>{{
+                !row.rowData.depositDate ? t('payment.notDeposited') : formatDate(row.rowData.depositDate)
+              }}</span>
             </div>
           </template>
 
@@ -364,30 +366,30 @@ const formatDate = (date: string | null) => {
 const getPaymentMethod = (method: number) => {
   switch (method) {
     case PaymentMethod.None:
-      return 'None'
+      return t('payment.other')
     case PaymentMethod.Cash:
-      return 'Cash'
+      return t('payment.cash')
     case PaymentMethod.BankTransfer:
-      return 'Bank Transfer'
+      return t('payment.bankTransfer')
     default:
-      return 'Unknown'
+      return t('payment.other')
   }
 }
 
 const getStatusText = (status: number) => {
   switch (status) {
     case PaymentStatus.Waiting:
-      return 'Waiting'
+      return t('form.waiting')
     case PaymentStatus.Incomplete:
-      return 'Incomplete'
+      return t('payment.incomplete')
     case PaymentStatus.Completed:
-      return 'Completed'
+      return t('payment.completed')
     case PaymentStatus.Canceled:
-      return 'Canceled'
+      return t('validateUtils.Cancel')
     case PaymentStatus.Failed:
-      return 'Failed'
+      return t('form.failed')
     default:
-      return 'Unknown'
+      return t('payment.other')
   }
 }
 
@@ -434,8 +436,6 @@ const handleDateChange = () => {
   if (new Date(endDate.value) < new Date(startDate.value)) {
     endDate.value = startDate.value
   }
-
-  router.push(`/payment-management/${startDate.value}/${endDate.value}`)
   getAllPaymentsPagination()
 }
 
@@ -487,18 +487,27 @@ const loadPatients = async () => {
       patientOptions.value = response.data
         .map((patient: Patient) => ({
           id: patient.id,
-          name: patient.fullName || patient.userName || 'Unknown Patient',
+          name: patient.fullName || formatUserName(patient.userName) || 'Unknown Patient',
         }))
         .filter((option: { id: string; name: string }) => option.id)
     }
   } catch (error) {
     console.error('Error loading patients:', error)
     init({
-      message: 'Lỗi khi tải danh sách bệnh nhân',
+      message: t('payment.loadPatientError'),
       color: 'danger',
       duration: 3000,
     })
   }
+}
+
+const formatUserName = (userName: string): string => {
+  if (!userName) return ''
+  // Split by dot and capitalize each part
+  return userName
+    .split('.')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
 }
 
 // Watch for patient selection changes
@@ -522,18 +531,13 @@ onMounted(async () => {
     return
   }
 
-  if (!route.params.startDate || !route.params.endDate) {
-    const today = new Date().toISOString().split('T')[0]
-    startDate.value = today
-    endDate.value = today
-    await router.push(`/payment-management/${today}/${today}`)
-  } else {
-    // Remove this check since we want to allow end date to be today
-    // if (new Date(endDate.value) > new Date(maxDate.value)) {
-    //   endDate.value = maxDate.value
-    //   await router.push(`/payment-management/${startDate.value}/${maxDate.value}`)
-    // }
-  }
+  // Initialize dates
+  const today = new Date()
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
+  const currentDate = today.toISOString().split('T')[0]
+
+  startDate.value = (route.params.startDate as string) || firstDayOfMonth
+  endDate.value = (route.params.endDate as string) || currentDate
 
   await Promise.all([getAllPaymentsPagination(), loadPatients()])
 })
@@ -552,7 +556,6 @@ const handleExport = async () => {
     }
     console.log('Export params:', exportParams)
 
-    // Gọi API trực tiếp với axios để có thể xử lý response dạng blob
     const axiosInstance = apiService.getAxiosInstance()
     const response = await axiosInstance.post('/v1/payment/export-payment', exportParams, {
       responseType: 'arraybuffer',
@@ -563,28 +566,31 @@ const handleExport = async () => {
 
     console.log('Export response received')
 
-    // Kiểm tra response
     if (!response.data) {
-      throw new Error('No data received')
+      throw new Error(t('payment.noDataReceived'))
     }
 
-    // Tạo blob với đúng MIME type cho Excel
     const blob = new Blob([response.data], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     })
 
-    // Tạo URL và download
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     const fileName = selectedPatient.value
-      ? `lich-su-thanh-toan-${selectedPatient.value.name}-${startDate.value}-den-${endDate.value}.xlsx`
-      : `payments-${startDate.value}-to-${endDate.value}.xlsx`
+      ? t('payment.exportFileName', {
+          name: selectedPatient.value.name,
+          startDate: startDate.value,
+          endDate: endDate.value,
+        })
+      : t('payment.exportFileNameAll', {
+          startDate: startDate.value,
+          endDate: endDate.value,
+        })
     link.setAttribute('download', fileName)
     document.body.appendChild(link)
     link.click()
 
-    // Cleanup
     setTimeout(() => {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
@@ -598,7 +604,6 @@ const handleExport = async () => {
   } catch (error: unknown) {
     console.error('Export failed:', error)
 
-    // Thử parse error message nếu có
     let errorMessage = t('payment.exportError')
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as { response?: { data?: ArrayBuffer } }
@@ -626,17 +631,15 @@ const handleExport = async () => {
 
 // Thay đổi placeholder của search input
 const searchPlaceholder = computed(() => {
-  try {
-    return t('common.search')
-  } catch {
-    return 'Tìm kiếm...'
-  }
+  return t('common.search')
 })
 </script>
 
 <style scoped>
 .payment-management-container {
-  padding: 24px;
+  padding: 2rem;
+  background: var(--va-background-primary);
+  min-height: 100vh;
 }
 
 .payment-card {
@@ -720,11 +723,175 @@ const searchPlaceholder = computed(() => {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .tab-wrapper {
-    width: 100%;
-    justify-content: center;
+@media (max-width: 1200px) {
+  .search-filter-container {
+    padding: 1rem;
+    margin: 1rem;
   }
+
+  .top-row {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .search-box {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .date-range {
+    flex: 1 1 calc(100% - 60px);
+  }
+
+  .export-button-container {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .payment-management-container {
+    padding: 12px;
+  }
+
+  .search-filter-container {
+    padding: 0.75rem;
+    margin: 0.75rem;
+  }
+
+  .top-row,
+  .bottom-row {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-box,
+  .date-range,
+  .patient-selector,
+  .status-filter,
+  .method-filter {
+    width: 100%;
+  }
+
+  .date-input-group {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .date-separator {
+    display: none;
+  }
+
+  .date-input {
+    width: 100%;
+  }
+
+  .status-tabs,
+  .method-tabs {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 42px;
+  }
+
+  .status-tab,
+  .method-tab {
+    flex: 1 1 auto;
+    min-width: 100px;
+    padding: 8px;
+    font-size: 0.875rem;
+  }
+
+  .card-title {
+    font-size: 1.4rem;
+    padding: 1rem;
+  }
+
+  /* Table responsive adjustments */
+  :deep(.va-data-table) {
+    font-size: 0.875rem;
+  }
+
+  :deep(.va-data-table__th),
+  :deep(.va-data-table__td) {
+    padding: 8px;
+  }
+}
+
+/* Add smooth scaling for larger screens */
+@media (min-width: 1201px) {
+  .payment-management-container {
+    padding: 2rem;
+  }
+
+  .search-filter-container {
+    transition: all 0.3s ease;
+  }
+
+  .search-box,
+  .date-range,
+  .patient-selector,
+  .status-filter,
+  .method-filter {
+    transition: all 0.3s ease;
+  }
+
+  .card-title {
+    transition: font-size 0.3s ease;
+  }
+}
+
+/* Improve table responsiveness */
+:deep(.va-data-table) {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+:deep(.va-data-table__table) {
+  min-width: 800px;
+}
+
+/* Improve dark mode contrast */
+.dark {
+  :deep(.va-data-table__th) {
+    background: var(--va-background-secondary);
+  }
+
+  :deep(.va-data-table__tr:hover) {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .search-input :deep(input),
+  .date-input-group,
+  .status-tabs,
+  .method-tabs {
+    background: var(--va-background-element);
+  }
+}
+
+/* Add fluid typography */
+html {
+  font-size: clamp(14px, 1vw, 16px);
+}
+
+.card-title {
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+}
+
+.search-input :deep(input),
+.date-input :deep(input),
+.status-tab,
+.method-tab {
+  font-size: clamp(0.875rem, 1.5vw, 0.95rem);
+}
+
+/* Improve button responsiveness */
+.export-button {
+  width: clamp(42px, 5vw, 48px) !important;
+  height: clamp(42px, 5vw, 48px) !important;
+}
+
+.export-button i {
+  font-size: clamp(18px, 2.5vw, 20px);
 }
 
 .search-filter-container {
@@ -732,7 +899,7 @@ const searchPlaceholder = computed(() => {
   flex-direction: column;
   gap: 1.5rem;
   padding: 1.5rem;
-  background: var(--va-background-primary);
+  background: var(--va-background-secondary);
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
   margin: 1.5rem;
@@ -772,7 +939,7 @@ const searchPlaceholder = computed(() => {
 
 .search-input :deep(input:focus) {
   border-color: #3b82f6;
-  background: white;
+  background: var(--va-background-secondary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -786,7 +953,7 @@ const searchPlaceholder = computed(() => {
 }
 
 .search-icon {
-  color: #64748b;
+  color: var(--va-text-primary);
   font-size: 1rem;
   margin-right: 12px;
 }
@@ -911,7 +1078,7 @@ const searchPlaceholder = computed(() => {
 
 .status-tabs {
   display: flex;
-  background: var(--va-background-secondary);
+  background: var(--va-background-primary);
   border: 1px solid var(--va-border-color);
   border-radius: 8px;
   padding: 4px;
@@ -923,7 +1090,7 @@ const searchPlaceholder = computed(() => {
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--va-text-secondary);
+  color: var(--va-text-primary);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -937,11 +1104,12 @@ const searchPlaceholder = computed(() => {
   align-items: center;
   justify-content: center;
   margin: 0 2px;
+  border-color: var(--va-border-color);
 }
 
 .status-tab.active {
-  background: var(--va-background-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: var(--va-background-secondary);
+  box-shadow: 0 2px 4px var(--va-background-primary);
   color: var(--va-primary);
 }
 
@@ -952,7 +1120,7 @@ const searchPlaceholder = computed(() => {
 
 .method-tabs {
   display: flex;
-  background: var(--va-background-secondary);
+  background: var(--va-background-primary);
   border: 1px solid var(--va-border-color);
   border-radius: 8px;
   padding: 4px;
@@ -964,7 +1132,7 @@ const searchPlaceholder = computed(() => {
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--va-text-secondary);
+  color: var(--va-text-primary);
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
@@ -978,17 +1146,18 @@ const searchPlaceholder = computed(() => {
   align-items: center;
   justify-content: center;
   margin: 0 2px;
+  border-color: var(--va-border-color);
 }
 
 .method-tab.active {
-  background: var(--va-background-primary);
+  background: var(--va-background-secondary);
   color: var(--va-primary);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 4px var(--va-background-primary);
 }
 
 .status-tab:hover:not(.active),
 .method-tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--va-background-secondary);
 }
 
 /* Responsive */

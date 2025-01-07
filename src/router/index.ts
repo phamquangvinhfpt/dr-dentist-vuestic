@@ -289,16 +289,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
         },
-        redirect: () => {
-          const today = new Date().toISOString().split('T')[0]
-          return `/payment-management/${today}/${today}`
-        },
-        children: [
-          {
-            path: ':startDate/:endDate',
-            component: () => import('../pages/PaymentPages/PaymentManagement.vue'),
-          },
-        ],
+        component: () => import('../pages/PaymentPages/PaymentManagement.vue'),
       },
       {
         name: 'payment-for-patient',

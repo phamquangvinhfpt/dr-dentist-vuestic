@@ -4,8 +4,10 @@ import { useAuthStore } from '@/stores/modules/auth.module'
 import { useMedicalRecordStore } from '@/stores/modules/medicalrecord1.module'
 import type { MedicalRecordDTO } from './types'
 import { useToast } from 'vuestic-ui'
+import { useI18n } from 'vue-i18n'
 import DiagnosisDentalChart from '@/components/DiagnosisDentalChart.vue'
-//có gì xóa sau
+
+const { t } = useI18n()
 const authStore = useAuthStore()
 const medicalRecordStore = useMedicalRecordStore()
 const { init } = useToast()
@@ -27,7 +29,7 @@ const fetchMedicalRecords = async () => {
     isLoading.value = true
     const userId = authStore.user?.id
     if (!userId) {
-      throw new Error('User not authenticated')
+      throw new Error(t('medicalRecord.error.userNotAuth'))
     }
 
     const formattedStartDate = formatDate(startDate.value)
@@ -37,7 +39,7 @@ const fetchMedicalRecords = async () => {
     records.value = response || []
   } catch (error: any) {
     init({
-      message: error.message || 'Error fetching medical records',
+      message: error.message || t('medicalRecord.error.fetchFailed'),
       color: 'danger',
       duration: 3000,
     })
@@ -76,20 +78,25 @@ onMounted(() => {
       <div class="card-header">
         <div class="header-left">
           <div class="title-wrapper">
-            <h1>Medical Records</h1>
+            <h1>{{ t('medicalRecord.title') }}</h1>
             <span class="total-badge">{{ records.length }}</span>
           </div>
-          <p class="subtitle">View and manage your dental history</p>
+          <p class="subtitle">{{ t('medicalRecord.subtitle') }}</p>
         </div>
         <div class="header-right">
           <div class="date-filters">
             <VaDateInput
               v-model="startDate"
-              placeholder="From"
+              :placeholder="t('medicalRecord.dateRange.from')"
               class="date-input"
               @update:modelValue="handleDateChange"
             />
-            <VaDateInput v-model="endDate" placeholder="To" class="date-input" @update:modelValue="handleDateChange" />
+            <VaDateInput
+              v-model="endDate"
+              :placeholder="t('medicalRecord.dateRange.to')"
+              class="date-input"
+              @update:modelValue="handleDateChange"
+            />
           </div>
         </div>
       </div>
@@ -102,7 +109,7 @@ onMounted(() => {
 
           <div v-else-if="records.length === 0" class="no-records">
             <i class="fas fa-folder-open"></i>
-            <p>No medical records found</p>
+            <p>{{ t('medicalRecord.noRecords') }}</p>
           </div>
 
           <template v-else>
@@ -180,40 +187,38 @@ onMounted(() => {
 
           <!-- Content Section -->
           <div class="detail-content custom-scrollbar">
-            <!-- Basic Examination Section - bao gồm cả Treatment Plan -->
+            <!-- Basic Examination Section -->
             <div class="detail-section">
               <div class="section-header">
                 <div class="header-icon">
                   <i class="fas fa-clipboard-check"></i>
                 </div>
-                <h3>Basic Examination</h3>
+                <h3>{{ t('medicalRecord.basicExamination.title') }}</h3>
               </div>
               <div class="section-content">
                 <div class="info-grid">
-                  <div class="info-label">Examination Result:</div>
+                  <div class="info-label">{{ t('medicalRecord.basicExamination.result') }}</div>
                   <div class="info-value">{{ selectedRecord.basicExamination.examinationContent }}</div>
 
-                  <div class="info-label">Treatment Plan:</div>
+                  <div class="info-label">{{ t('medicalRecord.basicExamination.treatmentPlan') }}</div>
                   <div class="info-value">{{ selectedRecord.basicExamination.treatmentPlanNote }}</div>
                 </div>
               </div>
             </div>
 
-            <!-- Diagnosis Section - giữ nguyên -->
+            <!-- Diagnosis Section -->
             <div class="detail-section">
               <div class="section-header">
                 <div class="header-icon">
                   <i class="fas fa-stethoscope"></i>
                 </div>
-                <h3>Diagnosis</h3>
+                <h3>{{ t('medicalRecord.diagnosis.title') }}</h3>
               </div>
               <div class="section-content">
-                <!-- Thêm dental chart, có gì sai thì xóa DiagnosisDentalChart -->
                 <DiagnosisDentalChart :diagnosis="selectedRecord.diagnosis" />
 
-                <!-- Giữ lại phần hiển thị danh sách -->
                 <div class="info-grid">
-                  <div class="info-label">Affected Teeth:</div>
+                  <div class="info-label">{{ t('medicalRecord.diagnosis.affectedTeeth') }}</div>
                   <div class="info-value">
                     <div v-for="(diagnosis, index) in selectedRecord.diagnosis" :key="index" class="tooth-diagnosis">
                       <span class="tooth-number">
@@ -231,17 +236,17 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Treatment Indications Section - bao gồm cả Indication Images -->
+            <!-- Treatment Indications Section -->
             <div class="detail-section">
               <div class="section-header">
                 <div class="header-icon">
                   <i class="fas fa-list-ul"></i>
                 </div>
-                <h3>Treatment Indications</h3>
+                <h3>{{ t('medicalRecord.treatment.title') }}</h3>
               </div>
               <div class="section-content">
                 <div class="info-grid">
-                  <div class="info-label">Types:</div>
+                  <div class="info-label">{{ t('medicalRecord.treatment.types') }}</div>
                   <div class="info-value">
                     <div class="indications-list">
                       <span v-for="type in selectedRecord.indication.indicationType" :key="type" class="indication-tag">
@@ -250,12 +255,11 @@ onMounted(() => {
                     </div>
                   </div>
 
-                  <div class="info-label">Description:</div>
+                  <div class="info-label">{{ t('medicalRecord.treatment.description') }}</div>
                   <div class="info-value">{{ selectedRecord.indication.description }}</div>
 
-                  <!-- Thêm Indication Images vào đây nếu có -->
                   <template v-if="selectedRecord.indicationImages?.length">
-                    <div class="info-label">Images:</div>
+                    <div class="info-label">{{ t('medicalRecord.treatment.images') }}</div>
                     <div class="info-value">
                       <div class="images-grid">
                         <div v-for="(image, index) in selectedRecord.indicationImages" :key="index" class="image-item">
@@ -851,5 +855,103 @@ onMounted(() => {
   border-radius: 20px;
   font-size: 1rem;
   font-weight: 600;
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 1200px) {
+  .card-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .header-right {
+    width: 100%;
+  }
+
+  .date-filters {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .medical-records-container {
+    padding: 1rem;
+  }
+
+  .timeline {
+    padding: 1rem;
+  }
+
+  .timeline-point {
+    width: 30px;
+    margin-right: 1rem;
+  }
+
+  .timeline-card {
+    width: 100%;
+  }
+
+  .card-header {
+    padding: 1rem;
+  }
+
+  .treatment-tags {
+    gap: 0.25rem;
+  }
+
+  .treatment-tag {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .detail-header {
+    padding: 1.5rem;
+  }
+
+  .patient-info {
+    gap: 1rem;
+  }
+
+  .patient-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+
+  .info-main h2 {
+    font-size: 1.5rem;
+  }
+
+  .info-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .date-filters {
+    flex-direction: column;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .images-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-content {
+    padding: 1rem;
+  }
+
+  .detail-section {
+    padding: 1rem;
+  }
+
+  .tooth-diagnosis {
+    padding: 0.75rem;
+  }
 }
 </style>

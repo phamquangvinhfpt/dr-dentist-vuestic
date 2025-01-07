@@ -3,7 +3,7 @@
     <VaCard class="service-card">
       <VaCardTitle class="card-title">
         <i class="fas fa-cog title-icon"></i>
-        Service Management
+        {{ t('service.serviceManagement') }}
       </VaCardTitle>
 
       <VaCardContent>
@@ -26,7 +26,7 @@
             :options="typeServices"
             text-by="typeName"
             value-by="id"
-            placeholder="Filter by type"
+            :placeholder="t('service.filterByType')"
             class="type-filter"
             size="large"
             style="flex: 1"
@@ -37,7 +37,7 @@
           <div class="button-group">
             <VaButton color="primary" class="action-button create-button" @click="showCreateModal = true">
               <i class="va-icon material-icons mr-2">add</i>
-              <span class="ml-1">Create</span>
+              <span class="ml-1">{{ t('common.create') }}</span>
             </VaButton>
             <VaButton
               :color="showBin ? 'warning' : 'secondary'"
@@ -45,7 +45,7 @@
               @click="toggleBin"
             >
               <i class="va-icon material-icons mr-2">{{ showBin ? 'list' : 'delete' }}</i>
-              <span class="ml-1">{{ showBin ? 'Active' : 'Bin' }}</span>
+              <span class="ml-1">{{ showBin ? t('common.active') : t('common.bin') }}</span>
             </VaButton>
           </div>
         </div>
@@ -59,7 +59,7 @@
           :disable-client-side-sorting="false"
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No services found</div>"
+          :no-data-html="`<div class='text-center'>${t('service.noServicesFound')}</div>`"
         >
           <template #cell(serviceName)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
@@ -67,7 +67,7 @@
             </div>
           </template>
 
-          <template v-if="showBin" #cell(deletedOn)="{ row }">
+          <!-- <template v-if="showBin" #cell(deletedOn)="{ row }">
             <div class="flex items-center gap-2">
               <span>{{ formatDate(row.rowData.deletedOn) }}</span>
             </div>
@@ -77,7 +77,7 @@
             <div class="flex items-center gap-2">
               <span>{{ row.rowData.deletedBy }}</span>
             </div>
-          </template>
+          </template> -->
 
           <template #cell(serviceDescription)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
@@ -206,26 +206,25 @@
       </template>
     </VaModal>
 
-    <VaModal v-model="showCreateModal" title="Create New Service" hide-default-actions>
+    <VaModal v-model="showCreateModal" :title="t('service.createNewService')" hide-default-actions>
       <div class="p-4">
         <form class="flex flex-col gap-4" @submit.prevent="handleCreate">
-          <VaInput v-model="formData.name" label="Service Name" required />
-          <VaTextarea v-model="formData.description" label="Description" required />
-          <VaCheckbox v-model="formData.isModify" label="Is Modifiable" />
+          <VaInput v-model="formData.name" :label="t('service.name')" required />
+          <VaTextarea v-model="formData.description" :label="t('service.description')" required />
           <VaSelect
             v-model="selectedTypeID"
-            label="Type Service"
+            :label="t('service.typeService')"
             :options="typeServices"
             text-by="typeName"
             value-by="id"
-            placeholder="Choose a service type"
+            :placeholder="t('service.chooseServiceType')"
           />
         </form>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showCreateModal = false">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="handleCreate">Create</VaButton>
+          <VaButton color="gray" @click="showCreateModal = false">{{ t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleCreate">{{ t('common.create') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -233,14 +232,14 @@
     <VaModal v-model="showEditModal" title="Edit Service" hide-default-actions>
       <div class="p-4">
         <form class="flex flex-col gap-4" @submit.prevent="handleUpdate">
-          <VaInput v-model="formData.name" label="Service Name" required />
-          <VaTextarea v-model="formData.description" label="Description" required />
+          <VaInput v-model="formData.name" :label="t('service.name')" required />
+          <VaTextarea v-model="formData.description" :label="t('service.description')" required />
         </form>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showEditModal = false">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate">Update</VaButton>
+          <VaButton color="gray" @click="showEditModal = false">{{ t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="handleUpdate">{{ t('common.update') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -271,7 +270,7 @@ const formData = reactive({
   orderBy: [],
   name: '',
   description: '',
-  isModify: true,
+  isModify: false,
   typeID: '',
 })
 
@@ -338,9 +337,9 @@ const handlePageSizeChange = (size: number) => {
   currentPage.value = 1
 }
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('vi-VN')
-}
+// const formatDate = (date: string) => {
+//   return new Date(date).toLocaleDateString('vi-VN')
+// }
 
 const getAllServicesPagination = async () => {
   try {
@@ -406,14 +405,8 @@ const columns = computed(() => {
     { key: 'totalPrice', label: t('service.price') },
   ]
 
-  if (showBin.value) {
-    baseColumns.push(
-      { key: 'deletedOn', label: t('common.deletedOn') },
-      { key: 'deletedBy', label: t('common.deletedBy') },
-    )
-  } else {
-    baseColumns.push({ key: 'status', label: t('service.status') })
-  }
+  if (showBin.value) baseColumns.push()
+  baseColumns.push({ key: 'status', label: t('service.status') })
 
   baseColumns.push({ key: 'action', label: t('common.actions') })
   return baseColumns
@@ -579,9 +572,8 @@ const resetForm = () => {
   // Reset form
   formData.name = ''
   formData.description = ''
-  formData.isModify = true
+  formData.isModify = false // Set to false tuan test
   formData.typeID = ''
-
   selectedService.value = null
 }
 
@@ -597,14 +589,14 @@ const handleToggleStatus = async (service: ServiceDTO) => {
     await getAllServicesPagination()
 
     init({
-      message: 'Status updated successfully',
+      message: t('service.statusUpdatedSuccessfully'),
       color: 'success',
       duration: 3000,
     })
   } catch (error) {
     console.error('Toggle status error:', error)
     init({
-      message: 'Failed to update status',
+      message: t('service.statusUpdatedFailed'),
       color: 'danger',
       duration: 3000,
     })
@@ -667,42 +659,6 @@ onMounted(async () => {
 .search-section {
   flex: 1;
   min-width: 300px;
-}
-
-.search-input {
-  width: 100%;
-}
-
-.search-input :deep(input) {
-  height: 42px;
-  border-radius: 8px;
-  padding: 8px 16px;
-  border: 1px solid var(--va-border-color);
-  transition: all 0.3s;
-  background: var(--va-background-secondary);
-  font-size: 0.95rem;
-  color: var(--va-text-primary);
-}
-
-.search-input :deep(input:focus) {
-  border-color: #3b82f6;
-  background: var(--va-background-secondary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.search-input :deep(.va-input-wrapper) {
-  border: none;
-  background: transparent;
-}
-
-.search-input :deep(.va-input) {
-  box-shadow: none;
-}
-
-.search-icon {
-  color: #64748b;
-  font-size: 1rem;
-  margin-right: 12px;
 }
 
 .filter-section {
@@ -1111,5 +1067,145 @@ onMounted(async () => {
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+}
+
+/* Responsive adjustments - Mobile only */
+@media (max-width: 1024px) {
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .search-section,
+  .type-filter {
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 250px;
+  }
+
+  .button-group {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .service-management-container {
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    padding: 1.2rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-section,
+  .type-filter {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  .button-group {
+    justify-content: stretch;
+    gap: 0.5rem;
+  }
+
+  .action-button {
+    flex: 1;
+  }
+
+  .custom-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .custom-table :deep(th),
+  .custom-table :deep(td) {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .records-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-size-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .service-management-container {
+    padding: 0.5rem;
+  }
+
+  .service-card {
+    border-radius: 10px;
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+    padding: 1rem;
+  }
+
+  .action-button {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    height: 36px;
+  }
+
+  .action-button i {
+    font-size: 1rem;
+  }
+
+  .action-button-circle {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .action-button-circle i {
+    font-size: 1.1rem;
+  }
+
+  .custom-table :deep(th),
+  .custom-table :deep(td) {
+    padding: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  :deep(.va-modal) {
+    width: 95% !important;
+    margin: 1rem !important;
+  }
+
+  :deep(.va-modal__title) {
+    font-size: 1.3rem;
+    padding: 1rem;
+  }
+
+  :deep(.va-modal__content) {
+    padding: 1rem;
+  }
+
+  :deep(.va-modal__actions) {
+    padding: 0.8rem;
+  }
 }
 </style>
