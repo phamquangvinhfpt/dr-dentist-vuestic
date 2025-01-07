@@ -22,7 +22,7 @@
               <template v-else>↓</template>
               {{ changeText }}
             </span>
-            since {{ since }}
+            {{ since }}
           </p>
         </div>
       </section>

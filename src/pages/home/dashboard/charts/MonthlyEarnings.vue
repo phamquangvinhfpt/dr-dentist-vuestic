@@ -10,8 +10,8 @@
         </div>
         <section>
           <div class="text-xl font-bold mb-2">{{ formatMoney(total) }}</div>
-          <p class="text-xs text-success">
-            <VaIcon name="arrow_upward" />
+          <p class="text-xs" :class="{ 'text-success': percentage > 0, 'text-danger': percentage < 0 }">
+            <VaIcon :name="percentage > 0 ? 'arrow_upward' : 'arrow_downward'" />
             {{ percentage }}%
             <span class="text-secondary"> {{ t('dashboard.last_month') }}</span>
           </p>
@@ -94,11 +94,15 @@ const dataReady = ref(false)
 dashboardStore.getChartDeposit({ start: startYear, end: endYear }).then((res) => {
   const data = res as DataEntry[]
   chartData.value.datasets = transformData(data).datasets
-  // calculate percentage
+
   const currentMonthNumber = new Date().getMonth()
   const currentMonthTotal = chartData.value.datasets[0].data[currentMonthNumber]
   const lastMonthTotal = chartData.value.datasets[0].data[currentMonthNumber - 1]
-  percentage.value = lastMonthTotal === 0 ? 100 : ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100
+
+  percentage.value = !lastMonthTotal
+    ? 100
+    : Number((((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100).toFixed(2))
+
   // calculate total
   total.value = chartData.value.datasets[0].data.reduce((acc: any, val: any) => acc + val, 0)
   dataReady.value = true

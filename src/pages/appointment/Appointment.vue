@@ -13,11 +13,11 @@
               clearable
             />
             <div
-              v-if="filteredTypes.length > 0"
+              v-if="currentView === 'list'"
               class="w-full inline-flex rounded-lg border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 p-1"
             >
               <button
-                v-for="type in filteredTypes"
+                v-for="type in types"
                 :key="type.id"
                 :class="[
                   'w-full px-3 py-1.5 text-sm font-medium transition-colors rounded-md',
@@ -56,7 +56,7 @@
               class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600"
               @click="openCreateAppointmentDialog"
             >
-              Create Appointment
+              {{ t('appointment.create_appointment.title') }}
             </button>
           </div>
         </div>
@@ -100,6 +100,9 @@
                   :offset="[-7, -7]"
                   class="mr-2"
                   :color="doctor.isWorked ? 'success' : 'secondary'"
+                  :style="{
+                    '--va-badge-dot-size': '0.65rem',
+                  }"
                 >
                   <VaAvatar
                     color="#692BEB"
@@ -385,6 +388,7 @@
                 '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
               }"
               :class="['small-text']"
+              :no-data-html="t('appointment.no_items_found')"
               sticky-header
             >
               <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
@@ -471,6 +475,7 @@
               }"
               sticky-header
               :class="['small-text']"
+              :no-data-html="t('appointment.no_items_found')"
             >
               <template #cell(date)="{ value }"> {{ formatDate(value) }} </template>
               <template #cell(status)="{ value }">
@@ -486,7 +491,7 @@
                     icon="check"
                     color="#b1fadc"
                     icon-color="#812E9E"
-                    @click="checkedFollowupAppointment(rowData.appointmentId)"
+                    @click="checkedFollowupAppointment(rowData.calendarID)"
                   />
                   <VaButton round icon="sync" color="warning" icon-color="#812E9E" @click="rescheduleModal(rowData)" />
                 </div>
@@ -520,6 +525,7 @@
               }"
               sticky-header
               :class="['small-text']"
+              :no-data-html="t('appointment.no_items_found')"
               @row:dblclick="(row) => openAssignListDialog(row.item)"
             >
               <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
@@ -579,15 +585,34 @@
         <h3 class="text-lg font-semibold mb-2">
           {{ selectedAppointment?.patientName }} - {{ selectedAppointment?.patientCode }}
         </h3>
-        <p><strong>Contact:</strong> {{ selectedAppointment?.patientPhone }}</p>
-        <p><strong>Room:</strong> {{ selectedAppointment?.roomName }}</p>
-        <p><strong>Time:</strong> {{ selectedAppointment?.startTime }}</p>
-        <p><strong>Date:</strong> {{ selectedAppointment?.appointmentDate }}</p>
-        <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedAppointment?.dentistId)) }}</p>
-        <p><strong>Service:</strong> {{ selectedAppointment?.serviceName }}</p>
-        <p><strong>Price:</strong> {{ formatPrice(selectedAppointment?.servicePrice) }}</p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.contact') }}:</strong>
+          {{ selectedAppointment?.patientPhone }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.room') }}:</strong> {{ selectedAppointment?.roomName }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.time') }}:</strong> {{ selectedAppointment?.startTime }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.date') }}:</strong>
+          {{ formatDate(selectedAppointment?.appointmentDate) }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.doctor') }}:</strong>
+          {{ getDoctorName(getDoctorId(selectedAppointment?.dentistId)) }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.service') }}:</strong>
+          {{ selectedAppointment?.serviceName }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.price') }}:</strong>
+          {{ formatPrice(selectedAppointment?.servicePrice) }}
+        </p>
         <p class="flex items-center gap-2">
-          <strong>Status:</strong>
+          <strong>{{ t('appointment.appointment_detail_modal.status') }}:</strong>
           <span
             v-if="selectedAppointment"
             class="px-2 py-1 text-xs rounded-full"
@@ -609,13 +634,28 @@
         <h3 class="text-lg font-semibold mb-2">
           {{ selectedFollowUpAppointment?.patientName }} - {{ selectedFollowUpAppointment?.patientCode }}
         </h3>
-        <p><strong>Room:</strong> {{ selectedFollowUpAppointment?.roomName }}</p>
-        <p><strong>Time:</strong> {{ selectedFollowUpAppointment?.startTime }}</p>
-        <p><strong>Date:</strong> {{ selectedFollowUpAppointment?.date }}</p>
-        <p><strong>Doctor:</strong> {{ getDoctorName(getDoctorId(selectedFollowUpAppointment?.doctorProfileID)) }}</p>
-        <p><strong>Service:</strong> {{ selectedFollowUpAppointment?.serviceName }}</p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.room') }}:</strong>
+          {{ selectedFollowUpAppointment?.roomName }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.time') }}:</strong>
+          {{ selectedFollowUpAppointment?.startTime }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.date') }}:</strong>
+          {{ formatDate(selectedFollowUpAppointment?.date) }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.doctor') }}:</strong>
+          {{ getDoctorName(getDoctorId(selectedFollowUpAppointment?.doctorProfileID)) }}
+        </p>
+        <p>
+          <strong>{{ t('appointment.appointment_detail_modal.service') }}:</strong>
+          {{ selectedFollowUpAppointment?.serviceName }}
+        </p>
         <p class="flex items-center gap-2">
-          <strong>Status:</strong>
+          <strong>{{ t('appointment.appointment_detail_modal.status') }}:</strong>
           <span
             v-if="selectedFollowUpAppointment"
             class="px-2 py-1 text-xs rounded-full"
@@ -643,7 +683,7 @@
             class="block w-full text-left px-4 py-2 text-sm"
             @click="showTimeSlotUnassignedModal(contextMenu.time, contextMenu.doctorId)"
           >
-            Show Unassigned
+            {{ t('appointment.show_appointment_no_doctor') }}
           </button>
         </div>
       </VaCard>
@@ -676,7 +716,7 @@
                   class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all"
                 >
                   <DialogTitle as="h3" class="text-lg font-medium leading-6">
-                    {{ selectedDate ? formatDate(selectedDate) : 'All' }} Unassigned Bookings at
+                    {{ selectedDate ? formatDate(selectedDate) : 'All' }} {{ t('appointment.no_booking_at') }}
                     {{ selectedTime ? `${selectedTime}` : '' }}
                   </DialogTitle>
                   <div class="mt-4">
@@ -692,15 +732,15 @@
                             class="ml-2 px-2 py-1 bg-blue-500 text-white rounded-md text-sm"
                             @click="openAssignDialog(booking)"
                           >
-                            Assign
+                            {{ t('appointment.assign_doctor') }}
                           </button>
                         </li>
                       </ul>
-                      <p v-else class="text-sm text-gray-500 text-center">
+                      <!-- <p v-else class="text-sm text-gray-500 text-center">
                         No unassigned bookings at {{ selectedTime }}.
-                      </p>
+                      </p> -->
                     </div>
-                    <p v-else class="text-sm text-gray-500 text-center">No unassigned bookings.</p>
+                    <p v-else class="text-sm text-gray-500 text-center">{{ t('appointment.no_booking_assigned') }}.</p>
                   </div>
                 </VaCard>
               </TransitionChild>
@@ -736,30 +776,29 @@
                 <VaCard
                   class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all"
                 >
-                  <DialogTitle as="h3" class="text-lg font-medium leading-6"> Assign Booking </DialogTitle>
-                  <form class="mt-4 space-y-4" @submit.prevent="handleAssignBooking">
+                  <DialogTitle as="h3" class="text-lg font-medium leading-6">
+                    {{ t('appointment.assign_doctor_modal.title') }}
+                  </DialogTitle>
+                  <VaForm ref="doctor_form">
                     <div class="space-y-2">
-                      <label class="text-sm font-medium">Patient: {{ selectedBooking.patientName }}</label>
+                      <VaSelect
+                        v-model="selectedDoctorId"
+                        :label="t('appointment.assign_doctor_modal.doctor')"
+                        :options="listDoctorsOptionsAssign"
+                        autocomplete
+                        highlight-matched-text
+                        :rules="[(v) => !!v || 'Please select a doctor']"
+                      />
                     </div>
-                    <div class="space-y-2">
-                      <VaSelect v-model="selectedDoctorId" label="Doctor" :options="listDoctorsOptionsAssign" />
+                    <div class="flex items-end justify-end mt-5">
+                      <VaButton class="mr-6" color="#ECF0F1" @click="showAssignDialog = false">
+                        {{ t('appointment.create_appointment.cancel') }}
+                      </VaButton>
+                      <VaButton :disabled="!selectedDoctorId?.value" @click="handleAssignBooking">
+                        {{ t('appointment.assign_doctor_modal.assign') }}
+                      </VaButton>
                     </div>
-                    <div class="flex justify-end space-x-2 mt-4">
-                      <button
-                        type="button"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        @click="showAssignDialog = false"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        class="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md hover:bg-purple-700"
-                      >
-                        Assign
-                      </button>
-                    </div>
-                  </form>
+                  </VaForm>
                 </VaCard>
               </TransitionChild>
             </div>
@@ -768,26 +807,26 @@
       </TransitionRoot>
       <!-- Create Appointment Modal -->
       <VaModal v-model="showModalAppointment" close-button hide-default-actions>
-        <h3 class="va-h3">Appointment Details</h3>
-        <VaForm ref="create_appointment_form">
+        <h3 class="va-h3">{{ t('appointment.appointment_detail') }}</h3>
+        <VaForm ref="create_form">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <VaSelect
               v-model="patientId"
               class="col-span-1"
-              label="Patient"
+              :label="t('appointment.create_appointment.patient')"
               :options="optionsPatients"
               autocomplete
               highlight-matched-text
-              :rules="[(v) => !!v || 'Patient is required']"
+              :rules="[(v) => !!v || t('appointment.create_appointment.patient_required')]"
             />
             <VaSelect
               v-model="serviceId"
               class="col-span-1"
-              label="Service"
+              :label="t('appointment.create_appointment.service')"
               :options="optionsServices"
               autocomplete
               highlight-matched-text
-              :rules="[(v) => !!v || 'Service is required']"
+              :rules="[(v) => !!v || t('appointment.create_appointment.service_required')]"
             />
             <VaDateInput
               v-model="date"
@@ -795,25 +834,35 @@
               :parse="parseDate"
               manual-input
               class="col-span-1"
-              label="Date"
+              :label="t('appointment.create_appointment.date')"
               clearable
-              :rules="[(v) => !!v || 'Date is required']"
+              :rules="[(v) => !!v || t('appointment.create_appointment.date_required')]"
             />
-            <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
+            <VaSelect
+              v-model="startTime"
+              class="col-span-1"
+              :label="t('appointment.create_appointment.time')"
+              :options="optionsStartTimes"
+              :rules="[(v) => !!v || t('appointment.create_appointment.time_required')]"
+            />
             <VaSelect
               v-model="doctorId"
               class="col-span-1"
-              label="Doctor"
+              :label="t('appointment.create_appointment.doctor')"
               :options="optionsDoctors"
               autocomplete
               highlight-matched-text
-              :rules="[(v) => !!v || 'Doctor is required']"
+              :rules="[(v) => !!v || t('appointment.create_appointment.doctor_required')]"
             />
-            <VaTextarea v-model="notes" label="Notes" />
+            <VaTextarea v-model="notes" :label="t('appointment.create_appointment.note')" />
           </div>
           <div class="flex items-end justify-end mt-5">
-            <VaButton class="mr-6" color="#ECF0F1" @click="showModalAppointment = false">Cancel</VaButton>
-            <VaButton :disabled="!isValid" @click="submitAppointment">Submit</VaButton>
+            <VaButton class="mr-6" color="#ECF0F1" @click="showModalAppointment = false">{{
+              t('appointment.create_appointment.cancel')
+            }}</VaButton>
+            <VaButton :disabled="!create_form?.isValid" @click="submitAppointment">{{
+              t('appointment.create_appointment.submit')
+            }}</VaButton>
           </div>
         </VaForm>
       </VaModal>
@@ -822,40 +871,52 @@
         v-model="showModalReschedule"
         ok-text="Reschedule"
         close-button
+        hide-default-actions
         @close="handleCloseReschedule"
         @ok="submitReschedule(isAppointment)"
       >
-        <h3 class="va-h3">Reschedule Appointment</h3>
+        <h3 class="va-h3">{{ t('appointment.reschedule_appointment.title') }}</h3>
         <VaCard>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <VaDateInput
-              v-model="date"
-              :format="formatDate"
-              :parse="parseDate"
-              manual-input
-              class="col-span-1"
-              label="Date"
-              clearable
-            />
-            <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
-          </div>
+          <VaForm ref="reschedule_form">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <VaDateInput
+                v-model="date"
+                :format="formatDate"
+                :parse="parseDate"
+                manual-input
+                class="col-span-1"
+                :label="t('appointment.reschedule_appointment.date')"
+                clearable
+                :rules="[(v) => !!v || t('appointment.reschedule_appointment.date_required')]"
+              />
+              <VaSelect
+                v-model="startTime"
+                class="col-span-1"
+                :label="t('appointment.reschedule_appointment.time')"
+                :options="optionsStartTimes"
+                :rules="[(v) => !!v || t('appointment.reschedule_appointment.time_required')]"
+              />
+            </div>
+
+            <div class="flex items-end justify-end mt-5">
+              <VaButton class="mr-6" color="#ECF0F1" @click="showModalReschedule = false">{{
+                t('appointment.reschedule_appointment.cancel')
+              }}</VaButton>
+              <VaButton :disabled="!reschedule_form?.isValid" @click="submitReschedule(isAppointment)">{{
+                t('appointment.reschedule_appointment.submit')
+              }}</VaButton>
+            </div>
+          </VaForm>
         </VaCard>
       </VaModal>
       <!-- Cancel Appointment Modal -->
-      <VaModal
-        v-model="showModalCancel"
-        cancel-text="Cancel"
-        close-button
-        ok-text="Yes"
-        @close="handleCloseCancel"
-        @ok="submitCancel(isAppointment)"
-      >
-        <h3 class="va-h3">Cancel Appointment</h3>
+      <VaModal v-model="showModalCancel" close-button @close="handleCloseCancel" @ok="submitCancel(isAppointment)">
+        <h3 class="va-h3">{{ t('appointment.cancel_appointment.title') }}</h3>
         <VaCard>
-          <p>Are you sure you want to cancel this appointment?</p>
+          <p>{{ t('appointment.cancel_appointment.subtitle') }}</p>
         </VaCard>
         <VaAlert color="#fdeae7" text-color="#940909" class="mt-4">
-          <p>This action cannot be undone.</p>
+          <p>{{ t('appointment.cancel_appointment.warning') }}</p>
         </VaAlert>
       </VaModal>
     </VaCard>
@@ -910,6 +971,7 @@ import { startOfWeek, addDays, format } from 'date-fns'
 import { debounce } from 'lodash'
 import ListAppointment from './widgets/list-appointment/ListAppointment.vue'
 import ListFollowUpAppointment from './widgets/list-appointment/ListFollowUpAppointment.vue'
+import { useI18n } from 'vue-i18n'
 
 const selectedDate = ref(new Date())
 const showAllUnassignedModal = ref(false)
@@ -939,52 +1001,55 @@ const showModalReschedule = ref(false)
 const showModalCancel = ref(false)
 const isMobile = computed(() => window.innerWidth < 768)
 const { init } = useToast()
+const { t } = useI18n()
 const router = useRouter()
 const usersStore = useAuthStore()
 const role = usersStore.user?.roles
 const items = ref<Appointment[]>([])
 const followitems = ref<FollowUpAppointment[]>([])
 const unassigneditems = ref<Appointment[]>([])
-const { isValid } = useForm('create_appointment_form')
+const create_form = useForm('create_appointment_form')
+const reschedule_form = useForm('reschedule_appointment_form')
+const doctor_form = useForm('assign_appointment_form')
 
 const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 const columns = computed(() => [
-  { key: 'appointmentDate', label: 'Date', name: 'appointmentDate' },
-  { key: 'roomName', label: 'Room', name: 'roomName' },
-  { key: 'startTime', label: 'Time', name: 'startTime' },
-  { key: 'patientName', label: 'Patient', name: 'patientName' },
-  { key: 'patientPhone', label: 'Phone', name: 'patientPhone' },
-  { key: 'dentistName', label: 'Doctor', name: 'dentistName' },
-  { key: 'serviceName', label: 'Service', name: 'serviceName' },
-  { key: 'servicePrice', label: 'Price', name: 'servicePrice' },
-  { key: 'status', label: 'Status', name: 'status' },
-  { key: 'paymentStatus', label: 'Payment Status', name: 'paymentStatus' },
-  { key: 'actions', label: 'Actions', name: 'actions' },
+  { key: 'appointmentDate', label: t('appointment.appointment_data_table.date'), name: 'appointmentDate' },
+  { key: 'roomName', label: t('appointment.appointment_data_table.room'), name: 'roomName' },
+  { key: 'startTime', label: t('appointment.appointment_data_table.time'), name: 'startTime' },
+  { key: 'patientName', label: t('appointment.appointment_data_table.patient'), name: 'patientName' },
+  { key: 'patientPhone', label: t('appointment.appointment_data_table.phone'), name: 'patientPhone' },
+  { key: 'dentistName', label: t('appointment.appointment_data_table.doctor'), name: 'dentistName' },
+  { key: 'serviceName', label: t('appointment.appointment_data_table.service'), name: 'serviceName' },
+  { key: 'servicePrice', label: t('appointment.appointment_data_table.price'), name: 'servicePrice' },
+  { key: 'status', label: t('appointment.appointment_data_table.status'), name: 'status' },
+  { key: 'paymentStatus', label: t('appointment.appointment_data_table.payment_status'), name: 'paymentStatus' },
+  { key: 'actions', label: t('appointment.appointment_data_table.actions'), name: 'actions' },
 ])
 
 const followColumns = computed(() => [
-  { key: 'date', label: 'Date', name: 'date' },
-  { key: 'roomName', label: 'Room', name: 'roomName' },
-  { key: 'startTime', label: 'Time', name: 'startTime' },
-  { key: 'patientName', label: 'Patient', name: 'patientName' },
-  { key: 'doctorName', label: 'Doctor', name: 'doctorName' },
-  { key: 'step', label: 'Step', name: 'step' },
-  { key: 'serviceName', label: 'Service', name: 'serviceName' },
-  { key: 'procedureName', label: 'Procedure', name: 'procedureName' },
-  { key: 'status', label: 'Status', name: 'status' },
-  { key: 'actions', label: 'Actions', name: 'actions' },
+  { key: 'date', label: t('appointment.appointment_data_table.date'), name: 'date' },
+  { key: 'roomName', label: t('appointment.appointment_data_table.room'), name: 'roomName' },
+  { key: 'startTime', label: t('appointment.appointment_data_table.time'), name: 'startTime' },
+  { key: 'patientName', label: t('appointment.appointment_data_table.patient'), name: 'patientName' },
+  { key: 'doctorName', label: t('appointment.appointment_data_table.doctor'), name: 'doctorName' },
+  { key: 'step', label: t('appointment.appointment_data_table.step'), name: 'step' },
+  { key: 'serviceName', label: t('appointment.appointment_data_table.service'), name: 'serviceName' },
+  { key: 'procedureName', label: t('appointment.appointment_data_table.procedure'), name: 'procedureName' },
+  { key: 'status', label: t('appointment.appointment_data_table.status'), name: 'status' },
+  { key: 'actions', label: t('appointment.appointment_data_table.actions'), name: 'actions' },
 ])
 
 const unassignedColumns = computed(() => [
-  { key: 'appointmentDate', label: 'Date', name: 'appointmentDate' },
-  { key: 'startTime', label: 'Time', name: 'startTime' },
-  { key: 'patientName', label: 'Patient', name: 'patientName' },
-  { key: 'serviceName', label: 'Service', name: 'serviceName' },
-  { key: 'servicePrice', label: 'Price', name: 'servicePrice' },
-  { key: 'status', label: 'Status', name: 'status' },
-  { key: 'paymentStatus', label: 'Payment Status', name: 'paymentStatus' },
-  { key: 'actions', label: 'Actions', name: 'actions' },
+  { key: 'appointmentDate', label: t('appointment.appointment_data_table.date'), name: 'appointmentDate' },
+  { key: 'startTime', label: t('appointment.appointment_data_table.time'), name: 'startTime' },
+  { key: 'patientName', label: t('appointment.appointment_data_table.patient'), name: 'patientName' },
+  { key: 'serviceName', label: t('appointment.appointment_data_table.service'), name: 'serviceName' },
+  { key: 'servicePrice', label: t('appointment.appointment_data_table.price'), name: 'servicePrice' },
+  { key: 'status', label: t('appointment.appointment_data_table.status'), name: 'status' },
+  { key: 'paymentStatus', label: t('appointment.appointment_data_table.payment_status'), name: 'paymentStatus' },
+  { key: 'actions', label: t('appointment.appointment_data_table.actions'), name: 'actions' },
 ])
 
 const views = [
@@ -992,11 +1057,20 @@ const views = [
   { id: 'list', label: 'List' },
 ]
 
-const types = [
-  { id: 'appointment', label: 'Appointment' },
-  { id: 'followup', label: 'Follow-up' },
-  { id: 'unassigned', label: 'Unassigned Bookings' },
-]
+const types = computed(() => {
+  if (role?.includes('Staff') || role?.includes('Admin')) {
+    return [
+      { id: 'appointment', label: t('appointment.appointment') },
+      { id: 'followup', label: t('appointment.follow_up') },
+      { id: 'unassigned', label: t('appointment.no_specific_doctor') },
+    ]
+  }
+
+  return [
+    { id: 'appointment', label: t('appointment.appointment') },
+    { id: 'followup', label: t('appointment.follow_up') },
+  ]
+})
 
 interface Options {
   text: string
@@ -1095,7 +1169,7 @@ const submitAppointment = () => {
     .then(() => {
       init({
         title: 'success',
-        message: 'Appointment created successfully!',
+        message: t('appointment.create_appointment.success'),
         color: 'success',
       })
       showModalAppointment.value = false
@@ -1119,7 +1193,7 @@ const checkedAppointment = async (appointmentId: any) => {
       init({
         title: 'success',
         color: 'success',
-        message: 'Bệnh nhân đã đến khám!',
+        message: t('appointment.check_in'),
       })
       fetchAppointments(searchValueA.value)
       fetchFollowUpAppointments(searchValueF.value)
@@ -1146,7 +1220,7 @@ const checkedFollowupAppointment = async (appointmentId: any) => {
       init({
         title: 'success',
         color: 'success',
-        message: 'Bệnh nhân đã đến khám!',
+        message: t('appointment.check_in'),
       })
       fetchFollowUpAppointments(searchValueF.value)
     })
@@ -1214,7 +1288,7 @@ const submitReschedule = (isAppointment: any) => {
     .then(() => {
       init({
         title: 'success',
-        message: 'Appointment rescheduled successfully!',
+        message: t('appointment.reschedule_appointment.success'),
         color: 'success',
       })
       showModalReschedule.value = false
@@ -1246,7 +1320,7 @@ const submitCancel = (isAppointment: any) => {
     .then(() => {
       init({
         title: 'success',
-        message: 'Appointment canceled successfully!',
+        message: t('appointment.cancel_appointment.success'),
         color: 'success',
       })
       showModalCancel.value = false
@@ -1265,13 +1339,6 @@ const submitCancel = (isAppointment: any) => {
       })
     })
 }
-
-const filteredTypes = computed(() => {
-  // if (role?.includes('Patient') || role?.includes('Dentist')) {
-  //   return currentView.value === 'list' ? types.filter((type) => type.id !== 'unassigned') : []
-  // }
-  return currentView.value === 'list' ? types : []
-})
 
 const formatPrice = (price: any) => {
   return new Intl.NumberFormat('vi-VN').format(price)
@@ -2009,10 +2076,10 @@ watch(
     () => paginationF.value.perPage,
     () => paginationN.value.page,
     () => paginationN.value.perPage,
-    () => isAppointment.value,
+    // () => isAppointment.value,
   ],
   ([newDate, newTime, newView, newPageA, newPerPageA, newPageF, newPerPageF, newPageN, newPerPageN]) => {
-    // update request
+    // update request newView next newTime
     request.date = formatDateForm(newDate)
     // Update search values
     const updatedSearchValue = {
@@ -2020,7 +2087,8 @@ watch(
       time: newTime,
     }
 
-    const getPageSize = (currentPageSize: any) => (newView === 'calendar' ? 100 : currentPageSize)
+    const getPageSize = (currentPageSize: any) => (newView === 'calendar' ? 20 : currentPageSize)
+    // const getPageSize = (currentPageSize: number = 10) => (currentPageSize === 0 ? 10 : currentPageSize)
 
     searchValueA.value = {
       ...searchValueA.value,
@@ -2043,27 +2111,30 @@ watch(
       pageSize: getPageSize(newPerPageN),
     }
 
-    if (role?.includes('Admin') || (role?.includes('Staff') && newView === 'calendar')) {
-      searchDoctor()
-    }
-    if (isAppointment.value === 'appointment') {
-      console.log('appointment')
-      debouncedFetchAppointments(searchValueA.value)
-    } else if (isAppointment.value === 'unassigned') {
-      console.log('unassigned')
-      debouncedFetchNonDoctorAppointments(searchValueN.value)
-    } else {
-      console.log('follow')
-      debouncedFetchFollowUpAppointments(searchValueF.value)
-    }
+    searchDoctor()
+    debouncedFetchAppointments(searchValueA.value)
+    debouncedFetchNonDoctorAppointments(searchValueN.value)
+    debouncedFetchFollowUpAppointments(searchValueF.value)
+    // if (role?.includes('Admin') || (role?.includes('Staff') && newView === 'calendar')) {
+    // }
+    // if (isAppointment.value === 'appointment') {
+    //   console.log('appointment')
+    //   debouncedFetchAppointments(searchValueA.value)
+    // } else if (isAppointment.value === 'unassigned') {
+    //   console.log('unassigned')
+    //   debouncedFetchNonDoctorAppointments(searchValueN.value)
+    // } else {
+    //   console.log('follow')
+    //   debouncedFetchFollowUpAppointments(searchValueF.value)
+    // }
 
     // Handle view changes
-    if (newView !== 'list') {
-      console.log('check')
-      debouncedFetchAppointments(searchValueA.value)
-      debouncedFetchNonDoctorAppointments(searchValueN.value)
-      debouncedFetchFollowUpAppointments(searchValueF.value)
-    }
+    // if (newView !== currentView.value) {
+    //   console.log('check')
+    //   debouncedFetchAppointments(searchValueA.value)
+    //   debouncedFetchNonDoctorAppointments(searchValueN.value)
+    //   debouncedFetchFollowUpAppointments(searchValueF.value)
+    // }
   },
   { deep: true },
 )
@@ -2101,7 +2172,7 @@ const debouncedFetchAvailableDoctors = debounce(fetchAvailableDoctors, 300)
 watch(
   [serviceId, date, startTime],
   ([newServiceId, newDate, newStartTime]) => {
-    if (newServiceId?.value !== '' && newDate && newStartTime && showModalAppointment) {
+    if (newServiceId?.value !== '' && newDate && newStartTime && showModalAppointment && showModalAppointment.value) {
       debouncedFetchAvailableDoctors()
     }
   },

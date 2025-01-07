@@ -763,8 +763,8 @@ onBeforeMount(() => {
   loadUsers()
 })
 
-onMounted(() => {
-  loadUsers()
+onMounted(async () => {
+  await loadUsers()
 })
 
 watch(

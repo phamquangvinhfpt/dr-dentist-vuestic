@@ -31,7 +31,7 @@
           <div class="info-item">
             <VaIcon name="event" />
             <div class="info-content">
-              <span class="info-label">Date & Time</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.date&time') }}</span>
               <span class="info-value">{{ followup.date }}</span>
               <span class="info-value">{{ followup.startTime.slice(0, 5) }}</span>
             </div>
@@ -40,7 +40,7 @@
           <div class="info-item">
             <VaIcon name="medical_services" />
             <div class="info-content">
-              <span class="info-label">Service</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.service') }}</span>
               <span class="info-value">{{ followup.serviceName }}</span>
             </div>
           </div>
@@ -48,7 +48,7 @@
           <div class="info-item">
             <VaIcon name="room" />
             <div class="info-content">
-              <span class="info-label">Room</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.room') }}</span>
               <span class="info-value">{{ followup.roomName }}</span>
             </div>
           </div>
@@ -56,7 +56,7 @@
           <div class="info-item">
             <VaIcon name="person" />
             <div class="info-content">
-              <span class="info-label">Doctor</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.doctor') }}</span>
               <span class="info-value">{{ followup.doctorName }}</span>
             </div>
           </div>
@@ -64,7 +64,7 @@
           <div class="info-item">
             <VaIcon name="assignment" />
             <div class="info-content">
-              <span class="info-label">Procedure</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.procedure') }}</span>
               <span class="info-value">{{ followup.procedureName }}</span>
             </div>
           </div>
@@ -72,7 +72,7 @@
           <div class="info-item">
             <VaIcon name="format_list_numbered" />
             <div class="info-content">
-              <span class="info-label">Step</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.step') }}</span>
               <span class="info-value">{{ followup.step }}</span>
             </div>
           </div>
@@ -80,7 +80,7 @@
           <div v-if="followup.note" class="info-item" style="grid-column: 1 / -1">
             <VaIcon name="note" />
             <div class="info-content">
-              <span class="info-label">Notes</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.note') }}</span>
               <span class="info-value">{{ followup.note }}</span>
             </div>
           </div>
@@ -123,10 +123,12 @@ import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const router = useRouter()
 const { init } = useToast()
+const { t } = useI18n()
 const store = useCalendarStore()
 const followup = ref<FollowUpAppointment | null>(null)
 const authStore = useAuthStore()

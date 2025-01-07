@@ -405,7 +405,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'services',
         path: '/services/:id?',
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
         },
         component: ServiceForUser,
       },
