@@ -3,9 +3,10 @@ import { useDoctorProfileStore } from '@stores/modules/doctor.module'
 import { useRouter } from 'vue-router'
 import { onMounted, Ref, ref, computed, watch } from 'vue'
 import { User } from './types'
-import { VaButton, VaAvatar, VaInput } from 'vuestic-ui'
+import { useI18n } from 'vue-i18n'
+import { VaButton, VaAvatar, VaInput, VaCard, VaSelect } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
-
+const { t } = useI18n()
 const userStore = useDoctorProfileStore()
 const router = useRouter()
 
@@ -101,13 +102,7 @@ watch(currentPage, () => {
     <!-- Header Section -->
     <VaCard class="mb-6 flex justify-between items-center">
       <div class="flex-1 max-w-md">
-        <VaInput
-          v-model="searchQuery"
-          placeholder="Tìm kiếm bác sĩ theo tên hoặc email..."
-          rounded
-          outlined
-          clearable
-        /><svg
+        <VaInput v-model="searchQuery" :placeholder="t('doctor.search')" rounded outlined clearable /><svg
           class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -128,7 +123,7 @@ watch(currentPage, () => {
         <template #prepend>
           <i class="mdi mdi-plus mr-2"></i>
         </template>
-        Thêm Bác Sĩ
+        {{ t('doctor.add_doctor') }}
       </VaButton>
     </VaCard>
 
@@ -139,14 +134,14 @@ watch(currentPage, () => {
         class="grid grid-cols-5 gap-4 px-6 py-3 bg-indigo-100 text-sm font-semibold text-indigo-800"
       >
         <div></div>
-        <div>Tên</div>
-        <div>Giới Tính</div>
-        <div>Email</div>
-        <div>Điện Thoại</div>
+        <div>{{ t('doctor.name') }}</div>
+        <div>{{ t('doctor.gender') }}</div>
+        <div>{{ t('doctor.email') }}</div>
+        <div>{{ t('doctor.phone') }}</div>
       </div>
 
       <div v-if="filteredDoctors.length === 0" class="py-10 text-center text-gray-500">
-        Không tìm thấy bác sĩ nào phù hợp.
+        {{ t('doctor.not_doctor') }}
       </div>
 
       <ul v-else>
@@ -190,30 +185,31 @@ watch(currentPage, () => {
       <!-- Pagination -->
       <VaCard class="flex flex-col sm:flex-row items-center justify-between mt-6 mx-3 space-y-4 sm:space-y-0">
         <!-- Số mục mỗi trang -->
-        <div class="flex items-center space-x-2">
-          <label for="pageSize" class="text-sm font-medium">Số mục mỗi trang:</label>
-          <select
+        <VaCard class="flex items-center space-x-2">
+          <VaSelect
             id="pageSize"
             v-model="itemsPerPage"
-            class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            @change="changeItemsPerPage"
+            :options="pageSizeOptions"
+            class="rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            @input="changeItemsPerPage"
           >
-            <option v-for="size in pageSizeOptions" :key="size" :value="size">{{ size }}</option>
-          </select>
-        </div>
+          </VaSelect>
+        </VaCard>
 
         <!-- Phân trang -->
         <ul class="pagination flex items-center space-x-2">
           <li>
-            <button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">←</button>
+            <VaButton :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">←</VaButton>
           </li>
           <li v-for="page in totalPages" :key="page">
-            <button :class="['pagination-button', { active: currentPage === page }]" @click="currentPage = page">
+            <VaButton :class="['pagination-button', { active: currentPage === page }]" @click="currentPage = page">
               {{ page }}
-            </button>
+            </VaButton>
           </li>
           <li>
-            <button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">→</button>
+            <VaButton :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++"
+              >→</VaButton
+            >
           </li>
         </ul>
       </VaCard>

@@ -1,94 +1,70 @@
 <template>
-  <div class="user-detail">
-    <h1>User Details</h1>
+  <VaCard class="user-detail">
+    <h1>{{ t('doctor.detail') }}</h1>
     <VaInnerLoading :loading="loading" :size="60">
       <!-- Personal Information Section -->
-      <div class="section personal-info">
+      <VaCard class="section personal-info">
         <div class="header">
-          <h2>Personal Information</h2>
-          <RouterLink :to="'/user-update/' + userId" class="edit-button">Edit User</RouterLink>
+          <h2>{{ t('doctor.Professional_Information') }}</h2>
+          <RouterLink :to="'/user-update/' + userId" class="edit-button">{{ t('doctor.Edit_staff') }}</RouterLink>
         </div>
 
-        <div class="card">
+        <VaCard class="card">
           <div class="profile-picture">
             <img v-if="user.imageUrl" :src="getSrcAvatar(user.imageUrl)" />
             <span v-else class="text-sm">No image available</span>
           </div>
-          <div class="details">
+          <VaCard class="details">
             <h3 class="name">{{ user.name }}</h3>
             <p class="username">@{{ user.userName }}</p>
             <p class="job">{{ user.jobTitle }}</p>
             <ul>
               <li>
-                <strong>Email:</strong>
+                <strong>{{ t('doctor.email') }}:</strong>
                 <a :href="'mailto:' + user.email">{{ user.email }}</a>
-                <span v-if="user.emailStatus" class="status confirmed">Confirmed</span>
+                <span v-if="user.emailStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
               </li>
               <li>
-                <strong>Phone:</strong>
+                <strong>{{ t('doctor.phone') }}:</strong>
                 <a :href="'tel:' + user.phone">{{ user.phone }}</a>
-                <span v-if="user.phoneStatus" class="status confirmed">Confirmed</span>
               </li>
-              <li><strong>Address:</strong> {{ user.address }}</li>
-              <li><strong>Born:</strong> {{ user.birthDate }}</li>
-              <li><strong>Gender:</strong> {{ user.gender ? 'Male' : 'Female' }}</li>
+              <li>
+                <strong>{{ t('doctor.address') }}:</strong> {{ user.address }}
+              </li>
+              <li>
+                <strong>{{ t('doctor.birth_date') }}:</strong> {{ user.birthDate }}
+              </li>
+              <li>
+                <strong>{{ t('doctor.gender') }}:</strong> {{ user.gender ? t('doctor.male') : t('doctor.female') }}
+              </li>
             </ul>
-          </div>
-        </div>
-      </div>
+          </VaCard>
+        </VaCard>
+      </VaCard>
 
       <!-- Account Status Section -->
-      <div class="section account-status">
-        <h2>Account Status</h2>
+      <VaCard class="section account-status">
+        <h2>{{ t('doctor.Account_Status') }}</h2>
         <ul>
-          <li><strong>Status:</strong> <span v-if="user.status" class="status active">Active</span></li>
           <li>
-            <strong>Email Status:</strong>
-            <span v-if="user.emailStatus" class="status confirmed">Confirmed</span>
-            <span v-else class="status not-confirmed">Not Confirm</span>
+            <strong>{{ t('doctor.Status') }}:</strong>
+            <span v-if="user.status" class="status active">{{ t('doctor.Active') }}</span>
           </li>
-
           <li>
-            <strong>Phone Status:</strong>
-            <span v-if="user.phoneStatus" class="status confirmed">Confirmed</span>
-            <span v-else class="status not-confirmed">Not Confirm</span>
+            <strong>{{ t('doctor.Email_Status') }}:</strong>
+            <span v-if="user.emailStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
+            <span v-else class="status not-confirmed">{{ t('doctor.UnConfirmed') }}</span>
+          </li>
+          <li>
+            <strong>{{ t('doctor.Phone_Status') }}:</strong>
+            <span v-if="user.phoneStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
+            <span v-else class="status not-confirmed">{{ t('doctor.UnConfirmed') }}</span>
           </li>
         </ul>
-      </div>
-
-      <!-- Activity History Section -->
-      <div class="section activity-history">
-        <h2>Activity History</h2>
-        <div class="tabs">
-          <button :class="{ active: showTransactionHistory }" @click="showTransactions">Transaction History</button>
-          <button :class="{ active: !showTransactionHistory }" @click="showAppointments">Appointment History</button>
-        </div>
-        <div class="content">
-          <div v-if="showTransactionHistory">
-            <ul class="transactions">
-              <li v-for="transaction in user.transactions" :key="transaction.id" class="transaction">
-                <span class="type">{{ transaction.type }}</span>
-                <span class="date">{{ transaction.date }}</span>
-                <span class="amount" :class="transaction.amount > 0 ? 'positive' : 'negative'">
-                  {{ transaction.amount > 0 ? '+' : '' }}{{ transaction.amount }}
-                </span>
-              </li>
-            </ul>
-          </div>
-          <div v-else>
-            <ul class="appointments">
-              <li v-for="appointment in user.appointments" :key="appointment.id" class="appointment">
-                <span class="details">{{ appointment.doctor }} - {{ appointment.specialty }}</span>
-                <span class="date-time">{{ appointment.date }} at {{ appointment.time }}</span>
-                <span class="status" :class="appointment.status.toLowerCase()">{{ appointment.status }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+      </VaCard>
     </VaInnerLoading>
     <VaButton class="btn-back" @click="$router.go(-1)"> Back </VaButton>
-  </div>
+  </VaCard>
 </template>
 
 <script setup lang="ts">
@@ -96,7 +72,9 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserProfileStore } from '@/stores/modules/user.module'
 import { getSrcAvatar } from '@/services/utils'
-
+import { VaCard } from 'vuestic-ui'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 interface User {
   imageUrl?: string
   name: string
@@ -116,7 +94,6 @@ interface User {
 const route = useRoute()
 const userId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
 const user = ref<User>({} as User)
-const showTransactionHistory = ref(true)
 const loading = ref(true)
 
 const getUserDetail = async () => {
@@ -143,14 +120,6 @@ const getUserDetail = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const showTransactions = () => {
-  showTransactionHistory.value = true
-}
-
-const showAppointments = () => {
-  showTransactionHistory.value = false
 }
 
 onMounted(() => {
@@ -214,7 +183,6 @@ onMounted(() => {
 
 .tabs button.active {
   background: #007bff;
-  color: #fff;
 }
 
 .transactions,
@@ -234,7 +202,6 @@ onMounted(() => {
 .edit-button {
   padding: 8px 16px;
   background-color: #007bff;
-  color: #fff;
   text-decoration: none;
   border-radius: 4px;
 }

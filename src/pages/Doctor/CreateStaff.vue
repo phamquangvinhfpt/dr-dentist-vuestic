@@ -115,8 +115,8 @@ const addressRules = [
 ]
 
 const genderOptions = [
-  { value: true, text: t('auth.male') },
-  { value: false, text: t('auth.female') },
+  { value: true, text: t('doctor.male') },
+  { value: false, text: t('doctor.female') },
 ]
 
 const checkBirthDayValid = (date: Date): boolean => {
@@ -148,7 +148,7 @@ const birthDayRules = computed(() => [
               <template #prepend>
                 <i class="mdi mdi-arrow-left mr-2"></i>
               </template>
-              Quay lại
+              {{ t('doctor.back') }}
             </VaButton>
           </div>
           <div class="grid grid-cols-2 gap-4 mb-4">

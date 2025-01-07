@@ -9,7 +9,7 @@
         <template #prepend>
           <i class="mdi mdi-plus mr-2"></i>
         </template>
-        Add Staff
+        {{ t('doctor.Add_Staff') }}
       </VaButton>
     </div>
 
@@ -17,12 +17,12 @@
     <VaCard class="bg-white shadow-md rounded-lg overflow-hidden">
       <div class="grid grid-cols-6 gap-4 px-6 py-3 bg-indigo-100 text-sm font-semibold text-indigo-800">
         <div></div>
-        <div>Name</div>
-        <div>Gender</div>
-        <div>Email</div>
-        <div>Phone</div>
+        <div>{{ t('doctor.name') }}</div>
+        <div>{{ t('doctor.gender') }}</div>
+        <div>{{ t('doctor.email') }}</div>
+        <div>{{ t('doctor.phone') }}</div>
       </div>
-      <div v-if="isLoading" class="py-10 text-center text-gray-500">Loading...</div>
+      <div v-if="isLoading" class="py-10 text-center text-gray-500">{{ t('doctor.loading') }}...</div>
       <div v-else-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">No matching users found.</div>
 
       <ul v-else>
@@ -51,14 +51,13 @@
       <!-- Pagination -->
       <div class="flex flex-col sm:flex-row items-center justify-between mt-6 mx-3 space-y-4 sm:space-y-0">
         <div class="flex items-center space-x-2">
-          <label for="pageSize" class="text-sm font-medium">Số mục mỗi trang:</label>
-          <select
+          <VaSelect
             id="pageSize"
             v-model="itemsPerPage"
-            class="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            :options="pageSizeOptions"
+            class="rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option v-for="size in pageSizeOptions" :key="size" :value="size">{{ size }}</option>
-          </select>
+          </VaSelect>
         </div>
 
         <!-- Phân trang -->
@@ -95,7 +94,8 @@ import { useRouter } from 'vue-router'
 import { ref, computed, onMounted, watch } from 'vue'
 import { VaButton, VaAvatar, VaInput } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const userStore = useUserProfileStore()
 const router = useRouter()
 

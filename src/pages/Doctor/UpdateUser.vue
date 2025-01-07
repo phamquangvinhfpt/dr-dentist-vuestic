@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, reactive, ref, onMounted } from 'vue'
-import { useForm, useToast, VaCard } from 'vuestic-ui'
+import { useForm, useToast, VaCard, VaSelect } from 'vuestic-ui'
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -24,7 +24,10 @@ const formData = reactive({
   firstName: '',
   lastName: '',
   email: '',
-  isMale: true, // true for male, false for female
+  isMale: {
+    value: true,
+    text: '',
+  }, // true for male, false for female
   birthDay: '',
   username: '',
   phoneNumber: '',
@@ -39,7 +42,10 @@ const formatDate = (dateString: string) => {
   const day = String(date.getDate()).padStart(2, '0')
   return `${date.getFullYear()}-${month}-${day}`
 }
-
+const genderOptions = ref([
+  { value: true, text: t('doctor.male') },
+  { value: false, text: t('doctor.female') },
+])
 const tooltipMessage = ref('')
 
 const showTooltip = (message: string) => {
@@ -55,7 +61,7 @@ const submit = () => {
       userId: formData.id,
       firstName: formData.firstName,
       lastName: formData.lastName,
-      gender: formData.isMale,
+      gender: formData.isMale.value,
       birthDate: formatDate(formData.birthDay) || '',
       job: formData.job || '',
       address: formData.address || '',
@@ -68,7 +74,7 @@ const submit = () => {
       .then(() => {
         init({
           title: 'Success',
-          message: t('auth.account_created'),
+          message: t('doctor.update_user'),
           color: 'success',
         })
       })
@@ -143,11 +149,16 @@ onMounted(async () => {
     formData.email = userDetails.email || ''
     formData.username = userDetails.userName || ''
     formData.phoneNumber = userDetails.phoneNumber || ''
-    formData.isMale = userDetails.gender // true or false
+    formData.isMale.value = userDetails.gender
     formData.birthDay = userDetails.birthDate || ''
     formData.job = userDetails.job || ''
     formData.address = userDetails.address || ''
     formData.id = id
+    if (userDetails.gender) {
+      formData.isMale.text = t('doctor.male')
+    } else {
+      formData.isMale.text = t('doctor.female')
+    }
   } catch (error) {
     console.error('Error fetching user details:', error)
   } finally {
@@ -165,7 +176,7 @@ onMounted(async () => {
               <template #prepend>
                 <i class="mdi mdi-arrow-left mr-2"></i>
               </template>
-              Quay lại
+              {{ t('doctor.back') }}
             </VaButton>
           </div>
           <div class="grid grid-cols-2 gap-4 mb-4">
@@ -190,7 +201,13 @@ onMounted(async () => {
             @mouseover="showTooltip('Không được phép chỉnh sửa')"
             @click="showTooltip('Không được phép chỉnh sửa')"
           />
-          <VaInput v-model="formData.address" :rules="addressRules" class="mb-4" :label="t('address')" type="text">
+          <VaInput
+            v-model="formData.address"
+            :rules="addressRules"
+            class="mb-4"
+            :label="t('doctor.address')"
+            type="text"
+          >
           </VaInput>
           <VaInput
             v-model="formData.email"
@@ -203,22 +220,23 @@ onMounted(async () => {
             @click="showTooltip('Không được phép chỉnh sửa')"
           />
 
-          <div class="mb-4">
+          <VaCard class="mb-4">
             <label
               for="gender"
               style="color: var(--va-primary)"
               class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-              >Gender</label
             >
-            <select
+              {{ t('doctor.gender') }}</label
+            >
+            <VaSelect
               id="gender"
               v-model="formData.isMale"
-              class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="true">Nam</option>
-              <option value="false">Nữ</option>
-            </select>
-          </div>
+              :options="genderOptions"
+              item-value="value"
+              item-text="text"
+              class="va-input__input w-full"
+            />
+          </VaCard>
 
           <VaDateInput
             v-model="formData.birthDay"

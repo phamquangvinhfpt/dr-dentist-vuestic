@@ -27,7 +27,7 @@
       <h2 class="text-xl font-semibold text-gray-900 mb-2">{{ doctor.name }}</h2>
       <p class="text-gray-600 mb-2">{{ doctor.specialty }}</p>
       <div class="flex items-center mb-2">
-        <span class="text-gray-600">Experience:</span>
+        <span class="text-gray-600">{{ t('doctor.experience') }}:</span>
         <span class="ml-2 font-medium">{{ doctor.experience }}</span>
       </div>
     </div>
@@ -37,7 +37,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useDoctorProfileStore } from '@stores/modules/doctor.module'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()
 

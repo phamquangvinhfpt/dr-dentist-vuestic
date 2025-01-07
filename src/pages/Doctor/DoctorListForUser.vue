@@ -5,14 +5,19 @@
         <!-- Header -->
 
         <VaCard style="margin-bottom: 0%" class="text-center mb-6">
-          <h1 class="text-2xl font-semibold va-h1 mb-2">Danh Sách Bác Sĩ</h1>
-          <p class="text-sm">Tìm kiếm bác sĩ phù hợp với bạn</p>
+          <h1 class="text-2xl font-semibold va-h1 mb-2">{{ t('doctor.doctor_list') }}</h1>
+          <p class="text-sm">{{ t('doctor.find_doctor') }}</p>
         </VaCard>
 
         <!-- Search and Filters -->
         <div class="rounded-2xl p-4 shadow-md space-y-4">
           <div class="relative mb-4">
-            <VaInput v-model="searchQuery" type="text" placeholder="Tìm bác sĩ..." label="Search">
+            <VaInput
+              v-model="searchQuery"
+              type="text"
+              :placeholder="t('doctor.find')"
+              :label="t('doctor.search_doctor')"
+            >
               <template #prependInner>
                 <VaIcon name="pageview" color="secondary" />
               </template>
@@ -22,15 +27,15 @@
           <!-- Filters -->
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
-              <VaSelect v-model="selectedTypeService" :options="typeServiceOptions" label="Loại dịch vụ" />
+              <VaSelect v-model="selectedTypeService" :options="typeServiceOptions" :label="t('doctor.type_service')" />
             </div>
 
             <div>
-              <VaSelect v-model="sortField" :options="arrange" label="Sắp Xếp Theo" />
+              <VaSelect v-model="sortField" :options="arrange" :label="t('doctor.Sort_By')" />
             </div>
 
             <div>
-              <VaSelect v-model="sortOrder" :options="step" label="Thứ Tự" />
+              <VaSelect v-model="sortOrder" :options="step" :label="t('doctor.Order')" />
             </div>
           </div>
         </div>
@@ -68,7 +73,7 @@
               class="pagination-button"
               @click="prevPage"
             >
-              Trước
+              {{ t('doctor.previous_page') }}
             </VaButton>
             <VaButton
               :disabled="currentPage === totalPages"
@@ -77,7 +82,7 @@
               class="pagination-button"
               @click="nextPage"
             >
-              Sau
+              {{ t('doctor.NEXT_PAGE') }}
             </VaButton>
           </div>
         </div>
@@ -92,7 +97,8 @@ import DoctorsGrid from './DoctorsGrid.vue'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { VaCard, VaCardContent } from 'vuestic-ui'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 // Define interfaces for our data structures
 interface Doctor {
   id: string | number
@@ -128,12 +134,12 @@ const sortField = ref<SelectOption>()
 const sortOrder = ref<SelectOption>()
 const selectedTypeService = ref<SelectOption>()
 const arrange = ref<SelectOption[]>([
-  { text: 'Đánh Giá', value: 'rating' },
-  { text: 'Kinh Nghiệm', value: 'experience' },
+  { text: t('doctor.Rating'), value: 'rating' },
+  { text: t('doctor.experience'), value: 'experience' },
 ])
 const step = ref<SelectOption[]>([
-  { text: 'Tăng dần', value: 'asc' },
-  { text: 'Giảm dần', value: 'desc' },
+  { text: t('doctor.asc'), value: 'asc' },
+  { text: t('doctor.desc'), value: 'desc' },
 ])
 
 // Computed properties with type annotations
@@ -205,7 +211,7 @@ async function fetchDoctors(): Promise<void> {
         name: `${doc.firstName} ${doc.lastName}`,
         specialty: typeService ? typeService.typeName : 'General Practice',
         typeServiceID: typeService ? typeService.id : null,
-        experience: `${doc.doctorProfile?.yearOfExp || 0} years`,
+        experience: `${doc.doctorProfile?.yearOfExp || 0} ` + t('doctor.years'),
         image: doc.imageUrl,
         rating: doc.rating || 0,
       }

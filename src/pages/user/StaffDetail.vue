@@ -1,69 +1,81 @@
 <template>
-  <div class="user-detail">
-    <h1>User Details</h1>
+  <VaCard class="user-detail">
+    <h1>{{ t('doctor.detail') }}</h1>
     <VaInnerLoading :loading="loading" :size="60">
       <!-- Personal Information Section -->
-      <div class="section personal-info">
+      <VaCard class="section personal-info">
         <div class="header">
-          <h2>Personal Information</h2>
-          <RouterLink :to="'/user-update/' + userId" class="edit-button">Edit User</RouterLink>
+          <h2>{{ t('doctor.Professional_Information') }}</h2>
+          <RouterLink :to="'/user-update/' + userId" class="edit-button">{{ t('doctor.Edit_staff') }}</RouterLink>
         </div>
 
-        <div class="card">
+        <VaCard class="card">
           <div class="profile-picture">
             <img v-if="user.imageUrl" :src="getSrcAvatar(user.imageUrl)" />
             <span v-else class="text-sm">No image available</span>
           </div>
-          <div class="details">
+          <VaCard class="details">
             <h3 class="name">{{ user.name }}</h3>
             <p class="username">@{{ user.userName }}</p>
             <p class="job">{{ user.jobTitle }}</p>
             <ul>
               <li>
-                <strong>Email:</strong>
+                <strong>{{ t('doctor.email') }}:</strong>
                 <a :href="'mailto:' + user.email">{{ user.email }}</a>
-                <span v-if="user.emailStatus" class="status confirmed">Confirmed</span>
+                <span v-if="user.emailStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
               </li>
               <li>
-                <strong>Phone:</strong>
+                <strong>{{ t('doctor.phone') }}:</strong>
                 <a :href="'tel:' + user.phone">{{ user.phone }}</a>
               </li>
-              <li><strong>Address:</strong> {{ user.address }}</li>
-              <li><strong>Born:</strong> {{ user.birthDate }}</li>
-              <li><strong>Gender:</strong> {{ user.gender ? 'Male' : 'Female' }}</li>
+              <li>
+                <strong>{{ t('doctor.address') }}:</strong> {{ user.address }}
+              </li>
+              <li>
+                <strong>{{ t('doctor.birth_date') }}:</strong> {{ user.birthDate }}
+              </li>
+              <li>
+                <strong>{{ t('doctor.gender') }}:</strong> {{ user.gender ? t('doctor.male') : t('doctor.female') }}
+              </li>
             </ul>
-          </div>
-        </div>
-      </div>
+          </VaCard>
+        </VaCard>
+      </VaCard>
 
       <!-- Account Status Section -->
-      <div class="section account-status">
-        <h2>Account Status</h2>
+      <VaCard class="section account-status">
+        <h2>{{ t('doctor.Account_Status') }}</h2>
         <ul>
-          <li><strong>Status:</strong> <span v-if="user.status" class="status active">Active</span></li>
           <li>
-            <strong>Email Status:</strong>
-            <span v-if="user.emailStatus" class="status confirmed">Confirmed</span>
-            <span v-else class="status not-confirmed">Not Confirm</span>
+            <strong>{{ t('doctor.Status') }}:</strong>
+            <span v-if="user.status" class="status active">{{ t('doctor.Active') }}</span>
           </li>
           <li>
-            <strong>Phone Status:</strong>
-            <span v-if="user.phoneStatus" class="status confirmed">Confirmed</span>
-            <span v-else class="status not-confirmed">Not Confirm</span>
+            <strong>{{ t('doctor.Email_Status') }}:</strong>
+            <span v-if="user.emailStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
+            <span v-else class="status not-confirmed">{{ t('doctor.UnConfirmed') }}</span>
+          </li>
+          <li>
+            <strong>{{ t('doctor.Phone_Status') }}:</strong>
+            <span v-if="user.phoneStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
+            <span v-else class="status not-confirmed">{{ t('doctor.UnConfirmed') }}</span>
           </li>
         </ul>
-      </div>
+      </VaCard>
     </VaInnerLoading>
-    <VaButton class="btn-back" @click="$router.go(-1)"> Back </VaButton>
-  </div>
+    <VaButton class="btn-back" @click="$router.go(-1)"> {{ t('doctor.back') }} </VaButton>
+  </VaCard>
 </template>
+ss
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserProfileStore } from '@/stores/modules/user.module'
 import { getSrcAvatar } from '@/services/utils'
-
+import { VaCard } from 'vuestic-ui'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 interface User {
   imageUrl?: string
   name: string
