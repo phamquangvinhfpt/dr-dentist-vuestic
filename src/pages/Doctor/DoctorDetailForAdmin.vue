@@ -17,30 +17,38 @@
               <span v-for="i in 5" :key="i" class="text-yellow-400">
                 <Star :class="i <= Math.round(doctor.rating || 0) ? 'fill-current' : 'stroke-current'" />
               </span>
-              <span class="ml-2 text-sm">({{ doctor.totalFeedback }} đánh giá)</span>
+              <span class="ml-2 text-sm font-semibold">({{ doctor.totalFeedback }} {{ t('doctor.rating') }})</span>
             </div>
-            <p class="mt-4"><Mail class="inline mr-2" /> {{ doctor.email }}</p>
-            <p><Phone class="inline mr-2" /> {{ doctor.phoneNumber }}</p>
+            <div class="mt-4">
+              <p class="font-bold">
+                <Mail class="inline mr-2" /> {{ t('doctor.email') }}:
+                <span class="font-normal">{{ doctor.email }}</span>
+              </p>
+              <p class="font-bold">
+                <Phone class="inline mr-2" /> {{ t('doctor.phone') }}:
+                <span class="font-normal">{{ doctor.phoneNumber }}</span>
+              </p>
+            </div>
           </div>
         </div>
       </VaCard>
 
       <!-- Professional Information -->
       <VaCard class="rounded-2xl shadow-xl p-6 sm:p-8">
-        <h2 class="text-2xl font-semibold mb-6 va-h2">Thông Tin Chuyên Môn</h2>
+        <h2 class="text-2xl font-semibold mb-6 va-h2">{{ t('doctor.Professional_Information') }}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <h3 class="text-sm font-medium">Học Vấn:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
-            <p>{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.education') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
+            <p class="font-normal">{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Số Năm Kinh Nghiệm:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.experience') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Loại Hình Làm Việc:</h3>
-            <p class="mt-1">
+            <h3 class="text-sm font-bold">{{ t('doctor.Job_Type') }}</h3>
+            <p class="mt-1 font-normal">
               {{
                 doctor.doctorProfile?.workingType === 2
                   ? 'Toàn Thời Gian'
@@ -51,15 +59,15 @@
             </p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Chứng Chỉ:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.certification') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
           </div>
         </div>
         <div class="mt-6">
-          <h3 class="text-sm font-medium">Về Tôi:</h3>
-          <p class="mt-1">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
+          <h3 class="text-sm font-bold">{{ t('doctor.seftDescription') }}</h3>
+          <p class="mt-1 font-normal">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
         </div>
-        <h2 class="text-2xl font-semibold mb-6 va-h2">Hình ảnh chứng nhận</h2>
+        <h2 class="text-2xl font-semibold mb-6 va-h2">{{ t('doctor.certification_image') }}</h2>
         <img
           alt="Preview"
           :src="getSrcAvatar(doctor.doctorProfile.certificationImage)"
@@ -92,7 +100,7 @@
         <div class="mt-6">
           <div v-if="currentTab === 'reviews'" class="space-y-4">
             <VaCard class="rounded-2xl shadow-xl p-6 sm:p-8">
-              <h2 class="text-2xl font-semibold mb-6">Phản Hồi Từ Bệnh Nhân</h2>
+              <h2 class="text-2xl font-semibold mb-6">{{ t('doctor.Patient_Feedback') }}</h2>
               <div class="flex flex-wrap justify-center gap-2 mb-6">
                 <button
                   v-for="i in 6"
@@ -104,7 +112,7 @@
                   class="px-4 py-2 rounded-full transition-all duration-200 text-sm font-medium"
                   @click="filterRating(i)"
                 >
-                  <span v-if="i === 6">Tất Cả</span>
+                  <span v-if="i === 6">{{ t('doctor.all') }}</span>
                   <span v-else class="flex items-center space-x-1">
                     <span>{{ i }}</span>
                     <Star class="w-4 h-4" :class="i <= selectedRating ? 'fill-current' : 'stroke-current'" />
@@ -134,7 +142,7 @@
                     <p v-else style="font-weight: bold" class="text-sm">{{ review.patientName }}</p>
                   </div>
                   <div class="flex justify-between items-center">
-                    <p class="text-sm">Dịch Vụ: {{ review.serviceName }}</p>
+                    <p class="text-sm">{{ t('doctor.service') }}: {{ review.serviceName }}</p>
                     <span class="text-sm">{{ formatDate(review.createDate) }}</span>
                   </div>
                   <div class="flex items-center mt-2">
@@ -181,7 +189,12 @@
           </div>
           <div v-else-if="currentTab === 'history'" class="space-y-4">
             <h2 class="text-xl font-semibold">Lịch Sử Khám</h2>
-            <p>Thông tin về lịch sử khám của người dùng sẽ hiển thị ở đây.</p>
+            <p v-if="filteredAppointments.length === 0">Không có lịch sử khám nào.</p>
+            <ul v-else>
+              <li v-for="appointment in filteredAppointments" :key="appointment.id">
+                {{ appointment.appointmentDate }} - {{ appointment.patientName }} ({{ appointment.status }})
+              </li>
+            </ul>
           </div>
         </div>
       </div>
@@ -190,7 +203,7 @@
         class="w-full sm:w-auto mt-6 bg-gray-200 font-semibold py-1 px-3 rounded-lg shadow-md hover:bg-gray-300 transition-colors duration-200"
         @click="$router.go(-1)"
       >
-        Quay Về
+        {{ t('doctor.back') }}
       </VaButton>
     </div>
   </VaCard>
@@ -207,7 +220,7 @@
           placeholder="Nội dung phản hồi"
         ></textarea>
         <div class="mt-4">
-          <label class="block text-sm font-medium">Đánh Giá:</label>
+          <label class="block text-sm font-medium">{{ t('doctor.rating') }}</label>
           <div class="flex items-center mt-1">
             <Star
               v-for="i in 5"
@@ -245,14 +258,18 @@ import { useAuthStore } from '@/stores/modules/auth.module'
 import userService from '@/services/user.service'
 import { Star, Mail, Phone, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { getSrcAvatar } from '@/services/utils'
-
+import { useAppointmentStore } from '@/stores/modules/appointment.module'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const route = useRoute()
 const doctorStore = useDoctorProfileStore()
 const authStore = useAuthStore()
+const appointmentStore = useAppointmentStore()
+const doctorid = route.params.id as string
 const currentTab = ref('reviews') // Mặc định tab "Đánh Giá" được chọn
 const tabs = [
-  { name: 'reviews', label: 'Đánh Giá' },
-  { name: 'history', label: 'Lịch Sử Khám' },
+  { name: 'reviews', label: t('doctor.rating') },
+  { name: 'history', label: t('doctor.History_of_Examination') },
 ]
 
 interface Doctor {
@@ -271,6 +288,7 @@ interface Doctor {
     seftDescription: string
     certification: string
     certificationImage: string
+    id: string
   }
   doctorFeedback: any[]
 }
@@ -291,6 +309,7 @@ const doctor = ref<Doctor>({
     seftDescription: '',
     certification: '',
     certificationImage: '',
+    id: '',
   },
   doctorFeedback: [],
 })
@@ -306,13 +325,36 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options)
 }
 
+interface Appointment {
+  id: string
+  dentistId: string
+  appointmentDate: string
+  patientName: string
+  status: string
+  // Add other relevant properties
+}
+
+const appointments = ref<Appointment[]>([])
+const filteredAppointments = computed(() => {
+  return appointments.value.filter((appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id)
+})
+
 onMounted(async () => {
   try {
-    const id = route.params.id as string
-    const response = await doctorStore.getDoctorDetailForAdmin(id)
+    const response = await doctorStore.getDoctorDetailForAdmin(doctorid)
     doctor.value = {
       ...response,
       doctorFeedback: (response.doctorFeedback || []).flatMap((feedback: any) => feedback.feedbacks),
+    }
+    const appointmentsResponse = await appointmentStore.getAppointments({})
+    console.log('danh sách medical', appointmentsResponse)
+
+    // Check if appointmentsResponse is an array
+    if (Array.isArray(appointmentsResponse)) {
+      appointments.value = appointmentsResponse as Appointment[] // Assign the response directly
+      console.log('danh sách medical filterfilter', appointments.value)
+    } else {
+      appointments.value = [] // Assign an empty array if not an array
     }
   } catch (error) {
     console.error('Error fetching doctor data:', error)
@@ -448,5 +490,13 @@ const setRating = (rating: number) => {
 .image-review:hover .overlay {
   filter: blur(5px); /* Làm mờ nền */
   opacity: 1; /* Hiển thị overlay */
+}
+.text-sm.font-bold {
+  font-weight: bold;
+  margin-bottom: 0.5rem; /* Tăng khoảng cách giữa các nhóm thông tin */
+}
+
+.text-sm.font-normal {
+  font-weight: normal;
 }
 </style>

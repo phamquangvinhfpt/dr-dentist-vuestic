@@ -1,17 +1,18 @@
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
-import { useForm, useToast } from 'vuestic-ui'
+import { useForm, useToast, VaCard } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { Register } from '@/pages/auth/types'
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
-
+const router = useRouter()
 const { validate } = useForm('form')
 const { init } = useToast()
 const store = useAuthStore()
-
+const goBack = () => router.back()
 const isLoading = ref(false)
 
 const formData = reactive({
@@ -55,6 +56,7 @@ const submit = () => {
       address: formData.address,
       role: formData.role,
     }
+    console.log('Staff gửi về api', registerData)
 
     isLoading.value = true
 
@@ -91,7 +93,7 @@ const usernameRules = [
 const phoneNumberRules = [
   (v: any) => !!v || t('validation.phoneNumber.required'),
   (v: any) => (v && v.length >= 10) || t('validation.phoneNumber.minLength'),
-  (v: any) => (v && v.length <= 15) || t('validation.phoneNumber.maxLength'),
+  (v: any) => (v && v.length <= 111) || t('validation.phoneNumber.maxLength'),
   (v: any) => (v && /^\d+$/.test(v)) || t('validation.phoneNumber.pattern'),
 ]
 
@@ -113,8 +115,8 @@ const addressRules = [
 ]
 
 const genderOptions = [
-  { value: true, text: t('auth.male') },
-  { value: false, text: t('auth.female') },
+  { value: true, text: t('doctor.male') },
+  { value: false, text: t('doctor.female') },
 ]
 
 const checkBirthDayValid = (date: Date): boolean => {
@@ -137,10 +139,18 @@ const birthDayRules = computed(() => [
 ])
 </script>
 <template>
-  <div class="form-wrapper min-h-screen flex items-center justify-center bg-gray-100">
-    <VaInnerLoading :loading="isLoading" :size="60" style="width: 60%">
+  <VaCard class="form-wrapper min-h-screen flex items-center justify-center bg-gray-100">
+    <VaInnerLoading :loading="isLoading" :size="60" style="width: 10%; height: 10%">
       <VaCard class="form-container p-6 max-w-lg w-full shadow-md rounded-lg bg-white">
         <VaForm ref="form" @submit.prevent="submit">
+          <div class="flex justify-between mb-6">
+            <VaButton @click="goBack">
+              <template #prepend>
+                <i class="mdi mdi-arrow-left mr-2"></i>
+              </template>
+              {{ t('doctor.back') }}
+            </VaButton>
+          </div>
           <div class="grid grid-cols-2 gap-4 mb-4">
             <VaInput
               v-model="formData.firstName"
@@ -181,12 +191,12 @@ const birthDayRules = computed(() => [
           />
           <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
           <div class="flex justify-center mt-4">
-            <VaButton class="w-full" @click="submit">{{ t('auth.staff_created') }}</VaButton>
+            <VaButton class="w-full" @click="submit">{{ t('auth.staff_create') }}</VaButton>
           </div>
         </VaForm>
       </VaCard>
     </VaInnerLoading>
-  </div>
+  </VaCard>
 </template>
 <style scoped>
 .min-h-screen {

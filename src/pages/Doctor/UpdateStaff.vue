@@ -1,19 +1,17 @@
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue'
-import { useForm, useToast, VaCard } from 'vuestic-ui'
+import { useForm, useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { Register } from '@/pages/auth/types'
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
-const router = useRouter()
 
 const { validate } = useForm('form')
 const { init } = useToast()
 const store = useAuthStore()
-const goBack = () => router.back()
+
 const isLoading = ref(false)
 
 const formData = reactive({
@@ -31,7 +29,7 @@ const formData = reactive({
   phoneNumber: '',
   job: '',
   address: '',
-  role: 'Patient',
+  role: 'Staff',
 })
 
 const formatDate = (dateString: string) => {
@@ -115,8 +113,8 @@ const addressRules = [
 ]
 
 const genderOptions = [
-  { value: true, text: t('doctor.male') },
-  { value: false, text: t('doctor.female') },
+  { value: true, text: t('auth.male') },
+  { value: false, text: t('auth.female') },
 ]
 
 const checkBirthDayValid = (date: Date): boolean => {
@@ -139,21 +137,9 @@ const birthDayRules = computed(() => [
 ])
 </script>
 <template>
-  <VaCard class="form-wrapper min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="form-wrapper min-h-screen flex items-center justify-center bg-gray-100">
     <VaInnerLoading :loading="isLoading" :size="60" style="width: 10%; height: 10%">
       <VaCard class="form-container p-6 max-w-lg w-full shadow-md rounded-lg bg-white">
-        <VaButton @click="goBack">
-          <template #prepend>
-            <i class="mdi mdi-arrow-left mr-2"></i>
-          </template>
-          {{ t('doctor.back') }}
-        </VaButton>
-        <h3
-          style="color: var(--va-primary); border-bottom-color: #154ec1; border-bottom: 2px"
-          class="text-lg font-semibold mb-4"
-        >
-          {{ t('doctor.Basic_information') }}
-        </h3>
         <VaForm ref="form" @submit.prevent="submit">
           <div class="grid grid-cols-2 gap-4 mb-4">
             <VaInput
@@ -174,7 +160,8 @@ const birthDayRules = computed(() => [
             class="mb-4"
             :label="t('auth.phone_number')"
           />
-          <VaInput v-model="formData.address" :rules="addressRules" class="mb-4" :label="t('auth.Address')"> </VaInput>
+          <VaInput v-model="formData.address" :rules="addressRules" class="mb-4" :label="t('address')" type="text">
+          </VaInput>
           <VaInput v-model="formData.email" :rules="emailRules" class="mb-4" :label="t('auth.email')" type="email" />
 
           <div class="mb-4">
@@ -194,19 +181,16 @@ const birthDayRules = computed(() => [
           />
           <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
           <div class="flex justify-center mt-4">
-            <VaButton class="w-full" @click="submit">{{ t('auth.user_create') }}</VaButton>
+            <VaButton class="w-full" @click="submit">{{ t('auth.staff_update') }}</VaButton>
           </div>
         </VaForm>
       </VaCard>
     </VaInnerLoading>
-  </VaCard>
+  </div>
 </template>
 <style scoped>
 .min-h-screen {
   min-height: 100vh;
-}
-
-.bg-gray-100 {
 }
 
 .VaCard {

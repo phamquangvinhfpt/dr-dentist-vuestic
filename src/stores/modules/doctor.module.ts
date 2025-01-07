@@ -81,16 +81,13 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         return await Promise.reject(error)
       }
     },
-    async updateDoctor(id: string, doctorData: any): Promise<any> {
+    async updateDoctor(doctorData: any): Promise<any> {
       try {
         this.isLoading = true
-        const response = await doctorService.updateDoctor(id, doctorData)
+        const response = await doctorService.updateDoctor(doctorData)
         this.isLoading = false
         // Optionally update the local state with the updated doctor
-        const index = this.doctors.findIndex((doctor) => doctor.id === id)
-        if (index !== -1) {
-          this.doctors[index] = { ...this.doctors[index], ...doctorData }
-        }
+        console.log('modules update', doctorData)
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false

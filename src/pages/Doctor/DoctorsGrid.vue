@@ -33,7 +33,7 @@
         <!-- Kinh nghiệm -->
         <div class="flex items-center text-indigo-600 mt-2">
           <VaIcon name="schedule" class="mr-1" />
-          <span>{{ doctor.experience }} kinh nghiệm</span>
+          <span>{{ doctor.experience }} {{ t('doctor.experience') }}</span>
         </div>
 
         <!-- Đánh giá (Sao) -->
@@ -50,7 +50,7 @@
         <button
           class="mt-4 w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 transition"
         >
-          Chi tiết
+          {{ t('doctor.detail') }}
           <VaIcon name="keyboard_arrow_right" class="ml-1" />
         </button>
       </div>
@@ -63,7 +63,8 @@ import { useRouter } from 'vue-router'
 import { useDoctorProfileStore } from '@stores/modules/doctor.module'
 import type { Doctor } from './types'
 import { getSrcAvatar } from '@/services/utils'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()
 

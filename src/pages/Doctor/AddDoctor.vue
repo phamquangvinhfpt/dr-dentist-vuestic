@@ -4,9 +4,10 @@ import { useRouter } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
 
-import { useToast } from 'vuestic-ui'
+import { useToast, VaButton, VaCard, VaForm, VaSelect } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()
 const { init: toast } = useToast()
@@ -22,10 +23,16 @@ interface DoctorForm {
   password: string
   confirmPassword: string
   phoneNumber: string
-  gender: boolean | null
+  gender: {
+    value: true
+    text: ''
+  }
   imageUrl: File[]
   address: string
-  typeServiceId: string // Add this line
+  typeServiceId: {
+    value: string
+    text: ''
+  }
   birthDate: string
   role: string
   specialization: string
@@ -33,7 +40,10 @@ interface DoctorForm {
   qualification: string
   consultationFee: number
   description: string
-  WorkingType: number
+  WorkingType: {
+    value: number
+    text: ''
+  }
 }
 
 const doctor = reactive<DoctorForm>({
@@ -44,8 +54,14 @@ const doctor = reactive<DoctorForm>({
   password: '123Pa$$word!',
   confirmPassword: '123Pa$$word!',
   phoneNumber: '',
-  gender: null,
-  typeServiceId: '', // New field for TypeServiceID
+  gender: {
+    value: true,
+    text: '',
+  },
+  typeServiceId: {
+    value: '',
+    text: '',
+  },
   imageUrl: [] as File[],
   address: '',
   birthDate: '',
@@ -55,7 +71,10 @@ const doctor = reactive<DoctorForm>({
   qualification: '',
   consultationFee: 0,
   description: '',
-  WorkingType: 0,
+  WorkingType: {
+    value: 0,
+    text: '',
+  },
 })
 
 const errors = reactive({
@@ -273,7 +292,7 @@ const submitForm = async () => {
     !validateUserName(doctor.userName) ||
     !validateForm()
   ) {
-    toast({ message: 'Vui lòng điền thông tin trong biểu mẫu', color: 'danger' })
+    toast({ message: t('doctor.fill_form'), color: 'danger' })
     return
   }
   showConfirmation.value = true
@@ -307,7 +326,7 @@ const confirmAddDoctor = async () => {
       FirstName: doctor.firstName,
       LastName: doctor.lastName,
       Email: doctor.email,
-      IsMale: doctor.gender || true,
+      IsMale: doctor.gender.value || true,
       BirthDay: doctor.birthDate,
       UserName: doctor.userName,
       Password: doctor.password,
@@ -317,14 +336,14 @@ const confirmAddDoctor = async () => {
       Address: doctor.address,
       DoctorProfile: {
         DoctorID: '', // Set appropriate value if needed
-        TypeServiceID: doctor.typeServiceId || '', // Use a fallback value if null
+        TypeServiceID: doctor.typeServiceId.value || '', // Use a fallback value if null
         Education: doctor.qualification || '',
         College: doctor.qualification || '',
         Certification: doctor.qualification || '',
         CertificationImage: doctor.imageUrl || 'url',
         YearOfExp: doctor.experience.toString(),
         SeftDescription: doctor.description || '',
-        WorkingType: doctor.WorkingType,
+        WorkingType: doctor.WorkingType.value,
       },
       Role: 'Dentist',
     }
@@ -342,7 +361,15 @@ const confirmAddDoctor = async () => {
     showSuccess.value = true
   } catch (error: any) {
     console.error('Chi tiết lỗi:', error)
-    toast({ message: error.message || 'Thêm thất bại', color: 'danger' }) // Hiển thị thông báo thêm thất bại
+    // Thay đổi thông báo lỗi cho trường hợp 400
+    if (error.response && error.response.status === 400) {
+      toast({ message: 'Email hoặc số điện thoại đã tồn tại', color: 'danger' })
+    }
+    if ((error.response && error.response.status === 405) || error.response.status === 500) {
+      toast({ message: 'máy chủ đang không hoạt động', color: 'danger' })
+    } else {
+      toast({ message: error.message || 'Thêm thất bại', color: 'danger' }) // Hiển thị thông báo thêm thất bại
+    }
   } finally {
     isSubmitting.value = false
   }
@@ -499,24 +526,24 @@ const validateSelfDescription = () => {
 
 <template>
   <VaCard class="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-    <form class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow" @submit.prevent="submitForm">
-      <div class="flex justify-between mb-6">
+    <VaForm class="form-container max-w-6xl mx-auto p-6 rounded-lg shadow" @submit.prevent="submitForm">
+      <VaCard class="flex justify-between mb-6">
         <VaButton @click="goBack">
           <template #prepend>
             <i class="mdi mdi-arrow-left mr-2"></i>
           </template>
-          Quay lại
+          {{ t('doctor.back') }}
         </VaButton>
-      </div>
+      </VaCard>
 
-      <div class="grid grid-cols-2 gap-8">
+      <VaCard class="grid grid-cols-2 gap-8">
         <div class="space-y-4">
-          <h3 class="text-lg font-semibold mb-4">Thông tin cơ bản</h3>
+          <h3 class="text-lg font-semibold mb-4">{{ t('doctor.Basic_information') }}</h3>
 
           <div class="input-group">
             <VaInput
               v-model="doctor.firstName"
-              label="Họ"
+              :label="t('doctor.first_Name')"
               :error="errors.firstName.error"
               :error-messages="errors.firstName.message"
               :success="validFields.firstName"
@@ -527,7 +554,7 @@ const validateSelfDescription = () => {
           <div class="input-group">
             <VaInput
               v-model="doctor.lastName"
-              label="Tên"
+              :label="t('doctor.last_Name')"
               :error="errors.lastName.error"
               :error-messages="errors.lastName.message"
               :success="validFields.lastName"
@@ -538,7 +565,7 @@ const validateSelfDescription = () => {
           <div class="input-group">
             <VaInput
               v-model="doctor.userName"
-              label="Tên đăng nhập"
+              :label="t('doctor.name')"
               :error="errors.userName.error"
               :error-messages="errors.userName.message"
               :success="validFields.userName"
@@ -549,7 +576,7 @@ const validateSelfDescription = () => {
           <div class="input-group">
             <VaInput
               v-model="doctor.email"
-              label="Email"
+              :label="t('doctor.email')"
               :error="errors.email.error"
               :error-messages="errors.email.message"
               :success="validFields.email"
@@ -560,7 +587,7 @@ const validateSelfDescription = () => {
           <div class="input-group">
             <VaInput
               v-model="doctor.phoneNumber"
-              label="Số điện thoại"
+              :label="t('doctor.phone')"
               :error="errors.phoneNumber.error"
               :error-messages="errors.phoneNumber.message"
               :success="validFields.phoneNumber"
@@ -573,12 +600,11 @@ const validateSelfDescription = () => {
               style="color: var(--va-primary)"
               class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
             >
-              Ngày sinh
+              {{ t('doctor.birth_date') }}
             </label>
-            <input
+            <VaInput
               v-model="doctor.birthDate"
               type="date"
-              class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               :max="new Date(new Date().setFullYear(new Date().getFullYear() - 25)).toISOString().split('T')[0]"
             />
             <span v-if="errors.birthDate.error" class="text-red-500 text-sm">{{ errors.birthDate.message }}</span>
@@ -589,37 +615,38 @@ const validateSelfDescription = () => {
               for="gender"
               style="color: var(--va-primary)"
               class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-              >Giới tính</label
             >
-            <select
+              {{ t('doctor.gender') }}
+            </label>
+            <VaSelect
               id="gender"
               v-model="doctor.gender"
-              class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              @change="validateForm"
-            >
-              <option value="true">Nam</option>
-              <option value="false">Nữ</option>
-            </select>
+              :options="[
+                { value: true, text: t('doctor.male') },
+                { value: false, text: t('doctor.female') },
+              ]"
+              @input="validateForm"
+            />
             <span v-if="errors.gender.error" class="text-red-500 text-sm">{{ errors.gender.message }}</span>
           </div>
         </div>
 
         <div class="space-y-4">
-          <h3 class="text-lg font-semibold mb-4">Thông tin chuyên môn</h3>
+          <h3 class="text-lg font-semibold mb-4">{{ t('doctor.Professional_Information') }}</h3>
           <label
             for="serviceType"
             style="color: var(--va-primary)"
             class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-            >Hình ảnh bằng cấp
+            >{{ t('doctor.certification_image') }}
           </label>
           <!-- File Upload Container -->
-          <div
+          <VaCard
             class="flex flex-col items-center justify-center w-full p-6 bg-white border-2 border-dashed border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition"
           >
             <!-- Instructions -->
             <div class="text-center mb-4">
-              <p class="text-gray-600 text-sm font-medium">Drag & drop your file here</p>
-              <p class="text-gray-500 text-xs">or click the button below to browse</p>
+              <p class="text-gray-600 text-sm font-medium">{{ t('doctor.Upload_File') }}</p>
+              <p class="text-gray-500 text-xs">{{ t('doctor.Upload_File_2') }}</p>
             </div>
 
             <!-- File Input -->
@@ -627,13 +654,13 @@ const validateSelfDescription = () => {
               for="fileUpload"
               class="relative cursor-pointer bg-indigo-500 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-indigo-600 transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
             >
-              Select File
+              {{ t('doctor.Select_File') }}
               <input id="fileUpload" type="file" class="sr-only" @change="handleAvatarUpload($event)" />
             </label>
 
             <!-- Display selected file name -->
             <div v-if="fileName" class="mt-4 text-sm text-gray-600">
-              Selected file: <span class="font-medium text-indigo-600">{{ fileName }}</span>
+              {{ t('doctor.Select_File') }}: <span class="font-medium text-indigo-600">{{ fileName }}</span>
             </div>
 
             <!-- Image Review Section -->
@@ -649,52 +676,44 @@ const validateSelfDescription = () => {
                 class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
               />
             </div>
-          </div>
+          </VaCard>
           <label
             for="serviceType"
             style="color: var(--va-primary)"
             class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-            >Chuyên Khoa</label
+            >{{ t('doctor.specialty') }}</label
           >
-          <select
+          <VaSelect
             id="serviceType"
             v-model="doctor.typeServiceId"
-            class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2"
-          >
-            <option v-for="service in serviceTypes" :key="service.id" :value="service.id">
-              {{ service.typeName }}
-            </option>
-          </select>
+            :options="serviceTypes.map((service) => ({ value: service.id, text: service.typeName }))"
+            class="w-full"
+            @input="validateForm"
+          />
 
           <div class="input-group">
             <label
               for="workingType"
               style="color: var(--va-primary)"
               class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-              >Loại hình làm việc</label
+              >{{ t('doctor.Job_Type') }}</label
             >
-            <select
+            <VaSelect
               id="workingType"
               v-model="doctor.WorkingType"
-              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2"
-            >
-              <option
-                v-for="option in [
-                  { value: 1, text: 'Part-time' },
-                  { value: 2, text: 'Full-time' },
-                ]"
-                :key="option.value"
-                :value="option.value"
-              >
-                {{ option.text }}
-              </option>
-            </select>
+              :options="[
+                { value: 1, text: t('doctor.part_time') },
+                { value: 2, text: t('doctor.full_time') },
+              ]"
+              class="w-full"
+              @input="validateForm"
+            />
           </div>
 
           <div class="input-group">
             <VaInput
               v-model.number="doctor.experience"
-              label="Số năm kinh nghiệm"
+              :label="t('doctor.experience')"
               type="number"
               min="0"
               :error="errors.experience.error"
@@ -702,7 +721,11 @@ const validateSelfDescription = () => {
             <span v-if="errors.experience.error" class="text-red-500 text-sm">{{ errors.experience.message }}</span>
           </div>
 
-          <VaInput v-model="doctor.qualification" label="Bằng cấp" :error="errors.qualification.error" />
+          <VaInput
+            v-model="doctor.qualification"
+            :label="t('doctor.certification')"
+            :error="errors.qualification.error"
+          />
 
           <VaTextarea
             v-model="doctor.description"
@@ -714,26 +737,28 @@ const validateSelfDescription = () => {
               min-height: 50px; /* Chiều cao tối thiểu */
               resize: none; /* Vô hiệu hóa kéo thủ công */
             "
-            label="Mô tả"
+            :label="t('doctor.Description')"
             class="auto-resize"
           />
         </div>
-      </div>
+      </VaCard>
 
-      <div class="flex justify-end mt-6">
-        <VaButton type="submit" color="primary">Thêm Bác Sĩ</VaButton>
-      </div>
-    </form>
+      <VaCard class="flex justify-end mt-6">
+        <VaButton type="submit" color="primary">{{ t('doctor.add_doctor') }}</VaButton>
+      </VaCard>
+    </VaForm>
 
     <!-- Modal xác nhận -->
     <VaModal v-model="showConfirmation" class="text-center" overlay hide-default-actions>
       <div class="confirmation-modal">
-        <h3 class="text-2xl font-semibold mb-4">Xác nhận hành động</h3>
-        <p class="text-gray-600 mb-8">Bạn có chắc chắn muốn thêm bác sĩ này không?</p>
+        <h3 class="text-2xl font-semibold mb-4">{{ t('doctor.Confirm_action') }}</h3>
+        <p class="text-gray-600 mb-8">{{ t('doctor.question_comfirm') }}</p>
         <VaDivider class="mb-6" />
         <div class="flex justify-end space-x-4">
-          <VaButton color="danger" :disabled="isSubmitting" @click="confirmAddDoctor">Xác nhận</VaButton>
-          <VaButton @click="showConfirmation = false">Hủy</VaButton>
+          <VaButton color="danger" :disabled="isSubmitting" @click="confirmAddDoctor">{{
+            t('doctor.Confirm')
+          }}</VaButton>
+          <VaButton @click="showConfirmation = false">{{ t('doctor.cancel') }}</VaButton>
         </div>
       </div>
     </VaModal>
@@ -741,9 +766,9 @@ const validateSelfDescription = () => {
     <!-- Success Modal -->
     <VaModal v-model="showSuccess" class="text-center" hide-default-actions>
       <div class="confirmation-modal">
-        <h3 class="text-2xl font-semibold mb-4">Thành công!</h3>
-        <p class="text-gray-600 mb-8">Bác sĩ đã được thêm thành công.</p>
-        <VaButton @click="closeSuccessModal">Đóng</VaButton>
+        <h3 class="text-2xl font-semibold mb-4">{{ t('doctor.Success') }}</h3>
+        <p class="text-gray-600 mb-8">{{ t('doctor.added') }}</p>
+        <VaButton @click="closeSuccessModal">{{ t('doctor.close') }}</VaButton>
       </div>
     </VaModal>
   </VaCard>
