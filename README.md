@@ -47,7 +47,9 @@ cd DR-DENTIST-VUESTIC
 npm install
 npm run dev
 ```
+
 ### Account for testing: All same pass 123Pa$$word!
+
 - Admin: admin@root.com
 - Staff: staff@root.com
 - Doctor: dentist@root.com
