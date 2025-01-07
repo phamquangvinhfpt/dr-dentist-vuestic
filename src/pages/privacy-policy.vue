@@ -7,7 +7,7 @@
         to="/"
         aria-label="Visit homepage"
       >
-        <VuesticLogo :height="180" start="#FFF" />
+        <img src="/1.png" alt="" class="size-60" />
       </RouterLink>
     </template>
     <template #content>
@@ -370,7 +370,6 @@
 </template>
 
 <script lang="ts" setup>
-import VuesticLogo from '../components/VuesticLogo.vue'
 import LanguageSwitcher from '@/pages/settings/language-switcher/LanguageSwitcher.vue'
 </script>
 

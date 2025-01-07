@@ -56,17 +56,17 @@
           </template>
           <VaIcon name="mso-info" class="cursor-pointer hover:opacity-80" @click="handleRedirectToPolicy" />
         </VaPopover>
-        <VaPopover :offset="[10, 0]">
+        <!-- <VaPopover :offset="[10, 0]">
           <template #body>
             <span class="text-xs">{{ t('bin.title') }}</span>
           </template>
           <VaIcon name="mso-delete" class="cursor-pointer hover:opacity-80" @click="handleRedirectToBin" />
-        </VaPopover>
+        </VaPopover> -->
         <VaPopover :offset="[10, 0]">
           <template #body>
             <span class="text-xs">{{ t('menu.help') }}</span>
           </template>
-          <VaIcon name="mso-help" class="cursor-pointer hover:opacity-80" />
+          <VaIcon name="mso-help" class="cursor-pointer hover:opacity-80" @click="handleRedirectToGit" />
         </VaPopover>
       </VaSidebarItemContent>
     </VaSidebarItem>
@@ -172,8 +172,12 @@ const arrowDirection = (state: boolean) => (state ? 'va-arrow-up' : 'va-arrow-do
 
 watch(() => route.fullPath, setActiveExpand, { immediate: true })
 
-const handleRedirectToBin = () => {
-  router.push({ name: 'bin' })
+// const handleRedirectToBin = () => {
+//   router.push({ name: 'bin' })
+// }
+
+const handleRedirectToGit = () => {
+  window.open('https://github.com/phamquangvinhfpt/dr-dentist-vuestic', '_blank')
 }
 
 const handleRedirectToPolicy = () => {

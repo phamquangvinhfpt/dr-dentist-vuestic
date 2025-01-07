@@ -228,6 +228,38 @@ class DashboardService {
         return Promise.reject(error)
       })
   }
+  async getAppointmentUnExamination(data?: any): Promise<any> {
+    let url
+    if (!data) {
+      url = `/v1/dashboard/staff/appointment/un-examination`
+    } else {
+      url = `/v1/dashboard/staff/appointment/un-examination?date=${data}`
+    }
+    return apiService
+      .post(url, {})
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getFollowUpAppointmentUnExamination(data?: any): Promise<any> {
+    let url
+    if (!data) {
+      url = `/v1/dashboard/staff/follow/un-examination`
+    } else {
+      url = `/v1/dashboard/staff/follow/un-examination?date=${data}`
+    }
+    return apiService
+      .post(url, {})
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new DashboardService()

@@ -416,6 +416,7 @@
     "navigationLayout": "Bố cục điều hướng",
     "topBarButton": "Thanh trên",
     "sideBarButton": "Thanh bên",
+    "home": "Trang chủ",
     "revenue_report": "Báo cáo doanh thu",
     "total_earnings": "Tổng thu nhập",
     "earnings_this_month": "Thu nhập tháng này",
@@ -433,6 +434,10 @@
     "service_report": "Báo cáo dịch vụ",
     "view_details": "Chi tiết",
     "trigger": "Đặt lịch ngay",
+    "total_appointments": "Tổng số lịch hẹn trong ngày",
+    "new_contacts": "Liên hệ mới trong ngày",
+    "follow_up": "Số lượng tái khám hôm nay",
+    "unassign": "Số ca chưa được phân công",
     "doctor_rating": {
       "title": "Đánh giá bác sĩ",
       "avatar": "Ảnh đại diện",
@@ -1024,7 +1029,7 @@
       "actions": "Thao Tác",
       "treatment": "Điều Trị",
       "reschedule": "Tái Khám",
-      "detail":"Chi Tiết"
+      "detail": "Chi Tiết"
     }
   },
   "calendar": {

@@ -8,7 +8,6 @@
           <div class="flex items-center gap-2 md:gap-4">
             <div class="flex items-center gap-2">
               <span
-                v-if="auth.musHaveRole('Dentist')"
                 class="material-symbols-outlined bg-blue-500 hover:cursor-pointer hover:bg-blue-600 p-2 rounded-full"
                 @click="export_calendar"
               >
@@ -1273,14 +1272,20 @@ const export_calendar = () => {
   const firstDay = new Date(currentYear.value, currentMonth.value, 2).toISOString().split('T')[0]
   const lastDay = new Date(currentYear.value, currentMonth.value + 1, 1).toISOString().split('T')[0]
   calendarStore
-    .exportCalendar(firstDay, lastDay, auth.user?.id)
+    .exportCalendar(firstDay, lastDay)
     .then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]))
+      console.log(response)
+      const url = window.URL.createObjectURL(
+        new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+      )
       const link = document.createElement('a')
       link.href = url
       link.setAttribute('download', 'calendar.xlsx')
       document.body.appendChild(link)
       link.click()
+
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)

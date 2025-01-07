@@ -1,6 +1,7 @@
 import dashboardService from '@/services/dashboard.service'
 import { defineStore } from 'pinia'
 import { Revenues } from '../../data/charts/revenueChartData'
+import { Appointment, FollowUpAppointment } from '@/pages/appointment/types'
 
 export const useDashboardStore = defineStore('Dashboard', {
   state: () => ({
@@ -15,6 +16,8 @@ export const useDashboardStore = defineStore('Dashboard', {
     new_contacts: 0,
     follow_up: 0,
     unassign: 0,
+    appointments: [] as Appointment[],
+    followupAppointments: [] as FollowUpAppointment[],
   }),
   actions: {
     async getChartRevenue(data: any): Promise<any> {
@@ -184,6 +187,30 @@ export const useDashboardStore = defineStore('Dashboard', {
         this.isLoading = true
         const response = await dashboardService.getUnassign(data)
         this.unassign = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getAppointmentUnExamination(data?: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getAppointmentUnExamination(data)
+        this.appointments = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getFollowUpAppointmentUnExamination(data?: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getFollowUpAppointmentUnExamination(data)
+        this.followupAppointments = response
         this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {

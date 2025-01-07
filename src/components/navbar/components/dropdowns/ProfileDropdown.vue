@@ -114,7 +114,7 @@ const props = withDefaults(
         list: [
           {
             name: 'helpAndSupport',
-            href: 'https://discord.gg/u7fQdqQt8c',
+            href: 'https://github.com/phamquangvinhfpt/dr-dentist-vuestic',
             icon: 'mso-error',
           },
         ],

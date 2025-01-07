@@ -131,9 +131,15 @@ class CalendarService {
         return Promise.reject(error)
       })
   }
-  async exportCalendar(start: any, end: any, id: any): Promise<any> {
+  async exportCalendar(start: any, end: any): Promise<any> {
     return apiService
-      .post(`/workingcalendar/export-working-calendar?start=${start}&end=${end}&doctorID=${id}`, {})
+      .postFileData(
+        `/workingcalendar/export-working-calendar?start=${start}&end=${end}`,
+        {},
+        {
+          responseType: 'blob',
+        },
+      )
       .then((response) => {
         return Promise.resolve(response)
       })
