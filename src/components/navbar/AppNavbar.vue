@@ -140,7 +140,6 @@ const hasAccess = (route: INavigationRoute) => {
   // Check roles first if specified
   if (route.meta.roles) {
     if (route.meta.roles.includes('Guest') && !authStore.user) {
-      console.log('có')
       return true
     }
 

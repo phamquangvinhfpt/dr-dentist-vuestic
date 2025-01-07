@@ -32,7 +32,7 @@
           <div class="info-item">
             <VaIcon name="event" />
             <div class="info-content">
-              <span class="info-label">Date & Time</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.date&time') }}</span>
               <span class="info-value">{{ formatDate(appointment.appointmentDate) }}</span>
               <span class="info-value">{{ appointment.startTime.slice(0, 5) }}</span>
             </div>
@@ -41,7 +41,7 @@
           <div class="info-item">
             <VaIcon name="medical_services" />
             <div class="info-content">
-              <span class="info-label">Service</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.service') }}</span>
               <span class="info-value">{{ appointment.serviceName }}</span>
               <span class="info-value price">{{ formatPrice(appointment.servicePrice) }}</span>
             </div>
@@ -50,7 +50,7 @@
           <div class="info-item">
             <VaIcon name="room" />
             <div class="info-content">
-              <span class="info-label">Room</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.room') }}</span>
               <span class="info-value">{{ appointment.roomName }}</span>
             </div>
           </div>
@@ -58,7 +58,7 @@
           <div class="info-item">
             <VaIcon name="payments" />
             <div class="info-content">
-              <span class="info-label">Payment Status</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.payment_status') }}</span>
               <VaBadge
                 :color="getPaymentStatusColor(appointment.paymentStatus)"
                 :text="getPaymentStatusLabel(appointment.paymentStatus)"
@@ -69,7 +69,7 @@
           <div v-if="appointment.dentistName" class="info-item">
             <VaIcon name="person" />
             <div class="info-content">
-              <span class="info-label">Dentist</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.doctor') }}</span>
               <span class="info-value">{{ appointment.dentistName }}</span>
             </div>
           </div>
@@ -77,7 +77,7 @@
           <div v-if="appointment.patientPhone" class="info-item">
             <VaIcon name="phone" />
             <div class="info-content">
-              <span class="info-label">Contact</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.contact') }}</span>
               <span class="info-value">{{ appointment.patientPhone }}</span>
             </div>
           </div>
@@ -85,7 +85,7 @@
           <div v-if="appointment.notes" class="info-item" style="grid-column: 1 / -1">
             <VaIcon name="note" />
             <div class="info-content">
-              <span class="info-label">Notes</span>
+              <span class="info-label">{{ t('appointment.appointment_detail_modal.note') }}</span>
               <span class="info-value">{{ appointment.notes }}</span>
             </div>
           </div>
@@ -128,10 +128,12 @@ import { Appointment, AppointmentStatus, PaymentStatus } from '../../types'
 import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
 const router = useRouter()
 const { init } = useToast()
+const { t } = useI18n()
 const store = useAppointmentStore()
 const appointment = ref<Appointment | null>(null)
 const authStore = useAuthStore()

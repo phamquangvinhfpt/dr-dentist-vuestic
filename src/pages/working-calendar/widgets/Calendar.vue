@@ -7,6 +7,12 @@
           <div class="mb-4 md:mb-0"></div>
           <div class="flex items-center gap-2 md:gap-4">
             <div class="flex items-center gap-2">
+              <span
+                class="material-symbols-outlined bg-blue-500 hover:cursor-pointer hover:bg-blue-600 p-2 rounded-full"
+                @click="export_calendar"
+              >
+                file_export
+              </span>
               <div
                 v-if="
                   auth.musHaveRole('Admin') ||
@@ -14,16 +20,7 @@
                   (auth.musHaveRole('Dentist') && typeDoctor === 'PartTime')
                 "
                 class="relative rounded-full w-10 h-10 bg-blue-500 hover:cursor-pointer hover:bg-blue-600"
-                @click="
-                  () => {
-                    if (auth.musHaveRole('Admin') || auth.musHaveRole('Staff')) {
-                      getAllDoctors()
-                      showModalSizeLarge = true
-                    } else if (auth.musHaveRole('Dentist') && typeDoctor === 'PartTime') {
-                      showAddModal = true
-                    }
-                  }
-                "
+                @click="toggleCalendarEdit"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -66,7 +63,7 @@
                 <ul class="space-y-2">
                   <li v-for="(dentist, index) in dentists?.data" :key="dentist.dentistUserID">
                     <div
-                      class="flex items-center justify-between gap-2 hover:cursor-pointer p-2 rounded-lg hover:bg-gray-100"
+                      class="flex items-center justify-between gap-2 hover:cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
                       @click="toggleDentistDetails(index)"
                     >
                       <div class="flex items-center gap-2">
@@ -87,7 +84,7 @@
                           name="done_all"
                           color="#0081cf"
                           class="mr-2"
-                          @click.stop="AutoSetRoomForPartTime(dentist.calendarDetails)"
+                          @click="AutoSetRoomForPartTime(dentist.calendarDetails)"
                         />
                         <VaIcon
                           name="chevron_right"
@@ -104,14 +101,14 @@
                       vertical
                       color="focus"
                     >
-                      <div
+                      <VaCard
                         v-for="(item, indexs) in dentist.calendarDetails"
                         :key="item.dentistUserID"
                         :class="[
                           'shadow-sm rounded-lg p-3 border transition-colors duration-200 mb-3',
                           selectedCalendarIndex.includes(indexs) && switcher === 'full-time'
-                            ? '!bg-[#dcf5ff] !border-blue-500 !text-white'
-                            : 'bg-white border-gray-200',
+                            ? '!bg-[#06181f] !border-blue-500 !text-white'
+                            : 'border-gray-200 dark:border-green-500',
                           switcher === 'full-time' ? 'hover:cursor-move' : '',
                         ]"
                         :draggable="switcher === 'full-time' ? true : false"
@@ -133,7 +130,7 @@
                                 clip-rule="evenodd"
                               />
                             </svg>
-                            <span class="text-sm font-medium text-gray-700">{{ formatDate(item.date) }}</span>
+                            <span class="text-sm font-medium">{{ formatDate(item.date) }}</span>
                           </div>
                           <span
                             class="px-2 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
@@ -147,10 +144,10 @@
                           </span>
                         </div>
                         <div class="flex items-center justify-between">
-                          <div class="mt-2 text-sm text-gray-600 italic">
+                          <div class="mt-2 text-sm italic">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
-                              class="h-4 w-4 inline-block mr-2 text-gray-400"
+                              class="h-4 w-4 inline-block mr-2"
                               viewBox="0 0 20 20"
                               fill="currentColor"
                             >
@@ -163,7 +160,7 @@
                             {{ item.note || 'No additional notes' }}
                           </div>
                         </div>
-                      </div>
+                      </VaCard>
                     </VaScrollContainer>
                   </li>
                 </ul>
@@ -182,11 +179,12 @@
 
                 <!-- Calendar Days -->
                 <div class="grid grid-cols-7 grid-rows-auto">
-                  <div
+                  <VaCard
                     v-for="(day, index) in calendarDays"
                     :key="index"
                     class="min-h-[60px] md:min-h-[120px] border-b border-r p-1 md:p-2 relative group"
-                    @click="openDayDetailsModal(day)"
+                    :class="{ 'bg-blue-100': isCalendarEditable && isDaySelected(day) }"
+                    @click="isCalendarEditable ? selectDay(day) : openDayDetailsModal(day)"
                     @contextmenu.prevent="openAddEventModal($event, day)"
                     @dragover.prevent
                     @drop="handleDrop($event)"
@@ -195,8 +193,11 @@
                       {{ day.date }}
                     </span>
 
-                    <!-- Events -->
-                    <div class="mt-1 md:mt-2 space-y-1 max-h-[40px] md:max-h-[80px] overflow-y-auto">
+                    <!-- Events (hidden when editing) -->
+                    <div
+                      v-if="!isCalendarEditable"
+                      class="mt-1 md:mt-2 space-y-1 max-h-[40px] md:max-h-[80px] overflow-y-auto"
+                    >
                       <div
                         v-for="event in day.events"
                         :key="event.id"
@@ -221,7 +222,22 @@
                         </span>
                       </div>
                     </div>
-                  </div>
+
+                    <!-- OptionList for editing (visible when editing) -->
+                    <div
+                      v-if="isCalendarEditable && day.isCurrentMonth && !dayHasSchedule(day)"
+                      class="absolute inset-0 bg-opacity-50 flex items-center justify-center"
+                    >
+                      <VaOptionList
+                        v-model="selectedTimes[getDateKey(day)]"
+                        :options="getOptionsForDate(getDateKey(day))"
+                        value-by="altValue"
+                        disabled-by="altDisabled"
+                        :text-by="(option: any) => option.altText"
+                        class="p-2 rounded"
+                      />
+                    </div>
+                  </VaCard>
                   <div
                     v-if="isDragging"
                     class="absolute inset-0 bg-blue-100 bg-opacity-50 border-2 border-blue-500 border-dashed z-50 flex items-center justify-center pointer-events-none"
@@ -230,6 +246,15 @@
                   </div>
                 </div>
               </div>
+
+              <VaButton
+                v-if="isCalendarEditable"
+                preset="primary"
+                class="fixed bottom-4 right-4 z-50"
+                @click="saveSchedule"
+              >
+                Save Changes
+              </VaButton>
 
               <!-- Context Menu -->
               <div
@@ -288,7 +313,7 @@
                             <span class="text-sm font-semibold">{{ formatDate(item.date) }}</span>
                             <VaOptionList
                               :model-value="getListValueForDate(item.date)"
-                              :options="optionsTimes"
+                              :options="optionsTimesByDate[item.date] || optionsTimes"
                               value-by="altValue"
                               disabled-by="altDisabled"
                               :text-by="(option: any) => option.altText"
@@ -382,7 +407,7 @@
                       />
                     </svg>
                     <span class="text-sm font-medium"
-                      >Working Status: {{ workingStatusLabel(selectedEvent?.workingStatus) }}</span
+                      >{{ t('calendar.working_status') }}: {{ workingStatusLabel(selectedEvent?.workingStatus) }}</span
                     >
                   </div>
                   <div v-if="selectedEvent?.note" class="flex items-start">
@@ -401,7 +426,7 @@
                     <span class="text-sm">{{ selectedEvent.note }}</span>
                   </div>
                   <div class="mt-4">
-                    <h4 class="text-sm font-semibold mb-2">Working Hours</h4>
+                    <h4 class="text-sm font-semibold mb-2">{{ t('calendar.working_hours') }}</h4>
                     <div class="space-y-2">
                       <div
                         v-for="time in selectedEvent?.times"
@@ -473,18 +498,12 @@
     <VaModal v-model="showModalSizeLarge" size="large" hide-default-actions>
       <VaDataTable
         :items="listDoctors"
-        :columns="[
-          { key: 'imageUrl', name: 'imageUrl', label: 'Avatar' },
-          { key: 'firstName', name: 'firstName', label: 'First Name' },
-          { key: 'lastName', name: 'lastName', label: 'Last Name' },
-          { key: 'phoneNumber', name: 'phoneNumber', label: 'Phone' },
-          { key: 'gender', name: 'gender', label: 'Gender' },
-          { key: 'actions', name: 'actions', label: 'Action', width: 80 },
-        ]"
+        :columns="doctor_column"
         :item-size="5"
         virtual-scroller
         :wrapper-size="500"
         height="500"
+        :no-data-html="t('calendar.doctor_table.no_items_found')"
       >
         <template #cell(imageUrl)="{ rowData }">
           <VaAvatar
@@ -497,11 +516,15 @@
           {{ value ? 'Nam' : 'Nữ' }}
         </template>
         <template #cell(actions)="{ rowData }">
-          <VaIcon
+          <VaButton
             v-if="rowData.doctorProfile.workingType === 2"
-            class="text-6xl text-green-500 hover:cursor-pointer"
-            name="schedule"
-            size="2rem"
+            round
+            class="text-6xl hover:cursor-pointer"
+            preset="secondary"
+            hover-behavior="opacity"
+            :hover-opacity="0.4"
+            color="success"
+            icon="schedule"
             @click="
               () => {
                 props
@@ -520,11 +543,15 @@
               }
             "
           />
-          <VaIcon
+          <VaButton
             v-if="rowData.doctorProfile.workingType === 1"
-            class="text-6xl text-green-500 hover:cursor-pointer"
-            name="notification_important"
-            size="2rem"
+            round
+            preset="secondary"
+            hover-behavior="opacity"
+            :hover-opacity="0.4"
+            class="text-6xl hover:cursor-pointer"
+            color="success"
+            icon="notification_important"
             @click="
               () => {
                 props.reminder(rowData.id, formatDateSend(new Date(currentYear, currentMonth, 1).toISOString()))
@@ -546,6 +573,7 @@ import { useAuthStore } from '@/stores/modules/auth.module'
 import { useToast } from 'vuestic-ui/web-components'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
 import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
+import { useI18n } from 'vue-i18n'
 
 const auth = useAuthStore()
 const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
@@ -583,6 +611,7 @@ const closeAddModal = () => {
   multiselectedDate.value = null
 }
 const { notify } = useToast()
+const { t } = useI18n()
 const listDoctors = ref<any>()
 const typeDoctor = computed(() => auth.user?.type)
 const showDetailsModal = ref(false)
@@ -602,6 +631,13 @@ const openDentistIndex = ref(null)
 const selectedCalendarIndex = ref<number[]>([])
 const showMobileDayModal = ref(false)
 const selectedDayEvents = ref<any[]>([])
+
+// New refs for calendar editing
+const isCalendarEditable = ref(false)
+const selectedTimes = ref<Record<string, string[]>>({})
+const selectedDays = ref<CalendarDay[]>([])
+const optionsState = ref(new Map<string, typeof optionsTimes>())
+
 const optionsTimes = [
   {
     text: '8:00 AM - 12:00 PM',
@@ -628,6 +664,14 @@ const optionsTimes = [
     altDisabled: false,
   },
 ]
+const doctor_column = computed(() => [
+  { key: 'imageUrl', name: 'imageUrl', label: t('calendar.doctor_table.avatar') },
+  { key: 'firstName', name: 'firstName', label: t('calendar.doctor_table.first_name') },
+  { key: 'lastName', name: 'lastName', label: t('calendar.doctor_table.last_name') },
+  { key: 'phoneNumber', name: 'phoneNumber', label: t('calendar.doctor_table.phone') },
+  { key: 'gender', name: 'gender', label: t('calendar.doctor_table.gender') },
+  { key: 'actions', name: 'actions', label: t('calendar.doctor_table.action'), width: 80 },
+])
 const contextMenu = ref({
   show: false,
   x: 0,
@@ -765,6 +809,76 @@ const getAllDoctors = (): any => {
     })
 }
 
+const toggleCalendarEdit = () => {
+  if (auth.musHaveRole('Admin') || auth.musHaveRole('Staff')) {
+    getAllDoctors()
+    showModalSizeLarge.value = true
+  } else if (auth.musHaveRole('Dentist') && typeDoctor.value === 'PartTime') {
+    isCalendarEditable.value = !isCalendarEditable.value
+    if (isCalendarEditable.value) {
+      // Initialize only current month days with empty arrays when entering edit mode
+      calendarDays.value.forEach((day) => {
+        if (day.isCurrentMonth) {
+          const dateKey = getDateKey(day)
+          if (!selectedTimes.value[dateKey]) {
+            selectedTimes.value[dateKey] = []
+          }
+        }
+      })
+    } else {
+      selectedDays.value = []
+      selectedTimes.value = {}
+
+      // Reset options state
+      optionsState.value = new Map()
+    }
+  }
+}
+
+const selectDay = (day: CalendarDay) => {
+  if (!day.isCurrentMonth) return
+  const dateKey = getDateKey(day)
+  if (isDaySelected(day)) {
+    selectedDays.value = selectedDays.value.filter((d) => getDateKey(d) !== dateKey)
+    delete selectedTimes.value[dateKey]
+  } else {
+    selectedDays.value.push(day)
+    if (!selectedTimes.value[dateKey]) {
+      selectedTimes.value[dateKey] = []
+    }
+  }
+}
+
+const isDaySelected = (day: CalendarDay) => {
+  return day.isCurrentMonth && selectedDays.value.some((d) => getDateKey(d) === getDateKey(day))
+}
+
+const dayHasSchedule = (day: CalendarDay) => {
+  return day.events.length > 0
+}
+
+const getDateKey = (day: CalendarDay) => {
+  return `${currentYear.value}-${currentMonth.value + 1}-${day.date}-${day.isCurrentMonth ? 'current' : 'other'}`
+}
+
+const getOptionsForDate = (dateKey: string) => {
+  if (!optionsState.value.has(dateKey)) {
+    // const selectedDatesCount = Object.values(selectedTimes.value).filter((times) => times.length > 0).length
+
+    // if (selectedDatesCount >= MAX_SELECTED_DAYS) {
+    //   return optionsTimes.map((option) => ({
+    //     ...option,
+    //     disabled: true,
+    //     altDisabled: true,
+    //   }))
+    // }
+    // return optionsTimes
+    return optionsTimes
+  }
+
+  return optionsState.value.get(dateKey)
+}
+
 const modalStyle = computed(() => ({
   left: modalPosition.value.x ? `${modalPosition.value.x}px` : '50%',
   top: modalPosition.value.y ? `${modalPosition.value.y}px` : '50%',
@@ -844,6 +958,12 @@ function selectedCalendar(item: any, index: number) {
 
 function getListValueForDate(date: any) {
   return multiDragValues.value[date] || []
+}
+
+const optionsTimesByDate = ref<{ [key: string]: typeof optionsTimes }>({})
+
+const createOptionsForDate = (date: string) => {
+  optionsTimesByDate.value[date] = JSON.parse(JSON.stringify(optionsTimes))
 }
 
 function updateListValueForDate(date: any, newValue: string[]) {
@@ -1013,30 +1133,23 @@ const saveSchedule = () => {
     multiselectedDate.value = null
     selectedCalendarIndex.value = []
   } else if (auth.musHaveRole('Dentist') && typeDoctor.value === 'PartTime') {
-    emit(
-      'update:updateWorkingCalendar',
-      auth.user?.id,
-      partTimeSchedules.value.map((schedule) => ({
-        date: formatDateSend(schedule.date),
-        timeWorkings: (() => {
-          const timeString = Array.isArray(schedule.time)
-            ? schedule.time[0] // Take first element if it's an array
-            : schedule.time // Use as-is if it's already a string
+    const schedules = Object.entries(selectedTimes.value)
+      .filter(([, times]) => times.length > 0)
+      .map(([dateKey, times]) => {
+        const [year, month, day] = dateKey.split('-').map(Number)
+        return {
+          date: formatDateSend(new Date(year, month - 1, day)),
+          timeWorkings: times.map((timeRange: string) => {
+            const [startTime, endTime] = timeRange.split('-')
+            return { startTime, endTime }
+          }),
+        }
+      })
 
-          const [startTime, endTime] = timeString.split('-')
-          return [
-            {
-              startTime,
-              endTime,
-            },
-          ]
-        })(),
-      })),
-    )
-    showAddModal.value = false
-    newScheduleDate.value = null
-    newScheduleTime.value = null
-    partTimeSchedules.value = []
+    emit('update:updateWorkingCalendar', auth.user?.id, schedules)
+    isCalendarEditable.value = false
+    selectedDays.value = []
+    selectedTimes.value = {}
   }
 }
 
@@ -1110,8 +1223,8 @@ async function AutoSetRoomForPartTime(calendars: any) {
     .addRoom(roomAssignments)
     .then(() => {
       notify({
-        title: 'Thành công',
-        message: 'Phân lịch thành công!',
+        title: 'success',
+        message: t('calendar.schedule_success'),
         color: 'success',
       })
       const firstDay = new Date(currentYear.value, currentMonth.value, 2).toISOString().split('T')[0]
@@ -1155,6 +1268,35 @@ const openDayDetailsModal = (day: CalendarDay) => {
   }
 }
 
+const export_calendar = () => {
+  const firstDay = new Date(currentYear.value, currentMonth.value, 2).toISOString().split('T')[0]
+  const lastDay = new Date(currentYear.value, currentMonth.value + 1, 1).toISOString().split('T')[0]
+  calendarStore
+    .exportCalendar(firstDay, lastDay)
+    .then((response) => {
+      console.log(response)
+      const url = window.URL.createObjectURL(
+        new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+      )
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'calendar.xlsx')
+      document.body.appendChild(link)
+      link.click()
+
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      notify({
+        title: 'error',
+        message: errorMessage,
+        color: 'danger',
+      })
+    })
+}
+
 watch(
   () => listValue.value,
   () => {
@@ -1172,6 +1314,38 @@ watch(
       })
     }
   },
+)
+
+watch(
+  () => multiDragValues.value,
+  (newValues) => {
+    console.log(newValues)
+
+    // For each date in newValues, ensure we have options created
+    Object.keys(newValues).forEach((date) => {
+      if (!optionsTimesByDate.value[date]) {
+        createOptionsForDate(date)
+      }
+
+      // Reset options for this date
+      optionsTimesByDate.value[date].forEach((option) => {
+        option.disabled = false
+        option.altDisabled = false
+      })
+
+      // If this date has 2 or more selections, disable unselected options
+      const dateValues = newValues[date]
+      if (dateValues.length >= 2) {
+        optionsTimesByDate.value[date].forEach((option) => {
+          if (!dateValues.includes(option.altValue)) {
+            option.disabled = true
+            option.altDisabled = true
+          }
+        })
+      }
+    })
+  },
+  { deep: true },
 )
 
 watch(
@@ -1200,6 +1374,59 @@ watch(
   },
   { immediate: false }, // Prevents running on initial load
 )
+
+// const MAX_SELECTED_DAYS = 5
+
+// watch(
+//   selectedTimes.value,
+//   (newSelectedTimes) => {
+//     // Create a Map to store options state for each date
+//     const optionsPerDate = new Map<string, typeof optionsTimes>()
+
+//     // Count dates with selections
+//     const selectedDatesCount = Object.entries(newSelectedTimes).filter(([, times]) => times.length > 0).length
+
+//     // Process each date's selections
+//     Object.entries(newSelectedTimes).forEach(([dateKey, selectedOptions]) => {
+//       // Create a copy of options for this date
+//       const dateOptions = optionsTimes.map((option) => ({ ...option }))
+
+//       // If this date has selections
+//       if (selectedOptions.length > 0) {
+//         if (selectedOptions.length === 1) {
+//           dateOptions.forEach((option) => {
+//             if (option.altValue !== selectedOptions[0]) {
+//               option.disabled = true
+//               option.altDisabled = true
+//             }
+//           })
+//         }
+//       } else {
+//         // If we've reached the maximum number of days and this date has no selections,
+//         // disable all options for this date
+//         if (selectedDatesCount >= MAX_SELECTED_DAYS) {
+//           dateOptions.forEach((option) => {
+//             option.disabled = true
+//             option.altDisabled = true
+//           })
+//         } else {
+//           // Otherwise, enable all options
+//           dateOptions.forEach((option) => {
+//             option.disabled = false
+//             option.altDisabled = false
+//           })
+//         }
+//       }
+
+//       // Store the options state for this date
+//       optionsPerDate.set(dateKey, dateOptions)
+//     })
+
+//     // Update your component's data structure to use these per-date options
+//     optionsState.value = optionsPerDate
+//   },
+//   { deep: true },
+// )
 
 watch(
   () => [currentMonth.value, currentYear.value],

@@ -22,5 +22,21 @@ class auditLogsService {
         return Promise.reject(error)
       })
   }
+  async exportAuditLogs(): Promise<any> {
+    return apiService
+      .postFileData(
+        `/v1/files/export-audit-logs`,
+        {},
+        {
+          responseType: 'blob',
+        },
+      )
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 export default new auditLogsService()

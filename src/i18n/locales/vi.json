@@ -504,14 +504,97 @@
     "navigationLayout": "Bố cục điều hướng",
     "topBarButton": "Thanh trên",
     "sideBarButton": "Thanh bên",
+    "home": "Trang chủ",
     "revenue_report": "Báo cáo doanh thu",
     "total_earnings": "Tổng thu nhập",
     "earnings_this_month": "Thu nhập tháng này",
     "export": "Xuất dữ liệu",
-    "yearly_deposit": "Tiền cọc hàng năm",
+    "yearly_deposit": "Tiền cọc hàng tháng",
     "yearly_revenue": "Doanh thu hàng năm",
     "monthly_revenue": "Doanh thu hàng tháng",
-    "last_month": "Tháng trước"
+    "last_month": "tháng trước",
+    "last_week": "tuần trước",
+    "this_month_earnings": "Thu nhập tháng này",
+    "booking_services": "Dịch vụ đã đặt",
+    "members": "Thành viên",
+    "new_profit": "Lợi nhuận",
+    "booking_analytics": "Phân tích đặt lịch khám trong tháng",
+    "service_report": "Báo cáo dịch vụ",
+    "view_details": "Chi tiết",
+    "trigger": "Đặt lịch ngay",
+    "total_appointments": "Tổng số lịch hẹn trong ngày",
+    "new_contacts": "Liên hệ mới trong ngày",
+    "follow_up": "Số lượng tái khám hôm nay",
+    "unassign": "Số ca chưa được phân công",
+    "doctor_rating": {
+      "title": "Đánh giá bác sĩ",
+      "avatar": "Ảnh đại diện",
+      "name": "Tên",
+      "rating": "Đánh giá"
+    },
+    "slogan": {
+      "slogan_1": "Chúng tôi cung cấp dịch vụ chăm sóc sức khỏe ",
+      "slogan_2": "răng miệng cho người lớn và trẻ em"
+    },
+    "services": "Dịch vụ",
+    "top_doctors": "Đội ngũ hàng đầu",
+    "see_all": "Xem tất cả",
+    "faq": "CÁC CÂU HỎI THƯỜNG GẶP",
+    "intro": {
+      "welcome": "Chào mừng đến Phòng khám Nha khoa của chúng tôi",
+      "introducion": "Tại phòng khám nha khoa của chúng tôi, chúng tôi cung cấp dịch vụ chăm sóc toàn diện và cá nhân hóa cho mọi nhu cầu nha khoa của bạn. Từ vệ sinh răng miệng định kỳ đến các ca phẫu thuật phức tạp, chúng tôi đảm bảo sức khỏe răng miệng của bạn được chăm sóc tốt nhất.",
+      "special_surgeries": "Phẫu thuật Chuyên sâu",
+      "special_surgeries_description": "Phòng khám chúng tôi cung cấp các thủ thuật phẫu thuật chuyên biệt để điều trị các vấn đề răng miệng phức tạp, được thực hiện bởi các chuyên gia có tay nghề cao cùng công nghệ hiện đại nhất.",
+      "top_quality_treatment": "Điều trị Chất lượng Cao",
+      "top_quality_treatment_description": "Từ chăm sóc dự phòng đến điều trị phục hồi, chúng tôi cung cấp các dịch vụ chất lượng cao để đảm bảo răng của bạn luôn khỏe mạnh và nụ cười luôn rạng rỡ.",
+      "ending": "Trải nghiệm dịch vụ chăm sóc nha khoa tốt nhất, nơi độ tin cậy và chất lượng là trọng tâm trong mọi việc chúng tôi làm."
+    },
+    "dental_faq": {
+      "first_appointment": {
+        "question": "Bạn có cần đến sớm cho lần hẹn đầu tiên không?",
+        "answer": "Có, ít nhất 15 phút để điền các giấy tờ cần thiết và cho nhân viên thời gian chuẩn bị mọi thứ cho bạn."
+      },
+      "dental_trouble_signs": {
+        "question": "Những dấu hiệu sớm của vấn đề răng miệng là gì?",
+        "answer": "Các dấu hiệu sớm có thể của vấn đề răng miệng là: Đau răng; Răng nhạy cảm; Chảy máu hoặc đau nướu; Hơi thở có mùi; Sâu răng; Đau hàm; Lở miệng; Khô miệng; Răng bị gãy, nứt, mẻ, mất."
+      },
+      "visit_frequency": {
+        "question": "Bạn nên đi khám nha sĩ bao lâu một lần?",
+        "answer": "Thông thường được khuyến nghị đi khám và vệ sinh răng miệng 6 tháng một lần. Tuy nhiên, nha sĩ có thể đề xuất thăm khám thường xuyên hơn dựa trên nhu cầu sức khỏe răng miệng của từng người."
+      }
+    },
+    "guide": {
+      "logo": "PHÒNG KHÁM NHA KHOA",
+      "title": {
+        "first": "CÁCH",
+        "second": "ĐỂ ĐẶT LỊCH HẸN"
+      },
+      "step": {
+        "title": "Hãy đặt lịch hẹn ngay bây giờ thông qua ba (3) bước đơn giản sau.",
+        "first": {
+          "title": "Đăng ký",
+          "link": "đăng ký",
+          "description": "Đầu tiên, hãy truy cập đến trang",
+          "description2": " và đăng ký tài khoản của bạn. Điền thông tin cá nhân và xác nhận tài khoản qua email."
+        },
+        "second": {
+          "title": "Đặt lịch hẹn",
+          "link": "đặt hẹn.",
+          "description": "Tiếp theo, chọn dịch vụ bạn cần, ngày và giờ tại trang ",
+          "description2": " Bạn cũng có thể chọn bác sĩ mong muốn."
+        },
+        "final": {
+          "title": "Hoàn tất",
+          "link": "Lịch hẹn của tôi",
+          "description": "Xem lịch hẹn đã đặt của bạn trong trang ",
+          "description2": ". Bạn cũng có thể hủy hoặc đổi lịch hẹn."
+        }
+      }
+    },
+    "patients_testimonials": "Nhận xét của bệnh nhân",
+    "satisfied_patients": "Bệnh nhân hài lòng",
+    "regular_doctors": "Bác sĩ",
+    "success_surgeries": "Phẫu thuật thành công"
   },
   "language": {
     "english": "Tiếng Anh",
@@ -1226,5 +1309,140 @@
     "scanQrCode": "Quét mã QR để thanh toán đặt cọc.",
     "qrCode": "Mã QR",
     "bankInformation": "Thông Tin Ngân Hàng"
+  },
+  "appointment": {
+    "appointment": "Lịch Hẹn",
+    "follow_up": "Tái Khám",
+    "no_specific_doctor": "Chưa có bác sĩ",
+    "show_appointment_no_doctor": "Hiển thị lịch hẹn chưa có bác sĩ",
+    "no_booking_at": "Không có lịch hẹn lúc",
+    "assign_doctor": "Chọn bác sĩ",
+    "no_booking_assigned": "Không có lịch hẹn",
+    "no_items_found": "Không tìm thấy lịch hẹn",
+    "appointment_detail": "Chi Tiết Lịch Hẹn",
+    "check_in": "Bệnh nhân đã đến!",
+    "create_appointment": {
+      "title": "Đặt Lịch Hẹn",
+      "patient": "Bệnh Nhân",
+      "patient_required": "Trường bệnh Nhân là bắt buộc",
+      "service": "Dịch Vụ",
+      "service_required": "Trường dịch vụ là bắt buộc",
+      "doctor": "Bác sĩ",
+      "doctor_required": "Trường bác sĩ là bắt buộc",
+      "date": "Ngày",
+      "date_required": "Trường ngày là bắt buộc",
+      "time": "Giờ",
+      "time_required": "Trường giờ là bắt buộc",
+      "note": "Ghi Chú",
+      "note_required": "Trường ghi chú là bắt buộc",
+      "submit": "Đặt Lịch",
+      "cancel": "Hủy",
+      "success": "Đặt lịch hẹn thành công!"
+    },
+    "reschedule_appointment": {
+      "title": "Đặt Lịch Tái Khám",
+      "date": "Ngày",
+      "date_required": "Trường ngày là bắt buộc",
+      "time": "Giờ",
+      "time_required": "Trường giờ là bắt buộc",
+      "submit": "Đặt Lịch",
+      "cancel": "Hủy",
+      "success": "Đặt lịch tái khám thành công!"
+    },
+    "cancel_appointment": {
+      "title": "Hủy Lịch Hẹn",
+      "subtitle": "Bạn có chắc chắn muốn hủy lịch hẹn này không?",
+      "warning": "Lưu ý: Hành động này không thể hoàn tác.",
+      "success": "Hủy lịch hẹn thành công!"
+    },
+    "appointment_detail_modal": {
+      "contact": "Liên Hệ",
+      "room": "Phòng",
+      "time": "Thời Gian",
+      "date": "Ngày",
+      "date&time": "Ngày & Giờ",
+      "doctor": "Bác Sĩ",
+      "service": "Dịch Vụ",
+      "price": "Giá",
+      "note": "Ghi Chú",
+      "step": "Bước",
+      "procedure": "Thủ Thuật",
+      "status": "Trạng Thái",
+      "payment_status": "Thanh Toán"
+    },
+    "appointment_data_table": {
+      "date": "Ngày",
+      "room": "Phòng",
+      "time": "Giờ",
+      "patient": "Bệnh Nhân",
+      "phone": "Số Điện Thoại",
+      "doctor": "Bác Sĩ",
+      "service": "Dịch Vụ",
+      "price": "Giá",
+      "status": "Trạng Thái",
+      "payment_status": "Thanh Toán",
+      "step": "Bước",
+      "procedure": "Thủ Thuật",
+      "actions": "Thao Tác"
+    },
+    "assign_doctor_modal": {
+      "title": "Chọn Bác Sĩ",
+      "patient": "Bệnh Nhân",
+      "doctor": "Bác Sĩ",
+      "doctor_required": "Trường bác sĩ là bắt buộc",
+      "assign": "Chọn",
+      "cancel": "Hủy"
+    }
+  },
+  "examination": {
+    "medical_record": "Hồ Sơ Bệnh Án",
+    "no_medical_record_found": "Không tìm thấy hồ sơ bệnh án",
+    "record": "Hồ sơ",
+    "date": "Ngày khám",
+    "general_examination": "Khám tổng quát",
+    "examination": "Khám",
+    "doctor": "Bác Sĩ",
+    "examinationContent": "Nội dung khám",
+    "treatmentPlanNote": "Ghi chú kế hoạch điều trị",
+    "teeth_condition": "Tình trạng răng",
+    "no_condition": "Không có tình trạng",
+    "tooth": "Răng",
+    "description": "Mô tả",
+    "indications": "Chỉ định",
+    "indication_note": "Chỉ định (Thêm chỉ định như Chụp X-Quang, xét nghiệm máu)",
+    "expected_cost": "Chi phí dự kiến",
+    "total_cost": "Tổng chi phí",
+    "add_treatment_detail": "Thêm chi tiết điều trị",
+    "reschedule_treatment": "Chi tiết điều trị",
+    "treatment_detail": "Chi tiết điều trị",
+    "create_record": "Tạo hồ sơ",
+    "treatment_plan_table": {
+      "title": "Kế Hoạch Điều Trị",
+      "step": "Bước",
+      "procedure": "Thủ Thuật",
+      "date": "Ngày",
+      "doctor": "Bác Sĩ",
+      "price": "Giá",
+      "plan_cost": "Chi phí",
+      "status": "Trạng Thái",
+      "actions": "Thao Tác",
+      "treatment": "Điều Trị",
+      "reschedule": "Tái Khám",
+      "detail": "Chi Tiết"
+    }
+  },
+  "calendar": {
+    "working_status": "Trạng Thái Làm Việc",
+    "working_hours": "Giờ Làm Việc",
+    "schedule_success": "Lịch làm việc đã được cập nhật!",
+    "doctor_table": {
+      "no_items_found": "Không tìm thấy bác sĩ nào trống lịch",
+      "avatar": "Ảnh đại diện",
+      "first_name": "Tên",
+      "last_name": "Họ",
+      "phone": "Số điện thoại",
+      "gender": "Giới tính",
+      "action": "Thao tác"
+    }
   }
 }

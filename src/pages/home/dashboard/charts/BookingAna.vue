@@ -1,16 +1,16 @@
 <template>
   <VaCard>
     <VaCardTitle class="pb-0!">
-      <h1 class="card-title text-secondary font-bold uppercase">Booking Analysis This Month</h1>
+      <h1 class="card-title text-secondary font-bold uppercase">{{ t('dashboard.booking_analytics') }}</h1>
     </VaCardTitle>
     <VaCardContent class="flex flex-col gap-1">
       <section class="flex w-full gap-8 items-center justify-between">
         <div class="w-1/2">
           <div class="text-xl font-bold mb-2">{{ totalCompleted }}</div>
-          <p class="text-xs text-success whitespace-nowrap">
-            <VaIcon name="arrow_outward" />
+          <p class="text-xs whitespace-nowrap" :class="changePercentage > 0 ? 'text-success' : 'text-danger'">
+            <VaIcon :name="changePercentage > 0 ? 'trending_up' : 'trending_down'" class="mr-1" />
             {{ changePercentage.toFixed(2) }}%
-            <span class="text-secondary"> last month</span>
+            <span class="text-secondary"> {{ t('dashboard.last_month') }}</span>
           </p>
         </div>
         <div class="my-4 gap-2 flex flex-col">
@@ -52,8 +52,9 @@ import { externalTooltipHandler } from '../../../../components/va-charts/externa
 import { useDashboardStore } from '@/stores/modules/dashboard.module'
 import { ref } from 'vue'
 import { TDoughnutChartData } from '@/data/types'
+import { useI18n } from 'vue-i18n'
 const dashboardStore = useDashboardStore()
-
+const { t } = useI18n()
 interface DataEntry {
   date: string
   cancelAnalytic: number
@@ -130,7 +131,6 @@ dashboardStore.getAnalyticBooking(null).then((data) => {
       currentMonthData.successAnalytic + currentMonthData.cancelAnalytic + currentMonthData.failAnalytic
     changePercentage.value = ((currentMonthTotal - lastMonthTotal) / lastMonthTotal) * 100
   }
-  console.log('chartData', chartData.value)
 })
 
 const options: ChartOptions<'doughnut'> = {

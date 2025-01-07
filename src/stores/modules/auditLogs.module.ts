@@ -29,5 +29,16 @@ export const useAuditLogsStore = defineStore('auditLogs', {
         return await Promise.reject(error)
       }
     },
+    async exportAuditLogs(): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await auditLogsService.exportAuditLogs()
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

@@ -23,6 +23,7 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: {
             vendor: ['vue', 'vue-router', 'pinia'],
+            ui: ['vuestic-ui'],
           },
         },
       },
@@ -38,7 +39,7 @@ export default defineConfig(({ mode }) => {
       }),
       viteCompression({
         verbose: true,
-        disable: true,
+        disable: false,
         threshold: 10240,
         algorithm: 'gzip',
         ext: '.gz',

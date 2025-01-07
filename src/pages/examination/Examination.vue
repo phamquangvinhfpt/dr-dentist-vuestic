@@ -8,6 +8,7 @@ import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import Treatment from './widgets/Treatment.vue'
 import { getErrorMessage } from '@/services/utils'
 import { useAuthStore } from '@/stores/modules/auth.module'
+import { useI18n } from 'vue-i18n'
 
 const router = useRoute()
 const loading = ref(false)
@@ -17,6 +18,7 @@ const appointmentStatus = ref<AppointmentStatus>()
 const patientid = ref('')
 const appointment = ref<Appointment>()
 const { init } = useToast()
+const { t } = useI18n()
 const user = useAuthStore()
 const isStaffOrAdmin = user.musHaveRole('Staff') || user.musHaveRole('Admin')
 
@@ -44,12 +46,12 @@ const getAppointmentDetails = async () => {
 const allTabs = [
   {
     id: 1,
-    name: 'Record',
+    name: t('examination.record'),
     icon: 'medical_services',
   },
   {
     id: 2,
-    name: 'Examination',
+    name: t('examination.examination'),
     icon: 'assignment',
   },
 ]
@@ -81,7 +83,7 @@ onMounted(() => {
     </template>
   </VaTabs>
   <div v-else>
-    <p class="text-center text-2xl">Medical Record:</p>
+    <p class="text-center text-2xl">{{ t('examination.medical_record') }}:</p>
   </div>
   <MedicalRecord v-if="selectedTab === 1 && !loading" v-model:patientId="patientid" />
   <Treatment v-if="selectedTab === 2" :appointment="appointment" @update:appointment="appointment = $event" />
