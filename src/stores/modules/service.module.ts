@@ -142,7 +142,7 @@ export const useServiceStore = defineStore('service', {
           deletedBy: '',
         }
 
-        const mappedProcedures = serviceData.procedures.map((proc) => ({
+        const mappedProcedures = (serviceData.procedures || []).map((proc) => ({
           serviceProcedureId: proc.procedureID,
           procedureDetail: {
             id: proc.procedureID,

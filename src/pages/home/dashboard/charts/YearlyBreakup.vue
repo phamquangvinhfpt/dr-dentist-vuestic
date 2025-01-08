@@ -10,8 +10,8 @@
         </div>
         <section>
           <div class="text-xl font-bold mb-2">{{ formatMoney(total) }}</div>
-          <p class="text-xs text-success">
-            <VaIcon name="arrow_upward" />
+          <p class="text-xs" :class="{ 'text-success': percentage > 0, 'text-danger': percentage < 0 }">
+            <VaIcon :name="percentage > 0 ? 'arrow_upward' : 'arrow_downward'" />
             {{ percentage }}%
             <span class="text-secondary"> {{ t('dashboard.last_month') }}</span>
           </p>
@@ -88,12 +88,22 @@ dashboardStore.getChartRevenue({ start: startYear, end: endYear }).then((res) =>
   const data = res as DataEntry[]
   chartData.value.datasets = transformData(data).datasets
   chartData.value.labels = transformData(data).labels
-  // calculate percentage
+
   const currentDayNumber = new Date().getDate()
-  const currentDayTotal = chartData.value.datasets[0].data[currentDayNumber - 1]
+  const currentDayTotal = chartData.value.datasets[0].data[currentDayNumber - 1] || 0
   const lastDayTotal = chartData.value.datasets[0].data[currentDayNumber - 2]
+
   total.value = currentDayTotal
-  percentage.value = ((currentDayTotal - lastDayTotal) / lastDayTotal) * 100 || 0
+
+  percentage.value = Number(
+    (() => {
+      if (!currentDayTotal) return 0
+      if (lastDayTotal === undefined) return 100
+      if (lastDayTotal === 0) return 100
+      return (((currentDayTotal - lastDayTotal) / lastDayTotal) * 100).toFixed(2)
+    })(),
+  )
+
   dataReady.value = true
 })
 

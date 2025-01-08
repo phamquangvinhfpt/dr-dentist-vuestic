@@ -14,8 +14,6 @@ class SignalRService {
   private readonly RECONNECT_DELAYS = [0, 2000, 5000, 10000, 30000]
   private readonly TIMEOUT_MS = 30000
   private readonly KEEP_ALIVE_INTERVAL_MS = 15000
-  // private reconnectAttempts = 0
-  // private maxReconnectAttempts = 10
 
   private getAccessToken = (): string | Promise<string> => {
     if (this.token === null) {
@@ -27,6 +25,8 @@ class SignalRService {
   async connect(url: string) {
     if (this.connection && this.connection.state === 'Connected') {
       console.log('Already connected to SignalR.')
+      await this.disconnect()
+      await this.reconnectWithToken(url)
       return
     }
 
@@ -49,13 +49,6 @@ class SignalRService {
 
       this.connection.onclose(async (error) => {
         console.error('Connection closed:', error)
-        // if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        //   this.reconnectAttempts++
-        //   console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
-        //   await this.connect(url)
-        // } else {
-        //   console.error('Max reconnection attempts reached. Please check your network connection.')
-        // }
       })
 
       this.connection.onreconnecting((error) => {
@@ -64,26 +57,14 @@ class SignalRService {
 
       this.connection.onreconnected((connectionId) => {
         console.log('Reconnected successfully. Connection ID:', connectionId)
-        // this.reconnectAttempts = 0
       })
-
-      // this.connection.onclose((error) => {
-      //   console.warn('Attempting to close', error)
-      // })
       try {
         await this.connection.start()
         if (!this.connection || this.connection.state !== 'Connected') {
           throw new Error('Connection not established')
         }
-        await this.connection.stop()
-        await this.connection.start()
       } catch (error) {
         console.error('Error connecting to SignalR:', error)
-        // if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        //   this.reconnectAttempts++
-        //   console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
-        //   setTimeout(() => this.connect(url), this.RECONNECT_DELAYS[this.reconnectAttempts] || 120000)
-        // }
       }
     } else {
       const url = import.meta.env.VITE_APP_BASE_URL

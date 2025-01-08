@@ -2,142 +2,152 @@
   <VaDateInput v-model="value" :readonly="false" :format-date="formatDate" :parse-date="parseDate" class="p-5" />
   <div class="medical-records h-screen overflow-y-auto">
     <div class="timeline-container">
-      <div class="timeline"></div>
-      <div v-for="record in medicalRecords" :key="record.recordId" class="record-container">
-        <div class="timeline-dot"></div>
-        <VaCard class="mb-6">
-          <VaCardContent class="p-0">
-            <VaCollapse>
-              <template #header="{ value, attrs, iconAttrs }">
-                <div
-                  v-bind="attrs"
-                  class="w-full flex items-center justify-between border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
-                >
-                  <div class="flex items-center">
-                    <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
-                    <span class="ml-2 font-medium">NGÀY KHÁM: {{ formatDate(record.date) }}</span>
+      <div v-if="medicalRecords.length === 0" class="text-center md:text-2xl">
+        {{ t('examination.no_medical_record_found') }}: <br />
+        {{ formatDate(value.start) }} - {{ formatDate(value.end) }}
+      </div>
+      <div v-else>
+        <div class="timeline"></div>
+        <div v-for="record in medicalRecords" :key="record.recordId" class="record-container">
+          <div class="timeline-dot"></div>
+          <VaCard class="mb-6">
+            <VaCardContent class="p-0">
+              <VaCollapse>
+                <template #header="{ value, attrs, iconAttrs }">
+                  <div
+                    v-bind="attrs"
+                    class="w-full flex items-center justify-between border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
+                  >
+                    <div class="flex items-center">
+                      <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
+                      <span class="ml-2 font-medium uppercase"
+                        >{{ t('examination.date') }}: {{ formatDate(record.date) }}</span
+                      >
+                    </div>
+                    <VaIcon name="edit_note" />
                   </div>
-                  <VaIcon name="edit_note" />
-                </div>
-              </template>
+                </template>
 
-              <template #default>
-                <div class="p-4 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-                  <!-- General Examination Section -->
-                  <VaCard>
-                    <VaCardContent>
-                      <VaCollapse>
-                        <template #header="{ value, attrs, iconAttrs }">
-                          <div
-                            v-bind="attrs"
-                            class="w-full flex items-center border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
-                          >
-                            <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
-                            <span class="ml-2 font-medium">KHÁM TỔNG QUÁT</span>
-                          </div>
-                        </template>
-
-                        <template #default>
-                          <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-                            <!-- Doctor Information -->
-                            <div class="mb-6">
-                              <span class="font-medium">Bác sĩ: {{ record.dentistName }}</span>
-                            </div>
-
-                            <!-- Examination Content -->
-                            <div class="grid grid-cols-2 gap-6 mb-6">
-                              <div>
-                                <h4 class="font-medium mb-3">Nội dung khám</h4>
-                                <p>{{ record.basicExamination.examinationContent }}</p>
-                              </div>
-                              <div>
-                                <h4 class="font-medium mb-3">Kế hoạch điều trị</h4>
-                                <p>{{ record.basicExamination.treatmentPlanNote }}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </template>
-                      </VaCollapse>
-                    </VaCardContent>
-                  </VaCard>
-
-                  <!-- Tooth Conditions Section -->
-                  <VaCard>
-                    <VaCardContent>
-                      <VaCollapse>
-                        <template #header="{ value, attrs, iconAttrs }">
-                          <div
-                            v-bind="attrs"
-                            class="w-full flex items-center border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
-                          >
-                            <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
-                            <span class="ml-2 font-medium">TÌNH TRẠNG RĂNG</span>
-                          </div>
-                        </template>
-
-                        <template #default>
-                          <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-                            <DentalChart
-                              ref="dentalChartRef"
-                              :is-view="true"
-                              :tooths="record.diagnosis.map((item) => item.toothNumber)"
-                              @toothHover="handleToothHover"
-                            />
+                <template #default>
+                  <div class="p-4 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
+                    <!-- General Examination Section -->
+                    <VaCard>
+                      <VaCardContent>
+                        <VaCollapse>
+                          <template #header="{ value, attrs, iconAttrs }">
                             <div
-                              v-if="hoveredTooth && getToothConditions(hoveredTooth).length > 0"
-                              class="tooth-popup"
-                              :style="popupStyle"
+                              v-bind="attrs"
+                              class="w-full flex items-center border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
                             >
-                              <div v-if="getToothConditions(hoveredTooth).length > 0">
-                                <p v-for="condition in getToothConditions(hoveredTooth)" :key="condition">
-                                  {{ condition }}
-                                </p>
-                              </div>
-                              <p v-else>No conditions</p>
+                              <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
+                              <span class="ml-2 font-medium uppercase">{{ t('examination.general_examination') }}</span>
                             </div>
-                          </div>
-                        </template>
-                      </VaCollapse>
-                    </VaCardContent>
-                  </VaCard>
+                          </template>
 
-                  <!-- Indications Section -->
-                  <VaCard>
-                    <VaCardContent>
-                      <VaCollapse>
-                        <template #header="{ value, attrs, iconAttrs }">
-                          <div
-                            v-bind="attrs"
-                            class="w-full flex items-center border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
-                          >
-                            <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
-                            <span class="ml-2 font-medium">CHỈ ĐỊNH</span>
-                          </div>
-                        </template>
+                          <template #default>
+                            <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
+                              <!-- Doctor Information -->
+                              <div class="mb-6">
+                                <span class="font-medium">{{ t('examination.doctor') }}: {{ record.dentistName }}</span>
+                              </div>
 
-                        <template #default>
-                          <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-                            <h4 class="font-medium mb-3">Chỉ định (Thêm chỉ định như Chụp X-Quang, xét nghiệm máu)</h4>
-                            <div class="grid grid-cols-3 gap-4 mt-4">
-                              <div v-for="image in record.indicationImages" :key="image.imageType" class="relative">
-                                <img
-                                  :src="getSrcAvatar(image.imageUrl)"
-                                  :alt="image.imageType"
-                                  class="w-full h-64 object-cover border-2 border-dashed"
-                                />
-                                <div class="text-center">{{ image.imageType }}</div>
+                              <!-- Examination Content -->
+                              <div class="grid grid-cols-2 gap-6 mb-6">
+                                <div>
+                                  <h4 class="font-medium mb-3">{{ t('examination.examinationContent') }}</h4>
+                                  <p>{{ record.basicExamination.examinationContent }}</p>
+                                </div>
+                                <div>
+                                  <h4 class="font-medium mb-3">{{ t('examination.treatmentPlanNote') }}</h4>
+                                  <p>{{ record.basicExamination.treatmentPlanNote }}</p>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </template>
-                      </VaCollapse>
-                    </VaCardContent>
-                  </VaCard>
-                </div>
-              </template>
-            </VaCollapse>
-          </VaCardContent>
-        </VaCard>
+                          </template>
+                        </VaCollapse>
+                      </VaCardContent>
+                    </VaCard>
+
+                    <!-- Tooth Conditions Section -->
+                    <VaCard>
+                      <VaCardContent>
+                        <VaCollapse>
+                          <template #header="{ value, attrs, iconAttrs }">
+                            <div
+                              v-bind="attrs"
+                              class="w-full flex items-center border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
+                            >
+                              <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
+                              <span class="ml-2 font-medium">{{ t('examination.teeth_condition') }}</span>
+                            </div>
+                          </template>
+
+                          <template #default>
+                            <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
+                              <DentalChart
+                                ref="dentalChartRef"
+                                :is-view="true"
+                                :tooths="record.diagnosis.map((item) => item.toothNumber)"
+                                @toothHover="handleToothHover"
+                              />
+                              <div
+                                v-if="hoveredTooth && getToothConditions(hoveredTooth).length > 0"
+                                class="tooth-popup"
+                                :style="popupStyle"
+                              >
+                                <div v-if="getToothConditions(hoveredTooth).length > 0">
+                                  <p v-for="condition in getToothConditions(hoveredTooth)" :key="condition">
+                                    {{ condition }}
+                                  </p>
+                                </div>
+                                <p v-else>No conditions</p>
+                              </div>
+                            </div>
+                          </template>
+                        </VaCollapse>
+                      </VaCardContent>
+                    </VaCard>
+
+                    <!-- Indications Section -->
+                    <VaCard>
+                      <VaCardContent>
+                        <VaCollapse>
+                          <template #header="{ value, attrs, iconAttrs }">
+                            <div
+                              v-bind="attrs"
+                              class="w-full flex items-center border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
+                            >
+                              <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
+                              <span class="ml-2 font-medium">{{ t('examination.indications') }}</span>
+                            </div>
+                          </template>
+
+                          <template #default>
+                            <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
+                              <h4 class="font-medium mb-3">
+                                {{ t('examination.indication_note') }}
+                              </h4>
+                              <div class="grid grid-cols-3 gap-4 mt-4">
+                                <div v-for="image in record.indicationImages" :key="image.imageType" class="relative">
+                                  <img
+                                    :src="getSrcAvatar(image.imageUrl)"
+                                    :alt="image.imageType"
+                                    class="w-full h-64 object-cover border-2 border-dashed"
+                                  />
+                                  <div class="text-center">{{ image.imageType }}</div>
+                                </div>
+                              </div>
+                            </div>
+                          </template>
+                        </VaCollapse>
+                      </VaCardContent>
+                    </VaCard>
+                  </div>
+                </template>
+              </VaCollapse>
+            </VaCardContent>
+          </VaCard>
+        </div>
       </div>
     </div>
   </div>
@@ -151,11 +161,12 @@ import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
 import { getErrorMessage, getSrcAvatar } from '@/services/utils'
 import { watch } from 'vue'
 import DentalChart from './DentalChart.vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   patientId: string
 }>()
-
+const { t } = useI18n()
 const { init } = useToast()
 const loading = ref(false)
 const storeMedicalRecord = useMedicalRecordStore()
@@ -319,7 +330,6 @@ onMounted(() => {
 
 .tooth-popup {
   position: fixed;
-  background-color: white;
   border: 1px solid #ccc;
   padding: 10px;
   border-radius: 4px;

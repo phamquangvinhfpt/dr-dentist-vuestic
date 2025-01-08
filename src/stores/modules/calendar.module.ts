@@ -151,5 +151,16 @@ export const useCalendarStore = defineStore('calendar', {
         return await Promise.reject(error)
       }
     },
+    async exportCalendar(start: any, end: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await calendarService.exportCalendar(start, end)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
   },
 })

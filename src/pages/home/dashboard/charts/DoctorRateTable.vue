@@ -2,13 +2,16 @@
 import { defineVaDataTableColumns } from 'vuestic-ui'
 import { computed, ref } from 'vue'
 import { useDashboardStore } from '@/stores/modules/dashboard.module'
+import { useI18n } from 'vue-i18n'
 const dashboardStore = useDashboardStore()
-
-const columns = defineVaDataTableColumns([
-  { label: 'Avatar', key: 'avatar', sortable: false },
-  { label: 'Name', key: 'doctorName', sortable: true },
-  { label: 'Rating', key: 'totalRating', sortable: true },
-])
+const { t } = useI18n()
+const columns = computed(() =>
+  defineVaDataTableColumns([
+    { label: t('dashboard.doctor_rating.avatar'), key: 'avatar', sortable: false },
+    { label: t('dashboard.doctor_rating.name'), key: 'doctorName', sortable: true },
+    { label: t('dashboard.doctor_rating.rating'), key: 'totalRating', sortable: true },
+  ]),
+)
 
 interface DoctorDataTable {
   doctorId: string
@@ -29,7 +32,7 @@ const pages = computed(() => Math.ceil(doctorData.value.length / 3))
 <template>
   <VaCard class="h-[400px]">
     <VaCardTitle class="flex items-start justify-between">
-      <h1 class="card-title text-secondary font-bold uppercase">Doctor Rate</h1>
+      <h1 class="card-title text-secondary font-bold uppercase">{{ t('dashboard.doctor_rating.title') }}</h1>
     </VaCardTitle>
     <VaCardContent>
       <div v-if="doctorData.length > 0">

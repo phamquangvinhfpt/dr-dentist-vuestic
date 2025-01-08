@@ -1,38 +1,40 @@
 <script lang="ts" setup>
-import { computed, reactive, ref } from 'vue'
-import { useForm, useToast, VaCard } from 'vuestic-ui'
-import { useAuthStore } from '@/stores/modules/auth.module'
-import { Register } from '@/pages/auth/types'
+import { computed, reactive, ref, onMounted } from 'vue'
+import { useForm, useToast, VaCard, VaSelect } from 'vuestic-ui'
 import { getErrorMessage } from '@/services/utils'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserProfileStore } from '@/stores/modules/user.module'
+import { UserDetailsUpdate } from '@/pages/auth/types'
 
 const { t } = useI18n()
-const router = useRouter()
 
 const { validate } = useForm('form')
 const { init } = useToast()
-const store = useAuthStore()
-const goBack = () => router.back()
-const isLoading = ref(false)
+const route = useRoute()
+const id = route.params.id as string
+const router = useRouter()
+
+const userProfileStore = useUserProfileStore()
+
+const isLoading = ref(true)
 
 const formData = reactive({
+  id: '',
   firstName: '',
   lastName: '',
   email: '',
   isMale: {
     value: true,
     text: '',
-  },
+  }, // true for male, false for female
   birthDay: '',
   username: '',
-  password: '123Pa$$word!',
-  repeatPassword: '123Pa$$word!',
   phoneNumber: '',
   job: '',
   address: '',
-  role: 'Patient',
 })
+const goBack = () => router.back()
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -40,32 +42,39 @@ const formatDate = (dateString: string) => {
   const day = String(date.getDate()).padStart(2, '0')
   return `${date.getFullYear()}-${month}-${day}`
 }
+const genderOptions = ref([
+  { value: true, text: t('doctor.male') },
+  { value: false, text: t('doctor.female') },
+])
+const tooltipMessage = ref('')
+
+const showTooltip = (message: string) => {
+  tooltipMessage.value = message
+  setTimeout(() => {
+    tooltipMessage.value = ''
+  }, 2000) // 2 seconds duration
+}
 
 const submit = () => {
   if (validate()) {
-    const registerData: Register = {
+    const registerData: UserDetailsUpdate = {
+      userId: formData.id,
       firstName: formData.firstName,
       lastName: formData.lastName,
-      email: formData.email,
-      userName: formData.username,
-      password: formData.password,
-      confirmPassword: formData.repeatPassword,
-      phoneNumber: formData.phoneNumber,
-      isMale: formData.isMale.value,
-      birthDay: formatDate(formData.birthDay),
-      job: formData.job,
-      address: formData.address,
-      role: formData.role,
+      gender: formData.isMale.value,
+      birthDate: formatDate(formData.birthDay) || '',
+      job: formData.job || '',
+      address: formData.address || '',
     }
-
+    console.log('user gửi về', registerData)
     isLoading.value = true
 
-    store
-      .register(registerData)
+    userProfileStore
+      .updateProfileForAdmin(registerData)
       .then(() => {
         init({
           title: 'Success',
-          message: t('auth.account_created'),
+          message: t('doctor.update_user'),
           color: 'success',
         })
       })
@@ -87,7 +96,6 @@ const usernameRules = [
   (v: any) => !!v || t('validation.username.required'),
   (v: any) => (v && v.length >= 3) || t('validation.username.minLength'),
   (v: any) => (v && v.length <= 20) || t('validation.username.maxLength'),
-  (v: any) => (v && /^[a-zA-Z0-9_]*$/.test(v)) || t('validation.username.pattern'),
 ]
 
 const phoneNumberRules = [
@@ -114,11 +122,6 @@ const addressRules = [
   (v: any) => (v && v.length <= 200) || t('validation.address.maxLength'),
 ]
 
-const genderOptions = [
-  { value: true, text: t('doctor.male') },
-  { value: false, text: t('doctor.female') },
-]
-
 const checkBirthDayValid = (date: Date): boolean => {
   if (!date) return false
 
@@ -137,24 +140,45 @@ const birthDayRules = computed(() => [
   (v: any) => !!v || t('validation.birthDay.required'),
   (v: any) => checkBirthDayValid(v) || t('validation.birthDay.invalid'),
 ])
+
+onMounted(async () => {
+  try {
+    const userDetails = await userProfileStore.getUserDetail(id)
+    formData.firstName = userDetails.firstName || ''
+    formData.lastName = userDetails.lastName || ''
+    formData.email = userDetails.email || ''
+    formData.username = userDetails.userName || ''
+    formData.phoneNumber = userDetails.phoneNumber || ''
+    formData.isMale.value = userDetails.gender
+    formData.birthDay = userDetails.birthDate || ''
+    formData.job = userDetails.job || ''
+    formData.address = userDetails.address || ''
+    formData.id = userDetails.id
+    if (userDetails.gender) {
+      formData.isMale.text = t('doctor.male')
+    } else {
+      formData.isMale.text = t('doctor.female')
+    }
+  } catch (error) {
+    console.error('Error fetching user details:', error)
+  } finally {
+    isLoading.value = false
+  }
+})
 </script>
 <template>
-  <VaCard class="form-wrapper min-h-screen flex items-center justify-center bg-gray-100">
+  <VaCard class="form-wrapper min-h-screen flex items-center justify-center">
     <VaInnerLoading :loading="isLoading" :size="60" style="width: 10%; height: 10%">
       <VaCard class="form-container p-6 max-w-lg w-full shadow-md rounded-lg bg-white">
-        <VaButton @click="goBack">
-          <template #prepend>
-            <i class="mdi mdi-arrow-left mr-2"></i>
-          </template>
-          {{ t('doctor.back') }}
-        </VaButton>
-        <h3
-          style="color: var(--va-primary); border-bottom-color: #154ec1; border-bottom: 2px"
-          class="text-lg font-semibold mb-4"
-        >
-          {{ t('doctor.Basic_information') }}
-        </h3>
         <VaForm ref="form" @submit.prevent="submit">
+          <div class="flex justify-between mb-6">
+            <VaButton @click="goBack">
+              <template #prepend>
+                <i class="mdi mdi-arrow-left mr-2"></i>
+              </template>
+              {{ t('doctor.back') }}
+            </VaButton>
+          </div>
           <div class="grid grid-cols-2 gap-4 mb-4">
             <VaInput
               v-model="formData.firstName"
@@ -173,18 +197,47 @@ const birthDayRules = computed(() => [
             :rules="phoneNumberRules"
             class="mb-4"
             :label="t('auth.phone_number')"
+            readonly
+            @mouseover="showTooltip('Không được phép chỉnh sửa')"
+            @click="showTooltip('Không được phép chỉnh sửa')"
           />
-          <VaInput v-model="formData.address" :rules="addressRules" class="mb-4" :label="t('auth.Address')"> </VaInput>
-          <VaInput v-model="formData.email" :rules="emailRules" class="mb-4" :label="t('auth.email')" type="email" />
+          <VaInput
+            v-model="formData.address"
+            :rules="addressRules"
+            class="mb-4"
+            :label="t('doctor.address')"
+            type="text"
+          >
+          </VaInput>
+          <VaInput
+            v-model="formData.email"
+            :rules="emailRules"
+            class="mb-4"
+            :label="t('auth.email')"
+            type="email"
+            readonly
+            @mouseover="showTooltip('Không được phép chỉnh sửa')"
+            @click="showTooltip('Không được phép chỉnh sửa')"
+          />
 
-          <div class="mb-4">
-            <VaRadio
+          <VaCard class="mb-4">
+            <label
+              for="gender"
+              style="color: var(--va-primary)"
+              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+            >
+              {{ t('doctor.gender') }}</label
+            >
+            <VaSelect
+              id="gender"
               v-model="formData.isMale"
               :options="genderOptions"
-              class="flex gap-4"
-              :rules="[(v: any) => !!v || t('auth.gender_required')]"
+              item-value="value"
+              item-text="text"
+              class="va-input__input w-full"
             />
-          </div>
+          </VaCard>
+
           <VaDateInput
             v-model="formData.birthDay"
             :rules="birthDayRules"
@@ -194,7 +247,7 @@ const birthDayRules = computed(() => [
           />
           <VaInput v-model="formData.job" :rules="jobRules" class="mb-4" :label="t('auth.job')" />
           <div class="flex justify-center mt-4">
-            <VaButton class="w-full" @click="submit">{{ t('auth.user_create') }}</VaButton>
+            <VaButton class="w-full" @click="submit">{{ t('auth.user_update') }}</VaButton>
           </div>
         </VaForm>
       </VaCard>
@@ -204,9 +257,6 @@ const birthDayRules = computed(() => [
 <style scoped>
 .min-h-screen {
   min-height: 100vh;
-}
-
-.bg-gray-100 {
 }
 
 .VaCard {

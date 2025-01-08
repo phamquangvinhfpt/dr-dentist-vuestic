@@ -1,24 +1,24 @@
 <template>
   <div class="my-contacts">
     <div class="flex justify-between mb-4">
-      <div class="flex gap-2 w-full">
-        <VaInput v-model="filterData.keyword" placeholder="Search..." class="flex-grow" clearable>
+      <div class="flex flex-col md:flex-row gap-2 w-full">
+        <VaInput v-model="filterData.keyword" :placeholder="$t('common.search')" class="w-full md:w-[75%]" clearable>
           <template #appendInner>
             <i class="va-icon material-icons">search</i>
           </template>
         </VaInput>
 
-        <VaButton :color="showAdvancedSearch ? 'primary' : 'gray'" @click="showAdvancedSearch = !showAdvancedSearch">
-          <i class="va-icon material-icons">tune</i>
-        </VaButton>
-
-        <VaButton color="primary" @click="handleRefresh">
-          <i class="va-icon material-icons">refresh</i>
-        </VaButton>
+        <div class="flex gap-2 w-full md:w-[25%]">
+          <VaButton color="success" class="flex-1" @click="showAvailableContacts = true">
+            <i class="va-icon material-icons">person_add</i>
+            <span class="hidden md:inline">{{ $t('contact.getNew') }}</span>
+            <span class="md:hidden">{{ $t('contact.getNew') }}</span>
+          </VaButton>
+        </div>
       </div>
     </div>
 
-    <div v-if="showAdvancedSearch" class="mb-4 p-4 border rounded-lg">
+    <!-- <div v-if="showAdvancedSearch" class="mb-4 p-4 border rounded-lg">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label class="block mb-2">Search Fields</label>
@@ -38,7 +38,7 @@
           <VaSelect v-model="filterData.orderBy" multiple :options="sortFields" placeholder="Select sort fields" />
         </div>
       </div>
-    </div>
+    </div> -->
 
     <VaDataTable
       class="my-table va-table--hoverable"
@@ -50,23 +50,23 @@
         '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
       }"
       sticky-header
-      no-data-html="<div class='text-center'>No contacts found</div>"
+      :no-data-html="`<div class='text-center'>{$t('contact.management.no_contacts')}</div>`"
     >
       <template #cell(title)="{ row }">
-        <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-          <span class="w-24">{{ row.rowData.title }}</span>
+        <div class="flex items-center gap-2">
+          <span>{{ row.rowData.title }}</span>
         </div>
       </template>
 
       <template #cell(email)="{ row }">
-        <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-          <span class="w-24">{{ row.rowData.email }}</span>
+        <div class="flex items-center gap-2">
+          <span>{{ row.rowData.email }}</span>
         </div>
       </template>
 
       <template #cell(phone)="{ row }">
-        <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-          <span class="w-24">{{ row.rowData.phone }}</span>
+        <div class="flex items-center gap-2">
+          <span>{{ row.rowData.phone }}</span>
         </div>
       </template>
 
@@ -88,8 +88,8 @@
     <VaCardContent>
       <div class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2">
         <div>
-          <b>{{ totalContacts }} results.</b>
-          Results per page
+          <b>{{ totalContacts }} {{ $t('contact.results') }}.</b>
+          {{ $t('contact.resultsPerPage') }}
           <VaSelect v-model="filterData.pageSize" class="!w-20" :options="[10, 50, 100]" />
         </div>
         <VaPagination
@@ -105,23 +105,28 @@
     </VaCardContent>
 
     <!-- View Details Modal -->
-    <VaModal v-model="showDetailsModal" title="CONTACT DETAILS" hide-default-actions class="contact-details-modal">
+    <VaModal
+      v-model="showDetailsModal"
+      :title="$t('contact.management.title')"
+      hide-default-actions
+      class="contact-details-modal"
+    >
       <div v-if="selectedContact" class="p-6">
         <div class="grid grid-cols-2 gap-6">
           <!-- Thông tin cá nhân -->
           <div class="contact-section">
-            <h3 class="section-title">Personal Information</h3>
+            <h3 class="section-title">{{ $t('contact.management.personalInformation') }}</h3>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Title</span>
+                <span class="info-label">{{ $t('contact.title') }}</span>
                 <span class="info-value">{{ selectedContact.title }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Email</span>
+                <span class="info-label">{{ $t('contact.email') }}</span>
                 <span class="info-value">{{ selectedContact.email }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Phone</span>
+                <span class="info-label">{{ $t('contact.phone') }}</span>
                 <span class="info-value">{{ selectedContact.phone }}</span>
               </div>
             </div>
@@ -129,20 +134,20 @@
 
           <!-- Thông tin trạng thái -->
           <div class="contact-section">
-            <h3 class="section-title">Status Information</h3>
+            <h3 class="section-title">{{ $t('contact.management.statusInformation') }}</h3>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Created Date</span>
+                <span class="info-label">{{ $t('contact.management.createdDate') }}</span>
                 <span class="info-value">{{ new Date(selectedContact.createDate).toLocaleString() }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Status</span>
+                <span class="info-label">{{ $t('contact.management.Status') }}</span>
                 <VaTag :color="selectedContact.staffId ? 'success' : 'warning'" class="status-tag">
                   {{ selectedContact.staffId ? 'Assigned' : 'Pending' }}
                 </VaTag>
               </div>
               <div class="info-item">
-                <span class="info-label">Staff Name</span>
+                <span class="info-label">{{ $t('contact.management.staffName') }}</span>
                 <span class="info-value">{{ selectedContact.staffName || 'Not assigned' }}</span>
               </div>
             </div>
@@ -150,14 +155,14 @@
 
           <!-- Nội dung liên hệ -->
           <div class="contact-section col-span-2">
-            <h3 class="section-title">Contact Content</h3>
+            <h3 class="section-title">{{ $t('contact.management.contactContent') }}</h3>
             <div class="content-box">
               <div class="mb-4">
-                <span class="info-label">Message</span>
+                <span class="info-label">{{ $t('contact.content') }}</span>
                 <p class="content-text">{{ selectedContact.content }}</p>
               </div>
-              <div>
-                <span class="info-label">Email Context</span>
+              <div v-if="selectedContact.emailContext">
+                <span class="info-label">{{ $t('contact.emailContext') }}</span>
                 <p class="content-text">{{ selectedContact.emailContext }}</p>
               </div>
             </div>
@@ -165,7 +170,7 @@
 
           <!-- Hình ảnh -->
           <div v-if="selectedContact.imageUrl?.length" class="contact-section col-span-2">
-            <h3 class="section-title">Attached Images</h3>
+            <h3 class="section-title">{{ $t('contact.management.attachedImages') }}</h3>
             <div class="image-gallery">
               <div v-for="(url, index) in selectedContact.imageUrl" :key="index" class="image-container">
                 <img
@@ -181,18 +186,23 @@
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 p-4">
-          <VaButton color="gray" @click="showDetailsModal = false">Close</VaButton>
+          <VaButton color="gray" @click="showDetailsModal = false">{{ $t('common.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
 
     <!-- Send Email Modal -->
-    <VaModal v-model="showEmailModal" title="Send Email" hide-default-actions class="email-modal">
+    <VaModal
+      v-model="showEmailModal"
+      :title="$t('contact.management.sendEmail')"
+      hide-default-actions
+      class="email-modal"
+    >
       <div class="p-6">
         <!-- Email field -->
         <div class="mb-6">
           <div class="flex items-center border-b border-gray-200 pb-2">
-            <span class="text-sm font-medium w-16 text-gray-600">Email:</span>
+            <span class="text-sm font-medium w-16 text-gray-600">{{ $t('contact.email') }}:</span>
             <VaInput
               v-model="emailData.to"
               type="email"
@@ -209,10 +219,10 @@
         <!-- Subject field -->
         <div class="mb-6">
           <div class="flex items-center border-b border-gray-200 pb-2">
-            <span class="text-sm font-medium w-16 text-gray-600">Subject:</span>
+            <span class="text-sm font-medium w-16 text-gray-600">{{ $t('contact.management.subject') }}:</span>
             <VaInput
               v-model="emailData.subject"
-              placeholder="Enter subject"
+              :placeholder="$t('contact.management.subject')"
               class="flex-grow"
               :style="{
                 '--va-input-wrapper-border-color': 'transparent',
@@ -227,7 +237,7 @@
           <VaTextarea
             v-model="emailData.content"
             rows="12"
-            placeholder="Write your message here..."
+            :placeholder="$t('contact.management.writeMessage')"
             class="w-full"
             autosize
             :style="{
@@ -241,17 +251,22 @@
       <template #footer>
         <div class="flex justify-end items-center px-6 py-4 border-t">
           <div class="flex gap-4">
-            <VaButton color="gray" @click="showEmailModal = false">Cancel</VaButton>
-            <VaButton color="primary" :loading="isSubmitting" @click="submitEmail"> Send </VaButton>
+            <VaButton color="gray" @click="showEmailModal = false">{{ $t('common.cancel') }}</VaButton>
+            <VaButton color="primary" :loading="isSubmitting" @click="submitEmail"> {{ $t('common.send') }} </VaButton>
           </div>
         </div>
       </template>
     </VaModal>
 
     <!-- Update Call Image Modal -->
-    <VaModal v-model="showImageModal" title="Upload Images" hide-default-actions class="upload-modal">
+    <VaModal
+      v-model="showImageModal"
+      :title="$t('contact.management.uploadImages')"
+      hide-default-actions
+      class="upload-modal"
+    >
       <div class="p-6">
-        <p class="text-sm text-gray-600 mb-4">Upload images to update call image</p>
+        <p class="text-sm text-gray-600 mb-4">{{ $t('contact.management.uploadImages') }}</p>
 
         <div
           class="upload-area mb-6"
@@ -266,8 +281,8 @@
             <div class="mb-4">
               <i class="va-icon material-icons text-4xl text-gray-400">cloud_upload</i>
             </div>
-            <p class="text-center mb-2">Drag and drop image files to upload</p>
-            <p class="text-sm text-gray-500 mb-4">Or click the button below</p>
+            <p class="text-center mb-2">{{ $t('contact.management.dragAndDrop') }}</p>
+            <p class="text-sm text-gray-500 mb-4">{{ $t('contact.management.orClick') }}</p>
             <VaFileUpload
               v-model="selectedImages"
               multiple
@@ -276,7 +291,7 @@
               class="upload-btn"
               @paste="handlePaste"
             >
-              <VaButton color="primary">Select files</VaButton>
+              <VaButton color="primary">{{ $t('contact.management.selectFiles') }}</VaButton>
             </VaFileUpload>
           </div>
         </div>
@@ -294,8 +309,10 @@
 
       <template #footer>
         <div class="flex justify-end gap-4 p-4 border-t">
-          <VaButton color="gray" @click="closeImageModal">Cancel</VaButton>
-          <VaButton color="primary" :loading="isSubmitting" @click="submitImages"> Add to profile </VaButton>
+          <VaButton color="gray" @click="closeImageModal">{{ $t('common.cancel') }}</VaButton>
+          <VaButton color="primary" :loading="isSubmitting" @click="submitImages">
+            {{ $t('contact.management.addToProfile') }}
+          </VaButton>
         </div>
       </template>
     </VaModal>
@@ -307,10 +324,83 @@
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 p-4">
-          <VaButton color="gray" @click="showImagePreview = false">Close</VaButton>
+          <VaButton color="gray" @click="showImagePreview = false">{{ $t('common.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
+
+    <!-- Available Contacts Modal test Tuan -->
+    <VaModal
+      v-model="showAvailableContacts"
+      :title="$t('contact.management.availableContacts')"
+      hide-default-actions
+      class="available-contacts-modal"
+    >
+      <div class="p-4">
+        <VaInput v-model="availableContactsSearch" :placeholder="$t('common.search')" class="mb-4" clearable>
+          <template #appendInner>
+            <i class="va-icon material-icons">search</i>
+          </template>
+        </VaInput>
+
+        <VaDataTable
+          class="custom-table"
+          :items="availableContacts"
+          :columns="availableContactsColumns"
+          hoverable
+          sticky-header
+          striped
+          :no-data-html="`<div class='text-center'>${t('contact.management.no_contacts')}</div>`"
+        >
+          <template #cell(title)="{ row }">
+            <div class="flex items-center">
+              <span class="truncate">{{ row.rowData.title }}</span>
+            </div>
+          </template>
+
+          <template #cell(email)="{ row }">
+            <div class="flex items-center">
+              <span class="truncate">{{ row.rowData.email }}</span>
+            </div>
+          </template>
+
+          <template #cell(phone)="{ row }">
+            <div class="flex items-center">
+              <span class="truncate">{{ row.rowData.phone }}</span>
+            </div>
+          </template>
+
+          <template #cell(actions)="{ row }">
+            <VaButton small color="primary" @click="handleTakeContact(row.rowData as ContactInfo)">
+              {{ $t('common.take') }}
+            </VaButton>
+          </template>
+        </VaDataTable>
+
+        <div class="flex justify-between items-center mt-4">
+          <div>
+            <b>{{ totalAvailableContacts }} {{ $t('contact.results') }}.</b>
+            {{ $t('contact.resultsPerPage') }}
+            <VaSelect v-model="availableContactsPageSize" class="!w-20" :options="[10, 50, 100]" />
+          </div>
+          <VaPagination
+            v-if="totalAvailablePages > 1"
+            v-model="availableContactsPage"
+            :pages="totalAvailablePages"
+            :visible-pages="5"
+            buttons-preset="secondary"
+            :boundary-links="true"
+            :direction-links="true"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2 p-4">
+          <VaButton color="gray" @click="showAvailableContacts = false">{{ $t('common.close') }}</VaButton>
+        </div>
+      </template>
+    </VaModal>
+    <!-- End of test Tuan -->
   </div>
 </template>
 
@@ -318,10 +408,13 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useToast } from 'vuestic-ui'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useContactStaffStore } from '@/stores/modules/contact-staff.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import type { ContactInfo, AdvancedSearch } from './types'
+import { computed } from 'vue'
 
+const { t } = useI18n()
 const { init } = useToast()
 const contactStaffStore = useContactStaffStore()
 const authStore = useAuthStore()
@@ -334,16 +427,15 @@ const currentPage = ref(1)
 const totalPages = ref(0)
 const totalContacts = ref(0)
 
-const columns = [
-  { key: 'title', title: 'Title' },
-  { key: 'email', title: 'Email' },
-  { key: 'phone', title: 'Phone' },
-  { key: 'actions', title: 'Actions' },
-]
+const columns = computed(() => [
+  { key: 'title', label: t('contact.title'), width: '30%' },
+  { key: 'email', label: t('contact.email'), width: '30%' },
+  { key: 'phone', label: t('contact.phone'), width: '25%' },
+  { key: 'actions', label: t('contact.actions'), width: '15%' },
+])
 
-const showAdvancedSearch = ref(false)
-const searchFields = ['title', 'email', 'phone', 'content']
-const sortFields = ['title', 'email', 'phone', 'createdAt']
+// const searchFields = ['title', 'email', 'phone', 'content']
+// const sortFields = ['title', 'email', 'phone', 'createdAt']
 
 const filterData = reactive({
   pageNumber: 1,
@@ -373,7 +465,7 @@ const fetchContacts = async () => {
     totalContacts.value = response.totalCount
   } catch (error) {
     init({
-      message: 'Failed to fetch contacts',
+      message: t('contact.failedToFetchContacts'),
       color: 'danger',
       duration: 3000,
     })
@@ -384,20 +476,6 @@ const fetchContacts = async () => {
 const handleViewDetails = (contact: ContactInfo) => {
   selectedContact.value = contact
   showDetailsModal.value = true
-}
-
-// Handle refresh
-const handleRefresh = () => {
-  currentPage.value = 1
-  filterData.pageNumber = 1
-  filterData.pageSize = 10
-  filterData.keyword = ''
-  filterData.advancedSearch = {
-    fields: [],
-    keyword: '',
-  }
-  filterData.orderBy = []
-  fetchContacts()
 }
 
 // Watch effects
@@ -448,8 +526,8 @@ const isSubmitting = ref(false)
 const selectedContactId = ref('')
 
 // Thêm hàm để tạo template email
-const generateDentalEmailTemplate = (patientName: string) => {
-  return `Dear ${patientName},
+const generateDentalEmailTemplate = (title: string) => {
+  return `We reply from your title "${title}",
 
 Thank you for contacting Dental Clinic. We have received your inquiry and would like to provide you with the following information:
 
@@ -479,7 +557,7 @@ const handleSendEmail = (contact: ContactInfo) => {
 const submitEmail = async () => {
   if (!emailData.content.trim()) {
     init({
-      message: 'Please enter email content',
+      message: t('contact.pleaseEnterEmailContent'),
       color: 'warning',
       duration: 3000,
     })
@@ -496,13 +574,13 @@ const submitEmail = async () => {
     emailData.content = ''
 
     init({
-      message: 'Email sent successfully',
+      message: t('contact.emailSentSuccessfully'),
       color: 'success',
       duration: 3000,
     })
   } catch (error) {
     init({
-      message: 'Failed to send email',
+      message: t('contact.failedToSendEmail'),
       color: 'danger',
       duration: 3000,
     })
@@ -520,7 +598,7 @@ const handleUpdateCallImage = (contact: ContactInfo) => {
 const submitImages = async () => {
   if (!selectedImages.value.length) {
     init({
-      message: 'Please select at least one image',
+      message: t('contact.pleaseSelectAtLeastOneImage'),
       color: 'warning',
       duration: 3000,
     })
@@ -542,7 +620,7 @@ const submitImages = async () => {
     showImageModal.value = false
     selectedImages.value = []
     init({
-      message: 'Images updated successfully',
+      message: t('contact.imagesUpdatedSuccessfully'),
       color: 'success',
       duration: 3000,
     })
@@ -551,7 +629,7 @@ const submitImages = async () => {
   } catch (error) {
     console.error('Error uploading images:', error)
     init({
-      message: error instanceof Error ? error.message : 'Failed to update images',
+      message: error instanceof Error ? error.message : t('contact.failedToUpdateImages'),
       color: 'danger',
       duration: 3000,
     })
@@ -567,7 +645,7 @@ onMounted(async () => {
     // Redirect or show error if user is not Staff
     router.push({ name: 'dashboard' })
     init({
-      message: 'Access denied. Staff role required.',
+      message: t('common.unauthorized'),
       color: 'danger',
       duration: 3000,
     })
@@ -672,6 +750,101 @@ const isDragging = ref(false)
 
 // Thêm vào phần đầu của script, cùng với các ref khác
 const imagePreviewUrls = ref<string[]>([])
+
+// Available Contacts Modal test Tuan
+const showAvailableContacts = ref(false)
+const availableContactsSearch = ref('')
+const availableContacts = ref<ContactInfo[]>([])
+const availableContactsPage = ref(1)
+const availableContactsPageSize = ref(10)
+const totalAvailablePages = ref(0)
+const totalAvailableContacts = ref(0)
+
+const availableContactsColumns = computed(() => [
+  { key: 'title', label: t('contact.management.title'), width: '30%' },
+  { key: 'email', label: t('contact.management.email'), width: '30%' },
+  { key: 'phone', label: t('contact.management.phone'), width: '25%' },
+  { key: 'actions', label: t('contact.management.actions'), width: '15%' },
+])
+
+// Fetch available contacts that have no staff assigned
+const fetchAvailableContacts = async () => {
+  try {
+    const response = await contactStaffStore.getAllContacts({
+      pageNumber: availableContactsPage.value - 1,
+      pageSize: availableContactsPageSize.value,
+      hasStaff: false,
+      orderBy: [],
+      keyword: availableContactsSearch.value,
+      advancedSearch: {
+        fields: [],
+        keyword: '',
+      },
+    })
+
+    availableContacts.value = response.data
+    availableContactsPage.value = response.currentPage + 1
+    totalAvailablePages.value = response.totalPages
+    totalAvailableContacts.value = response.totalCount
+  } catch (error) {
+    init({
+      message: t('contact.failedToFetchAvailableContacts'),
+      color: 'danger',
+      duration: 3000,
+    })
+  }
+}
+
+// Handle taking a contact
+const handleTakeContact = async (contact: ContactInfo) => {
+  try {
+    await contactStaffStore.addStaffContact(authStore.user?.id || '', contact.contactId)
+
+    init({
+      message: t('contact.contactTakenSuccessfully'),
+      color: 'success',
+      duration: 3000,
+    })
+
+    // Refresh both contact lists
+    await fetchAvailableContacts()
+    await fetchContacts()
+  } catch (error) {
+    init({
+      message: t('contact.failedToTakeContact'),
+      color: 'danger',
+      duration: 3000,
+    })
+  }
+}
+
+// Watch for changes in available contacts search and pagination
+watch([availableContactsSearch, availableContactsPage, availableContactsPageSize], () => {
+  fetchAvailableContacts()
+})
+
+// Update onMounted to check for Staff role instead of Admin
+onMounted(async () => {
+  if (!authStore.musHaveRole('Staff')) {
+    init({
+      message: t('common.unauthorized'),
+      color: 'danger',
+      duration: 3000,
+    })
+    router.push({ name: 'dashboard' })
+    return
+  }
+
+  await fetchContacts()
+})
+
+// Watch for modal open to fetch available contacts
+watch(showAvailableContacts, (newValue) => {
+  if (newValue) {
+    fetchAvailableContacts()
+  }
+})
+// End of test Tuan
 </script>
 
 <style scoped>
@@ -685,6 +858,11 @@ const imagePreviewUrls = ref<string[]>([])
 
 .contact-details-modal {
   max-width: 900px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .section-title {
@@ -765,6 +943,11 @@ const imagePreviewUrls = ref<string[]>([])
 .image-preview-modal {
   max-width: 90vw !important;
   max-height: 90vh !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .image-preview-container {
@@ -829,6 +1012,11 @@ const imagePreviewUrls = ref<string[]>([])
 /* Thêm vào phần style hiện có */
 .email-modal {
   max-width: 600px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .email-modal :deep(.va-input__content) {
@@ -857,6 +1045,11 @@ const imagePreviewUrls = ref<string[]>([])
 
 .upload-modal {
   max-width: 500px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .upload-area {
@@ -918,5 +1111,140 @@ const imagePreviewUrls = ref<string[]>([])
 .border-primary {
   border-color: var(--va-primary) !important;
   background-color: var(--va-background-secondary) !important;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .my-contacts {
+    padding: 16px;
+  }
+
+  .contact-details-modal {
+    max-width: 95% !important;
+    margin: 10px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .email-modal {
+    max-width: 95% !important;
+    margin: 10px;
+  }
+
+  .upload-modal {
+    max-width: 95% !important;
+    margin: 10px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .my-contacts {
+    padding: 12px;
+  }
+
+  .flex.justify-between.mb-4 {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .flex.gap-2.w-full {
+    flex-wrap: wrap;
+  }
+
+  .flex.gap-2.w-full .va-button {
+    flex: 1 1 auto;
+    min-width: calc(50% - 5px);
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+
+  .contact-section {
+    padding: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .info-label {
+    font-size: 0.85rem;
+  }
+
+  .content-box {
+    padding: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .flex.gap-2.w-full .va-button {
+    min-width: 100%;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+
+  .contact-section {
+    padding: 0.75rem;
+  }
+}
+
+:deep(.va-modal__overlay) {
+  background-color: transparent !important;
+}
+
+:deep(.va-modal__container) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  background: var(--va-background-primary) !important;
+}
+
+.available-contacts-modal {
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+:deep(.va-data-table__table-td) {
+  padding: 8px 16px !important;
+}
+
+:deep(.va-data-table__table-th) {
+  padding: 12px 16px !important;
+  font-weight: 600 !important;
+}
+
+.custom-table {
+  width: 100%;
 }
 </style>

@@ -57,32 +57,32 @@ onUnmounted(() => {
     @update:modelValue="updateVisibility"
   >
     <VaCard class="p-6 max-w-md mx-auto bg-white dark:bg-gray-800 container">
-      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Booking Confirmation</h3>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Your appointment has been booked successfully.</p>
+      <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">{{ $t('booking.confirm') }}</h3>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">{{ $t('booking.confirmDescription') }}</p>
 
       <div class="space-y-4">
         <div class="flex justify-between">
-          <span class="font-medium text-gray-700 dark:text-gray-300">Service:</span>
+          <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('booking.service') }}:</span>
           <span class="text-gray-900 dark:text-white">{{ selectedService.serviceName }}</span>
         </div>
         <div class="flex justify-between">
-          <span class="font-medium text-gray-700 dark:text-gray-300">Date:</span>
+          <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('booking.date') }}:</span>
           <span class="text-gray-900 dark:text-white">{{ formattedDate }}</span>
         </div>
         <div class="flex justify-between">
-          <span class="font-medium text-gray-700 dark:text-gray-300">Time:</span>
+          <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('booking.time') }}:</span>
           <span class="text-gray-900 dark:text-white">{{ selectedTime }}</span>
         </div>
         <div v-if="selectedPractitioner">
           <div class="flex justify-between">
-            <span class="font-medium text-gray-700 dark:text-gray-300">Doctor:</span>
+            <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('booking.doctor') }}:</span>
             <span class="text-gray-900 dark:text-white"
               >{{ selectedPractitioner.firstName }} {{ selectedPractitioner.lastName }}</span
             >
           </div>
         </div>
         <div class="flex justify-between">
-          <span class="font-medium text-gray-700 dark:text-gray-300">Deposit:</span>
+          <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('booking.deposit') }}:</span>
           <span class="text-gray-900 dark:text-white">{{ formattedDeposit }} ₫</span>
         </div>
       </div>

@@ -48,6 +48,17 @@ export const useUserProfileStore = defineStore('userProfile', {
         return await Promise.reject(error)
       }
     },
+    async updateProfileForAdmin(userData: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await userService.updateProfile(userData)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
     async changePassword(data: PasswordDetailFormData): Promise<any> {
       try {
         this.isLoading = true

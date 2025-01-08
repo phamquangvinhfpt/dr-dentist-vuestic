@@ -18,7 +18,7 @@
         @update:modelValue="handleChangeAction"
       />
     </div>
-    <VaButton class="col-strart-4" preset="primary">
+    <VaButton class="col-strart-4" preset="primary" @click="handleExport">
       {{ t('auditLogs.form.export') }}
     </VaButton>
   </VaForm>
@@ -30,10 +30,13 @@ import { onMounted, reactive, ref } from 'vue'
 import { optionsAction } from './audit-logs.enum'
 import { optionsActionType } from './types'
 import { useI18n } from 'vue-i18n'
+import { getErrorMessage } from '@/services/utils'
+import { useToast } from 'vuestic-ui/web-components'
 
 const props = defineProps<{
   handleTriggerFilter: (filterQuery: any) => void
 }>()
+const { notify } = useToast()
 const auditLogsStore = useAuditLogsStore()
 const formData = reactive({ action: '', resource: '' })
 const resourceType = ref<optionsActionType[]>([])
@@ -47,6 +50,31 @@ const getResourceType = async () => {
     optionsResource.unshift({ label: 'All', value: '' })
     resourceType.value = [...(optionsResource || [])]
   })
+}
+const handleExport = () => {
+  auditLogsStore
+    .exportAuditLogs()
+    .then((response) => {
+      const url = window.URL.createObjectURL(
+        new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+      )
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'logs.xlsx')
+      document.body.appendChild(link)
+      link.click()
+
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      notify({
+        title: 'error',
+        message: errorMessage,
+        color: 'danger',
+      })
+    })
 }
 onMounted(() => {
   getResourceType()

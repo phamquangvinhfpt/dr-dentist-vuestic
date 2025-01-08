@@ -3,34 +3,31 @@
     <VaCard class="service-card">
       <VaCardTitle class="card-title">
         <i class="fas fa-address-book title-icon"></i>
-        Contact Information
+        {{ t('contact.management.title') }}
       </VaCardTitle>
 
       <VaCardContent>
         <div class="header-actions">
           <div class="button-group">
-            <VaButton :color="showNonStaff ? 'warning' : 'secondary'" class="toggle-button" @click="toggleNonStaff">
-              <i class="va-icon material-icons mr-2">{{ showNonStaff ? 'list' : 'person_off' }}</i>
-              <span class="ml-1">{{ showNonStaff ? 'Staff List' : 'Non-Staff List' }}</span>
-            </VaButton>
+            <div class="toggle-container">
+              <button class="toggle-btn" :class="{ active: !showNonStaff }" @click="toggleNonStaff">
+                {{ t('contact.management.staff_list') }}
+              </button>
+              <button class="toggle-btn" :class="{ active: showNonStaff }" @click="toggleNonStaff">
+                {{ t('contact.management.non_staff_list') }}
+              </button>
+            </div>
 
-            <VaInput v-model="filterData.keyword" placeholder="Search..." class="flex-grow search-input" clearable>
+            <VaInput
+              v-model="filterData.keyword"
+              :placeholder="t('contact.management.search_placeholder')"
+              class="flex-grow search-input"
+              clearable
+            >
               <template #appendInner>
                 <i class="va-icon material-icons">search</i>
               </template>
             </VaInput>
-
-            <VaButton
-              :color="showAdvancedSearch ? 'primary' : 'gray'"
-              class="action-button"
-              @click="showAdvancedSearch = !showAdvancedSearch"
-            >
-              <i class="va-icon material-icons">tune</i>
-            </VaButton>
-
-            <VaButton color="primary" class="action-button" @click="handleRefresh">
-              <i class="va-icon material-icons">refresh</i>
-            </VaButton>
           </div>
         </div>
 
@@ -41,23 +38,23 @@
           hoverable
           sticky-header
           striped
-          no-data-html="<div class='text-center'>No contacts found</div>"
+          :no-data-html="'<div class=\'text-center\'>' + t('contact.management.no_contacts') + '</div>'"
         >
           <template #cell(title)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.title }}</span>
+              <span class="w-24" :title="row.rowData.title">{{ row.rowData.title }}</span>
             </div>
           </template>
 
           <template #cell(email)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.email }}</span>
+              <span class="w-24" :title="row.rowData.email">{{ row.rowData.email }}</span>
             </div>
           </template>
 
           <template #cell(phone)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.phone }}</span>
+              <span class="w-24" :title="row.rowData.phone">{{ row.rowData.phone }}</span>
             </div>
           </template>
 
@@ -69,13 +66,13 @@
 
           <template #cell(status)="{ row }">
             <VaTag :color="row.rowData.staffId ? 'success' : 'warning'">
-              {{ row.rowData.staffId ? 'Assigned' : 'Pending' }}
+              {{ row.rowData.staffId ? t('contact.management.assigned') : t('contact.management.pending') }}
             </VaTag>
           </template>
 
           <template #cell(staffName)="{ row }">
             <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.staffName || 'Not assigned' }}</span>
+              <span class="w-24">{{ row.rowData.staffName || t('contact.management.not_assigned') }}</span>
             </div>
           </template>
 
@@ -86,11 +83,18 @@
                 color="primary"
                 :disabled="!!(row.rowData as ContactInfo).staffId"
                 class="action-button"
+                :title="t('contact.management.tooltips.assign_staff')"
                 @click="handleAssignStaff(row.rowData as ContactInfo)"
               >
                 <i class="va-icon material-icons">person_add</i>
               </VaButton>
-              <VaButton small color="info" class="action-button" @click="handleViewDetails(row.rowData as ContactInfo)">
+              <VaButton
+                small
+                color="info"
+                class="action-button"
+                :title="t('contact.management.tooltips.view_details')"
+                @click="handleViewDetails(row.rowData as ContactInfo)"
+              >
                 <i class="va-icon material-icons">visibility</i>
               </VaButton>
             </div>
@@ -99,8 +103,8 @@
 
         <div class="table-footer">
           <div class="records-info">
-            <b>{{ totalContacts }} results.</b>
-            Results per page
+            <b>{{ t('contact.management.results_info', { count: totalContacts }) }}</b>
+            {{ t('contact.management.results_per_page') }}
             <VaSelect v-model="filterData.pageSize" class="!w-20" :options="[10, 50, 100]" />
           </div>
           <VaPagination
@@ -117,23 +121,28 @@
     </VaCard>
 
     <!-- View Details Modal -->
-    <VaModal v-model="showDetailsModal" title="CONTACT DETAILS" hide-default-actions class="contact-details-modal">
+    <VaModal
+      v-model="showDetailsModal"
+      :title="t('contact.management.contact_details')"
+      hide-default-actions
+      class="contact-details-modal"
+    >
       <div v-if="selectedContact" class="p-6">
         <div class="grid grid-cols-2 gap-6">
           <!-- Thông tin cá nhân -->
           <div class="contact-section">
-            <h3 class="section-title">Personal Information</h3>
+            <h3 class="section-title">{{ t('contact.management.personal_info') }}</h3>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Title</span>
+                <span class="info-label">{{ t('contact.management.fields.title') }}</span>
                 <span class="info-value">{{ selectedContact.title }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Email</span>
+                <span class="info-label">{{ t('contact.management.fields.email') }}</span>
                 <span class="info-value">{{ selectedContact.email }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Phone</span>
+                <span class="info-label">{{ t('contact.management.fields.phone') }}</span>
                 <span class="info-value">{{ selectedContact.phone }}</span>
               </div>
             </div>
@@ -141,35 +150,41 @@
 
           <!-- Thông tin trạng thái -->
           <div class="contact-section">
-            <h3 class="section-title">Status Information</h3>
+            <h3 class="section-title">{{ t('contact.management.status_info') }}</h3>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Created Date</span>
+                <span class="info-label">{{ t('contact.management.created_date') }}</span>
                 <span class="info-value">{{ new Date(selectedContact.createDate).toLocaleString() }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Status</span>
+                <span class="info-label">{{ t('contact.management.fields.status') }}</span>
                 <VaTag :color="selectedContact.staffId ? 'success' : 'warning'" class="status-tag">
-                  {{ selectedContact.staffId ? 'Assigned' : 'Pending' }}
+                  {{
+                    selectedContact.staffId
+                      ? t('contact.management.status.assigned')
+                      : t('contact.management.status.pending')
+                  }}
                 </VaTag>
               </div>
               <div class="info-item">
-                <span class="info-label">Staff Name</span>
-                <span class="info-value">{{ selectedContact.staffName || 'Not assigned' }}</span>
+                <span class="info-label">{{ t('contact.management.staff_name') }}</span>
+                <span class="info-value">{{
+                  selectedContact.staffName || t('contact.management.status.not_assigned')
+                }}</span>
               </div>
             </div>
           </div>
 
           <!-- Nội dung liên hệ -->
           <div class="contact-section col-span-2">
-            <h3 class="section-title">Contact Content</h3>
+            <h3 class="section-title">{{ t('contact.management.contact_content') }}</h3>
             <div class="content-box">
               <div class="mb-4">
-                <span class="info-label">Message</span>
+                <span class="info-label">{{ t('contact.management.fields.message') }}</span>
                 <p class="content-text">{{ selectedContact.content }}</p>
               </div>
-              <div>
-                <span class="info-label">Email Context</span>
+              <div v-if="selectedContact.emailContext">
+                <span class="info-label">{{ t('contact.management.fields.email_context') }}</span>
                 <p class="content-text">{{ selectedContact.emailContext }}</p>
               </div>
             </div>
@@ -177,12 +192,12 @@
 
           <!-- Hình ảnh -->
           <div v-if="selectedContact.imageUrl?.length" class="contact-section col-span-2">
-            <h3 class="section-title">Attached Images</h3>
+            <h3 class="section-title">{{ t('contact.management.attached_images') }}</h3>
             <div class="image-gallery">
               <div v-for="(url, index) in selectedContact.imageUrl" :key="index" class="image-container">
                 <img
                   :src="getImageSrc(url)"
-                  :alt="`Contact image ${index + 1}`"
+                  :alt="t('contact.management.image.alt', { index: index + 1 })"
                   class="gallery-image"
                   @click="openImagePreview(url)"
                 />
@@ -193,47 +208,62 @@
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 p-4">
-          <VaButton color="gray" @click="showDetailsModal = false">Close</VaButton>
+          <VaButton color="gray" @click="showDetailsModal = false">{{ t('contact.management.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
 
-    <VaModal v-model="showAssignStaffModal" title="Assign Staff" hide-default-actions>
+    <!-- Assign Staff Modal -->
+    <VaModal
+      v-model="showAssignStaffModal"
+      :title="t('contact.management.assign_staff')"
+      hide-default-actions
+      class="assign-staff-modal"
+    >
       <div class="p-4">
         <div class="mb-4">
-          <label class="block mb-2">Select Staff</label>
+          <label class="block mb-2">{{ t('contact.management.select_staff') }}</label>
           <VaSelect
             v-model="selectedStaffId"
             :options="contactStaffStore.staffList"
             value-by="id"
             text-by="name"
-            placeholder="Choose a staff member"
+            :placeholder="t('contact.management.choose_staff')"
           />
         </div>
       </div>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <VaButton color="gray" @click="showAssignStaffModal = false">Cancel</VaButton>
+          <VaButton color="gray" @click="showAssignStaffModal = false">{{ t('contact.management.cancel') }}</VaButton>
           <VaButton
             color="primary"
             :loading="contactStaffStore.isLoading"
             :disabled="!selectedStaffId"
             @click="confirmAssignStaff"
           >
-            Assign
+            {{ t('contact.management.assign') }}
           </VaButton>
         </div>
       </template>
     </VaModal>
 
     <!-- Thêm modal xem trước hình ảnh -->
-    <VaModal v-model="showImagePreview" class="image-preview-modal" hide-default-actions>
+    <VaModal
+      v-model="showImagePreview"
+      :title="t('contact.management.image_preview')"
+      class="image-preview-modal"
+      hide-default-actions
+    >
       <div class="image-preview-container">
-        <img :src="getImageSrc(selectedImage)" alt="Preview" class="preview-image" />
+        <img
+          :src="getImageSrc(selectedImage)"
+          :alt="t('contact.management.preview.preview_alt')"
+          class="preview-image"
+        />
       </div>
       <template #footer>
         <div class="flex justify-end gap-2 p-4">
-          <VaButton color="gray" @click="showImagePreview = false">Close</VaButton>
+          <VaButton color="gray" @click="showImagePreview = false">{{ t('contact.management.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -248,6 +278,7 @@ import { useContactStaffStore } from '@/stores/modules/contact-staff.module'
 import type { ContactInfo, AdvancedSearch } from './types'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useRouter } from 'vue-router'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 const { init } = useToast()
@@ -264,17 +295,15 @@ const currentPage = ref(1)
 const totalPages = ref(0)
 const totalContacts = ref(0)
 
-const columnsWithActions = [
-  { key: 'title', title: 'Title' },
-  { key: 'email', title: 'Email' },
-  { key: 'phone', title: 'Phone' },
-  { key: 'createDate', title: 'Created Date' },
-  { key: 'status', title: 'Status' },
-  { key: 'staffName', title: 'Staff Name' },
-  { key: 'actions', title: 'Actions' },
-]
-
-const showAdvancedSearch = ref(false)
+const columnsWithActions = computed(() => [
+  { key: 'title', label: t('contact.title') },
+  { key: 'email', label: t('contact.email') },
+  { key: 'phone', label: t('contact.phone') },
+  { key: 'createDate', label: t('contact.createDate') },
+  { key: 'status', label: t('contact.status') },
+  { key: 'staffName', label: t('contact.staffName') },
+  { key: 'actions', label: t('contact.actions') },
+])
 const showNonStaff = ref(false)
 
 const filterData = reactive({
@@ -314,10 +343,9 @@ const handleAssignStaff = async (contact: ContactInfo) => {
   showAssignStaffModal.value = true
   try {
     await contactStaffStore.getAllStaff()
-    console.log('Staff List:', contactStaffStore.staffList)
   } catch (error) {
     init({
-      message: 'Failed to fetch staff list',
+      message: t('contact.management.fetch_staff_error'),
       color: 'danger',
       duration: 3000,
     })
@@ -325,26 +353,13 @@ const handleAssignStaff = async (contact: ContactInfo) => {
 }
 
 const confirmAssignStaff = async () => {
-  if (!selectedStaffId.value || !contactToAssign.value) {
-    console.log('Missing data:', {
-      selectedStaffId: selectedStaffId.value,
-      contactToAssign: contactToAssign.value,
-    })
-    return
-  }
+  if (!selectedStaffId.value || !contactToAssign.value) return
 
   try {
-    console.log('Assigning staff with data:', {
-      staffId: selectedStaffId.value,
-      contactId: contactToAssign.value.contactId,
-    })
-
-    const result = await contactStaffStore.addStaffContact(selectedStaffId.value, contactToAssign.value.contactId)
-
-    console.log('Assignment result:', result)
+    await contactStaffStore.addStaffContact(selectedStaffId.value, contactToAssign.value.contactId)
 
     init({
-      message: 'Staff assigned successfully',
+      message: t('contact.management.staff_assigned_success'),
       color: 'success',
       duration: 3000,
     })
@@ -352,9 +367,8 @@ const confirmAssignStaff = async () => {
     showAssignStaffModal.value = false
     fetchContacts()
   } catch (error) {
-    console.error('Assignment error:', error)
     init({
-      message: 'Failed to assign staff',
+      message: t('contact.management.staff_assigned_error'),
       color: 'danger',
       duration: 3000,
     })
@@ -397,24 +411,11 @@ const fetchContacts = async () => {
     totalContacts.value = response.totalCount
   } catch (error) {
     init({
-      message: 'Failed to fetch contacts',
+      message: t('contact.management.fetch_contacts_error'),
       color: 'danger',
       duration: 3000,
     })
   }
-}
-
-const handleRefresh = () => {
-  currentPage.value = 1
-  filterData.pageNumber = 1
-  filterData.pageSize = 10
-  filterData.keyword = ''
-  filterData.advancedSearch = {
-    fields: [],
-    keyword: '',
-  }
-  filterData.orderBy = []
-  fetchContacts()
 }
 
 const toggleNonStaff = () => {
@@ -428,10 +429,9 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 onMounted(async () => {
-  // Check if user is Admin
   if (!authStore.musHaveRole('Admin')) {
     init({
-      message: t('common.unauthorized'),
+      message: t('contact.management.unauthorized_access'),
       color: 'danger',
       duration: 3000,
     })
@@ -499,15 +499,22 @@ const getImageSrc = (imageUrl: string) => {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .search-input {
-  margin-right: 1rem;
-  width: 1250px;
+  flex: 1;
+  min-width: 200px;
+  max-width: 100%;
   border-radius: 8px;
   padding: 0.5rem;
-  background: var(--va-background-element);
+  background: var(--va-background-secondary) !important;
   color: var(--va-text-primary);
+}
+
+.search-input:focus-within {
+  border-color: var(--va-primary);
 }
 
 .action-button {
@@ -528,8 +535,9 @@ const getImageSrc = (imageUrl: string) => {
 
 .toggle-button {
   border-radius: 8px;
-  padding: -2rem 3rem;
+  padding: 0.5rem 1rem;
   transition: background-color 0.3s ease;
+  white-space: nowrap;
 }
 
 .toggle-button:hover {
@@ -540,7 +548,7 @@ const getImageSrc = (imageUrl: string) => {
 .custom-table {
   margin-top: 1rem;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .custom-table :deep(th) {
@@ -561,10 +569,19 @@ const getImageSrc = (imageUrl: string) => {
   margin-top: 1.5rem;
   padding: 1rem 0;
   border-top: 1px solid var(--va-border-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .records-info {
   color: var(--va-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 /* Modal styles */
@@ -602,6 +619,11 @@ const getImageSrc = (imageUrl: string) => {
 
 .contact-details-modal {
   max-width: 900px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .section-title {
@@ -639,6 +661,7 @@ const getImageSrc = (imageUrl: string) => {
 
 .info-value {
   color: var(--va-text-primary);
+  word-break: break-word;
 }
 
 .content-box {
@@ -651,11 +674,12 @@ const getImageSrc = (imageUrl: string) => {
   color: var(--va-text-primary);
   line-height: 1.6;
   margin-top: 0.5rem;
+  word-break: break-word;
 }
 
 .image-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -682,6 +706,11 @@ const getImageSrc = (imageUrl: string) => {
 .image-preview-modal {
   max-width: 90vw !important;
   max-height: 90vh !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 
 .image-preview-container {
@@ -699,5 +728,115 @@ const getImageSrc = (imageUrl: string) => {
 
 .status-tag {
   width: fit-content;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 1024px) {
+  .service-management-container {
+    padding: 16px;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+    padding: 1rem;
+  }
+
+  .button-group {
+    gap: 0.5rem;
+  }
+
+  .toggle-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-input {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .grid.grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-section {
+    padding: 1rem;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .records-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .service-management-container {
+    padding: 8px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+  }
+
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .action-button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.toggle-container {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--va-primary);
+}
+
+.toggle-btn {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--va-primary);
+  font-weight: 500;
+}
+
+.toggle-btn.active {
+  background: var(--va-primary);
+  color: white;
+}
+
+.toggle-btn:hover:not(.active) {
+  background: rgba(var(--va-primary-rgb), 0.1);
+}
+
+:deep(.va-modal__overlay) {
+  background-color: transparent !important;
+}
+
+:deep(.va-modal__container) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  background: var(--va-background-primary) !important;
+}
+
+/* Update assign staff modal */
+.assign-staff-modal {
+  max-width: 500px !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
 }
 </style>

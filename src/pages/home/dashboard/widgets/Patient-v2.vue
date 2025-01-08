@@ -6,12 +6,12 @@ import { Doctors, TypeService } from './types'
 import { useRouter } from 'vue-router'
 import { avatarColor, getErrorMessage, getSrcAvatar } from '@/services/utils'
 import Contact from '../../landingpage/Contact.vue'
-
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useDashboardStore } from '@/stores/modules/dashboard.module'
+import { useI18n } from 'vue-i18n'
 
 const serviceStore = useServiceStore()
-
+const { t } = useI18n()
 const loading = ref(true)
 const currentSlide = ref(0)
 const showContent = ref(true)
@@ -63,19 +63,16 @@ const handleGetDoctors = async () => {
 
 const faqs = ref([
   {
-    question: 'Do I need to arrive early for my first appointment?',
-    answer:
-      'Yes, at least 15 minutes early to fill out essential paperwork and give the staff time to get you all set up.',
+    question: t('dashboard.dental_faq.first_appointment.question'),
+    answer: t('dashboard.dental_faq.first_appointment.answer'),
   },
   {
-    question: 'What are early signs of dental trouble?',
-    answer:
-      'The possible early signs of dental trouble are: Toothache; Sensitive Teeth; Bleeding or Sore Gums; Bad Breath; Cavities; Jaw Pain; Mouth Sores; Dry Mouth; Broken, Cracked, Chipped, Lost.',
+    question: t('dashboard.dental_faq.dental_trouble_signs.question'),
+    answer: t('dashboard.dental_faq.dental_trouble_signs.answer'),
   },
   {
-    question: 'How often should I visit the dentist?',
-    answer:
-      "It's generally recommended to visit your dentist for a check-up and cleaning every six months. However, your dentist may suggest more frequent visits based on your individual oral health needs.",
+    question: t('dashboard.dental_faq.visit_frequency.question'),
+    answer: t('dashboard.dental_faq.visit_frequency.answer'),
   },
 ])
 
@@ -159,8 +156,8 @@ window.addEventListener('resize', () => {
             <div v-show="showContent" :key="animationKey" class="text-center">
               <div class="slide-down">
                 <h3 class="text-white text-base md:text-5xl lg:text-6xl font-bold lg:mb-8 drop-shadow-lg">
-                  We Provide Oral Health Services to <br />
-                  Adults and Children
+                  {{ t('dashboard.slogan.slogan_1') }} <br />
+                  {{ t('dashboard.slogan.slogan_2') }}
                 </h3>
               </div>
               <div class="slide-up">
@@ -169,7 +166,7 @@ window.addEventListener('resize', () => {
                   color="info"
                   @click="router.push({ name: 'create-appointment' })"
                 >
-                  Book an Appointment
+                  {{ t('dashboard.trigger') }}
                   <svg
                     class="ml-2 w-4 h-4 fill-current"
                     xmlns="http://www.w3.org/2000/svg"
@@ -194,12 +191,12 @@ window.addEventListener('resize', () => {
       <!-- Services section -->
       <div v-if="!isLargeScreen" :class="[isLargeScreen ? 'container mx-auto p-4' : '']">
         <div v-if="!isLargeScreen" class="flex justify-between items-center mt-4 m-3">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Our Category</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ t('dashboard.services') }}</h2>
           <a
             href="#"
             class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
             @click="router.push({ name: 'services' })"
-            >See All</a
+            >{{ t('dashboard.see_all') }}</a
           >
         </div>
         <div class="grid grid-cols-3 gap-4 lg:gap-16 mt-8 lg:-mt-16 place-content-center lg:relative lg:px-4 z-10 m-3">
@@ -298,10 +295,10 @@ window.addEventListener('resize', () => {
         class="px-4 py-10 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24"
       >
         <h5
-          class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer"
+          class="uppercase mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer"
           @click="router.push({ name: 'services' })"
         >
-          OUR SERVICES
+          {{ t('dashboard.services') }}
         </h5>
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <VaCard v-for="(type, index) in serviceType" :key="index" class="bg-white dark:bg-gray-800 rounded-lg shadow">
@@ -318,7 +315,7 @@ window.addEventListener('resize', () => {
                 size="small"
                 @click="router.push({ name: 'services', params: { id: type.id } })"
               >
-                View Services
+                {{ t('dashboard.view_details') }}
               </VaButton>
             </VaCardActions>
           </VaCard>
@@ -329,9 +326,11 @@ window.addEventListener('resize', () => {
       <!-- Doctors section-->
       <div :class="[isLargeScreen ? 'w-full max-w-4xl md:max-w-screen-xl mx-auto mt-16 mb-6' : '']">
         <div v-if="!isLargeScreen" class="flex justify-between items-center mt-4 m-3">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Top Doctors</h2>
-          <a href="/find-doctors" class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
-            >See All</a
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ t('dashboard.top_doctors') }}</h2>
+          <a
+            href="/find-doctors"
+            class="text-blue-800 dark:text-blue-300 hover:text-blue-600 dark:hover:text-blue-400"
+            >{{ t('dashboard.see_all') }}</a
           >
         </div>
         <VaCardTitle
@@ -339,10 +338,10 @@ window.addEventListener('resize', () => {
           class="flex justify-center text-center text-9xl mb-2 font-semibold text-gray-900 dark:text-white hover:text-blue-800 dark:hover:text-blue-300 transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300"
         >
           <h5
-            class="mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer"
-            @click="router.push({ name: 'doctors-for-users' })"
+            class="uppercase mt-5 mb-5 text-3xl md:text-5xl font-bold text-center text-sky-700 hover:cursor-pointer"
+            @click="router.push({ name: 'find-doctors' })"
           >
-            TOP DOCTORS
+            {{ t('dashboard.top_doctors') }}
           </h5>
         </VaCardTitle>
         <VaCardContent>
@@ -414,10 +413,9 @@ window.addEventListener('resize', () => {
           <div class="lg:col-span-2 px-4 mb-8 lg:mb-0">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
               <div class="mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Welcome to Our Dental Clinic</h2>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('dashboard.intro.welcome') }}</h2>
                 <p class="text-gray-700 dark:text-gray-300">
-                  At our dental clinic, we provide comprehensive and personalized care for all your dental needs. From
-                  routine cleanings to advanced surgeries, we ensure your oral health is in the best hands.
+                  {{ t('dashboard.intro.introducion') }}
                 </p>
               </div>
               <div class="mb-6">
@@ -429,10 +427,11 @@ window.addEventListener('resize', () => {
                     >
                   </div>
                   <div class="ml-4">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Special Surgeries</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                      {{ t('dashboard.intro.special_surgeries') }}
+                    </h3>
                     <p class="text-gray-700 dark:text-gray-300">
-                      Our clinic offers specialized surgical procedures to address complex dental issues, all performed
-                      by highly skilled professionals using state-of-the-art technology.
+                      {{ t('dashboard.intro.special_surgeries_description') }}
                     </p>
                   </div>
                 </div>
@@ -444,23 +443,26 @@ window.addEventListener('resize', () => {
                     >
                   </div>
                   <div class="ml-4">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Top-Quality Treatments</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                      {{ t('dashboard.intro.top_quality_treatment') }}
+                    </h3>
                     <p class="text-gray-700 dark:text-gray-300">
-                      From preventive care to restorative treatments, we offer top-quality services that ensure your
-                      teeth remain healthy and your smile bright.
+                      {{ t('dashboard.intro.top_quality_treatment_description') }}
                     </p>
                   </div>
                 </div>
               </div>
               <p class="text-gray-700 dark:text-gray-300">
-                Experience the best in dental care, where reliability and quality are at the heart of everything we do.
+                {{ t('dashboard.intro.ending') }}
               </p>
             </div>
           </div>
           <div class="px-4">
             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
               <div class="mb-6">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Patient Testimonials</h3>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                  {{ t('dashboard.patients_testimonials') }}
+                </h3>
               </div>
               <div v-for="feedback in feedBackData" :key="feedback">
                 <div class="flex items-center space-y-4">
@@ -492,7 +494,7 @@ window.addEventListener('resize', () => {
             >
               <i class="material-icons text-blue-500 text-5xl">medical_services</i>
               <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">{{ satisfiedData }}</h3>
-              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Satisfied Patients</p>
+              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">{{ t('dashboard.satisfied_patients') }}</p>
             </div>
           </Transition>
           <Transition name="fade" mode="out-in">
@@ -504,7 +506,9 @@ window.addEventListener('resize', () => {
               <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">
                 {{ regularDoctorData }}
               </h3>
-              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Regular Doctors</p>
+              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">
+                {{ t('dashboard.regular_doctors') }}
+              </p>
             </div>
           </Transition>
           <Transition name="fade" mode="out-in">
@@ -516,7 +520,7 @@ window.addEventListener('resize', () => {
               <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">
                 {{ totalServiceData }}
               </h3>
-              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Services</p>
+              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">{{ t('dashboard.services') }}</p>
             </div>
           </Transition>
           <Transition name="fade" mode="out-in">
@@ -528,7 +532,7 @@ window.addEventListener('resize', () => {
               <h3 class="fun-fact-one__title text-2xl font-bold text-gray-900 dark:text-white">
                 {{ appointmentDoneData }}
               </h3>
-              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">Success Surgeries</p>
+              <p class="fun-fact-one__text text-gray-600 dark:text-gray-300">{{ t('dashboard.success_surgeries') }}</p>
             </div>
           </Transition>
         </div>
@@ -537,8 +541,8 @@ window.addEventListener('resize', () => {
       <!--- Start of Frequently Asked Questions -->
       <section>
         <div class="z-20 w-full bg-gradient-to-br from-teal-500 to-sky-700 dark:from-teal-700 dark:to-sky-900">
-          <div class="max-w-4xl px-4 py-10 mx-auto sm:px-6 lg:px-8 faqs">
-            <h5 class="mb-10 text-3xl md:text-5xl font-bold text-center text-white">FREQUENTLY ASKED QUESTIONS</h5>
+          <div class="max-w-6xl px-4 py-10 mx-auto sm:px-6 lg:px-8 faqs">
+            <h5 class="mb-10 text-3xl md:text-5xl font-bold text-center text-white">{{ t('dashboard.faq') }}</h5>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div class="space-y-6">
@@ -579,7 +583,7 @@ window.addEventListener('resize', () => {
             <p
               class="inline-block px-3 py-px mb-4 text-sm font-semibold tracking-wider uppercase rounded-full text-sky-700 bg-teal-accent-400"
             >
-              DCMS DENTAL CLINIC
+              {{ t('dashboard.guide.logo') }}
             </p>
           </div>
           <h2
@@ -598,12 +602,12 @@ window.addEventListener('resize', () => {
                 </defs>
                 <rect fill="url(#f51618fb-0edb-4bcb-b35a-ffc770941286)" width="52" height="24"></rect>
               </svg>
-              <span class="relative text-sky-700">HOW</span>
+              <span class="relative text-sky-700">{{ t('dashboard.guide.title.first') }}</span>
             </span>
-            TO SET AN APPOINTMENT
+            {{ t('dashboard.guide.title.second') }}
           </h2>
           <p class="text-base text-center teal-5 md:text-lg">
-            Set your appointment now through these three (3) easy steps.
+            {{ t('dashboard.guide.step.title') }}
           </p>
         </div>
         <div class="grid gap-8 row-gap-0 lg:grid-cols-3 px-6">
@@ -617,15 +621,13 @@ window.addEventListener('resize', () => {
                 <h1 class="text-6xl text-blue-500">1</h1>
               </div>
             </div>
-            <h6 class="mb-2 text-2xl font-extrabold">Choose a service.</h6>
+            <h6 class="mb-2 text-2xl font-extrabold">{{ t('dashboard.guide.step.first.title') }}</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
-              Go the
-              <span
-                class="border-b border-sky-700 hover:cursor-pointer"
-                @click="router.push({ name: 'create-appointment' })"
-                >Set an Appointment</span
-              >
-              Then choose a service you want.
+              {{ t('dashboard.guide.step.first.description') }}
+              <span class="border-b border-sky-700 hover:cursor-pointer" @click="router.push({ name: 'signup' })">{{
+                t('dashboard.guide.step.first.link')
+              }}</span>
+              {{ t('dashboard.guide.step.first.description2') }}
             </p>
             <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
               <svg
@@ -651,9 +653,15 @@ window.addEventListener('resize', () => {
                 <h1 class="text-6xl text-blue-500">2</h1>
               </div>
             </div>
-            <h6 class="mb-2 text-2xl font-extrabold">Choose a date.</h6>
+            <h6 class="mb-2 text-2xl font-extrabold">{{ t('dashboard.guide.step.second.title') }}</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto">
-              Next, choose and select your preferred date, time.
+              {{ t('dashboard.guide.step.second.description') }}
+              <span
+                class="border-b border-sky-700 hover:cursor-pointer"
+                @click="router.push({ name: 'create-appointment' })"
+                >{{ t('dashboard.guide.step.second.link') }}</span
+              >
+              {{ t('dashboard.guide.step.second.description2') }}
             </p>
             <div class="top-0 right-0 flex items-center justify-center h-24 lg:-mr-8 lg:absolute">
               <svg
@@ -679,13 +687,13 @@ window.addEventListener('resize', () => {
                 <h1 class="text-6xl text-blue-500">3</h1>
               </div>
             </div>
-            <h6 class="mb-2 text-2xl font-extrabold">Done.</h6>
+            <h6 class="mb-2 text-2xl font-extrabold">{{ t('dashboard.guide.step.final.title') }}</h6>
             <p class="max-w-md mb-3 text-sm text-sky-700 sm:mx-auto min-h-10">
-              View your scheduled appointments in the
+              {{ t('dashboard.guide.step.final.description') }}
               <span class="border-b border-sky-700 hover:cursor-pointer" @click="router.push({ name: 'appointment' })">
-                My Appointments</span
+                {{ t('dashboard.guide.step.final.link') }}</span
               >
-              page.
+              {{ t('dashboard.guide.step.final.description2') }}
             </p>
           </div>
         </div>

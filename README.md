@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="#" target="_blank">
-    <img alt="DCMS Logo" width="220" src="./public/favicon-32x32.png"/>
+    <img alt="DCMS Logo" width="300" src="./public/1.png"/>
   </a>
 </p>
 
@@ -30,3 +30,48 @@
 > <a href="#">issues</a>,
 > <a href="#">contributing guide</a> and join discussions on our
 > <a href="#">Community Forum</a> to help us improved.
+
+<p align="center">
+  <a href="#" target="_blank">
+    <img src="./public/Screenshot.png" align="center" width="888px"/>
+  </a>
+</p>
+
+### Quick start
+
+Use the following command to quickly start Dr.Dentist project.
+
+```bash
+git https://github.com/phamquangvinhfpt/dr-dentist-vuestic.git
+cd DR-DENTIST-VUESTIC
+npm install
+npm run dev
+```
+
+### Account for testing: All same pass 123Pa$$word!
+
+- Admin: admin@root.com
+- Staff: staff@root.com
+- Doctor: dentist@root.com
+- Patient: patient@root.com
+- Patient for testing: patient1-4@root.com
+
+### How to started mobile app
+
+- Run build project:
+
+```bash
+npm run build
+```
+
+- Sync project:
+
+```bash
+npx cap sync
+```
+
+- Open android studio
+
+```bash
+npx cap open android
+```

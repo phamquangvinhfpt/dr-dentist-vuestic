@@ -85,7 +85,17 @@
           </div>
 
           <!-- Submit Button with improved styling -->
-          <div class="flex justify-end pt-4">
+          <div class="flex justify-end gap-4 pt-4">
+            <VaButton
+              preset="secondary"
+              class="px-8 py-3 rounded-lg transform transition-transform hover:scale-105"
+              @click="router.back()"
+            >
+              <span class="flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back
+              </span>
+            </VaButton>
             <VaButton
               preset="primary"
               :loading="isSubmitting"

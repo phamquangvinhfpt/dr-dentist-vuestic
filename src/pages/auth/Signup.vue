@@ -71,6 +71,11 @@ const submit = () => {
           message: t('auth.account_created'),
           color: 'success',
         })
+        if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
+          showModal.value = true
+        } else {
+          push({ name: 'login' })
+        }
       })
       .catch((error) => {
         const message = getErrorMessage(error)
@@ -82,11 +87,6 @@ const submit = () => {
       })
       .finally(() => {
         isLoading.value = false
-        if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
-          showModal.value = true
-        } else {
-          push({ name: 'login' })
-        }
       })
   }
 }

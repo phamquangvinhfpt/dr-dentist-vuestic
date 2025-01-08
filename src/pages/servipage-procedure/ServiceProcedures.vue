@@ -1,31 +1,55 @@
 <template>
   <VaCard>
-    <VaCardTitle>Service Details</VaCardTitle>
+    <VaCardTitle>
+      <div class="flex items-center gap-4">
+        <VaButton
+          class="back-btn"
+          icon="arrow_back"
+          color="primary"
+          size="small"
+          @click="$router.push('/service-management')"
+        />
+        <span class="text-2xl font-bold">{{ t('service.serviceDetails') }}</span>
+      </div>
+    </VaCardTitle>
     <VaCardContent v-if="!isLoading">
       <!-- Service Details Section -->
       <div class="service-info mb-4">
         <VaCard class="border-black">
           <VaCardContent>
             <div class="flex flex-col gap-2">
-              <h2 class="text-xl font-bold">Service Information</h2>
+              <h2 class="text-xl font-bold">{{ t('service.serviceInformation') }}</h2>
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <p class="font-semibold">Name:</p>
+                  <p class="font-semibold">{{ t('service.name') }}:</p>
                   <p>{{ serviceDetail?.name || 'N/A' }}</p>
                 </div>
                 <div>
-                  <p class="font-semibold">Description:</p>
+                  <p class="font-semibold">{{ t('service.description') }}:</p>
                   <p>{{ serviceDetail?.description || 'N/A' }}</p>
                 </div>
                 <div>
-                  <p class="font-semibold">Total Price:</p>
+                  <p class="font-semibold">{{ t('service.totalPrice') }}:</p>
                   <p>{{ formatPrice(serviceDetail?.totalPrice || 0) }}</p>
                 </div>
                 <div>
-                  <p class="font-semibold">Status:</p>
-                  <p :class="serviceDetail?.isActive ? 'text-success' : 'text-danger'">
-                    {{ serviceDetail?.isActive ? 'Active' : 'Inactive' }}
-                  </p>
+                  <p class="font-semibold">{{ t('common.status') }}:</p>
+                  <div class="flex items-center gap-2">
+                    <VaButton
+                      color="warning"
+                      size="small"
+                      class="action-button-circle"
+                      :disabled="isToggling"
+                      :loading="isToggling"
+                      round
+                      @click="handleToggleStatus"
+                    >
+                      <VaIcon :name="serviceDetail?.isActive ? 'toggle_off' : 'toggle_on'" />
+                    </VaButton>
+                    <p :class="serviceDetail?.isActive ? 'text-success' : 'text-danger'">
+                      {{ serviceDetail?.isActive ? 'Active' : 'Inactive' }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -36,17 +60,17 @@
       <!-- Procedures List Section -->
       <div class="procedures-list">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-bold">Procedures List</h2>
+          <h2 class="text-xl font-bold">{{ t('procedure.ProcedureManagement') }}</h2>
 
           <div class="flex gap-2">
-            <VaButton color="success" @click="showAddModal = true"> Add Procedure </VaButton>
+            <VaButton color="success" @click="showAddModal = true"> {{ t('procedure.addProcedure') }} </VaButton>
 
             <VaButton
               v-if="!showRemovedProcedures"
               :color="isMultiSelectMode ? 'danger' : 'primary'"
               @click="isMultiSelectMode = !isMultiSelectMode"
             >
-              {{ isMultiSelectMode ? 'Cancel Selection' : 'Select Multiple' }}
+              {{ isMultiSelectMode ? t('common.cancel') : t('procedure.selectMultiple') }}
             </VaButton>
 
             <VaButton
@@ -54,7 +78,7 @@
               color="danger"
               @click="deleteSelectedProcedures"
             >
-              Delete Selected ({{ selectedProcedures.length }})
+              {{ t('common.delete') }} ({{ selectedProcedures.length }})
             </VaButton>
           </div>
         </div>
@@ -99,11 +123,11 @@
                 </div>
                 <div class="procedure-body">
                   <div class="mb-2">
-                    <p class="font-semibold text-gray-700">Description:</p>
+                    <p class="font-semibold text-gray-700">{{ $t('procedure.description') }}:</p>
                     <p>{{ item.procedureDetail.description }}</p>
                   </div>
                   <div class="mb-2">
-                    <p class="font-semibold text-gray-700">Price:</p>
+                    <p class="font-semibold text-gray-700">{{ $t('procedure.price') }}:</p>
                     <p class="text-success font-medium">{{ formatPrice(item.procedureDetail.price) }}</p>
                   </div>
                 </div>
@@ -144,13 +168,22 @@
 
   <VaModal v-model="showAddModal" size="large" hide-default-actions>
     <template #header>
-      <h3>Add Procedures</h3>
+      <h3>{{ t('procedure.addProcedure') }}</h3>
     </template>
 
     <div class="p-4">
+      <!-- Search input -->
+      <div class="mb-4">
+        <VaInput v-model="searchQuery" :placeholder="t('common.search')" removable class="w-full">
+          <template #prependInner>
+            <i class="va-icon material-icons">search</i>
+          </template>
+        </VaInput>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <VaCard
-          v-for="procedure in availableProcedures"
+          v-for="procedure in filteredProcedures"
           :key="procedure.id"
           class="procedure-card border-black"
           :class="{
@@ -172,6 +205,11 @@
           </VaCardContent>
         </VaCard>
       </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-center mt-4">
+        <VaPagination v-model="currentPage" :pages="totalPages" :visible-pages="5" class="justify-center" />
+      </div>
     </div>
 
     <template #footer>
@@ -185,7 +223,7 @@
           :disabled="selectedNewProcedures.length === 0"
           @click="handleAddProcedures"
         >
-          Add Selected ({{ selectedNewProcedures.length }})
+          {{ t('procedure.addSelected') }} ({{ selectedNewProcedures.length }})
         </VaButton>
       </div>
     </template>
@@ -203,7 +241,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { storeToRefs } from 'pinia'
@@ -221,6 +259,7 @@ const { init } = useToast()
 const showDeleteModal = ref(false)
 const selectedProcedureId = ref<string | null>(null)
 const isDeleting = ref(false)
+const isToggling = ref(false)
 const isRemove = ref(false)
 const showRemovedProcedures = ref(false)
 const selectedProcedures = ref<string[]>([])
@@ -229,6 +268,9 @@ const showAddModal = ref(false)
 const isAdding = ref(false)
 const selectedNewProcedures = ref<string[]>([])
 const allProcedures = ref<ProcedureDTO[]>([])
+const searchQuery = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 9 // 3x3 grid
 
 // Separate active and removed procedures
 const activeProcedures = computed(() => serviceProcedures.value.filter((proc) => !proc.procedureDetail.isRemove))
@@ -344,7 +386,36 @@ const handleAddProcedures = async () => {
     isAdding.value = false
   }
 }
+// Filter procedures based on search query and pagination
+const filteredProcedures = computed(() => {
+  const filtered = availableProcedures.value.filter((procedure) => {
+    const searchLower = searchQuery.value.toLowerCase()
+    return (
+      procedure.name.toLowerCase().includes(searchLower) || procedure.description.toLowerCase().includes(searchLower)
+    )
+  })
 
+  // Pagination
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filtered.slice(start, end)
+})
+
+const totalPages = computed(() => {
+  const filtered = availableProcedures.value.filter((procedure) => {
+    const searchLower = searchQuery.value.toLowerCase()
+    return (
+      procedure.name.toLowerCase().includes(searchLower) || procedure.description.toLowerCase().includes(searchLower)
+    )
+  })
+  return Math.ceil(filtered.length / itemsPerPage)
+})
+
+// Reset pagination when search changes
+watch(searchQuery, () => {
+  currentPage.value = 1
+})
+//end filter procedures
 onMounted(async () => {
   try {
     const id = route.params.id as string
@@ -361,6 +432,37 @@ onMounted(async () => {
     console.error('Error loading data:', error)
   }
 })
+
+const handleToggleStatus = async () => {
+  if (!serviceDetail.value) return
+
+  try {
+    isToggling.value = true
+
+    await serviceStore.toggleServiceStatus({
+      id: route.params.id as string,
+      activate: !serviceDetail.value.isActive,
+    })
+
+    // Refresh service detail data after toggling
+    await serviceStore.getServiceDetail(route.params.id as string)
+
+    init({
+      message: t('service.statusUpdatedSuccessfully'),
+      color: 'success',
+      duration: 3000,
+    })
+  } catch (error) {
+    console.error('Toggle status error:', error)
+    init({
+      message: t('service.statusUpdatedFailed'),
+      color: 'danger',
+      duration: 3000,
+    })
+  } finally {
+    isToggling.value = false
+  }
+}
 </script>
 <style scoped>
 .procedure-card {

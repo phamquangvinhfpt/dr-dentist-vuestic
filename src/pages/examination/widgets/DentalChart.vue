@@ -11,13 +11,13 @@
             width="289.61084"
             height="370.54398"
           >
-            <title id="title3476">Human Dental Arches</title>
+            <title id="title3476"></title>
             <metadata id="metadata8">
               <rdf:RDF>
                 <cc:Work rdf:about="">
                   <dc:format>image/svg+xml</dc:format>
                   <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-                  <dc:title>Human Dental Arches</dc:title>
+                  <dc:title></dc:title>
                 </cc:Work>
               </rdf:RDF>
             </metadata>

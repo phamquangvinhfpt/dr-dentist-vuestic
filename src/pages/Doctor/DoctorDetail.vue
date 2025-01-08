@@ -17,30 +17,38 @@
               <span v-for="i in 5" :key="i" class="text-yellow-400">
                 <Star :class="i <= Math.round(doctor.rating || 0) ? 'fill-current' : 'stroke-current'" />
               </span>
-              <span class="ml-2 text-sm">({{ doctor.totalFeedback }} đánh giá)</span>
+              <span class="ml-2 text-sm font-semibold">({{ doctor.totalFeedback }} {{ t('doctor.rating') }})</span>
             </div>
-            <p class="mt-4"><Mail class="inline mr-2" /> {{ doctor.email }}</p>
-            <p><Phone class="inline mr-2" /> {{ doctor.phoneNumber }}</p>
+            <div class="mt-4">
+              <p class="font-bold">
+                <Mail class="inline mr-2" /> {{ t('doctor.email') }}:
+                <span class="font-normal">{{ doctor.email }}</span>
+              </p>
+              <p class="font-bold">
+                <Phone class="inline mr-2" /> {{ t('doctor.phone') }}:
+                <span class="font-normal">{{ doctor.phoneNumber }}</span>
+              </p>
+            </div>
           </div>
         </div>
       </VaCard>
 
       <!-- Professional Information -->
       <VaCard class="rounded-2xl shadow-xl p-6 sm:p-8">
-        <h2 class="text-2xl font-semibold mb-6 va-h2">Thông Tin Chuyên Môn</h2>
+        <h2 class="text-2xl font-semibold mb-6 va-h2">{{ t('doctor.Professional_Information') }}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <h3 class="text-sm font-medium">Học Vấn:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
-            <p>{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.education') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
+            <p class="font-normal">{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Số Năm Kinh Nghiệm:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.experience') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Loại Hình Làm Việc:</h3>
-            <p class="mt-1">
+            <h3 class="text-sm font-bold">{{ t('doctor.Job_Type') }}</h3>
+            <p class="mt-1 font-normal">
               {{
                 doctor.doctorProfile?.workingType === 2
                   ? 'Toàn Thời Gian'
@@ -51,19 +59,19 @@
             </p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Chứng Chỉ:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.certification') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
           </div>
         </div>
         <div class="mt-6">
-          <h3 class="text-sm font-medium">Về Tôi:</h3>
-          <p class="mt-1">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
+          <h3 class="text-sm font-bold">{{ t('doctor.seftDescription') }}</h3>
+          <p class="mt-1 font-normal">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
         </div>
       </VaCard>
 
       <!-- Patient Feedback -->
       <VaCard class="rounded-2xl shadow-xl p-6 sm:p-8">
-        <h2 class="text-2xl font-semibold mb-6">Phản Hồi Từ Bệnh Nhân</h2>
+        <h2 class="text-2xl font-semibold mb-6">{{ t('doctor.Patient_Feedback') }}</h2>
         <div class="flex flex-wrap justify-center gap-2 mb-6">
           <button
             v-for="i in 6"
@@ -101,11 +109,13 @@
                 alt="Avatar"
                 class="h-10 w-10 rounded-full object-cover mr-3"
               />
-              <p v-if="isUserOnline(review.patientID)" style="font-weight: bold" class="text-sm">Tôi</p>
+              <p v-if="isUserOnline(review.patientID)" style="font-weight: bold" class="text-sm">
+                {{ t('doctor.my') }}
+              </p>
               <p v-else style="font-weight: bold" class="text-sm">{{ review.patientName }}</p>
             </div>
             <div class="flex justify-between items-center">
-              <p class="text-sm">Dịch Vụ: {{ review.serviceName }}</p>
+              <p class="text-sm">{{ t('doctor.service') }}: {{ review.serviceName }}</p>
               <span class="text-sm">{{ formatDate(review.createDate) }}</span>
             </div>
             <div class="flex items-center mt-2">
@@ -128,7 +138,7 @@
               class="mt-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
               @click="openEditPopup(review)"
             >
-              Chỉnh Sửa
+              {{ t('doctor.Edit') }}
             </button>
           </div>
         </div>
@@ -163,7 +173,7 @@
   <Transition name="fade">
     <div v-if="isEditPopupOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <VaCard class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-        <h3 class="text-xl font-semibold mb-4">Chỉnh Sửa Phản Hồi</h3>
+        <h3 class="text-xl font-semibold mb-4">{{ t('doctor.Edit_Feedback') }}</h3>
         <textarea
           v-model="editFeedback.message"
           class="w-full p-3 border dark:bg-[#1F262F] border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -171,7 +181,7 @@
           placeholder="Nội dung phản hồi"
         ></textarea>
         <div class="mt-4">
-          <label class="block text-sm font-medium">Đánh Giá:</label>
+          <label class="block text-sm font-medium">{{ t('doctor.Rating') }}:</label>
           <div class="flex items-center mt-1">
             <Star
               v-for="i in 5"
@@ -187,13 +197,13 @@
             class="px-2 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200"
             @click="isEditPopupOpen = false"
           >
-            Hủy
+            {{ t('doctor.cancel') }}
           </VaButton>
           <VaButton
             class="px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
             @click="saveEditFeedback"
           >
-            Lưu
+            {{ t('doctor.save') }}
           </VaButton>
         </div>
       </VaCard>
@@ -209,7 +219,8 @@ import { useAuthStore } from '@/stores/modules/auth.module'
 import userService from '@/services/user.service'
 import { Star, Mail, Phone, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { getSrcAvatar } from '@/services/utils'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const route = useRoute()
 const doctorStore = useDoctorProfileStore()
 const authStore = useAuthStore()
@@ -366,5 +377,13 @@ const setRating = (rating: number) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+.text-sm.font-bold {
+  font-weight: bold;
+  margin-bottom: 0.5rem; /* Tăng khoảng cách giữa các nhóm thông tin */
+}
+
+.text-sm.font-normal {
+  font-weight: normal;
 }
 </style>

@@ -3,15 +3,40 @@ import { ref, reactive, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
-
+import { getSrcAvatar } from '@/services/utils'
 import { useToast } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const route = useRoute() // Get the current route
 const router = useRouter()
 const doctorStore = useDoctorProfileStore()
 const { init: toast } = useToast()
 const serviceStore = useServiceStore()
+const newImage = ref<string | null>(null) // New reactive property for the image preview
+const fileName = ref('')
+const reviewimage = ref<string | null>(null)
+const handleAvatarUpload = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const files = input.files
 
+  if (files && files.length > 0) {
+    const file = files[0] // Get the first selected file
+    const theReader = new FileReader()
+
+    theReader.onloadend = async () => {
+      newImage.value = (await theReader.result) as string // Set the new image for review
+    }
+
+    theReader.readAsDataURL(file) // Read the file as a data URL
+    doctor.imageUrl = [file] // Store the file in doctor.imageUrl for later use
+    fileName.value = files.length > 1 ? `${files.length} files selected` : files[0].name // Update fileName
+  } else {
+    doctor.imageUrl = []
+    newImage.value = null // Reset newImage if no files are selected
+    fileName.value = ''
+  }
+}
 const goBack = () => router.back()
 const doctorId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
 
@@ -23,19 +48,27 @@ interface DoctorForm {
   password: string
   confirmPassword: string
   phoneNumber: string
-  gender: boolean | null
+  gender: {
+    value: true
+    text: ''
+  }
   imageUrl: File[]
   address: string
-  typeServiceId: string // Add this line
+  typeServiceId: {
+    value: string
+    text: string
+  }
   birthDate: string
-  DoctorID: string
   role: string
   specialization: string
   experience: number
   qualification: string
   consultationFee: number
   description: string
-  WorkingType: number
+  WorkingType: {
+    value: number
+    text: string
+  }
 }
 
 const doctor = reactive<DoctorForm>({
@@ -46,19 +79,27 @@ const doctor = reactive<DoctorForm>({
   password: '123Pa$$word!',
   confirmPassword: '123Pa$$word!',
   phoneNumber: '',
-  gender: null,
-  typeServiceId: '', // New field for TypeServiceID
+  gender: {
+    value: true,
+    text: '',
+  },
+  typeServiceId: {
+    value: '',
+    text: '',
+  },
   imageUrl: [] as File[],
   address: '',
   birthDate: '',
-  DoctorID: '',
   role: 'Bác Sĩ',
   specialization: '',
   experience: 0,
   qualification: '',
   consultationFee: 0,
   description: '',
-  WorkingType: 0,
+  WorkingType: {
+    value: 0,
+    text: '',
+  },
 })
 
 const errors = reactive({
@@ -109,15 +150,29 @@ const getDoctorDetail = async () => {
       doctor.experience = response.doctorProfile.yearOfExp || 0 // Fill in the experience
       doctor.specialization = response.doctorProfile.specialization || '' // Fill in the specialization
       doctor.description = response.doctorProfile.seftDescription || '' // Fill in the self-description
-      doctor.typeServiceId = response.doctorProfile.typeServiceID || '' // Fill in the type service ID
-      doctor.WorkingType = response.doctorProfile.workingType || 0 // Fill in the working type
+      doctor.typeServiceId.value = response.doctorProfile.typeServiceID || '' // Fill in the type service ID
+      doctor.WorkingType.value = response.doctorProfile.workingType || 0 // Fill in the working type
+      doctor.imageUrl = response.doctorProfile.certificationImage
+      if (response.doctorProfile.workingType == 1) {
+        doctor.WorkingType.text = t('doctor.part_time')
+      } else {
+        doctor.WorkingType.text = t('doctor.full_time')
+      }
+      reviewimage.value = response.doctorProfile.certificationImage
+      console.log('image chứng chỉ', reviewimage.value)
+      const matchedService = serviceTypes.value.find((service) => service.id === response.doctorProfile.typeServiceID)
+      const typeName = matchedService ? matchedService.typeName : t('doctor.Unknown')
+      doctor.typeServiceId.text = typeName
       // Populate other fields as necessary
     }
   } catch (error) {
     console.error('Error fetching doctor details:', error)
     toast({ message: 'Không thể tải thông tin bác sĩ', color: 'danger' })
+  } finally {
+    isLoading.value = false // Set loading to false after data is fetched
   }
 }
+const isLoading = ref(true) // Loading state
 
 onMounted(() => {
   fetchServiceTypes()
@@ -314,15 +369,15 @@ const confirmAddDoctor = async () => {
       Job: 'Bác Sĩ',
       Address: doctor.address,
       DoctorProfile: {
-        DoctorID: '', // Set appropriate value if needed
-        TypeServiceID: doctor.typeServiceId || '', // Use a fallback value if null
-        Education: doctor.qualification || '',
-        College: doctor.qualification || '',
-        Certification: doctor.qualification || '',
+        DoctorID: doctorId || '', // Set appropriate value if needed
+        TypeServiceID: doctor.typeServiceId.value || '', // Use a fallback value if null
+        Education: doctor.qualification || '', // Ensure this matches the API requirement
+        College: doctor.qualification || '', // Ensure this matches the API requirement
+        Certification: doctor.qualification || '', // Ensure this matches the API requirement
+        YearOfExp: doctor.experience || 0, // Ensure this matches the API requirement
+        SeftDescription: doctor.description || '', // Ensure this matches the API requirement
+        WorkingType: doctor.WorkingType.value || 0, // Ensure this matches the API requirement
         CertificationImage: doctor.imageUrl || 'url',
-        YearOfExp: doctor.experience.toString(),
-        SeftDescription: doctor.description || '',
-        WorkingType: doctor.WorkingType,
       },
       Role: 'Dentist',
     }
@@ -330,8 +385,7 @@ const confirmAddDoctor = async () => {
     // Log the formatted data for debugging
     console.log('Đang gửi dữ liệu bác sĩ:', JSON.stringify(formattedData, null, 2))
     const response = await doctorStore.updateDoctor(
-      doctor.DoctorID, // Đối số thứ nhất: DoctorID
-      formattedData, // Đối số thứ hai: dữ liệu đã được định dạng
+      formattedData.DoctorProfile, // Đối số thứ hai: dữ liệu đã được định dạng
     )
 
     if (!response) {
@@ -352,7 +406,7 @@ const confirmAddDoctor = async () => {
 
 const closeSuccessModal = () => {
   showSuccess.value = false
-  router.push({ name: 'doctor-create' })
+  router.push({ name: 'doctor-update' })
 }
 
 const validateForm = () => {
@@ -423,209 +477,274 @@ watch(
 
 <template>
   <VaCard class="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-    <form class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow" @submit.prevent="submitForm">
-      <div class="flex justify-between mb-6">
-        <VaButton @click="goBack">
-          <template #prepend>
-            <i class="mdi mdi-arrow-left mr-2"></i>
-          </template>
-          Quay lại
-        </VaButton>
+    <div class="relative">
+      <div v-if="isLoading" class="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 z-10">
+        <p>{{ t('doctor.loading') }}</p>
+        <VaProgressCircle indeterminate size="large" class="text-blue-500" />
       </div>
+      <VaForm class="max-w-6xl mx-auto p-6 rounded-lg shadow" @submit.prevent="submitForm">
+        <VaCard class="flex justify-between mb-6">
+          <VaButton @click="goBack">
+            <template #prepend>
+              <i class="mdi mdi-arrow-left mr-2"></i>
+            </template>
+            {{ t('doctor.back') }}
+          </VaButton>
+        </VaCard>
 
-      <div class="grid grid-cols-2 gap-8">
-        <div class="space-y-4">
-          <h3 class="text-lg font-semibold mb-4">Thông tin cơ bản</h3>
+        <VaCard class="grid grid-cols-2 gap-8">
+          <VaCard class="space-y-4">
+            <h3 class="text-lg font-semibold mb-4">{{ t('doctor.Basic_information') }}</h3>
 
-          <div class="input-group">
-            <VaInput
-              v-model="doctor.firstName"
-              label="Họ"
-              :error="errors.firstName.error"
-              :error-messages="errors.firstName.message"
-              :success="validFields.firstName"
-              @blur="validateFirstName(doctor.firstName)"
-            />
-          </div>
+            <VaCard class="input-group">
+              <VaInput
+                v-model="doctor.firstName"
+                :label="t('doctor.first_Name')"
+                :error="errors.firstName.error"
+                :error-messages="errors.firstName.message"
+                :success="validFields.firstName"
+                readonly
+                @blur="validateFirstName(doctor.firstName)"
+              />
+            </VaCard>
 
-          <div class="input-group">
-            <VaInput
-              v-model="doctor.lastName"
-              label="Tên"
-              :error="errors.lastName.error"
-              :error-messages="errors.lastName.message"
-              :success="validFields.lastName"
-              @blur="validateLastName(doctor.lastName)"
-            />
-          </div>
+            <div class="input-group">
+              <VaInput
+                v-model="doctor.lastName"
+                :label="t('doctor.last_Name')"
+                :error="errors.lastName.error"
+                :error-messages="errors.lastName.message"
+                :success="validFields.lastName"
+                readonly
+                @blur="validateLastName(doctor.lastName)"
+              />
+            </div>
 
-          <div class="input-group">
-            <VaInput
-              v-model="doctor.userName"
-              label="Tên đăng nhập"
-              :error="errors.userName.error"
-              :error-messages="errors.userName.message"
-              :success="validFields.userName"
-              @blur="validateUserName(doctor.userName)"
-            />
-          </div>
+            <div class="input-group">
+              <VaInput
+                v-model="doctor.userName"
+                :label="t('doctor.name')"
+                :error="errors.userName.error"
+                :error-messages="errors.userName.message"
+                :success="validFields.userName"
+                readonly
+                @blur="validateUserName(doctor.userName)"
+              />
+            </div>
 
-          <div class="input-group">
-            <VaInput
-              v-model="doctor.email"
-              label="Email"
-              :error="errors.email.error"
-              :error-messages="errors.email.message"
-              :success="validFields.email"
-              @blur="validateEmail(doctor.email)"
-            />
-          </div>
+            <div class="input-group">
+              <VaInput
+                v-model="doctor.email"
+                :label="t('doctor.email')"
+                :error="errors.email.error"
+                :error-messages="errors.email.message"
+                :success="validFields.email"
+                readonly
+                @blur="validateEmail(doctor.email)"
+              />
+            </div>
 
-          <div class="input-group">
-            <VaInput
-              v-model="doctor.phoneNumber"
-              label="Số điện thoại"
-              :error="errors.phoneNumber.error"
-              :error-messages="errors.phoneNumber.message"
-              :success="validFields.phoneNumber"
-              @blur="validatePhoneNumber(doctor.phoneNumber)"
-            />
-          </div>
+            <div class="input-group">
+              <VaInput
+                v-model="doctor.phoneNumber"
+                :label="t('doctor.phone')"
+                :error="errors.phoneNumber.error"
+                :error-messages="errors.phoneNumber.message"
+                :success="validFields.phoneNumber"
+                readonly
+                @blur="validatePhoneNumber(doctor.phoneNumber)"
+              />
+            </div>
 
-          <div class="va-input">
-            <label
-              style="color: var(--va-primary)"
-              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-            >
-              Ngày sinh
-            </label>
-            <input
-              v-model="doctor.birthDate"
-              type="date"
-              class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              :max="new Date(new Date().setFullYear(new Date().getFullYear() - 25)).toISOString().split('T')[0]"
-            />
-            <span v-if="errors.birthDate.error" class="text-red-500 text-sm">{{ errors.birthDate.message }}</span>
-          </div>
-
-          <div class="input-group">
-            <label
-              for="gender"
-              style="color: var(--va-primary)"
-              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-              >Giới tính</label
-            >
-            <select
-              id="gender"
-              v-model="doctor.gender"
-              class="va-input__input w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              @change="validateForm"
-            >
-              <option value="true">Nam</option>
-              <option value="false">Nữ</option>
-            </select>
-            <span v-if="errors.gender.error" class="text-red-500 text-sm">{{ errors.gender.message }}</span>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          <h3 class="text-lg font-semibold mb-4">Thông tin chuyên môn</h3>
-
-          <!-- File Upload Container -->
-
-          <label
-            for="serviceType"
-            style="color: var(--va-primary)"
-            class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-            >Chuyên Khoa</label
-          >
-          <select
-            id="serviceType"
-            v-model="doctor.typeServiceId"
-            class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2"
-          >
-            <option v-for="service in serviceTypes" :key="service.id" :value="service.id">
-              {{ service.typeName }}
-            </option>
-          </select>
-
-          <div class="input-group">
-            <label
-              for="workingType"
-              style="color: var(--va-primary)"
-              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
-              >Loại hình làm việc</label
-            >
-            <select
-              id="workingType"
-              v-model="doctor.WorkingType"
-              class="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2"
-            >
-              <option
-                v-for="option in [
-                  { value: 1, text: 'Part-time' },
-                  { value: 2, text: 'Full-time' },
-                ]"
-                :key="option.value"
-                :value="option.value"
+            <div class="va-input">
+              <label
+                style="color: var(--va-primary)"
+                class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
               >
-                {{ option.text }}
-              </option>
-            </select>
+                {{ t('doctor.birth_date') }}
+              </label>
+              <input
+                v-model="doctor.birthDate"
+                type="date"
+                class="va-input__input w-full"
+                :max="new Date(new Date().setFullYear(new Date().getFullYear() - 25)).toISOString().split('T')[0]"
+                readonly
+              />
+              <span v-if="errors.birthDate.error" class="text-red-500 text-sm">{{ errors.birthDate.message }}</span>
+            </div>
+
+            <div class="input-group">
+              <label
+                for="gender"
+                style="color: var(--va-primary)"
+                class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+              >
+                {{ t('doctor.gender') }}</label
+              >
+              <select
+                id="gender"
+                v-model="doctor.gender"
+                class="va-input__input w-full"
+                disabled
+                @change="validateForm"
+              >
+                <option value="true">{{ t('doctor.male') }}</option>
+                <option value="false">{{ t('doctor.female') }}</option>
+              </select>
+              <span v-if="errors.gender.error" class="text-red-500 text-sm">{{ errors.gender.message }}</span>
+            </div>
+          </VaCard>
+
+          <VaCard class="space-y-4">
+            <h3 class="text-lg font-semibold mb-4">{{ t('doctor.Professional_Information') }}</h3>
+
+            <!-- File Upload Container -->
+            <label
+              for="serviceType"
+              style="color: var(--va-primary)"
+              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+              >{{ t('doctor.certification_image') }}
+            </label>
+            <!-- File Upload Container -->
+            <VaCard
+              class="flex flex-col items-center justify-center w-full p-6 bg-white border-2 border-dashed border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition"
+            >
+              <!-- Instructions -->
+              <div class="text-center mb-4">
+                <p class="text-gray-600 text-sm font-medium">{{ t('doctor.Upload_File') }}</p>
+                <p class="text-gray-500 text-xs">{{ t('doctor.Upload_File_2') }}</p>
+              </div>
+
+              <!-- File Input -->
+              <label
+                for="fileUpload"
+                class="relative cursor-pointer bg-indigo-500 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-indigo-600 transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              >
+                {{ t('doctor.Select_File') }}
+                <input id="fileUpload" type="file" class="sr-only" @change="handleAvatarUpload($event)" />
+              </label>
+
+              <!-- Display selected file name -->
+              <div v-if="fileName" class="mt-4 text-sm text-gray-600">
+                {{ t('doctor.Select_File') }}: <span class="font-medium text-indigo-600">{{ fileName }}</span>
+              </div>
+
+              <!-- Image Review Section -->
+              <!-- Image Review Section -->
+              <div v-if="newImage" class="image-review">
+                <!-- Overlay to blur the background -->
+                <div class="overlay"></div>
+
+                <!-- Image with zoom effect -->
+                <img
+                  alt="Preview"
+                  :src="newImage"
+                  class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
+                />
+              </div>
+              <div v-else class="image-review">
+                <!-- Overlay to blur the background -->
+                <div class="overlay"></div>
+
+                <!-- Image with zoom effect -->
+                <img
+                  alt="Preview"
+                  :src="getSrcAvatar(reviewimage)"
+                  class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
+                />
+              </div>
+            </VaCard>
+            <label
+              for="serviceType"
+              style="color: var(--va-primary)"
+              class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+              >{{ t('doctor.specialty') }}</label
+            >
+            <VaSelect
+              id="serviceType"
+              v-model="doctor.typeServiceId"
+              :options="serviceTypes.map((service) => ({ value: service.id, text: service.typeName }))"
+              class="w-full"
+              @input="validateForm"
+            />
+
+            <div class="input-group">
+              <label
+                for="workingType"
+                style="color: var(--va-primary)"
+                class="va-input-label va-input-wrapper__label va-input-wrapper__label--outer"
+                >{{ t('doctor.Job_Type') }}</label
+              >
+              <VaSelect
+                id="workingType"
+                v-model="doctor.WorkingType"
+                :options="[
+                  { value: 1, text: t('doctor.part_time') },
+                  { value: 2, text: t('doctor.full_time') },
+                ]"
+                class="w-full"
+                @input="validateForm"
+              />
+            </div>
+            <VaInput
+              v-model.number="doctor.experience"
+              :label="t('doctor.experience')"
+              type="number"
+              min="0"
+              :error="errors.experience.error"
+            />
+
+            <VaInput
+              v-model="doctor.qualification"
+              :label="t('doctor.certification')"
+              :error="errors.qualification.error"
+            />
+
+            <VaTextarea
+              v-model="doctor.description"
+              :autosize="true"
+              style="
+                height: auto;
+                width: 520px;
+                overflow: hidden;
+                min-height: 50px; /* Chiều cao tối thiểu */
+                resize: none; /* Vô hiệu hóa kéo thủ công */
+              "
+              label="Mô tả"
+              class="auto-resize"
+            />
+          </VaCard>
+        </VaCard>
+
+        <div class="flex justify-end mt-6">
+          <VaButton type="submit" color="primary">{{ t('doctor.edit_doctor') }}</VaButton>
+        </div>
+      </VaForm>
+
+      <!-- Modal xác nhận -->
+      <VaModal v-model="showConfirmation" class="text-center" overlay hide-default-actions>
+        <div class="confirmation-modal">
+          <h3 class="text-2xl font-semibold mb-4">{{ t('doctor.Confirm_action') }}</h3>
+          <p class="text-gray-600 mb-8">{{ t('doctor.Confirm_action') }}</p>
+          <VaDivider class="mb-6" />
+          <div class="flex justify-end space-x-4">
+            <VaButton color="danger" :disabled="isSubmitting" @click="confirmAddDoctor">{{
+              t('doctor.Confirm')
+            }}</VaButton>
+            <VaButton @click="showConfirmation = false">{{ t('doctor.cancel') }}</VaButton>
           </div>
-
-          <VaInput
-            v-model.number="doctor.experience"
-            label="Số năm kinh nghiệm"
-            type="number"
-            min="0"
-            :error="errors.experience.error"
-          />
-
-          <VaInput v-model="doctor.qualification" label="Bằng cấp" :error="errors.qualification.error" />
-
-          <VaTextarea
-            v-model="doctor.description"
-            :autosize="true"
-            style="
-              height: auto;
-              width: 520px;
-              overflow: hidden;
-              min-height: 50px; /* Chiều cao tối thiểu */
-              resize: none; /* Vô hiệu hóa kéo thủ công */
-            "
-            label="Mô tả"
-            class="auto-resize"
-          />
         </div>
-      </div>
+      </VaModal>
 
-      <div class="flex justify-end mt-6">
-        <VaButton type="submit" color="primary">Hoàn Thành</VaButton>
-      </div>
-    </form>
-
-    <!-- Modal xác nhận -->
-    <VaModal v-model="showConfirmation" class="text-center" overlay hide-default-actions>
-      <div class="confirmation-modal">
-        <h3 class="text-2xl font-semibold mb-4">Xác nhận hành động</h3>
-        <p class="text-gray-600 mb-8">Bạn có chắc chắn muốn thêm bác sĩ này không?</p>
-        <VaDivider class="mb-6" />
-        <div class="flex justify-end space-x-4">
-          <VaButton color="danger" :disabled="isSubmitting" @click="confirmAddDoctor">Xác nhận</VaButton>
-          <VaButton @click="showConfirmation = false">Hủy</VaButton>
+      <!-- Success Modal -->
+      <VaModal v-model="showSuccess" class="text-center" hide-default-actions>
+        <div class="confirmation-modal">
+          <h3 class="text-2xl font-semibold mb-4">{{ t('doctor.Success') }}</h3>
+          <p class="text-gray-600 mb-8">{{ t('doctor.edit_doctor_success') }}</p>
+          <VaButton @click="closeSuccessModal">{{ t('doctor.close') }}</VaButton>
         </div>
-      </div>
-    </VaModal>
-
-    <!-- Success Modal -->
-    <VaModal v-model="showSuccess" class="text-center" hide-default-actions>
-      <div class="confirmation-modal">
-        <h3 class="text-2xl font-semibold mb-4">Thành công!</h3>
-        <p class="text-gray-600 mb-8">Bác sĩ đã được thêm thành công.</p>
-        <VaButton @click="closeSuccessModal">Đóng</VaButton>
-      </div>
-    </VaModal>
+      </VaModal>
+    </div>
   </VaCard>
 </template>
 
@@ -692,7 +811,19 @@ h3 {
 .success-modal .va-button {
   margin-top: 1rem;
 }
+.relative {
+  position: relative;
+}
 
+.absolute {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.75); /* Semi-transparent background */
+  z-index: 10; /* Ensure it is above the form */
+}
 .input-success {
   animation: flash-success 0.5s ease;
 }
@@ -779,5 +910,42 @@ h3 {
   background: #1cc88a;
   transform: translateY(-2px);
   transition: all 0.3s ease;
+}
+.hover\:zoom-image:hover {
+  transform: scale(4); /* Phóng to hình ảnh khi hover */
+  z-index: 2; /* Đưa hình ảnh lên trên overlay */
+}
+
+/* Overlay styling */
+.image-review .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7); /* Màu nền mờ */
+  z-index: 1;
+  pointer-events: none; /* Không chặn thao tác chuột */
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+  filter: blur(0px); /* Không làm mờ mặc định */
+  opacity: 0;
+}
+
+.image-review:hover .overlay {
+  filter: blur(5px); /* Làm mờ nền */
+  opacity: 1; /* Hiển thị overlay */
+}
+.image-review {
+  position: relative; /* Đảm bảo container này quản lý các phần tử con */
+}
+
+.hover\:zoom-image {
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease; /* Hiệu ứng mượt */
+  position: relative;
+  z-index: 1;
 }
 </style>

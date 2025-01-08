@@ -4,10 +4,8 @@ import { onMounted, ref, computed, reactive } from 'vue'
 import {
   useToast,
   VaInnerLoading,
-  VaCollapse,
   VaCard,
   VaCardContent,
-  VaIcon,
   VaButton,
   VaModal,
   VaDateInput,
@@ -16,6 +14,7 @@ import {
   VaCheckbox,
   VaChip,
   VaDataTable,
+  useForm,
 } from 'vuestic-ui'
 import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
@@ -25,6 +24,7 @@ import Prescription from './Prescription.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
 import DentalChart from './DentalChart.vue'
+import { useI18n } from 'vue-i18n'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -32,20 +32,21 @@ const props = defineProps<{
 }>()
 
 const { init } = useToast()
+const { t } = useI18n()
 const storeTreatment = useTreatmentStore()
 const storeMedicalRecord = useMedicalRecordStore()
 const showModalTreatment = ref(false)
 const prevent = ref(false)
 const titleModalTreatment = computed(() => {
   if (selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Pending) {
-    return 'Add Treatment Detail'
+    return t('examination.add_treatment_detail')
   } else if (
     selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Active &&
     !isToday(selectedTreatmentPlan.value?.startDate)
   ) {
-    return 'Reschedule Treatment'
+    return t('examination.reschedule_treatment')
   }
-  return 'Treatment Details'
+  return t('examination.treatment_detail')
 })
 const selectedTreatmentPlanId = ref('')
 const selectedTreatmentPlan = ref<TreatmentPlanResponse>()
@@ -56,19 +57,25 @@ const treatmentplans = ref<TreatmentPlanResponse[]>([])
 const user = useAuthStore()
 const isDoctor = user.musHaveRole('Dentist')
 const showModalCreateRecord = ref(false)
-const allColumns = [
-  { key: 'step', sortable: true, title: 'S.L' },
-  { key: 'procedureName', sortable: true, title: 'Tên thủ thuật' },
-  { key: 'startDate', sortable: true, title: 'Ngày bắt đầu' },
-  { key: 'doctorName', sortable: true, title: 'Bác sĩ' },
-  { key: 'price', sortable: true, title: 'Đơn giá' },
-  { key: 'planCost', sortable: true, title: 'Tổng chi phí' },
-  { key: 'status', sortable: true, title: 'Tình trạng' },
-  { key: 'action', title: 'Hành động' },
-]
+const record_form = useForm('record_form')
+const allColumns = computed(() => [
+  { key: 'step', sortable: true, title: 'S.L', label: t('examination.treatment_plan_table.step') },
+  {
+    key: 'procedureName',
+    sortable: true,
+    title: 'Tên thủ thuật',
+    label: t('examination.treatment_plan_table.procedure'),
+  },
+  { key: 'startDate', sortable: true, title: 'Ngày bắt đầu', label: t('examination.treatment_plan_table.date') },
+  { key: 'doctorName', sortable: true, title: 'Bác sĩ', label: t('examination.treatment_plan_table.doctor') },
+  { key: 'price', sortable: true, title: 'Đơn giá', label: t('examination.treatment_plan_table.price') },
+  { key: 'planCost', sortable: true, title: 'Tổng chi phí', label: t('examination.treatment_plan_table.plan_cost') },
+  { key: 'status', sortable: true, title: 'Tình trạng', label: t('examination.treatment_plan_table.status') },
+  { key: 'action', title: 'Hành động', label: t('examination.treatment_plan_table.actions') },
+])
 
 const columns = computed(() => {
-  return allColumns.filter((column) => {
+  return allColumns.value.filter((column) => {
     if (!isDoctor) {
       return column.key !== 'action'
     } else {
@@ -196,9 +203,9 @@ const handleTreatmentAction = (item: TreatmentPlanResponse) => {
   loading.value = true
   storeTreatment
     .doTreatment(item.treatmentPlanID)
-    .then((response) => {
+    .then(() => {
       init({
-        message: response,
+        message: t('examination.treatment_success'),
         color: 'success',
         title: 'Success',
       })
@@ -246,9 +253,9 @@ const submitTreatmentDetail = () => {
   if (selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Pending) {
     storeTreatment
       .addTreatmentDetail(request)
-      .then((response) => {
+      .then(() => {
         init({
-          message: response,
+          message: t('examination.add_treatment_success'),
           color: 'success',
           title: 'Success',
         })
@@ -276,9 +283,9 @@ const submitTreatmentDetail = () => {
   ) {
     storeTreatment
       .updateTreatmentDetail(request)
-      .then((response) => {
+      .then(() => {
         init({
-          message: response,
+          message: t('examination.reschedule_treatment_success'),
           color: 'success',
           title: 'Success',
         })
@@ -415,9 +422,9 @@ const createMedicalRecord = async () => {
 
   await storeMedicalRecord
     .createMedicalRecord(form)
-    .then((response) => {
+    .then(() => {
       init({
-        message: response,
+        message: t('examination.create_record_success'),
         color: 'success',
         title: 'Success',
       })
@@ -560,131 +567,115 @@ onMounted(() => {
 </script>
 
 <template>
-  <VaCard>
+  <VaCard class="m-6">
     <VaCardContent class="space-y-3">
-      <VaCollapse>
-        <template #header="{ value, attrs, iconAttrs }">
-          <div
-            v-bind="attrs"
-            class="w-full flex items-center justify-between border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
-          >
-            <div class="flex items-center">
-              <VaIcon name="expand_more" :class="value ? '' : '-rotate-90'" v-bind="iconAttrs" />
-              <div class="flex justify-between items-center">
-                <span class="ml-2 font-medium">KẾ HOẠCH ĐIỀU TRỊ</span>
-              </div>
-            </div>
-            <VaButton
-              v-if="isDoctor"
-              preset="primary"
-              icon-right="add"
-              class="p-2"
-              round
-              border-color="primary"
-              size="small"
-              @click="showModalCreateRecord = true"
-            >
-              Create Record
-            </VaButton>
-          </div>
-        </template>
+      <div
+        class="w-full flex items-center justify-between border-2 border-solid border-[var(--va-background-border)] p-4 bg-[var(--va-background-element)] rounded"
+      >
+        <div class="flex items-center">
+          <span class="ml-2 font-medium">{{ t('examination.treatment_plan_table.title') }}</span>
+        </div>
+        <VaButton
+          v-if="isDoctor"
+          preset="primary"
+          icon-right="add"
+          class="p-2"
+          round
+          border-color="primary"
+          size="small"
+          @click="showModalCreateRecord = true"
+        >
+          {{ t('examination.create_record') }}
+        </VaButton>
+      </div>
 
-        <template #default>
-          <VaInnerLoading :loading="loading">
-            <div class="p-6 border-2 border-t-0 border-solid border-[var(--va-background-border)]">
-              <VaDataTable
-                :items="treatmentplans"
-                :columns="columns"
-                striped
-                hoverable
-                :items-per-page="10"
-                :search="true"
+      <VaInnerLoading :loading="loading">
+        <div class="p-6 border-2 border-solid border-[var(--va-background-border)]">
+          <VaDataTable :items="treatmentplans" :columns="columns" striped hoverable :items-per-page="10" :search="true">
+            <template #cell(price)="{ value }">
+              {{ formatCurrency(Number(value)) }}
+            </template>
+            <template #cell(planCost)="{ value }">
+              {{ formatCurrency(Number(value)) }}
+            </template>
+            <template #cell(startDate)="{ value, rowData }">
+              {{ rowData.status === TreatmentPlanStatus.Pending ? 'N/A' : formatDate(value) }}
+            </template>
+            <template #cell(status)="{ value }">
+              <VaChip
+                :color="
+                  (value as unknown as number) === TreatmentPlanStatus.Completed
+                    ? 'success'
+                    : (value as unknown as number) === TreatmentPlanStatus.Active
+                      ? 'warning'
+                      : (value as unknown as number) === TreatmentPlanStatus.Cancelled
+                        ? 'danger'
+                        : (value as unknown as number) === TreatmentPlanStatus.Rescheduled
+                          ? 'info'
+                          : 'gray'
+                "
               >
-                <template #cell(price)="{ value }">
-                  {{ formatCurrency(Number(value)) }}
-                </template>
-                <template #cell(planCost)="{ value }">
-                  {{ formatCurrency(Number(value)) }}
-                </template>
-                <template #cell(startDate)="{ value, rowData }">
-                  {{ rowData.status === TreatmentPlanStatus.Pending ? 'N/A' : formatDate(value) }}
-                </template>
-                <template #cell(status)="{ value }">
-                  <VaChip
-                    :color="
-                      (value as unknown as number) === TreatmentPlanStatus.Completed
-                        ? 'success'
-                        : (value as unknown as number) === TreatmentPlanStatus.Active
-                          ? 'warning'
-                          : (value as unknown as number) === TreatmentPlanStatus.Cancelled
-                            ? 'danger'
-                            : (value as unknown as number) === TreatmentPlanStatus.Rescheduled
-                              ? 'info'
-                              : 'gray'
-                    "
-                  >
-                    {{ getStatusText(Number(value)) }}
-                  </VaChip>
-                </template>
-                <template #cell(action)="{ rowData }">
-                  <VaButton
-                    v-if="rowData.status === TreatmentPlanStatus.Active && isToday(rowData.startDate)"
-                    preset="primary"
-                    class="mr-6 mb-2"
-                    round
-                    border-color="primary"
-                    size="small"
-                    @click="handleTreatmentAction(rowData as TreatmentPlanResponse)"
-                  >
-                    Điều trị
-                  </VaButton>
-                  <VaButton
-                    v-else-if="rowData.status === TreatmentPlanStatus.Active && !isToday(rowData.startDate)"
-                    preset="primary"
-                    class="mr-6 mb-2"
-                    round
-                    border-color="primary"
-                    size="small"
-                    @click="handleTreatmentSchedule(rowData as TreatmentPlanResponse)"
-                  >
-                    Reschedule
-                  </VaButton>
-                  <VaButton
-                    v-else-if="rowData.status === TreatmentPlanStatus.Pending"
-                    preset="primary"
-                    class="mr-6 mb-2"
-                    round
-                    border-color="primary"
-                    size="small"
-                    @click="handleTreatmentDetails(rowData as TreatmentPlanResponse)"
-                  >
-                    Details
-                  </VaButton>
-                  <Prescription
-                    v-else-if="!rowData.hasPrescription"
-                    :items="rowData as TreatmentPlanResponse"
-                    @update:refresh="fetchTreatment"
-                  />
-                </template>
-              </VaDataTable>
+                {{ getStatusText(Number(value)) }}
+              </VaChip>
+            </template>
+            <template #cell(action)="{ rowData }">
+              <VaButton
+                v-if="rowData.status === TreatmentPlanStatus.Active && isToday(rowData.startDate)"
+                preset="primary"
+                class="mr-6 mb-2"
+                round
+                border-color="primary"
+                size="small"
+                @click="handleTreatmentAction(rowData as TreatmentPlanResponse)"
+              >
+                {{ t('examination.treatment_plan_table.treatment') }}
+              </VaButton>
+              <VaButton
+                v-else-if="rowData.status === TreatmentPlanStatus.Active && !isToday(rowData.startDate)"
+                preset="primary"
+                class="mr-6 mb-2"
+                round
+                border-color="primary"
+                size="small"
+                @click="handleTreatmentSchedule(rowData as TreatmentPlanResponse)"
+              >
+                {{ t('examination.treatment_plan_table.reschedule') }}
+              </VaButton>
+              <VaButton
+                v-else-if="rowData.status === TreatmentPlanStatus.Pending"
+                preset="primary"
+                class="mr-6 mb-2"
+                round
+                border-color="primary"
+                size="small"
+                @click="handleTreatmentDetails(rowData as TreatmentPlanResponse)"
+              >
+                {{ t('examination.treatment_plan_table.detail') }}
+              </VaButton>
+              <Prescription
+                v-else-if="!rowData.hasPrescription"
+                :items="rowData as TreatmentPlanResponse"
+                @update:refresh="fetchTreatment"
+              />
+            </template>
+          </VaDataTable>
 
-              <!-- Summary Section -->
-              <div class="mt-6 space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Chi phí dự kiến:</span>
-                  <span class="font-medium">{{ formatCurrency(totalExpectedCost) }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Tổng chi phí dự kiến:</span>
-                  <span class="font-medium">{{ formatCurrency(totalFinalCost) }}</span>
-                </div>
-              </div>
+          <!-- Summary Section -->
+          <div class="mt-6 space-y-2">
+            <div class="flex justify-between">
+              <span class="text-gray-600">{{ t('examination.expected_cost') }}:</span>
+              <span class="font-medium">{{ formatCurrency(totalExpectedCost) }}</span>
             </div>
-          </VaInnerLoading>
-        </template>
-      </VaCollapse>
+            <div class="flex justify-between">
+              <span class="text-gray-600">{{ t('examination.total_cost') }}:</span>
+              <span class="font-medium">{{ formatCurrency(totalFinalCost) }}</span>
+            </div>
+          </div>
+        </div>
+      </VaInnerLoading>
     </VaCardContent>
   </VaCard>
+
   <!-- Add TreatmentDetail modal -->
   <VaModal v-model="showModalTreatment" ok-text="Apply" @close="handleCloseTreatmentDetail" @ok="submitTreatmentDetail">
     <h3 class="va-h3">{{ titleModalTreatment }}</h3>
@@ -704,123 +695,136 @@ onMounted(() => {
       </div>
     </VaCard>
   </VaModal>
+
   <!-- Create Medical Record -->
   <VaModal
     v-model="showModalCreateRecord"
     close-button
     size="large"
+    hide-default-actions
     @close="closeModal"
     @beforeOk="validateForm"
     @ok="createMedicalRecord"
   >
     <VaCard>
       <VaCardContent>
-        <!-- <h2 class="text-2xl font-bold mb-6">Create Medical Record</h2> -->
-
         <!-- General Examination Section -->
-        <div class="mb-6">
-          <h3 class="text-xl font-semibold mb-4">KHÁM TỔNG QUÁT</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <VaTextarea
-              v-model="formData.BasicExamination.ExaminationContent"
-              label="Nội dung khám"
-              class="mt-4"
-              :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
-            />
-            <VaTextarea
-              v-model="formData.BasicExamination.TreatmentPlanNote"
-              label="Kế hoạch điều trị"
-              class="mt-4"
-              :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
-            />
-          </div>
-        </div>
-
-        <!-- Tooth Conditions Section -->
-        <div class="mb-6">
-          <h3 class="text-xl font-semibold mb-4">TÌNH TRẠNG RĂNG</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="relative">
-              <DentalChart
-                ref="dentalChartRef"
-                :is-view="false"
-                @toothNumber="handleSelectedTeeth"
-                @toothHover="handleToothHover"
+        <VaForm ref="record_form">
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-4">{{ t('examination.general_examination') }}</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <VaTextarea
+                v-model="formData.BasicExamination.ExaminationContent"
+                :label="t('examination.examinationContent')"
+                class="mt-4"
+                :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+                required-mark
               />
-              <div
-                v-if="hoveredTooth && getToothConditions(hoveredTooth).length > 0"
-                class="tooth-popup"
-                :style="popupStyle"
-              >
-                <h4 class="font-bold mb-2">Tooth {{ hoveredTooth }}</h4>
-                <div v-if="getToothConditions(hoveredTooth).length > 0">
-                  <p v-for="condition in getToothConditions(hoveredTooth)" :key="condition">
-                    {{ condition }}
-                  </p>
+              <VaTextarea
+                v-model="formData.BasicExamination.TreatmentPlanNote"
+                :label="t('examination.treatmentPlanNote')"
+                class="mt-4"
+                :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+                required-mark
+              />
+            </div>
+          </div>
+
+          <!-- Tooth Conditions Section -->
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-4">{{ t('examination.teeth_condition') }}</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="relative">
+                <DentalChart
+                  ref="dentalChartRef"
+                  :is-view="false"
+                  @toothNumber="handleSelectedTeeth"
+                  @toothHover="handleToothHover"
+                />
+                <div
+                  v-if="hoveredTooth && getToothConditions(hoveredTooth).length > 0"
+                  class="tooth-popup"
+                  :style="popupStyle"
+                >
+                  <h4 class="font-bold mb-2">{{ t('examination.tooth') }} {{ hoveredTooth }}</h4>
+                  <div v-if="getToothConditions(hoveredTooth).length > 0">
+                    <p v-for="condition in getToothConditions(hoveredTooth)" :key="condition">
+                      {{ condition }}
+                    </p>
+                  </div>
+                  <p v-else>{{ t('examination.no_condition') }}</p>
                 </div>
-                <p v-else>No conditions</p>
+              </div>
+              <div class="grid grid-cols-2 place-content-center gap-8">
+                <VaCheckbox
+                  v-for="condition in toothConditions"
+                  :key="condition.code"
+                  :model-value="
+                    formData.Diagnosis.some(
+                      (d) => d.teethConditions.includes(condition.code) && d.toothNumber === current_tooth,
+                    )
+                  "
+                  :label="condition.label"
+                  @update:modelValue="updateTeethConditions(condition.code, $event)"
+                />
               </div>
             </div>
-            <div class="grid grid-cols-2 place-content-center gap-8">
+          </div>
+
+          <!-- Indications Section -->
+          <div class="mb-6">
+            <h3 class="text-xl font-semibold mb-4">{{ t('examination.indications') }}</h3>
+            <div class="grid grid-cols-2 gap-4">
               <VaCheckbox
-                v-for="condition in toothConditions"
-                :key="condition.code"
-                :model-value="
-                  formData.Diagnosis.some(
-                    (d) => d.teethConditions.includes(condition.code) && d.toothNumber === current_tooth,
-                  )
-                "
-                :label="condition.label"
-                @update:modelValue="updateTeethConditions(condition.code, $event)"
+                v-for="indication in indicationTypes"
+                :key="indication.code"
+                :model-value="formData.Indication.IndicationType.includes(indication.code)"
+                :label="indication.label"
+                @update:modelValue="updateIndicationType(indication.code, $event)"
               />
             </div>
-          </div>
-        </div>
-
-        <!-- Indications Section -->
-        <div class="mb-6">
-          <h3 class="text-xl font-semibold mb-4">CHỈ ĐỊNH</h3>
-          <div class="grid grid-cols-2 gap-4">
-            <VaCheckbox
-              v-for="indication in indicationTypes"
-              :key="indication.code"
-              :model-value="formData.Indication.IndicationType.includes(indication.code)"
-              :label="indication.label"
-              @update:modelValue="updateIndicationType(indication.code, $event)"
+            <div class="grid grid-cols-3 gap-4 mt-4">
+              <div v-for="(image, index) in formData.IndicationImages" :key="image.imageType" class="relative">
+                <img
+                  :src="image.imageUrl"
+                  :alt="image.imageType"
+                  class="w-full h-64 object-cover border-2 border-dashed"
+                />
+                <div class="text-center">{{ image.imageType }}</div>
+                <button
+                  class="absolute top-0 right-0 transform scale-75 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                  @click.stop="removeImage(image.imageType, index)"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <VaTextarea
+              v-model="formData.Indication.Description"
+              :label="t('examination.description')"
+              class="mt-4 w-full"
+              counter
+              required-mark
             />
           </div>
-          <div class="grid grid-cols-3 gap-4 mt-4">
-            <div v-for="(image, index) in formData.IndicationImages" :key="image.imageType" class="relative">
-              <img
-                :src="image.imageUrl"
-                :alt="image.imageType"
-                class="w-full h-64 object-cover border-2 border-dashed"
-              />
-              <div class="text-center">{{ image.imageType }}</div>
-              <button
-                class="absolute top-0 right-0 transform scale-75 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                @click.stop="removeImage(image.imageType, index)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
+
+          <div class="flex items-end justify-end mt-5">
+            <VaButton class="mr-6" color="#ECF0F1" @click="closeModal">{{
+              t('appointment.create_appointment.cancel')
+            }}</VaButton>
+            <VaButton :disabled="!record_form?.isValid" @click="createMedicalRecord">{{
+              t('appointment.create_appointment.submit')
+            }}</VaButton>
           </div>
-          <VaTextarea
-            v-model="formData.Indication.Description"
-            label="Mô tả"
-            class="mt-4 w-full"
-            counter
-            required-mark
-          />
-        </div>
+        </VaForm>
       </VaCardContent>
     </VaCard>
   </VaModal>

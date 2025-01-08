@@ -18,11 +18,13 @@
           <p class="mb-2">{{ title }}</p>
           <p class="text-xs text-secondary">
             <span :class="changeClass">
-              <template v-if="up">↑</template>
-              <template v-else>↓</template>
+              <template v-if="up !== undefined">
+                <template v-if="up">↑</template>
+                <template v-else>↓</template>
+              </template>
               {{ changeText }}
             </span>
-            since {{ since }}
+            {{ since }}
           </p>
         </div>
       </section>
@@ -34,18 +36,28 @@
 import { computed } from 'vue'
 import { VaCard } from 'vuestic-ui'
 
-const props = defineProps<{
-  title: string
-  value: string | number
-  changeText: string
-  up: boolean
-  iconBackground: string
-  iconColor: string
-  since: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    value: string | number
+    changeText?: string
+    up?: boolean | undefined
+    iconBackground: string
+    iconColor: string
+    since?: string
+  }>(),
+  {
+    up: undefined,
+    changeText: '',
+    since: '',
+  },
+)
 
-const changeClass = computed(() => ({
-  'text-success': props.up,
-  'text-red-600': !props.up,
-}))
+const changeClass = computed(() => {
+  if (props.up === undefined) return {}
+  return {
+    'text-success': props.up,
+    'text-red-600': !props.up,
+  }
+})
 </script>

@@ -17,30 +17,38 @@
               <span v-for="i in 5" :key="i" class="text-yellow-400">
                 <Star :class="i <= Math.round(doctor.rating || 0) ? 'fill-current' : 'stroke-current'" />
               </span>
-              <span class="ml-2 text-sm">({{ doctor.totalFeedback }} đánh giá)</span>
+              <span class="ml-2 text-sm font-semibold">({{ doctor.totalFeedback }} {{ t('doctor.rating') }})</span>
             </div>
-            <p class="mt-4"><Mail class="inline mr-2" /> {{ doctor.email }}</p>
-            <p><Phone class="inline mr-2" /> {{ doctor.phoneNumber }}</p>
+            <div class="mt-4">
+              <p class="font-bold">
+                <Mail class="inline mr-2" /> {{ t('doctor.email') }}:
+                <span class="font-normal">{{ doctor.email }}</span>
+              </p>
+              <p class="font-bold">
+                <Phone class="inline mr-2" /> {{ t('doctor.phone') }}:
+                <span class="font-normal">{{ doctor.phoneNumber }}</span>
+              </p>
+            </div>
           </div>
         </div>
       </VaCard>
 
       <!-- Professional Information -->
       <VaCard class="rounded-2xl shadow-xl p-6 sm:p-8">
-        <h2 class="text-2xl font-semibold mb-6 va-h2">Thông Tin Chuyên Môn</h2>
+        <h2 class="text-2xl font-semibold mb-6 va-h2">{{ t('doctor.Professional_Information') }}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <h3 class="text-sm font-medium">Học Vấn:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
-            <p>{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.education') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
+            <p class="font-normal">{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Số Năm Kinh Nghiệm:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.experience') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Loại Hình Làm Việc:</h3>
-            <p class="mt-1">
+            <h3 class="text-sm font-bold">{{ t('doctor.Job_Type') }}</h3>
+            <p class="mt-1 font-normal">
               {{
                 doctor.doctorProfile?.workingType === 2
                   ? 'Toàn Thời Gian'
@@ -51,15 +59,15 @@
             </p>
           </div>
           <div>
-            <h3 class="text-sm font-medium">Chứng Chỉ:</h3>
-            <p class="mt-1">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
+            <h3 class="text-sm font-bold">{{ t('doctor.certification') }}</h3>
+            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
           </div>
         </div>
         <div class="mt-6">
-          <h3 class="text-sm font-medium">Về Tôi:</h3>
-          <p class="mt-1">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
+          <h3 class="text-sm font-bold">{{ t('doctor.seftDescription') }}</h3>
+          <p class="mt-1 font-normal">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
         </div>
-        <h2 class="text-2xl font-semibold mb-6 va-h2">Hình ảnh chứng nhận</h2>
+        <h2 class="text-2xl font-semibold mb-6 va-h2">{{ t('doctor.certification_image') }}</h2>
         <img
           alt="Preview"
           :src="getSrcAvatar(doctor.doctorProfile.certificationImage)"
@@ -92,7 +100,7 @@
         <div class="mt-6">
           <div v-if="currentTab === 'reviews'" class="space-y-4">
             <VaCard class="rounded-2xl shadow-xl p-6 sm:p-8">
-              <h2 class="text-2xl font-semibold mb-6">Phản Hồi Từ Bệnh Nhân</h2>
+              <h2 class="text-2xl font-semibold mb-6">{{ t('doctor.Patient_Feedback') }}</h2>
               <div class="flex flex-wrap justify-center gap-2 mb-6">
                 <button
                   v-for="i in 6"
@@ -104,7 +112,7 @@
                   class="px-4 py-2 rounded-full transition-all duration-200 text-sm font-medium"
                   @click="filterRating(i)"
                 >
-                  <span v-if="i === 6">Tất Cả</span>
+                  <span v-if="i === 6">{{ t('doctor.all') }}</span>
                   <span v-else class="flex items-center space-x-1">
                     <span>{{ i }}</span>
                     <Star class="w-4 h-4" :class="i <= selectedRating ? 'fill-current' : 'stroke-current'" />
@@ -134,7 +142,7 @@
                     <p v-else style="font-weight: bold" class="text-sm">{{ review.patientName }}</p>
                   </div>
                   <div class="flex justify-between items-center">
-                    <p class="text-sm">Dịch Vụ: {{ review.serviceName }}</p>
+                    <p class="text-sm">{{ t('doctor.service') }}: {{ review.serviceName }}</p>
                     <span class="text-sm">{{ formatDate(review.createDate) }}</span>
                   </div>
                   <div class="flex items-center mt-2">
@@ -180,8 +188,38 @@
             </VaCard>
           </div>
           <div v-else-if="currentTab === 'history'" class="space-y-4">
-            <h2 class="text-xl font-semibold">Lịch Sử Khám</h2>
-            <p>Thông tin về lịch sử khám của người dùng sẽ hiển thị ở đây.</p>
+            <h2 class="text-xl font-semibold">{{ t('doctor.History_of_Examination') }}</h2>
+            <div v-if="isLoadingAppointments" class="text-center">{{ t('doctor.loading') }}...</div>
+            <div v-else-if="filteredAppointments.length === 0" class="text-gray-500">{{ t('doctor.no_medical') }}</div>
+            <ul v-else class="space-y-4">
+              <li
+                v-for="appointment in paginatedAppointments"
+                :key="appointment.id"
+                class="border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+              >
+                <div class="flex justify-between">
+                  <span class="font-semibold">{{ appointment.appointmentDate }}</span>
+                </div>
+                <p class="mt-1 text-gray-700">{{ appointment.patientName }}</p>
+                <p class="mt-1 text-gray-600">{{ t('doctor.service') }}: {{ appointment.serviceName }}</p>
+              </li>
+            </ul>
+            <div class="flex justify-between mt-4">
+              <VaButton
+                :disabled="currentPage === 1"
+                class="px-2 py-1 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                @click="prevPage2"
+              >
+                <ChevronLeft class="w-5 h-5" />
+              </VaButton>
+              <VaButton
+                :disabled="currentPage >= totalPages2"
+                class="px-2 py-1 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                @click="nextPage2"
+              >
+                <ChevronRight class="w-5 h-5" />
+              </VaButton>
+            </div>
           </div>
         </div>
       </div>
@@ -190,7 +228,7 @@
         class="w-full sm:w-auto mt-6 bg-gray-200 font-semibold py-1 px-3 rounded-lg shadow-md hover:bg-gray-300 transition-colors duration-200"
         @click="$router.go(-1)"
       >
-        Quay Về
+        {{ t('doctor.back') }}
       </VaButton>
     </div>
   </VaCard>
@@ -207,7 +245,7 @@
           placeholder="Nội dung phản hồi"
         ></textarea>
         <div class="mt-4">
-          <label class="block text-sm font-medium">Đánh Giá:</label>
+          <label class="block text-sm font-medium">{{ t('doctor.rating') }}</label>
           <div class="flex items-center mt-1">
             <Star
               v-for="i in 5"
@@ -238,21 +276,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import userService from '@/services/user.service'
 import { Star, Mail, Phone, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 import { getSrcAvatar } from '@/services/utils'
-
+import { useAppointmentStore } from '@/stores/modules/appointment.module'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const route = useRoute()
 const doctorStore = useDoctorProfileStore()
 const authStore = useAuthStore()
+const appointmentStore = useAppointmentStore()
+const doctorid = route.params.id as string
 const currentTab = ref('reviews') // Mặc định tab "Đánh Giá" được chọn
 const tabs = [
-  { name: 'reviews', label: 'Đánh Giá' },
-  { name: 'history', label: 'Lịch Sử Khám' },
+  { name: 'reviews', label: t('doctor.rating') },
+  { name: 'history', label: t('doctor.History_of_Examination') },
 ]
 
 interface Doctor {
@@ -271,6 +313,7 @@ interface Doctor {
     seftDescription: string
     certification: string
     certificationImage: string
+    id: string
   }
   doctorFeedback: any[]
 }
@@ -291,6 +334,7 @@ const doctor = ref<Doctor>({
     seftDescription: '',
     certification: '',
     certificationImage: '',
+    id: '',
   },
   doctorFeedback: [],
 })
@@ -306,16 +350,50 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options)
 }
 
+interface Appointment {
+  id: string
+  dentistId: string
+  appointmentDate: string
+  patientName: string
+  status: string
+  serviceName: string
+  // Add other relevant properties
+}
+
+const appointments = ref<Appointment[]>([])
+const filteredAppointments = ref<Appointment[]>([])
+watch(
+  () => appointments.value,
+  (newAppointments) => {
+    filteredAppointments.value = newAppointments.filter(
+      (appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id,
+    )
+  },
+)
+const isLoadingAppointments = ref(true) // Add loading state for appointments
+
 onMounted(async () => {
   try {
-    const id = route.params.id as string
-    const response = await doctorStore.getDoctorDetailForAdmin(id)
+    const response = await doctorStore.getDoctorDetailForAdmin(doctorid)
     doctor.value = {
       ...response,
       doctorFeedback: (response.doctorFeedback || []).flatMap((feedback: any) => feedback.feedbacks),
     }
+    const appointmentsResponse = await appointmentStore.getAppointments({})
+    console.log('danh sách medical', appointmentsResponse)
+
+    // Check if appointmentsResponse is an array
+    if (Array.isArray(appointmentsResponse.data)) {
+      appointments.value = appointmentsResponse.data as Appointment[] // Assign the response directly
+      console.log('danh sách medical filter', appointments.value)
+    } else {
+      appointments.value = [] // Assign an empty array if not an array
+      console.log('danh sách medical filterfilter', appointments.value)
+    }
   } catch (error) {
     console.error('Error fetching doctor data:', error)
+  } finally {
+    isLoadingAppointments.value = false // Set loading state to false after fetching
   }
 })
 
@@ -355,23 +433,27 @@ const totalPages = computed(() => {
   return Math.ceil(combinedReviews.length / itemsPerPage)
 })
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-  }
-}
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-  }
-}
+watch(
+  () => appointments.value,
+  (newAppointments) => {
+    filteredAppointments.value = newAppointments.filter(
+      (appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id,
+    )
+  },
+)
 
 const openEditPopup = (review: any) => {
   editFeedback.value = { message: review.message, rating: review.ratings, feedbackID: review.feedbackID }
   isEditPopupOpen.value = true
 }
-
+watch(
+  () => appointments.value,
+  (newAppointments) => {
+    filteredAppointments.value = newAppointments.filter(
+      (appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id,
+    )
+  },
+)
 const saveEditFeedback = async () => {
   try {
     await userService.updateFeedbackDetail({
@@ -397,6 +479,38 @@ const saveEditFeedback = async () => {
 
 const setRating = (rating: number) => {
   editFeedback.value.rating = rating
+}
+
+const paginatedAppointments = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredAppointments.value.slice(start, start + itemsPerPage)
+})
+
+const totalPages2 = computed(() => {
+  return Math.ceil(filteredAppointments.value.length / itemsPerPage)
+})
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+const nextPage2 = () => {
+  if (currentPage.value < totalPages2.value) {
+    currentPage.value++
+  }
+}
+
+const prevPage2 = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
 }
 </script>
 
@@ -448,5 +562,13 @@ const setRating = (rating: number) => {
 .image-review:hover .overlay {
   filter: blur(5px); /* Làm mờ nền */
   opacity: 1; /* Hiển thị overlay */
+}
+.text-sm.font-bold {
+  font-weight: bold;
+  margin-bottom: 0.5rem; /* Tăng khoảng cách giữa các nhóm thông tin */
+}
+
+.text-sm.font-normal {
+  font-weight: normal;
 }
 </style>

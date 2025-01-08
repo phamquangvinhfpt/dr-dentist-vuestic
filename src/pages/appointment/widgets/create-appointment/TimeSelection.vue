@@ -46,7 +46,7 @@ const toggleSection = () => {
     >
       <div class="flex flex-col items-start">
         <p class="text-xl font-bold text-blue-900 dark:text-blue-100">
-          Select time
+          {{ $t('booking.selectTime') }}
           <span v-if="selectedTime" class="text-sm font-normal text-gray-600 dark:text-gray-300">
             ({{ selectedTime }})
           </span>

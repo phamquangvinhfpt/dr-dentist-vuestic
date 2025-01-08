@@ -2,10 +2,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { useToast, VaInnerLoading, VaCard, VaButton, VaRadio, VaDivider, VaDataTable } from 'vuestic-ui'
-import { getPaymentMethodLabel, PaymentDetailResponse, PaymentMethod } from '../types'
+import { PaymentDetailResponse, PaymentMethod } from '../types'
 import { generateQRCode, getErrorMessage } from '@/services/utils'
 import QrSelection from '@/pages/appointment/widgets/create-appointment/QrSelection.vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 // const for payment
 const router = useRoute()
@@ -25,6 +26,7 @@ const isMobile = computed(() => window.innerWidth < 768)
 const result = ref(false)
 const loading = ref(false)
 const { init } = useToast()
+const { t } = useI18n()
 const storeTreatment = useTreatmentStore()
 const paymentDetailResponse = ref<PaymentDetailResponse>()
 const selectedPaymentMethod = ref<PaymentMethod>(PaymentMethod.None)
@@ -59,33 +61,15 @@ const formatCurrency = (value: number | string) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(numValue)
 }
 
-const paymentDetailsColumns = [
-  { key: 'procedureName', label: 'Procedure Name' },
-  { key: 'paymentAmount', label: 'Amount' },
-]
-
-const proceduresColumns = [
-  { key: 'id', title: 'ID' },
-  { key: 'name', title: 'Name' },
-  { key: 'amount', title: 'Amount' },
-  { key: 'status', title: 'Status' },
-]
-
-const procedureList = computed(() => {
-  return (
-    paymentDetailResponse.value?.details.map((detail) => ({
-      id: detail.procedureID,
-      name: detail.procedureName,
-      amount: formatCurrency(detail.paymentAmount),
-      status: detail.paymentStatus,
-    })) || []
-  )
-})
+const paymentDetailsColumns = computed(() => [
+  { key: 'procedureName', label: t('payment.procedure_name') },
+  { key: 'paymentAmount', label: t('payment.amount') },
+])
 
 const confirmPayment = () => {
   if (selectedPaymentMethod.value === PaymentMethod.None) {
     init({
-      message: 'Please select a payment method',
+      message: t('payment.none_select_method'),
       color: 'warning',
       title: 'Warning',
     })
@@ -104,7 +88,7 @@ const confirmPayment = () => {
       .sendPayment(request)
       .then(() => {
         init({
-          message: 'Payment has been confirmed',
+          message: t('payment.payment_success'),
           color: 'success',
           title: 'Success',
         })
@@ -136,7 +120,7 @@ const confirmPayment = () => {
       .sendPayment(request)
       .then(() => {
         init({
-          message: 'Please scan the QR code to complete the payment!',
+          message: t('payment.scan_qr_code'),
           color: 'success',
           title: 'Success',
         })
@@ -201,19 +185,21 @@ defineExpose({
   <div class="container mx-auto max-w-5xl px-4 m-10">
     <VaInnerLoading :loading="loading">
       <VaCard v-if="paymentDetailResponse" class="w-full p-4">
-        <h2 class="text-2xl font-bold mb-4 text-center">Payment Bill</h2>
+        <h2 class="text-2xl font-bold mb-4 text-center">{{ t('payment.payment_bill') }}</h2>
 
         <div class="mb-4">
-          <strong>Patient:</strong> {{ paymentDetailResponse.paymentResponse.patientName }} ({{
+          <strong>{{ t('payment.patient') }}:</strong> {{ paymentDetailResponse.paymentResponse.patientName }} ({{
             paymentDetailResponse.paymentResponse.patientCode
           }})
         </div>
 
-        <div class="mb-4"><strong>Service:</strong> {{ paymentDetailResponse.paymentResponse.serviceName }}</div>
+        <div class="mb-4">
+          <strong>{{ t('payment.service') }}:</strong> {{ paymentDetailResponse.paymentResponse.serviceName }}
+        </div>
 
         <VaDivider />
 
-        <h3 class="text-xl font-semibold my-4">Payment Details</h3>
+        <h3 class="text-xl font-semibold my-4">{{ t('payment.payment_detail') }}</h3>
 
         <VaDataTable :columns="paymentDetailsColumns" :items="paymentDetailResponse.details" striped hoverable>
           <template #cell(paymentAmount)="{ value }">
@@ -223,46 +209,38 @@ defineExpose({
 
         <VaDivider />
 
-        <h3 class="text-xl font-semibold my-4">Procedures</h3>
-
-        <VaTable :columns="proceduresColumns" :data="procedureList" striped hoverable class="mb-4" />
-
-        <VaDivider />
-
         <div class="mt-4 grid grid-rows-3 text-right">
-          <div><strong>Total Amount:</strong> {{ formatCurrency(Number(totalAmount)) }}</div>
           <div>
-            <strong>Deposit Amount:</strong>
+            <strong>{{ t('payment.total_amount') }}:</strong> {{ formatCurrency(Number(totalAmount)) }}
+          </div>
+          <div>
+            <strong>{{ t('payment.deposit_amount') }}:</strong>
             {{ formatCurrency(Number(paymentDetailResponse.paymentResponse.depositAmount)) }}
           </div>
           <VaDivider />
           <div>
-            <strong>Remaining Amount:</strong>
+            <strong>{{ t('payment.remaining_amount') }}:</strong>
             {{ formatCurrency(Number(paymentDetailResponse.paymentResponse.remainingAmount)) }}
           </div>
         </div>
 
         <VaDivider />
 
-        <h3 class="text-xl font-semibold my-4 flex justify-end">Payment Method</h3>
+        <h3 class="text-xl font-semibold my-4 flex justify-end">{{ t('payment.payment_method') }}</h3>
 
         <div class="mb-4 flex justify-end">
           <div>
-            <VaRadio
-              v-model="selectedPaymentMethod"
-              :option="PaymentMethod.Cash"
-              :label="getPaymentMethodLabel(PaymentMethod.Cash)"
-            />
+            <VaRadio v-model="selectedPaymentMethod" :option="PaymentMethod.Cash" :label="t('payment.cash')" />
             <VaRadio
               v-model="selectedPaymentMethod"
               :option="PaymentMethod.BankTransfer"
-              :label="getPaymentMethodLabel(PaymentMethod.BankTransfer)"
+              :label="t('payment.bankTransfer')"
             />
           </div>
         </div>
 
         <div class="flex justify-end items-center mt-4">
-          <VaButton color="success" @click="confirmPayment">Confirm Payment</VaButton>
+          <VaButton color="success" @click="confirmPayment">{{ t('payment.confirm_payment') }}</VaButton>
         </div>
       </VaCard>
       <QrSelection
@@ -308,21 +286,20 @@ defineExpose({
                 data-original="#000000"
               />
             </svg>
-            <h4 class="text-xl text-gray-800 font-semibold mt-4">Thanh toán thành công!</h4>
+            <h4 class="text-xl text-gray-800 font-semibold mt-4">{{ t('payment.payment_success') }}!</h4>
             <p className="text-sm text-gray-600 leading-relaxed mt-4">
-              Cảm ơn bạn đã thanh toán dịch vụ. Khoản thanh toán của bạn đã được xác nhận thành công. Vui lòng kiểm tra
-              email để nhận biên lai và thông tin chi tiết.
+              {{ t('payment.tks') }}
             </p>
           </div>
 
           <div className="mt-6 bg-gray-50 p-4 rounded-lg">
             <p className="text-sm text-gray-600 mb-2">
-              <strong>Lưu ý quan trọng:</strong>
+              <strong>{{ t('payment.warning') }}:</strong>
             </p>
             <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
-              <li>Quý khách vui lòng giữ lại biên lai để đối chiếu nếu cần</li>
-              <li>Nhân viên sẽ liên hệ để xác nhận và hướng dẫn các bước tiếp theo</li>
-              <li>Mọi thắc mắc về thanh toán, vui lòng liên hệ bộ phận hỗ trợ khách hàng</li>
+              <li>{{ t('payment.tks') }}</li>
+              <li>{{ t('payment.tks') }}</li>
+              <li>{{ t('payment.tks') }}</li>
             </ul>
           </div>
 

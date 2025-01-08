@@ -178,13 +178,19 @@ class PaymentService {
 
   async exportPayments(params: any) {
     try {
-      const response = await apiService.post('/v1/payment/export-payment', {
-        startDate: params.startDate,
-        endDate: params.endDate,
-        paymentStatus: params.paymentStatus,
-        paymentMethod: params.paymentMethod,
-        userID: params.userID,
-      })
+      const response = await apiService.postFileData(
+        '/v1/payment/export-payment',
+        {
+          startDate: params.startDate,
+          endDate: params.endDate,
+          paymentStatus: params.paymentStatus,
+          paymentMethod: params.paymentMethod,
+          userID: params.userID,
+        },
+        {
+          responseType: 'blob',
+        },
+      )
       return response.data
     } catch (error) {
       console.error('Export error:', error)

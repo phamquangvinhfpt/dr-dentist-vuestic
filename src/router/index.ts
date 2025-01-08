@@ -120,6 +120,22 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/user/UsersManagement.vue'),
       },
       {
+        name: 'user-detail',
+        path: 'users-detail/:id',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/user/UserDetail.vue'),
+      },
+      {
+        name: 'user-update',
+        path: 'user-update/:id',
+        meta: {
+          requiresAuth: true,
+        },
+        component: () => import('../pages/Doctor/UpdateUser.vue'),
+      },
+      {
         name: 'message',
         path: 'message',
         meta: {
@@ -142,6 +158,15 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: false,
           title: 'Doctor Details',
+        },
+      },
+      {
+        name: 'staff-detail',
+        path: 'staff/:id',
+        component: () => import('../pages/user/StaffDetail.vue'),
+        meta: {
+          requiresAuth: true,
+          title: 'Staff Details',
         },
       },
       {
@@ -264,16 +289,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
         },
-        redirect: () => {
-          const today = new Date().toISOString().split('T')[0]
-          return `/payment-management/${today}/${today}`
-        },
-        children: [
-          {
-            path: ':startDate/:endDate',
-            component: () => import('../pages/PaymentPages/PaymentManagement.vue'),
-          },
-        ],
+        component: () => import('../pages/PaymentPages/PaymentManagement.vue'),
       },
       {
         name: 'payment-for-patient',
@@ -405,7 +421,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'services',
         path: '/services/:id?',
         meta: {
-          requiresAuth: true,
+          requiresAuth: false,
         },
         component: ServiceForUser,
       },

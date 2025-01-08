@@ -22,12 +22,7 @@
           </div>
 
           <div class="button-group flex items-center gap-4">
-            <VaButton
-              class="create-button"
-              color="primary"
-              icon="add"
-              @click="router.push({ name: 'form-application' })"
-            >
+            <VaButton class="create-button" color="primary" icon="add" @click="handleCreateButtonClick">
               {{ t('form.CreateApplication') }}
             </VaButton>
 
@@ -166,7 +161,7 @@
           <div class="detail-section full-width">
             <h3 class="section-title"><i class="fas fa-align-left mr-2"></i>{{ t('form.Description') }}</h3>
             <div class="detail-content">
-              <p class="description-text">{{ selectedForm.description || 'No description provided' }}</p>
+              <p class="description-text">{{ selectedForm.description || $t('form.noDescription') }}</p>
             </div>
           </div>
 
@@ -174,7 +169,7 @@
             <h3 class="section-title"><i class="fas fa-sticky-note mr-2"></i>{{ t('form.Notes') }}</h3>
             <div class="detail-content">
               <div class="note-container">
-                <p class="note-text">{{ selectedForm.note || 'No notes available' }}</p>
+                <p class="note-text">{{ selectedForm.note || $t('form.noNotes') }}</p>
               </div>
             </div>
           </div>
@@ -188,23 +183,180 @@
         </div>
       </template>
     </VaModal>
+
+    <!-- Application Form Modal -->
+    <VaModal v-model="showApplicationModal" hide-default-actions class="application-modal">
+      <div class="application-form-container">
+        <div class="text-center mb-6">
+          <h2
+            class="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"
+          >
+            {{ t('form.ApplicationForm') }}
+          </h2>
+          <p class="mt-2 text-sm text-gray-500">{{ t('form.PleaseDetails') }}</p>
+        </div>
+
+        <form class="space-y-8" @submit.prevent="submitApplicationForm">
+          <!-- Calendar Select -->
+          <div class="transition-all duration-200 hover:shadow-md p-4 rounded-lg border border-gray-100">
+            <label for="calendarID" class="block text-sm font-semibold text-gray-700 mb-2">
+              {{ t('form.SelectWorkingDate') }}
+            </label>
+            <VaSelect
+              v-model="applicationFormData.calendarID"
+              :options="calendarOptions"
+              value-by="calendarID"
+              :text-by="formatOptionText"
+              :error="!!applicationFormErrors.calendarID"
+              :error-messages="applicationFormErrors.calendarID"
+              :placeholder="t('form.SelectWorkingDate')"
+              class="w-full"
+              @update:modelValue="handleCalendarChange"
+            />
+          </div>
+
+          <!-- Leave Type Select -->
+          <div class="transition-all duration-200 hover:shadow-md p-4 rounded-lg border border-gray-100">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ t('form.LeaveType') }}</label>
+            <div class="flex gap-6">
+              <VaRadio
+                v-model="applicationFormData.leaveType"
+                :option="LeaveType.TIME_SLOT"
+                :label="t('form.TimeSlot')"
+                class="hover:opacity-80 transition-opacity"
+              />
+              <VaRadio
+                v-model="applicationFormData.leaveType"
+                :option="LeaveType.ALL_DAY"
+                :label="t('form.AllDay')"
+                class="hover:opacity-80 transition-opacity"
+              />
+            </div>
+          </div>
+
+          <!-- Time Slot Select -->
+          <div
+            v-if="applicationFormData.leaveType === LeaveType.TIME_SLOT"
+            class="transition-all duration-200 hover:shadow-md p-4 rounded-lg border border-gray-100"
+          >
+            <label for="timeID" class="block text-sm font-semibold text-gray-700 mb-2">
+              {{ t('form.SelectTimeSlot') }}
+            </label>
+            <VaSelect
+              v-model="applicationFormData.timeID"
+              :options="timeSlots"
+              value-by="timeID"
+              :text-by="formatTimeSlot"
+              :error="!!applicationFormErrors.timeID"
+              :error-messages="applicationFormErrors.timeID"
+              :placeholder="t('form.SelectTimeSlot')"
+              class="w-full"
+              :disabled="!applicationFormData.calendarID"
+            />
+          </div>
+
+          <!-- Description -->
+          <div class="transition-all duration-200 hover:shadow-md p-4 rounded-lg border border-gray-100">
+            <label for="description" class="block text-sm font-semibold text-gray-700 mb-2">
+              {{ t('form.Description') }}
+            </label>
+            <VaTextarea
+              id="description"
+              v-model="applicationFormData.description"
+              rows="4"
+              class="w-full"
+              :error="!!applicationFormErrors.description"
+              :error-messages="applicationFormErrors.description"
+              :placeholder="t('form.DescriptionPlaceholder')"
+              required
+            />
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex justify-end gap-4 pt-4">
+            <VaButton
+              preset="secondary"
+              class="px-8 py-3 rounded-lg transform transition-transform hover:scale-105"
+              @click="showApplicationModal = false"
+            >
+              <span class="flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i>
+                {{ t('common.Back') }}
+              </span>
+            </VaButton>
+            <VaButton
+              preset="primary"
+              :loading="isSubmitting"
+              type="submit"
+              class="px-8 py-3 rounded-lg transform transition-transform hover:scale-105"
+            >
+              <template v-if="isSubmitting">
+                <span class="flex items-center">
+                  <i class="fas fa-spinner fa-spin mr-2"></i>
+                  {{ t('common.Submitting') }}
+                </span>
+              </template>
+              <template v-else>
+                <span class="flex items-center">
+                  <i class="fas fa-paper-plane mr-2"></i>
+                  {{ t('form.SubmitApplication') }}
+                </span>
+              </template>
+            </VaButton>
+          </div>
+        </form>
+      </div>
+    </VaModal>
+
+    <!-- Success Modal -->
+    <VaModal v-model="showSuccessModal" hide-default-actions class="rounded-xl">
+      <template #header>
+        <div class="text-center p-4">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+            <i class="fas fa-check text-green-600 text-xl"></i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900">{{ t('form.ApplicationSubmitted') }}</h3>
+        </div>
+      </template>
+
+      <div class="px-4 pb-4">
+        <p class="text-sm text-gray-500 text-center">
+          {{ t('form.ApplicationSuccess') }}
+        </p>
+      </div>
+
+      <div class="mt-5 flex justify-center pb-6">
+        <VaButton
+          preset="primary"
+          class="px-6 py-2 rounded-lg transform transition-transform hover:scale-105"
+          @click="closeSuccessModal"
+        >
+          <i class="fas fa-check mr-2"></i>
+          {{ t('form.GotIt') }}
+        </VaButton>
+      </div>
+    </VaModal>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useFormStore } from '@/stores/modules/form.module'
 import { onMounted, ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { FormDTO, FilterForm } from './types'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useRouter } from 'vue-router'
+import { useFormStore } from '@/stores/modules/form.module'
+import { LeaveType } from './types'
+import type { FormDTO, FilterForm, ApplicationFormRequest, CalendarOption } from './types'
+import type { WorkingCalendar, WorkingTime } from '@/pages/working-calendar/types'
 
 const { t } = useI18n()
 const { init } = useToast()
 const formStore = useFormStore()
 const authStore = useAuthStore()
+const router = useRouter()
 
+// Form list data
 const formData = reactive({
   pageNumber: 1,
   pageSize: 10,
@@ -213,16 +365,61 @@ const formData = reactive({
 })
 
 const formList = ref<FormDTO[]>([])
+const allForms = ref<FormDTO[]>([])
 const searchQuery = ref('')
 const currentPage = ref(1)
 const selectedStatusFilter = ref<number | null>(null)
 const showDetailsModal = ref(false)
 const selectedForm = ref<FormDTO | null>(null)
-const router = useRouter()
 
-const totalPages = computed(() => {
-  return Math.ceil(formList.value.length / formData.pageSize)
+// Application Form Data
+const showApplicationModal = ref(false)
+const showSuccessModal = ref(false)
+const isSubmitting = ref(false)
+const workingCalendars = ref<WorkingCalendar[]>([])
+const timeSlots = ref<WorkingTime[]>([])
+
+const applicationFormData = reactive<ApplicationFormRequest>({
+  userID: authStore.user?.id || '',
+  calendarID: '',
+  timeID: '',
+  description: '',
+  leaveType: LeaveType.TIME_SLOT,
 })
+
+const applicationFormErrors = reactive({
+  calendarID: '',
+  timeID: '',
+  description: '',
+})
+
+// Computed properties
+const filteredForms = computed(() => {
+  let filtered = [...allForms.value]
+
+  if (selectedStatusFilter.value !== null) {
+    filtered = filtered.filter((form) => form.status === selectedStatusFilter.value)
+  }
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter((form) => {
+      const description = form.description.toLowerCase()
+      const date = formatDate(form.workingDate)
+      const dateVariants = [date, date.split('/')[0], date.split('/').slice(0, 2).join('/'), date.replace(/\//g, '')]
+
+      if (description.includes(query)) {
+        return true
+      }
+
+      return dateVariants.some((variant) => variant.includes(query.replace(/\//g, '')))
+    })
+  }
+
+  return filtered
+})
+
+const totalPages = computed(() => Math.ceil(filteredForms.value.length / formData.pageSize))
 
 const columns = computed(() => [
   { key: 'workingDate', label: t('form.workingDate') },
@@ -232,51 +429,13 @@ const columns = computed(() => [
   { key: 'action', label: t('common.actions') },
 ])
 
-const getAllForms = async () => {
-  try {
-    const currentUserID = authStore.user?.id
-
-    if (!currentUserID) {
-      throw new Error('User ID not found')
-    }
-
-    const filter: FilterForm = {
-      pageNumber: currentPage.value,
-      pageSize: formData.pageSize,
-      isActive: formData.isActive,
-      orderBy: formData.orderBy,
-      advancedFilter: {
-        logic: 'and',
-        filters: [
-          {
-            field: 'userID',
-            operator: 'eq',
-            value: currentUserID,
-          },
-          ...(selectedStatusFilter.value !== null
-            ? [
-                {
-                  field: 'status',
-                  operator: 'eq',
-                  value: selectedStatusFilter.value.toString(),
-                },
-              ]
-            : []),
-        ],
-      },
-    }
-
-    const response = await formStore.getAllForms(filter)
-    formList.value = response.data
-  } catch (error) {
-    console.error('Error fetching forms:', error)
-    init({
-      message: t('form.fetchError'),
-      color: 'danger',
-      duration: 3000,
-    })
-  }
-}
+const calendarOptions = computed<CalendarOption[]>(() => {
+  return workingCalendars.value.map((calendar) => ({
+    calendarID: calendar.calendarID,
+    workingDate: formatDateDisplay(calendar.workingDate),
+    roomName: calendar.roomName,
+  }))
+})
 
 // Utility functions
 const formatDate = (date: string) => {
@@ -293,6 +452,28 @@ const formatTime = (time: string) => {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+const formatDateForApi = (date: Date) => {
+  return date.toISOString().split('T')[0]
+}
+
+const formatDateDisplay = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('vi-VN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+}
+
+const formatTimeSlot = (timeSlot: WorkingTime) => {
+  return `${timeSlot.startTime} - ${timeSlot.endTime}`
+}
+
+const formatOptionText = (option: CalendarOption) => {
+  return `${option.workingDate} - ${option.roomName}`
 }
 
 const getStatusText = (status: number) => {
@@ -334,16 +515,127 @@ const getStatusDotClass = (status: number) => {
   }
 }
 
+// API calls
+const getAllForms = async () => {
+  try {
+    const currentUserID = authStore.user?.id
+
+    if (!currentUserID) {
+      throw new Error('User ID not found')
+    }
+
+    const filter: FilterForm = {
+      pageNumber: 1,
+      pageSize: 1000, // Get all forms at once
+      isActive: formData.isActive,
+      orderBy: formData.orderBy,
+      advancedFilter: {
+        logic: 'and',
+        filters: [
+          {
+            field: 'userID',
+            operator: 'eq',
+            value: currentUserID,
+          },
+        ],
+      },
+    }
+
+    const response = await formStore.getAllForms(filter)
+    allForms.value = response.data
+    updateDisplayedForms()
+  } catch (error) {
+    console.error('Error fetching forms:', error)
+    init({
+      message: t('form.fetchError'),
+      color: 'danger',
+      duration: 3000,
+    })
+  }
+}
+
+const fetchWorkingCalendars = async () => {
+  try {
+    const today = new Date()
+    const endDate = new Date()
+    endDate.setMonth(endDate.getMonth() + 1)
+
+    const response = await formStore.getWorkingCalendar(formatDateForApi(today), formatDateForApi(endDate), {
+      doctorId: authStore.user?.id,
+    })
+
+    if (response?.data) {
+      const calendars = response.data[0]?.calendarDetails || []
+      workingCalendars.value = calendars.map((calendar: any) => ({
+        calendarID: calendar.calendarID,
+        workingDate: calendar.date,
+        workingTimes: [],
+        roomName: calendar.roomName,
+        workingStatus: calendar.workingStatus,
+      }))
+    }
+  } catch (error) {
+    console.error('Error fetching calendars:', error)
+    init({
+      message: t('form.CalendarLoadError'),
+      color: 'danger',
+    })
+  }
+}
+
 // Event handlers
 const handlePageChange = (page: number) => {
   currentPage.value = page
-  getAllForms()
+  formData.pageNumber = page
+  updateDisplayedForms()
 }
 
 const handlePageSizeChange = (size: number) => {
   formData.pageSize = size
+  formData.pageNumber = 1
   currentPage.value = 1
-  getAllForms()
+  updateDisplayedForms()
+}
+
+const handleCalendarChange = async (calendarID: string) => {
+  try {
+    applicationFormData.timeID = ''
+    timeSlots.value = []
+
+    if (!calendarID) return
+
+    const selectedCalendar = workingCalendars.value.find((cal) => cal.calendarID === calendarID)
+    if (selectedCalendar) {
+      const response = await formStore.getTimeWorkingOfDoctor({
+        userID: authStore.user?.id || '',
+        date: selectedCalendar.workingDate,
+      })
+
+      if (response) {
+        // Filter out time slots that are already in existing forms
+        const existingForms = formList.value.filter(
+          (form) => form.calendarID === calendarID && form.status !== 2, // Exclude rejected forms
+        )
+
+        const usedTimeSlots = new Set(existingForms.flatMap((form) => form.workingTimes.map((time) => time.timeID)))
+
+        timeSlots.value = response.filter((timeSlot: any) => !usedTimeSlots.has(timeSlot.timeID))
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching time slots:', error)
+    init({
+      message: t('form.TimeSlotsLoadError'),
+      color: 'danger',
+    })
+  }
+}
+
+const handleStatusFilterChange = (status: number | null) => {
+  selectedStatusFilter.value = status
+  formData.pageNumber = 1
+  currentPage.value = 1
+  updateDisplayedForms()
 }
 
 const viewDetails = (form: FormDTO) => {
@@ -351,7 +643,7 @@ const viewDetails = (form: FormDTO) => {
   showDetailsModal.value = true
 }
 
-// Status filter options and handlers
+// Status filter options
 const statusFilterOptions = [
   { id: 'all', value: null, label: t('form.allStatus') },
   { id: 'waiting', value: 0, label: t('form.waiting') },
@@ -359,67 +651,109 @@ const statusFilterOptions = [
   { id: 'failed', value: 2, label: t('form.failed') },
 ]
 
-const handleStatusFilterChange = (status: number | null) => {
-  selectedStatusFilter.value = status
+// Form validation and submission
+function validateApplicationForm(): boolean {
+  let isValid = true
+  applicationFormErrors.calendarID = ''
+  applicationFormErrors.timeID = ''
+  applicationFormErrors.description = ''
+
+  if (!applicationFormData.calendarID) {
+    applicationFormErrors.calendarID = t('form.CalendarRequired')
+    isValid = false
+  }
+
+  if (applicationFormData.leaveType === LeaveType.TIME_SLOT && !applicationFormData.timeID) {
+    applicationFormErrors.timeID = t('form.TimeRequired')
+    isValid = false
+  }
+
+  // Check for existing forms on the same date
+  const existingForms = formList.value.filter(
+    (form) =>
+      form.status !== 2 && // Exclude rejected forms
+      form.calendarID === applicationFormData.calendarID,
+  )
+
+  if (existingForms.length > 0) {
+    // Check if there's any ALL_DAY form
+    const hasAllDayForm = existingForms.some((form) => {
+      // If the form has multiple time slots, it's likely an ALL_DAY form
+      return form.workingTimes.length > 1
+    })
+
+    // Check if there's any TIME_SLOT form
+    const hasTimeSlotForm = existingForms.some((form) => {
+      // If the form has exactly one time slot, it's a TIME_SLOT form
+      return form.workingTimes.length === 1
+    })
+
+    if (applicationFormData.leaveType === LeaveType.ALL_DAY) {
+      // If trying to create ALL_DAY form but TIME_SLOT forms exist
+      if (hasTimeSlotForm || hasAllDayForm) {
+        applicationFormErrors.calendarID = t('form.HasTimeSlotError')
+        isValid = false
+      }
+    } else {
+      // If trying to create TIME_SLOT form but ALL_DAY form exists
+      if (hasAllDayForm) {
+        applicationFormErrors.timeID = t('form.HasAllDayError')
+        isValid = false
+      } else {
+        // Check for duplicate time slot
+        const hasTimeConflict = existingForms.some((form) =>
+          form.workingTimes.some((time) => time.timeID === applicationFormData.timeID),
+        )
+        if (hasTimeConflict) {
+          applicationFormErrors.timeID = t('form.DuplicateTimeError')
+          isValid = false
+        }
+      }
+    }
+  }
+
+  if (!applicationFormData.description) {
+    applicationFormErrors.description = t('form.DescriptionRequired')
+    isValid = false
+  } else if (applicationFormData.description.length < 10) {
+    applicationFormErrors.description = t('form.DescriptionLength')
+    isValid = false
+  }
+
+  return isValid
+}
+
+async function submitApplicationForm() {
+  if (!validateApplicationForm()) return
+
+  try {
+    isSubmitting.value = true
+    await formStore.submitForm(applicationFormData)
+    showSuccessModal.value = true
+    showApplicationModal.value = false
+
+    // Reset form
+    applicationFormData.calendarID = ''
+    applicationFormData.timeID = ''
+    applicationFormData.description = ''
+    await getAllForms()
+  } catch (error: any) {
+    init({
+      message: error.message || t('form.SubmitError'),
+      color: 'danger',
+    })
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+function closeSuccessModal() {
+  showSuccessModal.value = false
   getAllForms()
 }
 
-// Search functionality
-const handleSearch = (query: string) => {
-  if (!query) {
-    getAllForms()
-    return
-  }
-
-  // Tách query thành các từ riêng biệt
-  const searchTerms = query
-    .toLowerCase()
-    .split(' ')
-    .filter((term) => term)
-
-  const filteredForms = formList.value.filter((form) => {
-    const description = form.description.toLowerCase()
-
-    // Tìm kiếm chính xác cụm từ
-    if (description.includes(query.toLowerCase())) {
-      return true
-    }
-
-    // Tìm kiếm theo từng từ riêng lẻ
-    const matchedTerms = searchTerms.filter((term) => description.includes(term))
-
-    // Form phải chứa ít nhất 1 từ khóa tìm kiếm
-    return matchedTerms.length > 0
-  })
-
-  formList.value = filteredForms
-}
-
-// Debounce search để tránh gọi quá nhiều lần
-const debouncedSearch = (query: string) => {
-  clearTimeout(searchTimeout.value)
-  searchTimeout.value = setTimeout(() => {
-    handleSearch(query)
-  }, 300) // Đợi 300ms sau khi người dùng ngừng gõ
-}
-
-// Watch search query với debounce
-watch(searchQuery, (newValue) => {
-  debouncedSearch(newValue)
-})
-
-// Thêm ref cho timeout
-const searchTimeout = ref<NodeJS.Timeout>()
-
-// Cleanup khi component unmount
-onBeforeUnmount(() => {
-  if (searchTimeout.value) {
-    clearTimeout(searchTimeout.value)
-  }
-})
-
+// Lifecycle hooks
 onMounted(async () => {
-  // Check if user is Admin
   if (!authStore.musHaveRole('Dentist')) {
     init({
       message: t('common.unauthorized'),
@@ -432,6 +766,42 @@ onMounted(async () => {
 
   await getAllForms()
 })
+
+onBeforeUnmount(() => {
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+  }
+})
+
+// Watchers
+watch(searchQuery, () => {
+  formData.pageNumber = 1
+  currentPage.value = 1
+  updateDisplayedForms()
+})
+
+watch(
+  () => applicationFormData.leaveType,
+  () => {
+    applicationFormData.timeID = ''
+  },
+)
+
+// Update create button click handler
+const searchTimeout = ref<NodeJS.Timeout>()
+
+// Update create button click handler
+const handleCreateButtonClick = async () => {
+  showApplicationModal.value = true
+  await fetchWorkingCalendars()
+}
+
+// Add new function to update displayed forms
+const updateDisplayedForms = () => {
+  const startIndex = (formData.pageNumber - 1) * formData.pageSize
+  const endIndex = startIndex + formData.pageSize
+  formList.value = filteredForms.value.slice(startIndex, endIndex)
+}
 </script>
 
 <style scoped>
@@ -480,31 +850,6 @@ onMounted(async () => {
 .search-section {
   width: 60%;
   max-width: 600px;
-}
-
-.search-input {
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input) {
-  height: 40px;
-  font-size: 0.95rem;
-  background: var(--va-background-element) !important;
-  border: none !important;
-  border-radius: 8px;
-  padding: 0 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.search-input:deep(input):focus {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.search-input:deep(input)::placeholder {
-  color: var(--va-text-secondary);
-  opacity: 0.7;
 }
 
 .search-icon {
@@ -945,13 +1290,13 @@ onMounted(async () => {
 
 .status-tab:hover {
   color: var(--va-text-primary);
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--va-background-element);
 }
 
 .status-tab.active {
   background: var(--va-background-secondary);
   color: var(--va-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px var(--va-background-primary);
 }
 
 /* Responsive */
@@ -987,6 +1332,9 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  background: var(--va-background-element);
+  padding: 4px;
+  border-radius: 8px;
 }
 
 /* Thêm responsive styles */
@@ -1008,6 +1356,160 @@ onMounted(async () => {
 
   .create-button {
     width: auto;
+  }
+}
+
+/* Add styles for application modal */
+.application-modal :deep(.va-modal__container) {
+  max-width: 800px;
+  width: 90%;
+}
+
+.application-form-container {
+  padding: 2rem;
+}
+
+/* Add any additional styles needed for the application form */
+
+/* Add responsive styles */
+@media screen and (max-width: 1400px) {
+  .form-dentist-container {
+    padding: 1.5rem;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .header-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-section {
+    width: 100%;
+  }
+
+  .button-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .custom-table {
+    overflow-x: auto;
+  }
+
+  .custom-table:deep(table) {
+    min-width: 800px;
+  }
+
+  .status-tabs {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .form-dentist-container {
+    padding: 1rem;
+  }
+
+  .card-title {
+    padding: 1.2rem;
+  }
+
+  .title-icon {
+    font-size: 1.8rem;
+  }
+
+  .records-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .page-size-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .details-modal :deep(.va-modal__container),
+  .application-modal :deep(.va-modal__container) {
+    width: 95%;
+    margin: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .form-dentist-container {
+    padding: 0.5rem;
+  }
+
+  .card-title h2 {
+    font-size: 1.5rem;
+  }
+
+  .status-tabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .status-tab {
+    width: calc(50% - 0.25rem);
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .table-footer {
+    padding: 1rem;
+  }
+
+  .form-details-container,
+  .application-form-container {
+    padding: 1rem;
+  }
+
+  .detail-section {
+    padding: 1rem;
+  }
+
+  .time-slot {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  :deep(.va-modal__dialog) {
+    margin: 0.5rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .create-button {
+    width: 100%;
+  }
+
+  .status-tabs {
+    width: 100%;
+  }
+
+  .status-tab {
+    width: 100%;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
   }
 }
 </style>

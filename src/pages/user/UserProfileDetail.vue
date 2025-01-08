@@ -9,7 +9,6 @@ import {
   UserDetailsUpdate,
   // DoctorDetailFormData,
   DoctorDetailsUpdate,
-  Rela,
   PatientFamilyUpdate,
   MedicalHistoryUpdate,
   PatientProfileUpdate,
@@ -42,10 +41,10 @@ const props = defineProps({
   },
 })
 const relationshipOptions = [
-  { text: t('auth.father'), value: Rela.Father, id: 1 },
-  { text: t('auth.mother'), value: Rela.Mother, id: 2 },
-  { text: t('auth.sister'), value: Rela.Sister, id: 3 },
-  { text: t('auth.brother'), value: Rela.Brother, id: 4 },
+  { text: t('auth.father'), value: 0, id: 0 },
+  { text: t('auth.mother'), value: 1, id: 1 },
+  { text: t('auth.sister'), value: 2, id: 2 },
+  { text: t('auth.brother'), value: 3, id: 3 },
 ]
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const { init: notify } = useToast()
@@ -103,7 +102,7 @@ const userDetail = ref<UserDetailFormData>({
     name: '',
     phone: '',
     email: '',
-    relationship: Rela.Father,
+    relationship: null,
   },
   medicalHistory: {
     medicalName: [],
@@ -149,7 +148,7 @@ const updateMedicalName = () => {
 }
 
 const initializeMedicalItems = () => {
-  medicalHistoryOptions.forEach((option) => {
+  medicalHistoryOptions.value.forEach((option: any) => {
     selectedMedicalItems[option.value] = formData.medicalHistory?.medicalName?.includes(option.value) || false
   })
 }
@@ -183,7 +182,7 @@ const getUserDetail = async () => {
         name: userProfileStore?.userDetails?.patientFamily?.name || '', // Thuộc tính `name` ở đây nằm trong `patientFamily`
         phone: userProfileStore?.userDetails?.patientFamily?.phone || '',
         email: userProfileStore?.userDetails?.patientFamily?.email || '',
-        relationship: userProfileStore?.userDetails?.patientFamily?.relationship || Rela.Father,
+        relationship: userProfileStore?.userDetails?.patientFamily?.relationship || null,
       },
       medicalHistory: {
         medicalName: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
@@ -209,7 +208,7 @@ const getUserDetail = async () => {
       name: userProfileStore?.userDetails?.patientFamily?.name,
       phone: userProfileStore?.userDetails?.patientFamily?.phone,
       email: userProfileStore?.userDetails?.patientFamily?.email,
-      relationship: userProfileStore?.userDetails?.patientFamily?.relationship,
+      relationship: userProfileStore?.userDetails?.patientFamily?.relationship || null,
     }
     medicalHistory.value = {
       medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
@@ -325,7 +324,7 @@ const patientFamily = ref<any>({
   name: '',
   phone: '',
   email: '',
-  relationship: Rela.Father,
+  relationship: null,
 })
 const medicalHistory = ref<any>({
   medicalname: [],
@@ -650,52 +649,57 @@ const submitDoctorProfile = async () => {
   }
 }
 
-const getRelationShipValue = (value: Rela | undefined) => {
-  return relationshipOptions.find((item) => item.value === value)?.value
-}
-
-// const patientFamilyModal = ref<any>({
-//   isUpdatePatientFamily: true,
-//   patientFamily: {
-//     name: '',
-//     phone: '',
-//     email: '',
-//     relationship: 1,
-//   },
-// })
-
 // submit Patient Family
 const submitPatientFamily = async () => {
   if (validate()) {
-    // Lấy thông tin từ form
-    const value = formData.patientFamily.relationship
-    console.log('Value:', userDetail.value.PatientProfile?.id)
+    const patientProfileId = userProfileStore?.userDetails?.patientProfile?.id
+
+    if (!patientProfileId) {
+      notify({
+        title: t('auth.error'),
+        message: 'Patient Profile ID not found',
+        color: 'danger',
+      })
+      return
+    }
+
+    // Kiểm tra relationship có được chọn chưa
+    if (formData.patientFamily.relationship === undefined || formData.patientFamily.relationship === null) {
+      notify({
+        title: t('auth.error'),
+        message: t('auth.relationship_required'),
+        color: 'danger',
+      })
+      return
+    }
+
     // Dữ liệu cần cập nhật
     const updatedData: PatientFamilyUpdate = {
-      patientProfileId: userProfileStore?.userDetails ? userProfileStore?.userDetails?.patientProfile?.id : '', // Dùng ID của PatientProfile hoặc User nếu không có
+      patientProfileId: patientProfileId,
       isUpdatePatientFamily: true,
       patientFamily: {
-        name: formData.patientFamily.name ?? '',
-        phone: formData.patientFamily.phone ?? '',
-        email: formData.patientFamily.email ?? '',
-        relationship: getRelationShipValue(value) ?? 1,
+        name: formData.patientFamily.name || '',
+        phone: formData.patientFamily.phone || '',
+        email: formData.patientFamily.email || '',
+        relationship: formData.patientFamily.relationship,
       },
     }
 
-    console.log('Data will be sent:', updatedData)
+    console.log('Patient Family Data being sent:', JSON.stringify(updatedData, null, 2))
 
     await userProfileStore
       .updatePatientFamilyProfile(updatedData)
-      .then(() => {
+      .then((response) => {
+        console.log('Patient Family Response:', response)
         notify({
           title: t('auth.success'),
           message: t('auth.updated_patient_family_successfully'),
           color: 'success',
         })
         getUserDetail()
-        console.log('Data sent successfully' + updatedData)
       })
       .catch((error) => {
+        console.error('Patient Family Error:', error)
         const message = getErrorMessage(error)
         notify({
           title: t('auth.error'),
@@ -706,20 +710,72 @@ const submitPatientFamily = async () => {
   }
 }
 
-// const medicalHistoryModal = ref<any>({
-// isUpdateMedicalHistory: true,
-//   medicalHistory: {
-//     medicalname: [],
-//     note: '',
-//   },
-// })
+// submit Patient Profile
+const submitPatientProfile = async () => {
+  if (validate()) {
+    const userId = userProfileStore?.userDetails?.id
+    const patientProfileId = userProfileStore?.userDetails?.patientProfile?.id
+
+    if (!userId || !patientProfileId) {
+      notify({
+        title: t('auth.error'),
+        message: 'User ID or Patient Profile ID not found',
+        color: 'danger',
+      })
+      return
+    }
+
+    const updatePatientProfileData: PatientProfileUpdate = {
+      patientProfileId: patientProfileId,
+      isUpdateProfile: true,
+      profile: {
+        userId: userId,
+        idCardNumber: formData.PatientProfile.idCardNumber || '',
+        occupation: formData.PatientProfile.occupation || '',
+      },
+    }
+
+    console.log('Patient Profile Data being sent:', JSON.stringify(updatePatientProfileData, null, 2))
+
+    await userProfileStore
+      .updatePatientProfile(updatePatientProfileData)
+      .then((response) => {
+        console.log('Patient Profile Response:', response)
+        notify({
+          title: t('auth.success'),
+          message: t('auth.updated_patient_profile_successfully'),
+          color: 'success',
+        })
+        getUserDetail()
+      })
+      .catch((error) => {
+        console.error('Patient Profile Error:', error)
+        const message = getErrorMessage(error)
+        notify({
+          title: t('auth.error'),
+          message: message,
+          color: 'danger',
+        })
+      })
+  }
+}
+
 // submit Medical History
 const submitMedicalHistory = async () => {
   if (validate()) {
-    // Cập nhật medicalName từ selectedMedicalItems trước khi submit
-    updateMedicalName()
+    const patientProfileId = userProfileStore?.userDetails?.patientProfile?.id
 
-    // Đảm bảo medicalName là một mảng
+    if (!patientProfileId) {
+      notify({
+        title: t('auth.error'),
+        message: 'Patient Profile ID not found',
+        color: 'danger',
+      })
+      return
+    }
+
+    // Cập nhật medicalName từ selectedMedicalItems
+    updateMedicalName()
     const medicalNames = formData.medicalHistory?.medicalName || []
 
     // Kiểm tra lại sau khi đã cập nhật
@@ -733,16 +789,19 @@ const submitMedicalHistory = async () => {
     }
 
     const updatedMedicalData: MedicalHistoryUpdate = {
-      patientProfileId: userProfileStore?.userDetails?.patientProfile?.id || '',
+      patientProfileId: patientProfileId,
       isUpdateMedicalHistory: true,
       medicalHistory: {
-        medicalName: medicalNames, // Sử dụng mảng đã kiểm tra
+        medicalName: medicalNames,
         note: formData.medicalHistory?.note || '',
       },
     }
 
+    console.log('Medical History Data being sent:', JSON.stringify(updatedMedicalData, null, 2))
+
     try {
-      await userProfileStore.updateMedicalHistory(updatedMedicalData)
+      const response = await userProfileStore.updateMedicalHistory(updatedMedicalData)
+      console.log('Medical History Response:', response)
       notify({
         title: t('auth.success'),
         message: t('settings.medical_history_updated_successfully'),
@@ -750,6 +809,7 @@ const submitMedicalHistory = async () => {
       })
       getUserDetail()
     } catch (error) {
+      console.error('Medical History Error:', error)
       const message = getErrorMessage(error)
       notify({
         title: t('auth.error'),
@@ -760,62 +820,6 @@ const submitMedicalHistory = async () => {
   }
 }
 
-// const PatientProfileModal = ref<any>({
-//   patientProfileId: '',
-//   isUpdatePatientProfile: true,
-//   PatientProfile: {
-//     userId : '',
-//     idCardNumber: '',
-//     occupation: '',
-//   },
-// })
-// submit Patient Profile
-const submitPatientProfile = async () => {
-  if (validate()) {
-    const userId = userProfileStore?.userDetails?.id
-
-    if (!userId) {
-      notify({
-        title: t('auth.error'),
-        message: 'User ID not found',
-        color: 'danger',
-      })
-      return
-    }
-
-    // Lấy ID của patient profile t bng patient profile
-    const patientProfileId = userProfileStore?.userDetails?.patientProfile?.id
-
-    const updatePatientProfiledData: PatientProfileUpdate = {
-      patientProfileId: patientProfileId || '', // ID từ bảng patient profile
-      isUpdatePatientProfile: true,
-      Patientprofile: {
-        id: patientProfileId || '', // ID từ bảng patient profile
-        userId: userId, // ID của user
-        idCardNumber: formData.PatientProfile.idCardNumber || '',
-        occupation: formData.PatientProfile.occupation || '',
-      },
-    }
-    await userProfileStore
-      .updatePatientProfile(updatePatientProfiledData)
-      .then(() => {
-        notify({
-          title: t('auth.success'),
-          message: t('auth.updated_patient_profile_successfully'),
-          color: 'success',
-        })
-        getUserDetail()
-      })
-      .catch((error) => {
-        const message = getErrorMessage(error)
-        notify({
-          title: t('auth.error'),
-          message: message,
-          color: 'danger',
-        })
-      })
-  }
-}
 const submitChangePassword = async () => {
   if (validateChangePassword()) {
     const passwordDetailData: PasswordDetailFormData = {
@@ -1084,74 +1088,74 @@ const verifyEmail = async () => {
 }
 
 // Constants for checkboxes
-const medicalHistoryOptions = [
-  { value: 'Gingivitis', text: t('auth.gingivitis') }, // Viêm nướu
-  { value: 'Periodontitis', text: t('auth.periodontitis') }, // Viêm nha chu
-  { value: 'Gum_Recession', text: t('auth.gum_recession') }, // Tụt nướu
-  { value: 'Bleeding_Gums', text: t('auth.bleeding_gums') }, // Chảy máu nướu
-  { value: 'Gum_Abscess', text: t('auth.gum_abscess') }, // Áp xe nướu
+const medicalHistoryOptions = computed(() => [
+  { value: 'Gingivitis', label: t('auth.gingivitis') }, // Viêm nướu
+  { value: 'Periodontitis', label: t('auth.periodontitis') }, // Viêm nha chu
+  { value: 'Gum_Recession', label: t('auth.gum_recession') }, // Tụt nướu
+  { value: 'Bleeding_Gums', label: t('auth.bleeding_gums') }, // Chảảy máu nướu
+  { value: 'Gum_Abscess', label: t('auth.gum_abscess') }, // Áp xe nướu
 
   // Bệnh về răng
-  { value: 'Dental_Caries', text: t('auth.dental_caries') }, // Sâu răng
-  { value: 'Tooth_Decay', text: t('auth.tooth_decay') }, // Mục răng
-  { value: 'Tooth_Abscess', text: t('auth.tooth_abscess') }, // Áp xe răng
-  { value: 'Tooth_Sensitivity', text: t('auth.tooth_sensitivity') }, // Ê buốt răng
-  { value: 'Cracked_Tooth', text: t('auth.cracked_tooth') }, // Răng nứt
-  { value: 'Broken_Tooth', text: t('auth.broken_tooth') }, // Răng vỡ
-  { value: 'Tooth_Erosion', text: t('auth.tooth_erosion') }, // Mòn răng
-  { value: 'Tooth_Wear', text: t('auth.tooth_wear') }, // Mài mòn răng
-  { value: 'Tooth_Discoloration', text: t('auth.tooth_discoloration') }, // Đổi màu răng
-  { value: 'Tooth_Loss', text: t('auth.tooth_loss') }, // Mất răng
+  { value: 'Dental_Caries', label: t('auth.dental_caries') }, // Sâu răng
+  { value: 'Tooth_Decay', label: t('auth.tooth_decay') }, // Mục răng
+  { value: 'Tooth_Abscess', label: t('auth.tooth_abscess') }, // Áp xe răng
+  { value: 'Tooth_Sensitivity', label: t('auth.tooth_sensitivity') }, // Ê buốt răng
+  { value: 'Cracked_Tooth', label: t('auth.cracked_tooth') }, // Răng nứt
+  { value: 'Broken_Tooth', label: t('auth.broken_tooth') }, // Răng vỡ
+  { value: 'Tooth_Erosion', label: t('auth.tooth_erosion') }, // Mòn răng
+  { value: 'Tooth_Wear', label: t('auth.tooth_wear') }, // Mài mòn răng
+  { value: 'Tooth_Discoloration', label: t('auth.tooth_discoloration') }, // Đổi màu răng
+  { value: 'Tooth_Loss', label: t('auth.tooth_loss') }, // Mất răng
 
   // Bệnh về tủy răng
-  { value: 'Pulpitis', text: t('auth.pulpitis') }, // Viêm tủy
-  { value: 'Root_Canal_Infection', text: t('auth.root_canal_infection') }, // Nhiễm trùng ống tủy
-  { value: 'Dental_Pulp_Necrosis', text: t('auth.dental_pulp_necrosis') }, // Hoại tử tủy răng
-  { value: 'Periapical_Abscess', text: t('auth.periapical_abscess') }, // Áp xe chân răng
-  { value: 'Dental_Granuloma', text: t('auth.dental_granuloma') }, // U hạt răng
+  { value: 'Pulpitis', label: t('auth.pulpitis') }, // Viêm tủy
+  { value: 'Root_Canal_Infection', label: t('auth.root_canal_infection') }, // Nhiễm trùng ống tủy
+  { value: 'Dental_Pulp_Necrosis', label: t('auth.dental_pulp_necrosis') }, // Hoại tử tủy răng
+  { value: 'Periapical_Abscess', label: t('auth.periapical_abscess') }, // Áp xe chân răng
+  { value: 'Dental_Granuloma', label: t('auth.dental_granuloma') }, // U hạt răng
 
   // Bệnh về khớp cắn
-  { value: 'Malocclusion', text: t('auth.malocclusion') }, // Sai khớp cắn
-  { value: 'Crossbite', text: t('auth.crossbite') }, // Cắn chéo
-  { value: 'Overbite', text: t('auth.overbite') }, // Cắn sâu
-  { value: 'Underbite', text: t('auth.underbite') }, // Cắn ngược
-  { value: 'Open_Bite', text: t('auth.open_bite') }, // Cắn hở
+  { value: 'Malocclusion', label: t('auth.malocclusion') }, // Sai khớp cắn
+  { value: 'Crossbite', label: t('auth.crossbite') }, // Cắn chéo
+  { value: 'Overbite', label: t('auth.overbite') }, // Cắn sâu
+  { value: 'Underbite', label: t('auth.underbite') }, // Cắn ngược
+  { value: 'Open_Bite', label: t('auth.open_bite') }, // Cắn hở
 
   // Bệnh về khớp thái dương hàm
-  { value: 'TMJ_Disorders', text: t('auth.tmj_disorders') }, // Rối loạn khớp thái dương hàm
-  { value: 'Bruxism', text: t('auth.bruxism') }, // Nghiến răng
-  { value: 'Jaw_Pain', text: t('auth.jaw_pain') }, // Đau hàm
-  { value: 'Clicking_Jaw', text: t('auth.clicking_jaw') }, // Hàm kêu lục cục
-  { value: 'Limited_Jaw_Movement', text: t('auth.limited_jaw_movement') }, // Hạn chế vận động hàm
+  { value: 'TMJ_Disorders', label: t('auth.tmj_disorders') }, // Rối loạn khớp thái dương hàm
+  { value: 'Bruxism', label: t('auth.bruxism') }, // Nghiến răng
+  { value: 'Jaw_Pain', label: t('auth.jaw_pain') }, // Đau hàm
+  { value: 'Clicking_Jaw', label: t('auth.clicking_jaw') }, // Hàm kêu lục cục
+  { value: 'Limited_Jaw_Movement', label: t('auth.limited_jaw_movement') }, // Hạn chế vận động hàm
 
   // Bệnh về niêm mạc miệng
-  { value: 'Oral_Thrush', text: t('auth.oral_thrush') }, // Nhiễm nấm miệng
-  { value: 'Oral_Ulcers', text: t('auth.oral_ulcers') }, // Loét miệng
-  { value: 'Oral_Lichen_Planus', text: t('auth.oral_lichen_planus') }, // Bệnh lichen phẳng miệng
-  { value: 'Leukoplakia', text: t('auth.leukoplakia') }, // Bạch sản
-  { value: 'Oral_Cancer', text: t('auth.oral_cancer') }, // Ung thư miệng
+  { value: 'Oral_Thrush', label: t('auth.oral_thrush') }, // Nhiễm nấm miệng
+  { value: 'Oral_Ulcers', label: t('auth.oral_ulcers') }, // Loét miệng
+  { value: 'Oral_Lichen_Planus', label: t('auth.oral_lichen_planus') }, // Bệnh lichen phẳng miệng
+  { value: 'Leukoplakia', label: t('auth.leukoplakia') }, // Bạch sản
+  { value: 'Oral_Cancer', label: t('auth.oral_cancer') }, // Ung thư miệng
 
   // Bệnh về răng mọc
-  { value: 'Impacted_Teeth', text: t('auth.impacted_teeth') }, // Răng mọc ngầm
-  { value: 'Wisdom_Teeth_Problems', text: t('auth.wisdom_teeth_problems') }, // Vấn đề răng khôn
-  { value: 'Dental_Crowding', text: t('auth.dental_crowding') }, // Chen chúc răng
-  { value: 'Tooth_Eruption_Issues', text: t('auth.tooth_eruption_issues') }, // Rối loạn mọc răng
-  { value: 'Supernumerary_Teeth', text: t('auth.supernumerary_teeth') }, // Răng thừa
+  { value: 'Impacted_Teeth', label: t('auth.impacted_teeth') }, // Răng mọc ngầm
+  { value: 'Wisdom_Teeth_Problems', label: t('auth.wisdom_teeth_problems') }, // Vấn đề răng khôn
+  { value: 'Dental_Crowding', label: t('auth.dental_crowding') }, // Chen chúc răng
+  { value: 'Tooth_Eruption_Issues', label: t('auth.tooth_eruption_issues') }, // Rối loạn mọc răng
+  { value: 'Supernumerary_Teeth', label: t('auth.supernumerary_teeth') }, // Răng thừa
 
   // Bệnh về xương hàm
-  { value: 'Jaw_Bone_Loss', text: t('auth.jaw_bone_loss') }, // Tiêu xương hàm
-  { value: 'Osteonecrosis', text: t('auth.osteonecrosis') }, // Hoại tử xương hàm
-  { value: 'Jaw_Cysts', text: t('auth.jaw_cysts') }, // U nang xương hàm
-  { value: 'Jaw_Tumors', text: t('auth.jaw_tumors') }, // U xương hàm
-  { value: 'Jaw_Fractures', text: t('auth.jaw_fractures') }, // Gãy xương hàm
+  { value: 'Jaw_Bone_Loss', label: t('auth.jaw_bone_loss') }, // Tiêu xương hàm
+  { value: 'Osteonecrosis', label: t('auth.osteonecrosis') }, // Hoại tử xương hàm
+  { value: 'Jaw_Cysts', label: t('auth.jaw_cysts') }, // U nang xương hàm
+  { value: 'Jaw_Tumors', label: t('auth.jaw_tumors') }, // U xương hàm
+  { value: 'Jaw_Fractures', label: t('auth.jaw_fractures') }, // Gãy xương hàm
 
   // Các vấn đề khác
-  { value: 'Bad_Breath', text: t('auth.bad_breath') }, // Hôi miệng
-  { value: 'Dry_Mouth', text: t('auth.dry_mouth') }, // Khô miệng
-  { value: 'Teeth_Grinding', text: t('auth.teeth_grinding') }, // Nghiến răng
-  { value: 'Geographic_Tongue', text: t('auth.geographic_tongue') }, // Lưỡi địa lý
-  { value: 'Burning_Mouth_Syndrome', text: t('auth.burning_mouth_syndrome') }, // Hội chứng bỏng rát miệng
-]
+  { value: 'Bad_Breath', label: t('auth.bad_breath') }, // Hôi miệng
+  { value: 'Dry_Mouth', label: t('auth.dry_mouth') }, // Khô miệng
+  { value: 'Teeth_Grinding', label: t('auth.teeth_grinding') }, // Nghiến răng
+  { value: 'Geographic_Tongue', label: t('auth.geographic_tongue') }, // Lưỡi địa lý
+  { value: 'Burning_Mouth_Syndrome', label: t('auth.burning_mouth_syndrome') }, // Hội chứng bỏng rát miệng
+])
 
 const workingTypeOptions = [
   { text: t('auth.full_time'), value: WorkingType.FullTime },
@@ -1326,13 +1330,13 @@ const openImagePreview = (image: string) => {
             </VaField>
             <!--phần test thử của Tuấn -->
             <VaField>
-              <VaInput
+              <AddressAutocomplete
                 v-model="formData.address"
                 :label="t('auth.Address')"
-                class="mb-3"
                 :placeholder="t('auth.enter_address')"
+                :rules="[(v: any) => !!v || t('auth.address_required')]"
+                class="mb-3"
               />
-              <AddressAutocomplete :rules="[(v: any) => !!v || t('auth.address_required')]" />
             </VaField>
             <VaField>
               <VaInput v-model="formData.job" :label="t('auth.Job')" class="mb-3" :placeholder="t('auth.enter_job')" />
@@ -1352,7 +1356,7 @@ const openImagePreview = (image: string) => {
       <!-- Tab Doctor Fields -->
       <VaCard v-if="isShowDoctorProfile" class="p-2 ml-1 rounded">
         <VaForm ref="form" @submit.prevent="submitDoctorProfile">
-          <div class="grid md:grid-cols-2 gap-4">
+          <div class="grid md:grid-cols-2 gap-4 p-3">
             <VaField>
               <VaInput
                 v-model="formData.doctorProfile.education"
@@ -1394,17 +1398,6 @@ const openImagePreview = (image: string) => {
                 preset="solid"
               />
             </VaField>
-            <VaField>
-              <VaInput
-                v-model="formData.doctorProfile.seftDescription"
-                :label="t('auth.self_description')"
-                class="mb-3"
-                :placeholder="t('auth.enter_self_description')"
-                textarea
-                readonly
-                preset="solid"
-              />
-            </VaField>
             <!-- VaField typeServiceID -->
             <VaField>
               <VaSelect
@@ -1432,7 +1425,18 @@ const openImagePreview = (image: string) => {
                 preset="solid"
               />
             </VaField>
-
+            <VaField class="col-span-2" width="100%">
+              <VaTextarea
+                v-model="formData.doctorProfile.seftDescription"
+                :label="t('auth.self_description')"
+                class="mb-3"
+                :placeholder="t('auth.enter_self_description')"
+                readonly
+                preset="solid"
+                rows="4"
+                style="width: 100%"
+              />
+            </VaField>
             <!-- Display certification images -->
             <VaField
               v-if="formData.doctorProfile?.certificationImage && formData.doctorProfile.certificationImage.length > 0"
@@ -1519,7 +1523,8 @@ const openImagePreview = (image: string) => {
                 :placeholder="t('auth.choose_relationship')"
                 :options="relationshipOptions"
                 text-by="text"
-                clearable
+                value-by="value"
+                :rules="[(v) => !!v || t('auth.relationship_required')]"
               />
             </VaField>
           </div>
@@ -1546,7 +1551,7 @@ const openImagePreview = (image: string) => {
               <div v-for="option in medicalHistoryOptions" :key="option.value">
                 <VaCheckbox
                   v-model="selectedMedicalItems[option.value]"
-                  :label="option.text"
+                  :label="option.label"
                   @change="updateMedicalName"
                 />
               </div>

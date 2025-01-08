@@ -1,347 +1,216 @@
 <template>
-  <div class="dashboard-staff">
-    <!-- Top Stats Cards -->
-    <div class="stats-container mb-6">
-      <VaCard class="stats-card">
-        <VaCardContent>
-          <div class="stats-header">Total Appointments</div>
-          <div class="stats-value-container">
-            <span class="stats-number">{{ totalAppointments }}</span>
-          </div>
-        </VaCardContent>
-      </VaCard>
-
-      <VaCard class="stats-card">
-        <VaCardContent>
-          <div class="stats-header">New Contacts</div>
-          <div class="stats-value-container">
-            <span class="stats-number">{{ newContacts }}</span>
-          </div>
-        </VaCardContent>
-      </VaCard>
-
-      <VaCard class="stats-card">
-        <VaCardContent>
-          <div class="stats-header">Pending Payments</div>
-          <div class="stats-value-container">
-            <span class="stats-number">{{ pendingPayments }}</span>
-          </div>
-        </VaCardContent>
-      </VaCard>
-
-      <VaCard class="stats-card">
-        <VaCardContent>
-          <div class="stats-header">Total Doctors</div>
-          <div class="stats-value-container">
-            <span class="stats-number">{{ totalDoctors }}</span>
-          </div>
-        </VaCardContent>
-      </VaCard>
-
-      <VaCard class="stats-card">
-        <VaCardContent>
-          <div class="stats-header">Total Patients</div>
-          <div class="stats-value-container">
-            <span class="stats-number">{{ totalPatients }}</span>
-          </div>
-        </VaCardContent>
-      </VaCard>
+  <VaInnerLoading :loading="isLoading" class="p-4">
+    <div class="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-4 gap-4 md:w-full">
+      <DataSectionItem
+        v-for="metric in dashboardMetrics"
+        :key="metric.id"
+        :title="metric.title"
+        :value="metric.value"
+        :icon-background="metric.iconBackground"
+        :icon-color="metric.iconColor"
+      >
+        <template #icon>
+          <VaIcon :name="metric.icon" size="large" />
+        </template>
+      </DataSectionItem>
+      <div class="col-span-2 sm:col-span-1 md:col-span-4">
+        <VaCard class="mt-3 overflow-auto">
+          <VaButtonToggle
+            v-model="isAppointment"
+            preset="secondary"
+            border-color="primary"
+            :options="options"
+            class="p-3"
+          />
+          <VaCardTitle class="flex items-start justify-between">
+            <h1 class="card-title text-secondary font-bold uppercase">
+              {{ isAppointment ? t('appointment.appointment') : t('appointment.follow_up') }}
+            </h1>
+          </VaCardTitle>
+          <VaCardContent>
+            <VaDataTable
+              :items="tableItems"
+              :columns="columns"
+              :per-page="5"
+              :current-page="currentPage"
+              :no-data-html="t('appointment.no_items_found')"
+            >
+              <template #cell(appointmentDate)="{ value }">
+                {{ formatDate(value) }}
+              </template>
+              <template #cell(date)="{ value }">
+                {{ formatDate(value) }}
+              </template>
+              <template #footer>
+                <tr>
+                  <td>
+                    <div class="flex justify-center mt-4">
+                      <VaPagination v-model="currentPage" :pages="isAppointment ? pagesA : pagesF" />
+                    </div>
+                  </td>
+                </tr>
+              </template>
+            </VaDataTable>
+          </VaCardContent>
+        </VaCard>
+      </div>
     </div>
-
-    <!-- Upcoming Appointments -->
-    <div class="dashboard-bottom mt-6">
-      <VaCard class="appointments-card">
-        <VaCardTitle>Upcoming Appointments</VaCardTitle>
-        <VaCardContent>
-          <div class="appointments-grid">
-            <div v-for="day in weekDays" :key="day.name" class="day-column">
-              <div class="day-header">
-                <h3 class="day-name">{{ day.name }}</h3>
-                <span class="day-date">{{ day.date }}</span>
-              </div>
-              <div class="appointments-list">
-                <div v-if="day.appointments && day.appointments.length > 0" class="appointment-items">
-                  <div v-for="apt in day.appointments" :key="apt.id" class="appointment-item">
-                    <span class="appointment-time">{{ apt.time }}</span>
-                    <span class="appointment-patient">{{ apt.patientName }}</span>
-                  </div>
-                </div>
-                <div v-else class="no-appointments">No Appointments</div>
-              </div>
-            </div>
-          </div>
-        </VaCardContent>
-      </VaCard>
-    </div>
-  </div>
+  </VaInnerLoading>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import appointmentService from '@/services/appointment.service'
-import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
-import { usePaymentStore } from '@/stores/modules/payment.module'
-import { useUserProfileStore } from '@/stores/modules/user.module'
+import { getErrorMessage } from '@/services/utils'
+import { useDashboardStore } from '@/stores/modules/dashboard.module'
+import { computed, onBeforeMount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { DataTableItem, useColors, useToast } from 'vuestic-ui'
+import DataSectionItem from './DataSectionItem.vue'
+import { Appointment, FollowUpAppointment } from '@/pages/appointment/types'
+import { DateInputModelValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 
-// Create an instance of the store
-const doctorStore = useDoctorProfileStore()
-const paymentStore = usePaymentStore()
-const userStore = useUserProfileStore()
+const isLoading = ref(false)
+const dashboardStore = useDashboardStore()
+const current_date = ref<string>()
+const isAppointment = ref(true)
+const appointments = ref<Appointment[]>([])
+const followups = ref<FollowUpAppointment[]>([])
 
-// Define interfaces for the data
-interface Appointment {
-  id: number
-  time: string
-  patientName: string
-  date: string
-  status: string
-}
+const tableItems = computed<DataTableItem[]>(() => (isAppointment.value ? appointments.value : followups.value))
 
-interface DaySchedule {
-  name: string
-  date: string
-  appointments: Appointment[]
-}
-// Reactive variables for dashboard data
-const totalAppointments = ref(0)
-const newContacts = ref(0)
-const pendingPayments = ref(0)
-const totalDoctors = ref(0)
-const totalPatients = ref(0)
-const weekDays = ref<DaySchedule[]>([])
+const options = computed(() => [
+  { value: true, label: t('appointment.appointment') },
+  { value: false, label: t('appointment.follow_up') },
+])
 
-// Helper function to format appointments into weekly schedule
-const formatWeeklySchedule = (appointments: any) => {
-  const today = new Date()
-  const weekDaysData: DaySchedule[] = []
-
-  // Ensure appointments is an array and handle nested data structure
-  const appointmentsArray = Array.isArray(appointments)
-    ? appointments
-    : Array.isArray(appointments?.data)
-      ? appointments.data
-      : []
-
-  for (let i = 0; i < 7; i++) {
-    const currentDate = new Date(today)
-    currentDate.setDate(today.getDate() + i)
-
-    const dayData: DaySchedule = {
-      name: currentDate.toLocaleDateString('en-US', { weekday: 'short' }),
-      date: currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      appointments: appointmentsArray
-        .filter(
-          (apt: any) =>
-            apt?.appointmentDate && new Date(apt.appointmentDate).toDateString() === currentDate.toDateString(),
-        )
-        .map((apt: any) => ({
-          id: apt.id || 0,
-          time: apt.appointmentDate
-            ? new Date(apt.appointmentDate).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })
-            : '',
-          patientName: apt.patientName || 'Unknown',
-          date: apt.appointmentDate || '',
-          status: apt.status || '',
-        })),
-    }
-    weekDaysData.push(dayData)
+const columns = computed(() => {
+  if (isAppointment.value) {
+    return [
+      { key: 'appointmentDate', label: t('appointment.appointment_data_table.date'), name: 'appointmentDate' },
+      { key: 'startTime', label: t('appointment.appointment_data_table.time'), name: 'startTime' },
+      { key: 'patientName', label: t('appointment.appointment_data_table.patient'), name: 'patientName' },
+      { key: 'patientPhone', label: t('appointment.appointment_data_table.phone'), name: 'patientPhone' },
+      { key: 'dentistName', label: t('appointment.appointment_data_table.doctor'), name: 'dentistName' },
+      { key: 'serviceName', label: t('appointment.appointment_data_table.service'), name: 'serviceName' },
+    ]
   }
-  return weekDaysData
+  return [
+    { key: 'date', label: t('appointment.appointment_data_table.date'), name: 'date' },
+    { key: 'startTime', label: t('appointment.appointment_data_table.time'), name: 'startTime' },
+    { key: 'patientName', label: t('appointment.appointment_data_table.patient'), name: 'patientName' },
+    { key: 'doctorName', label: t('appointment.appointment_data_table.doctor'), name: 'doctorName' },
+    { key: 'patientPhone', label: t('appointment.appointment_data_table.phone'), name: 'patientPhone' },
+    { key: 'serviceName', label: t('appointment.appointment_data_table.service'), name: 'serviceName' },
+    { key: 'procedureName', label: t('appointment.appointment_data_table.procedure'), name: 'procedureName' },
+  ]
+})
+
+interface DashboardMetric {
+  id: string
+  title: string
+  value: string
+  icon: string
+  iconBackground: string
+  iconColor: string
 }
 
-// Fetch data on component mount
+const { getColor } = useColors()
+const { t } = useI18n()
+const { init } = useToast()
+
+const dashboardMetrics = computed(() => {
+  return [
+    {
+      id: 'appointments',
+      title: t('dashboard.total_appointments'),
+      value: String(dashboardStore.total_appointment) as string,
+      icon: 'book_online',
+      iconBackground: getColor('success'),
+      iconColor: getColor('on-success'),
+    },
+    {
+      id: 'new_contacts',
+      title: t('dashboard.new_contacts'),
+      value: String(dashboardStore.new_contacts),
+      icon: 'contact_support',
+      iconBackground: getColor('info'),
+      iconColor: getColor('on-info'),
+    },
+    {
+      id: 'follow_up',
+      title: t('dashboard.follow_up'),
+      value: String(dashboardStore.follow_up),
+      icon: 'change_circle',
+      iconBackground: getColor('danger'),
+      iconColor: getColor('on-danger'),
+    },
+    {
+      id: 'unassign',
+      title: t('dashboard.unassign'),
+      value: String(dashboardStore.unassign),
+      icon: 'add_circle',
+      iconBackground: getColor('warning'),
+      iconColor: getColor('on-warning'),
+    },
+  ] satisfies DashboardMetric[]
+})
+
+const currentPage = ref(1)
+const pagesA = computed(() => Math.ceil(appointments.value.length / 5))
+const pagesF = computed(() => Math.ceil(followups.value.length / 5))
+
+const formatDate = (date: DateInputModelValue): string => {
+  if (date === null || date === undefined) return ''
+
+  const dateObj =
+    date instanceof Date
+      ? date
+      : typeof date === 'string'
+        ? new Date(date)
+        : date instanceof Number
+          ? new Date(Number(date))
+          : new Date()
+
+  if (isNaN(dateObj.getTime())) return ''
+
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+  const day = dateObj.getDate().toString().padStart(2, '0')
+  const year = dateObj.getFullYear()
+
+  return `${day}/${month}/${year}`
+}
+
+onBeforeMount(() => {
+  const getCurrentDate = () => {
+    return new Date().toISOString().split('T')[0]
+  }
+  current_date.value = getCurrentDate()
+})
+
 onMounted(async () => {
-  // Fetch appointments
-  try {
-    const appointments = await appointmentService.listAppointments() // Đây đã là mảng
-    console.log('Appointments:', appointments) // Kiểm tra xem appointments có dữ liệu không
+  isLoading.value = true
+  await Promise.all([
+    dashboardStore.getTotalAppointments(current_date.value),
+    dashboardStore.getNewContacts(current_date.value),
+    dashboardStore.getFollowUp(current_date.value),
+    dashboardStore.getUnassign(current_date.value),
+  ]).catch((error) => {
+    const errorMessage = getErrorMessage(error)
+    init({
+      title: 'error',
+      message: errorMessage,
+      color: 'danger',
+    })
+    isLoading.value = false
+  })
 
-    totalAppointments.value = Array.isArray(appointments) ? appointments.length : 0 // Đảm bảo là mảng
-    weekDays.value = formatWeeklySchedule(appointments)
-  } catch (error) {
-    console.error('Error fetching appointments:', error)
-    totalAppointments.value = 0
-    weekDays.value = formatWeeklySchedule([])
-  }
+  dashboardStore.getAppointmentUnExamination(current_date.value).then((data) => {
+    appointments.value = data.data as Appointment[]
+  })
+  dashboardStore.getFollowUpAppointmentUnExamination(current_date.value).then((data) => {
+    followups.value = data.data as FollowUpAppointment[]
+    console.log(followups.value)
+  })
 
-  // Set default values for now
-  newContacts.value = 0
-  totalDoctors.value = 0
-  totalPatients.value = 0
-  pendingPayments.value = 0
-
-  // Fetch total doctors
-  try {
-    const doctors = await doctorStore.getDoctors({ isActive: true })
-    totalDoctors.value = doctors.length || 0
-  } catch (error) {
-    console.error('Error fetching doctors:', error)
-    totalDoctors.value = 0
-  }
-
-  // Fetch total patients
-  try {
-    const patients = await userStore.getAllPatients({ pageNumber: 1, pageSize: 20, isActive: true })
-    totalPatients.value = patients.data.length
-  } catch (error) {
-    console.error('Error fetching patients:', error)
-    totalPatients.value = 0
-  }
-
-  // Fetch pending payments with filter, page, limit, and date range
-  try {
-    const filter = { page: 1, limit: 500 } // Example pagination filter, adjust as needed
-    const startDate = '2024-01-01' // Start date for payments filter (example)
-    const endDate = '2024-12-31' // End date for payments filter
-    // Adjusted filter to match PaginationFilter type
-    const adjustedFilter = { pageNumber: filter.page, pageSize: filter.limit }
-    // Call store action with adjusted filter, startDate, and endDate
-    const response = await paymentStore.getAllPayments(adjustedFilter, startDate, endDate)
-    pendingPayments.value = response.data.length || 0
-  } catch (error) {
-    console.error('Error fetching payments:', error)
-    pendingPayments.value = 0 // Default value in case of error
-  }
+  isLoading.value = false
 })
 </script>
-
-<style scoped>
-.dashboard-staff {
-  padding: 24px;
-  background-color: #f8f9fa;
-}
-
-/* Stats Cards Styling */
-.stats-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
-}
-
-.stats-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-  overflow: hidden;
-  border-top: 4px solid #4caf50; /* Default color */
-}
-
-.stats-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-.stats-header {
-  color: #4a4a4a;
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 12px;
-}
-
-.stats-value-container {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-}
-
-.stats-number {
-  font-size: 32px;
-  font-weight: 700;
-  background: linear-gradient(45deg, #333, #666);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Appointments Section */
-.appointments-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.appointments-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
-  padding: 20px;
-}
-
-.day-column {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 16px;
-  transition: transform 0.2s;
-}
-
-.day-column:hover {
-  transform: translateY(-2px);
-}
-
-.day-header {
-  text-align: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.day-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2196f3;
-  margin-bottom: 4px;
-}
-
-.day-date {
-  font-size: 14px;
-  color: #666;
-}
-
-.appointment-item {
-  background: white;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s;
-  border-left: 4px solid #2196f3;
-}
-
-.appointment-item:hover {
-  transform: scale(1.02);
-}
-
-.appointment-time {
-  font-size: 14px;
-  font-weight: 600;
-  color: #2196f3;
-  margin-bottom: 6px;
-}
-
-.appointment-patient {
-  font-size: 15px;
-  color: #333;
-  font-weight: 500;
-}
-
-.no-appointments {
-  text-align: center;
-  color: #666;
-  padding: 20px;
-  font-style: italic;
-}
-
-/* Utility Classes */
-.mb-6 {
-  margin-bottom: 24px;
-}
-.mt-6 {
-  margin-top: 24px;
-}
-</style>

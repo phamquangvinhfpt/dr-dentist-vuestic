@@ -9,7 +9,7 @@
         <template #prepend>
           <i class="mdi mdi-plus mr-2"></i>
         </template>
-        Add Staff
+        {{ t('doctor.Add_Staff') }}
       </VaButton>
     </div>
 
@@ -17,20 +17,19 @@
     <VaCard class="bg-white shadow-md rounded-lg overflow-hidden">
       <div class="grid grid-cols-6 gap-4 px-6 py-3 bg-indigo-100 text-sm font-semibold text-indigo-800">
         <div></div>
-        <div>Name</div>
-        <div>Gender</div>
-        <div>Email</div>
-        <div>Phone</div>
-        <div>Actions</div>
+        <div>{{ t('doctor.name') }}</div>
+        <div>{{ t('doctor.gender') }}</div>
+        <div>{{ t('doctor.email') }}</div>
+        <div>{{ t('doctor.phone') }}</div>
       </div>
-
-      <div v-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">No matching users found.</div>
+      <div v-if="isLoading" class="py-10 text-center text-gray-500">{{ t('doctor.loading') }}...</div>
+      <div v-else-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">No matching users found.</div>
 
       <ul v-else>
         <li
           v-for="user in paginatedUsers"
           :key="user.id"
-          class="border-b border-gray-200 last:border-b-0 hover:bg-indigo-50 transition-all cursor-pointer"
+          class="border-b border-gray-200 last:border-b-0 hover:bg-indigo-50 hover:dark:bg-[#1f263f] transition-all cursor-pointer"
         >
           <div class="grid grid-cols-6 gap-4 px-6 py-4 items-center">
             <div>
@@ -41,12 +40,6 @@
             <div class="truncate">{{ maskEmail(user.email) }}</div>
             <div>{{ maskPhone(user.phoneNumber) }}</div>
             <div class="flex gap-2 justify-end items-center text-sm">
-              <VaButton color="danger">
-                <i class="mdi mdi-delete h-4 w-4 text-red"></i>
-              </VaButton>
-              <VaButton color="warning" @click.stop="updateUser(user.id)">
-                <i class="mdi mdi-pencil h-4 w-4 text-yellow"></i>
-              </VaButton>
               <VaButton color="info" @click.stop="viewDetails(user.id)">
                 <i class="mdi mdi-open-in-new h-4 w-4 text-blue"></i>
               </VaButton>
@@ -56,8 +49,40 @@
       </ul>
 
       <!-- Pagination -->
-      <div class="flex justify-center mt-6">
-        <VaPagination v-model="currentPage" :total-pages="totalPages" :visible-pages="5" color="primary" />
+      <div class="flex flex-col sm:flex-row items-center justify-between mt-6 mx-3 space-y-4 sm:space-y-0">
+        <div class="flex items-center space-x-2">
+          <VaSelect
+            id="pageSize"
+            v-model="itemsPerPage"
+            :options="pageSizeOptions"
+            class="rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+          </VaSelect>
+        </div>
+
+        <!-- Phân trang -->
+        <ul class="pagination flex items-center space-x-2">
+          <!-- Nút quay lại -->
+          <li>
+            <Button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">
+              <i class="mdi mdi-arrow-left h-4"></i>
+            </Button>
+          </li>
+
+          <!-- Số trang -->
+          <li v-for="page in totalPages" :key="page">
+            <Button :class="['pagination-button', { active: currentPage === page }]" @click="currentPage = page">
+              {{ page }}
+            </Button>
+          </li>
+
+          <!-- Nút tiếp tục -->
+          <li>
+            <button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">
+              <i class="mdi mdi-arrow-right h-4 w-4 text-blue"></i>
+            </button>
+          </li>
+        </ul>
       </div>
     </VaCard>
   </VaCard>
@@ -67,9 +92,10 @@
 import { useUserProfileStore } from '@stores/modules/user.module'
 import { useRouter } from 'vue-router'
 import { ref, computed, onMounted, watch } from 'vue'
-import { VaButton, VaAvatar, VaInput, VaPagination } from 'vuestic-ui'
+import { VaButton, VaAvatar, VaInput } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const userStore = useUserProfileStore()
 const router = useRouter()
 
@@ -109,17 +135,26 @@ const filteredUsers = computed(() => {
 })
 
 const currentPage = ref(1)
-const itemsPerPage = ref(6)
-const totalPages = computed(() => Math.ceil(filteredUsers.value.length / itemsPerPage.value))
+const itemsPerPage = ref(5)
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+const pageSizeOptions = ref([5, 10, 20, 50])
 
 const paginatedUsers = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
-  return filteredUsers.value.slice(start, start + itemsPerPage.value)
+  const end = start + itemsPerPage.value
+  // Apply filter to the userList before slicing for pagination
+  return filteredUsers.value.slice(start, end)
 })
 
+// Tổng số mục sau khi áp dụng tìm kiếm
+const totalItems = computed(() => userList.value.length)
+
+const isLoading = ref(true)
+
 const getAllUsers = async () => {
+  isLoading.value = true
   try {
-    const res = await userStore.getAllStaff({ isActive: true, pageNumber: 1, pageSize: 10 })
+    const res = await userStore.getAllStaff({ isActive: true, pageNumber: 1, pageSize: 100 })
     userList.value = res.data.map((user) => ({
       id: user.id,
       userName: user.userName,
@@ -137,16 +172,14 @@ const getAllUsers = async () => {
     }))
   } catch (error) {
     console.error('Error fetching users:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
 const viewDetails = (id: string) => {
   userStore.id = id
-  router.push({ name: 'user-detail', params: { id } })
-}
-
-const updateUser = (id: string) => {
-  router.push({ name: 'user-update', params: { id } })
+  router.push({ name: 'staff-detail', params: { id } })
 }
 
 const maskEmail = (email: string) => email.replace(/(\w{3})[\w.-]+(@[\w.]+)/, '$1***$2')
@@ -162,10 +195,54 @@ onMounted(() => {
   getAllUsers()
 })
 
-watch(currentPage, getAllUsers)
+watch([userList, itemsPerPage], () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = 1
+  }
+})
+watch(itemsPerPage, () => {
+  currentPage.value = 1
+})
 </script>
 
 <style scoped>
 .bg-gray-50 {
+  background-color: #f9fafb;
+}
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination-button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+.pagination-button:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.pagination-button:disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: default;
 }
 </style>

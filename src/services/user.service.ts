@@ -34,6 +34,25 @@ class UserService {
         return Promise.reject(error)
       })
   }
+  async updateProfileForAdmin(userData: any): Promise<any> {
+    const formData = new FormData()
+    // Thêm các field thông thường
+    formData.append('userId', userData?.DoctorID || '')
+    formData.append('firstName', userData?.TypeServiceID || '')
+    formData.append('lastName', userData.Education || '')
+    formData.append('gender', userData.College || '')
+    formData.append('job', userData.Certification || '')
+    formData.append('address', userData.Certification || '')
+
+    return apiService
+      .put(`/personal/profile`, formData)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 
   async changePassword(data: PasswordDetailFormData): Promise<any> {
     return apiService
