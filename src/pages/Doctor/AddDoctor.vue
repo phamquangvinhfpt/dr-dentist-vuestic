@@ -938,7 +938,7 @@ h3 {
 }
 
 .hover\:zoom-image:hover {
-  transform: scale(6); /* Phóng to hình ảnh khi hover */
+  transform: scale(4); /* Phóng to hình ảnh khi hover */
   z-index: 2; /* Đưa hình ảnh lên trên overlay */
 }
 

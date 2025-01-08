@@ -3,7 +3,7 @@ import { ref, reactive, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
-
+import { getSrcAvatar } from '@/services/utils'
 import { useToast } from 'vuestic-ui'
 import '@mdi/font/css/materialdesignicons.css'
 import { useI18n } from 'vue-i18n'
@@ -14,9 +14,8 @@ const doctorStore = useDoctorProfileStore()
 const { init: toast } = useToast()
 const serviceStore = useServiceStore()
 const newImage = ref<string | null>(null) // New reactive property for the image preview
-const emptyImage = 'path/to/placeholder/image.png' // Placeholder image path
 const fileName = ref('')
-
+const reviewimage = ref<string | null>(null)
 const handleAvatarUpload = (event: Event) => {
   const input = event.target as HTMLInputElement
   const files = input.files
@@ -159,6 +158,8 @@ const getDoctorDetail = async () => {
       } else {
         doctor.WorkingType.text = t('doctor.full_time')
       }
+      reviewimage.value = response.doctorProfile.certificationImage
+      console.log('image chứng chỉ', reviewimage.value)
       const matchedService = serviceTypes.value.find((service) => service.id === response.doctorProfile.typeServiceID)
       const typeName = matchedService ? matchedService.typeName : t('doctor.Unknown')
       doctor.typeServiceId.text = typeName
@@ -637,7 +638,18 @@ watch(
                 <!-- Image with zoom effect -->
                 <img
                   alt="Preview"
-                  :src="newImage || emptyImage"
+                  :src="newImage"
+                  class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
+                />
+              </div>
+              <div v-else class="image-review">
+                <!-- Overlay to blur the background -->
+                <div class="overlay"></div>
+
+                <!-- Image with zoom effect -->
+                <img
+                  alt="Preview"
+                  :src="getSrcAvatar(reviewimage)"
                   class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
                 />
               </div>
@@ -898,5 +910,42 @@ h3 {
   background: #1cc88a;
   transform: translateY(-2px);
   transition: all 0.3s ease;
+}
+.hover\:zoom-image:hover {
+  transform: scale(4); /* Phóng to hình ảnh khi hover */
+  z-index: 2; /* Đưa hình ảnh lên trên overlay */
+}
+
+/* Overlay styling */
+.image-review .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7); /* Màu nền mờ */
+  z-index: 1;
+  pointer-events: none; /* Không chặn thao tác chuột */
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease;
+  filter: blur(0px); /* Không làm mờ mặc định */
+  opacity: 0;
+}
+
+.image-review:hover .overlay {
+  filter: blur(5px); /* Làm mờ nền */
+  opacity: 1; /* Hiển thị overlay */
+}
+.image-review {
+  position: relative; /* Đảm bảo container này quản lý các phần tử con */
+}
+
+.hover\:zoom-image {
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease; /* Hiệu ứng mượt */
+  position: relative;
+  z-index: 1;
 }
 </style>

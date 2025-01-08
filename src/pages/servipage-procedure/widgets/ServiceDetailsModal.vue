@@ -85,7 +85,7 @@
               <div v-for="feedback in reviewGroup.feedbacks" :key="feedback.feedbackId">
                 <VaCard class="review-item flex items-start gap-4 w-full h-full">
                   <img
-                    v-if="feedback.doctorAvatar"
+                    v-if="feedback.patientAvatar"
                     :src="getSrcAvatar(feedback.patientAvatar)"
                     alt=" Avatar"
                     class="w-16 h-16 rounded-full"
@@ -98,11 +98,11 @@
                   />
                   <div class="flex-1 flex flex-col">
                     <h5 class="font-semibold text-gray-900 dark:text-white text-xl">
-                      {{ feedback.doctorName }} (Bác sĩ)
+                      {{ feedback.patientName }} (Bệnh Nhân)
                     </h5>
                     <p class="text-gray-600 dark:text-gray-300 text-base mb-2">{{ feedback.message }}</p>
                     <div class="text-sm text-gray-500">
-                      Đánh giá: {{ feedback.ratings }} ★ | Bệnh nhân: {{ feedback.patientName }}
+                      Đánh giá: {{ feedback.ratings }} ★ | Bác sĩ: {{ feedback.doctorName }}
                     </div>
                   </div>
                 </VaCard>
