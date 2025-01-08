@@ -232,7 +232,12 @@
     "verify_message": "We have sent a code to your phone",
     "verify_ask": "Didn't receive code?",
     "type_service": "Type Service",
-    "certification_images": "Certification Images"
+    "certification_images": "Certification Images",
+    "updated_patient_family_successfully": "Updated patient family successfully",
+    "updated_patient_profile_successful": "Updated patient profile successfully",
+    "family_history": "Family History",
+    "enter_family_history": "Enter family history",
+    "updated_patient_profile_successfully": "Updated patient profile successfully"
   },
   "doctor": {
     "doctor_list": "Doctor List",

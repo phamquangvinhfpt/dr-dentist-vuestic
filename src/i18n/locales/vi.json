@@ -219,7 +219,14 @@
     "verify_message": "Chúng tôi đã gửi mã xác thực đến số",
     "verify_ask": "Không nhận được OTP?",
     "type_service": "Loại dịch vụ",
-    "certification_images": "Chứng chỉ"
+    "certification_images": "Chứng chỉ",
+    "enter_certification_images": "Nhập chứng chỉ",
+    "updated_patient_family_successfully": "Cập nhật thông tin người thân thành công",
+    "updated_patient_profile_successful": "Cập nhật hồ sơ bệnh nhân thành công",
+    "family_history": "lịch sử bệnh án",
+    "enter_family_history": "Điền lịch sử bệnh án",
+    "family_history_required": "Lịch sử bệnh án là bắt buộc",
+    "updated_medical_history_successfully": "Cập nhật lịch sử bệnh án thành công"
   },
   "doctor": {
     "doctor_list": "Danh sách bác sĩ",

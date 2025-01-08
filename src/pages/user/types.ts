@@ -63,7 +63,7 @@ type PatientFamilyInfor = {
   name: string
   phone: string
   email: string
-  relationship: Rela
+  relationship: Rela | null
 }
 
 type MedicalHistoryInfor = {
@@ -232,13 +232,14 @@ export type DoctorDetailsUpdate = {
 
 // Update patientfamily
 export type PatientFamilyUpdate = {
+  patientProfileId: string
   isUpdatePatientFamily: boolean
-  patientProfileId: string | undefined
   patientFamily: PatientFamilyInfor
 }
-//update medical history
+
+// update medical history
 export type MedicalHistoryUpdate = {
-  patientProfileId: string | undefined
+  patientProfileId: string
   isUpdateMedicalHistory: boolean
   medicalHistory: MedicalHistoryInfor
 }
@@ -246,8 +247,12 @@ export type MedicalHistoryUpdate = {
 // update patient profile
 export type PatientProfileUpdate = {
   patientProfileId: string
-  isUpdatePatientProfile: boolean
-  Patientprofile: PatientProfileInfor
+  isUpdateProfile: boolean
+  profile: {
+    userId: string
+    idCardNumber: string
+    occupation: string
+  }
 }
 
 export type Doctor = {
