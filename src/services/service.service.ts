@@ -45,7 +45,7 @@ class ServiceService {
 
   async getServiceById(id: string): Promise<any> {
     try {
-      const response = await apiService.get(`/service/customer/get/${id}`)
+      const response = await apiService.get(`/service/${id}/get`)
       console.log('API Response in service:', response) // Debug log
 
       if (!response || !response.data) {

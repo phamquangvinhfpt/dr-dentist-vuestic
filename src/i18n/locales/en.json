@@ -1168,7 +1168,8 @@
     "restoreError": "Failed to restore service",
     "deleteSuccess": "Delete service successfully",
     "deleteError": "Failed to delete service",
-    "statusUpdatedSuccessfully": "Status updated successfully"
+    "statusUpdatedSuccessfully": "Status updated successfully",
+    "serviceDetails": "Service Details"
   },
   "procedure": {
     "id": "ID",
