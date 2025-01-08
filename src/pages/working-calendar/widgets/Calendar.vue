@@ -9,9 +9,10 @@
             <div class="flex items-center gap-2">
               <span
                 class="material-symbols-outlined bg-blue-500 hover:cursor-pointer hover:bg-blue-600 p-2 rounded-full"
+                :class="{ 'animate-spin': loading }"
                 @click="export_calendar"
               >
-                file_export
+                {{ loading ? 'circle' : 'file_export' }}
               </span>
               <div
                 v-if="
@@ -1269,6 +1270,7 @@ const openDayDetailsModal = (day: CalendarDay) => {
 }
 
 const export_calendar = () => {
+  loading.value = true
   const firstDay = new Date(currentYear.value, currentMonth.value, 2).toISOString().split('T')[0]
   const lastDay = new Date(currentYear.value, currentMonth.value + 1, 1).toISOString().split('T')[0]
   calendarStore
@@ -1294,6 +1296,10 @@ const export_calendar = () => {
         message: errorMessage,
         color: 'danger',
       })
+      loading.value = false
+    })
+    .finally(() => {
+      loading.value = false
     })
 }
 

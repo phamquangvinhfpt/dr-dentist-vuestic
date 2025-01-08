@@ -86,7 +86,6 @@ const columns = computed(() => {
   if (isAppointment.value) {
     return [
       { key: 'appointmentDate', label: t('appointment.appointment_data_table.date'), name: 'appointmentDate' },
-      { key: 'roomName', label: t('appointment.appointment_data_table.room'), name: 'roomName' },
       { key: 'startTime', label: t('appointment.appointment_data_table.time'), name: 'startTime' },
       { key: 'patientName', label: t('appointment.appointment_data_table.patient'), name: 'patientName' },
       { key: 'patientPhone', label: t('appointment.appointment_data_table.phone'), name: 'patientPhone' },
@@ -96,11 +95,10 @@ const columns = computed(() => {
   }
   return [
     { key: 'date', label: t('appointment.appointment_data_table.date'), name: 'date' },
-    { key: 'roomName', label: t('appointment.appointment_data_table.room'), name: 'roomName' },
     { key: 'startTime', label: t('appointment.appointment_data_table.time'), name: 'startTime' },
     { key: 'patientName', label: t('appointment.appointment_data_table.patient'), name: 'patientName' },
     { key: 'doctorName', label: t('appointment.appointment_data_table.doctor'), name: 'doctorName' },
-    { key: 'step', label: t('appointment.appointment_data_table.step'), name: 'step' },
+    { key: 'patientPhone', label: t('appointment.appointment_data_table.phone'), name: 'patientPhone' },
     { key: 'serviceName', label: t('appointment.appointment_data_table.service'), name: 'serviceName' },
     { key: 'procedureName', label: t('appointment.appointment_data_table.procedure'), name: 'procedureName' },
   ]

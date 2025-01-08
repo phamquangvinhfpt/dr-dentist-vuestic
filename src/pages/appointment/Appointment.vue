@@ -501,6 +501,15 @@
                     icon-color="#812E9E"
                     @click="rescheduleModal(rowData)"
                   />
+
+                  <VaButton
+                    v-if="(rowData.status === 3 || rowData.status === 2) && !role?.includes('Dentist')"
+                    round
+                    icon="clear"
+                    color="danger"
+                    icon-color="#812E9E"
+                    @click="cancelModal(rowData)"
+                  />
                 </div>
               </template>
             </VaDataTable>
@@ -900,7 +909,7 @@
                 v-model="startTime"
                 class="col-span-1"
                 :label="t('appointment.reschedule_appointment.time')"
-                :options="optionsStartTimes"
+                :options="availableTimes"
                 :rules="[(v) => !!v || t('appointment.reschedule_appointment.time_required')]"
               />
             </div>
@@ -979,6 +988,7 @@ import { debounce } from 'lodash'
 import ListAppointment from './widgets/list-appointment/ListAppointment.vue'
 import ListFollowUpAppointment from './widgets/list-appointment/ListFollowUpAppointment.vue'
 import { useI18n } from 'vue-i18n'
+import { useCalendarStore } from '@/stores/modules/calendar.module'
 
 const selectedDate = ref(new Date())
 const showAllUnassignedModal = ref(false)
@@ -996,6 +1006,7 @@ const loading = ref(false)
 const appointments = ref<Appointment[]>([])
 const followUpAppointments = ref<FollowUpAppointment[]>([])
 const storeAppointments = useAppointmentStore()
+const calendarStore = useCalendarStore()
 const storeDoctors = useDoctorProfileStore()
 const storeServices = useServiceStore()
 const storeTreatment = useTreatmentStore()
@@ -1013,6 +1024,7 @@ const router = useRouter()
 const usersStore = useAuthStore()
 const role = usersStore.user?.roles
 const items = ref<Appointment[]>([])
+const availableTimes = ref<string[]>([])
 const followitems = ref<FollowUpAppointment[]>([])
 const unassigneditems = ref<Appointment[]>([])
 const create_form = useForm('create_appointment_form')
@@ -1091,6 +1103,7 @@ const serviceId = ref<Options>()
 const date = ref(new Date())
 const current_follow_up = ref<any>()
 const startTime = ref('')
+const current_appointment = ref<any>()
 const duration = ref('00:30:00')
 const notes = ref('')
 const optionsPatients = ref<Options[]>([])
@@ -1248,6 +1261,18 @@ const rescheduleModal = (appointment: any) => {
   appointmentId.value = appointment.appointmentId
   date.value = appointment.appointmentDate
   startTime.value = ''
+  const request = {
+    doctorID:
+      isAppointment.value === 'appointment'
+        ? getDoctorId(appointment.dentistId)
+        : getDoctorId(appointment.doctorProfileID),
+    date:
+      isAppointment.value === 'appointment'
+        ? formatDateForm(appointment.appointmentDate)
+        : formatDateForm(appointment.date),
+  }
+  current_appointment.value = appointment
+  getAvailablesTimesForDoctor(request)
   showModalReschedule.value = true
   if (isAppointment.value === 'followup') {
     current_follow_up.value = appointment
@@ -1256,7 +1281,7 @@ const rescheduleModal = (appointment: any) => {
 
 const cancelModal = (appointment: any) => {
   appointmentId.value = appointment.appointmentId
-  userId.value = appointment.patientId
+  userId.value = isAppointment.value === 'appointment' ? appointment.patientId : appointment.patientProfileID
   showModalCancel.value = true
 }
 
@@ -1315,6 +1340,8 @@ const submitReschedule = (isAppointment: any) => {
         color: 'danger',
       })
     })
+
+  showModalReschedule.value = false
 }
 
 const submitCancel = (isAppointment: any) => {
@@ -1335,6 +1362,8 @@ const submitCancel = (isAppointment: any) => {
         fetchAppointments(searchValueA.value)
       } else if (isAppointment === 'unassigned') {
         fetchNonDoctorAppointments(searchValueN.value)
+      } else {
+        fetchFollowUpAppointments(searchValueF.value)
       }
     })
     .catch((error) => {
@@ -2066,6 +2095,26 @@ const getWeekDayDate = (index: number) => {
   return format(day, 'yyyy-MM-dd')
 }
 
+const getAvailablesTimesForDoctor = (data: any) => {
+  loading.value = true
+  calendarStore
+    .getAvailableTimeSlots(data)
+    .then((response) => {
+      availableTimes.value = response.data.map((slot: any) => slot.time.slice(0, 5))
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
 // Debounce function for API calls
 const debouncedFetchAppointments = debounce(fetchAppointments, 300)
 const debouncedFetchFollowUpAppointments = debounce(fetchFollowUpAppointments, 300)
@@ -2181,6 +2230,18 @@ watch(
   ([newServiceId, newDate, newStartTime]) => {
     if (newServiceId?.value !== '' && newDate && newStartTime && showModalAppointment && showModalAppointment.value) {
       debouncedFetchAvailableDoctors()
+    }
+
+    if (newDate && showModalReschedule && current_appointment.value) {
+      const request = {
+        doctorID:
+          isAppointment.value === 'appointment'
+            ? getDoctorId(current_appointment.value.dentistId)
+            : getDoctorId(current_appointment.value.doctorProfileID),
+        date: formatDateForm(newDate),
+      }
+
+      getAvailablesTimesForDoctor(request)
     }
   },
   { deep: true },

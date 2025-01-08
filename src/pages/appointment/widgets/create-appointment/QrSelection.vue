@@ -3,6 +3,7 @@ import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useToast, VaAlert, VaModal, VaSkeleton, VaSkeletonGroup } from 'vuestic-ui'
 import { Clipboard } from '@capacitor/clipboard'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   showQrCode: boolean
@@ -22,6 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:showQrCode', 'update:closeSubmit', 'update:success'])
 const { init } = useToast()
+const { t } = useI18n()
 
 const showCopySuccess = ref(false)
 const localShowQrCode = ref(props.showQrCode)
@@ -39,8 +41,8 @@ const copyToClipboard = async (text: any) => {
     setTimeout(() => {
       showCopySuccess.value = false
       init({
-        title: 'Copied to clipboard!',
-        message: 'The description has been copied to your clipboard.',
+        title: t('booking.copied_to_clipboard'),
+        message: t('booking.copy_message'),
         color: 'success',
       })
     }, 500)
@@ -70,8 +72,8 @@ const updateRemainingTime = () => {
 
     if (timeLeft === 0) {
       init({
-        title: 'Time is up!',
-        message: 'The time to pay the deposit has expired. Please request a new QR code.',
+        title: t('booking.timeRemainingExpired'),
+        message: t('booking.timeRemainingExpiredDescription'),
         color: 'danger',
       })
       closeModal()
@@ -86,8 +88,8 @@ const cancelPayment = () => {
     .cancelPayment(props.bankInfo.description)
     .then(() => {
       init({
-        title: 'Payment canceled!',
-        message: 'The payment has been canceled successfully.',
+        title: t('payment.payment_cancel'),
+        message: t('payment.payment_cancel_description'),
         color: 'success',
       })
     })

@@ -141,6 +141,7 @@ export type FollowUpAppointment = {
   calendarID: string
   patientName: string
   patientCode: string
+  patientPhone: string
   patientProfileID: string
   doctorProfileID: string
   doctorName: string

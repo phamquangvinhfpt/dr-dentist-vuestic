@@ -32,9 +32,9 @@ interface DashboardMetric {
   id: string
   title: string
   value: string
-  icon: string
-  changeText: string
-  since: string
+  icon?: string
+  changeText?: string
+  since?: string
   changeDirection: 'up' | 'down'
   iconBackground: string
   iconColor: string
@@ -52,6 +52,11 @@ const calculateChange = (current: number, previous: number) => {
 interface DataEntry {
   date: string
   total: number
+}
+
+interface Data {
+  value: number
+  percent: number
 }
 
 // Process the data
@@ -91,6 +96,14 @@ const transformData = (data: DataEntry[]): TLineChartData => {
 
 const currentMonthMemberGrowth = ref(0)
 const previousMonthMemberGrowth = ref(0)
+const bookingData = ref<Data>({
+  value: 0,
+  percent: 0,
+})
+const revenueData = ref<Data>({
+  value: 0,
+  percent: 0,
+})
 const currentMonth = new Date().getMonth()
 
 dashboardStore.getChartMemberGrowth(null).then((res) => {
@@ -105,6 +118,14 @@ dashboardStore.getChartMemberGrowth(null).then((res) => {
   } else {
     previousMonthMemberGrowth.value = mdata[0].data[currentMonth - 1]
   }
+})
+
+dashboardStore.getBookingPercent(new Date().toISOString().split('T')[0]).then((res) => {
+  bookingData.value = res
+})
+
+dashboardStore.getRevenuePercent(new Date().toISOString().split('T')[0]).then((res) => {
+  revenueData.value = res
 })
 
 const dashboardMetrics = computed<DashboardMetric[]>(() => [
@@ -132,11 +153,11 @@ const dashboardMetrics = computed<DashboardMetric[]>(() => [
   {
     id: 'ongoingProjects',
     title: t('dashboard.booking_services'),
-    value: '15',
+    value: bookingData.value?.value + '',
     icon: 'mso-folder_open',
-    changeText: '25.36%',
+    changeText: (bookingData.value?.percent + '%') as string,
     since: t('dashboard.last_week'),
-    changeDirection: 'up',
+    changeDirection: bookingData.value?.percent > 0 ? 'up' : 'down',
     iconBackground: getColor('info'),
     iconColor: getColor('on-info'),
   },
@@ -155,11 +176,11 @@ const dashboardMetrics = computed<DashboardMetric[]>(() => [
   {
     id: 'newProfit',
     title: t('dashboard.new_profit'),
-    value: '27%',
+    value: formatMoney(revenueData.value?.value),
     icon: 'mso-grade',
-    changeText: '4%',
+    changeText: (revenueData.value?.percent + '%') as string,
     since: t('dashboard.last_week'),
-    changeDirection: 'up',
+    changeDirection: revenueData.value?.percent > 0 ? 'up' : 'down',
     iconBackground: getColor('warning'),
     iconColor: getColor('on-warning'),
   },

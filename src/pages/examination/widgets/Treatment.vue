@@ -203,9 +203,9 @@ const handleTreatmentAction = (item: TreatmentPlanResponse) => {
   loading.value = true
   storeTreatment
     .doTreatment(item.treatmentPlanID)
-    .then((response) => {
+    .then(() => {
       init({
-        message: response,
+        message: t('examination.treatment_success'),
         color: 'success',
         title: 'Success',
       })
@@ -253,9 +253,9 @@ const submitTreatmentDetail = () => {
   if (selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Pending) {
     storeTreatment
       .addTreatmentDetail(request)
-      .then((response) => {
+      .then(() => {
         init({
-          message: response,
+          message: t('examination.add_treatment_success'),
           color: 'success',
           title: 'Success',
         })
@@ -283,9 +283,9 @@ const submitTreatmentDetail = () => {
   ) {
     storeTreatment
       .updateTreatmentDetail(request)
-      .then((response) => {
+      .then(() => {
         init({
-          message: response,
+          message: t('examination.reschedule_treatment_success'),
           color: 'success',
           title: 'Success',
         })
@@ -422,9 +422,9 @@ const createMedicalRecord = async () => {
 
   await storeMedicalRecord
     .createMedicalRecord(form)
-    .then((response) => {
+    .then(() => {
       init({
-        message: response,
+        message: t('examination.create_record_success'),
         color: 'success',
         title: 'Success',
       })

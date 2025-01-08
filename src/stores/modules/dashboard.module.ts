@@ -18,6 +18,8 @@ export const useDashboardStore = defineStore('Dashboard', {
     unassign: 0,
     appointments: [] as Appointment[],
     followupAppointments: [] as FollowUpAppointment[],
+    bookingPercent: null as any,
+    revenuePercent: null as any,
   }),
   actions: {
     async getChartRevenue(data: any): Promise<any> {
@@ -211,6 +213,30 @@ export const useDashboardStore = defineStore('Dashboard', {
         this.isLoading = true
         const response = await dashboardService.getFollowUpAppointmentUnExamination(data)
         this.followupAppointments = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getBookingPercent(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getBookingPercent(data)
+        this.bookingPercent = response
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getRevenuePercent(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await dashboardService.getRevenuePercent(data)
+        this.revenuePercent = response
         this.isLoading = false
         return await Promise.resolve(response)
       } catch (error) {

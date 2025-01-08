@@ -260,6 +260,26 @@ class DashboardService {
         return Promise.reject(error)
       })
   }
+  async getBookingPercent(data: any): Promise<any> {
+    return apiService
+      .get(`/v1/dashboard/booking/percent?start=${data}`)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getRevenuePercent(data: any): Promise<any> {
+    return apiService
+      .get(`/v1/dashboard/revenue/percent?start=${data}`)
+      .then((response) => {
+        return response.data
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export default new DashboardService()
