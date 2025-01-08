@@ -16,6 +16,17 @@ const props = defineProps<{
   modelValue?: string
 }>()
 
+// Add watcher for modelValue
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    if (newValue !== addressInput.value) {
+      addressInput.value = newValue || ''
+    }
+  },
+  { immediate: true },
+)
+
 const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
