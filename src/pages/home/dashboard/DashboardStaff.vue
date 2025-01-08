@@ -206,7 +206,7 @@ onMounted(async () => {
   dashboardStore.getAppointmentUnExamination(current_date.value).then((data) => {
     appointments.value = data.data as Appointment[]
   })
-  dashboardStore.getFollowUpAppointmentUnExamination('2025-01-08').then((data) => {
+  dashboardStore.getFollowUpAppointmentUnExamination(current_date.value).then((data) => {
     followups.value = data.data as FollowUpAppointment[]
     console.log(followups.value)
   })

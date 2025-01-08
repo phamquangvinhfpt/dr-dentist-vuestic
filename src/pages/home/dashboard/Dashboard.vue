@@ -10,6 +10,7 @@ import DataSection from './DataSection.vue'
 import DoctorRateTable from './charts/DoctorRateTable.vue'
 import BookingAna from './charts/BookingAna.vue'
 import DashboardStaff from './DashboardStaff.vue'
+import Appointment from '@/pages/appointment/Appointment.vue'
 
 const authStore = useAuthStore()
 const isPatient = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)

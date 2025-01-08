@@ -55,3 +55,23 @@ npm run dev
 - Doctor: dentist@root.com
 - Patient: patient@root.com
 - Patient for testing: patient1-4@root.com
+
+### How to started mobile app
+
+- Run build project:
+
+```bash
+npm run build
+```
+
+- Sync project:
+
+```bash
+npx cap sync
+```
+
+- Open android studio
+
+```bash
+npx cap open android
+```

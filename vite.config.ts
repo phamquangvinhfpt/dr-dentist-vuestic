@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
       }),
       viteCompression({
         verbose: true,
-        disable: false,
+        disable: true,
         threshold: 10240,
         algorithm: 'gzip',
         ext: '.gz',
