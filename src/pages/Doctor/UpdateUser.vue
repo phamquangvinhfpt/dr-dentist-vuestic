@@ -153,7 +153,7 @@ onMounted(async () => {
     formData.birthDay = userDetails.birthDate || ''
     formData.job = userDetails.job || ''
     formData.address = userDetails.address || ''
-    formData.id = id
+    formData.id = userDetails.id
     if (userDetails.gender) {
       formData.isMale.text = t('doctor.male')
     } else {

@@ -188,13 +188,38 @@
             </VaCard>
           </div>
           <div v-else-if="currentTab === 'history'" class="space-y-4">
-            <h2 class="text-xl font-semibold">Lịch Sử Khám</h2>
-            <p v-if="filteredAppointments.length === 0">Không có lịch sử khám nào.</p>
-            <ul v-else>
-              <li v-for="appointment in filteredAppointments" :key="appointment.id">
-                {{ appointment.appointmentDate }} - {{ appointment.patientName }} ({{ appointment.status }})
+            <h2 class="text-xl font-semibold">{{ t('doctor.History_of_Examination') }}</h2>
+            <div v-if="isLoadingAppointments" class="text-center">{{ t('doctor.loading') }}...</div>
+            <div v-else-if="filteredAppointments.length === 0" class="text-gray-500">{{ t('doctor.no_medical') }}</div>
+            <ul v-else class="space-y-4">
+              <li
+                v-for="appointment in paginatedAppointments"
+                :key="appointment.id"
+                class="border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+              >
+                <div class="flex justify-between">
+                  <span class="font-semibold">{{ appointment.appointmentDate }}</span>
+                </div>
+                <p class="mt-1 text-gray-700">{{ appointment.patientName }}</p>
+                <p class="mt-1 text-gray-600">{{ t('doctor.service') }}: {{ appointment.serviceName }}</p>
               </li>
             </ul>
+            <div class="flex justify-between mt-4">
+              <VaButton
+                :disabled="currentPage === 1"
+                class="px-2 py-1 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                @click="prevPage2"
+              >
+                <ChevronLeft class="w-5 h-5" />
+              </VaButton>
+              <VaButton
+                :disabled="currentPage >= totalPages2"
+                class="px-2 py-1 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                @click="nextPage2"
+              >
+                <ChevronRight class="w-5 h-5" />
+              </VaButton>
+            </div>
           </div>
         </div>
       </div>
@@ -251,7 +276,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
@@ -331,13 +356,21 @@ interface Appointment {
   appointmentDate: string
   patientName: string
   status: string
+  serviceName: string
   // Add other relevant properties
 }
 
 const appointments = ref<Appointment[]>([])
-const filteredAppointments = computed(() => {
-  return appointments.value.filter((appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id)
-})
+const filteredAppointments = ref<Appointment[]>([])
+watch(
+  () => appointments.value,
+  (newAppointments) => {
+    filteredAppointments.value = newAppointments.filter(
+      (appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id,
+    )
+  },
+)
+const isLoadingAppointments = ref(true) // Add loading state for appointments
 
 onMounted(async () => {
   try {
@@ -350,14 +383,17 @@ onMounted(async () => {
     console.log('danh sách medical', appointmentsResponse)
 
     // Check if appointmentsResponse is an array
-    if (Array.isArray(appointmentsResponse)) {
-      appointments.value = appointmentsResponse as Appointment[] // Assign the response directly
-      console.log('danh sách medical filterfilter', appointments.value)
+    if (Array.isArray(appointmentsResponse.data)) {
+      appointments.value = appointmentsResponse.data as Appointment[] // Assign the response directly
+      console.log('danh sách medical filter', appointments.value)
     } else {
       appointments.value = [] // Assign an empty array if not an array
+      console.log('danh sách medical filterfilter', appointments.value)
     }
   } catch (error) {
     console.error('Error fetching doctor data:', error)
+  } finally {
+    isLoadingAppointments.value = false // Set loading state to false after fetching
   }
 })
 
@@ -397,23 +433,27 @@ const totalPages = computed(() => {
   return Math.ceil(combinedReviews.length / itemsPerPage)
 })
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++
-  }
-}
-
-const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--
-  }
-}
+watch(
+  () => appointments.value,
+  (newAppointments) => {
+    filteredAppointments.value = newAppointments.filter(
+      (appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id,
+    )
+  },
+)
 
 const openEditPopup = (review: any) => {
   editFeedback.value = { message: review.message, rating: review.ratings, feedbackID: review.feedbackID }
   isEditPopupOpen.value = true
 }
-
+watch(
+  () => appointments.value,
+  (newAppointments) => {
+    filteredAppointments.value = newAppointments.filter(
+      (appointment: any) => appointment.dentistId === doctor.value.doctorProfile.id,
+    )
+  },
+)
 const saveEditFeedback = async () => {
   try {
     await userService.updateFeedbackDetail({
@@ -439,6 +479,38 @@ const saveEditFeedback = async () => {
 
 const setRating = (rating: number) => {
   editFeedback.value.rating = rating
+}
+
+const paginatedAppointments = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredAppointments.value.slice(start, start + itemsPerPage)
+})
+
+const totalPages2 = computed(() => {
+  return Math.ceil(filteredAppointments.value.length / itemsPerPage)
+})
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+const nextPage2 = () => {
+  if (currentPage.value < totalPages2.value) {
+    currentPage.value++
+  }
+}
+
+const prevPage2 = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
 }
 </script>
 

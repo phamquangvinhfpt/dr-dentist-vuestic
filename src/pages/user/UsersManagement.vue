@@ -29,7 +29,7 @@
         <li
           v-for="user in paginatedUsers"
           :key="user.id"
-          class="border-b border-gray-200 last:border-b-0 hover:bg-indigo-50 transition-all cursor-pointer"
+          class="border-b border-gray-200 last:border-b-0 hover:bg-indigo-50 hover:dark:bg-[#1f263f] transition-all cursor-pointer"
         >
           <div class="grid grid-cols-6 gap-4 px-6 py-4 items-center">
             <div>

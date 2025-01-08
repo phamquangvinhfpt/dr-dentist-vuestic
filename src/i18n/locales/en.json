@@ -325,6 +325,7 @@
     "delete_doctor_success": "Doctor deleted successfully",
     "delete_doctor_fail": "Failed to delete doctor",
     "update_user": "edited successfully",
+    "no_medical":"No medical history",
     "add_doctor_error": "Error adding doctor",
     "edit_doctor_error": "Error editing doctor",
     "delete_doctor_error": "Error deleting doctor",
