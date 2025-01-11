@@ -244,7 +244,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/servipage-procedure/DeletedServiceManagement.vue'),
       },
       {
-        path: '/procedures/:id',
+        path: '/procedures/detail',
         name: 'ServiceProcedures',
         component: () => import('../pages/servipage-procedure/ServiceProcedures.vue'),
         meta: {

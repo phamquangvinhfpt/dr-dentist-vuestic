@@ -50,7 +50,7 @@
         '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
       }"
       sticky-header
-      :no-data-html="`<div class='text-center'>{$t('contact.management.no_contacts')}</div>`"
+      :no-data-html="`<div class='text-center'>${t('contact.management.no_contacts')}</div>`"
     >
       <template #cell(title)="{ row }">
         <div class="flex items-center gap-2">

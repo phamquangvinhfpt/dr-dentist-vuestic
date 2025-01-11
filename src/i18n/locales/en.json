@@ -1015,8 +1015,11 @@
     "viewDetails": "View Details",
     "content": "Content",
     "resultsPerPage": "Results per page",
+    "take": "Take",
+    "contactTakenSuccessfully": "Contact taken successfully",
     "management": {
       "subject": "Subject",
+      "dragAndDrop": "Drag and drop files here to upload",
       "contactContent": "Contact Content",
       "emailContext": "Email Context",
       "attachedImages": "Attached Images",
@@ -1169,7 +1172,9 @@
     "deleteSuccess": "Delete service successfully",
     "deleteError": "Failed to delete service",
     "statusUpdatedSuccessfully": "Status updated successfully",
-    "serviceDetails": "Service Details"
+    "serviceDetails": "Service Details",
+    "serviceInformation": "Service Information",
+    "createSuccess": "Create service successfully"
   },
   "procedure": {
     "id": "ID",
@@ -1233,7 +1238,8 @@
     "deletedOn": "Deleted on",
     "status": "Status",
     "close": "Close",
-    "send": "Send Email"
+    "send": "Send Email",
+    "take": "Take"
   },
   "payment": {
     "patientCode": "Patient Code",

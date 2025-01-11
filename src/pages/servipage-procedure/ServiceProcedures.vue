@@ -242,7 +242,7 @@
 
 <script setup lang="ts">
 import { onMounted, computed, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { storeToRefs } from 'pinia'
 import { useToast } from 'vuestic-ui'
@@ -250,7 +250,7 @@ import { useI18n } from 'vue-i18n'
 import { ref } from 'vue'
 import type { ProcedureDTO, ServiceProcedureDetail } from '@/pages/servipage-procedure/types'
 
-const route = useRoute()
+const router = useRouter()
 const serviceStore = useServiceStore()
 const { serviceProcedures, isLoading, serviceDetail } = storeToRefs(serviceStore)
 
@@ -308,7 +308,7 @@ const handleDelete = async () => {
   try {
     console.log('Starting delete process...')
     isDeleting.value = true
-    const serviceId = route.params.id as string
+    const serviceId = (history.state as any)?.serviceId
     isRemove.value = true
 
     // Handle both single and multiple deletions
@@ -356,7 +356,7 @@ const toggleNewProcedureSelection = (procedureId: string) => {
 const handleAddProcedures = async () => {
   try {
     isAdding.value = true
-    const serviceId = route.params.id as string
+    const serviceId = (history.state as any)?.serviceId
 
     await serviceStore.addOrDeleteProcedures(
       serviceId,
@@ -418,7 +418,11 @@ watch(searchQuery, () => {
 //end filter procedures
 onMounted(async () => {
   try {
-    const id = route.params.id as string
+    const id = (history.state as any)?.serviceId
+    if (!id) {
+      router.push('/service-management')
+      return
+    }
     await serviceStore.getServiceDetail(id)
 
     // Fetch all procedures
@@ -438,14 +442,15 @@ const handleToggleStatus = async () => {
 
   try {
     isToggling.value = true
+    const id = (history.state as any)?.serviceId
 
     await serviceStore.toggleServiceStatus({
-      id: route.params.id as string,
+      id: id,
       activate: !serviceDetail.value.isActive,
     })
 
     // Refresh service detail data after toggling
-    await serviceStore.getServiceDetail(route.params.id as string)
+    await serviceStore.getServiceDetail(id)
 
     init({
       message: t('service.statusUpdatedSuccessfully'),

@@ -18,6 +18,8 @@ const selectedRecord = ref<MedicalRecordDTO | null>(null)
 const showModal = ref(false)
 const startDate = ref('')
 const endDate = ref('')
+const showImagePreview = ref(false)
+const selectedImage = ref('')
 
 const formatDate = (date: string) => {
   if (!date) return ''
@@ -57,6 +59,18 @@ const handleDateChange = () => {
   if (startDate.value && endDate.value) {
     fetchMedicalRecords()
   }
+}
+
+const openImagePreview = (imageUrl: string) => {
+  selectedImage.value = imageUrl
+  showImagePreview.value = true
+}
+
+const getImageSrc = (imageUrl: string): string => {
+  if (!imageUrl) return ''
+  const baseUrl = import.meta.env.VITE_APP_BASE_URL as string
+  const url_without_api = baseUrl.slice(0, -3)
+  return `${url_without_api}${imageUrl}`
 }
 
 onMounted(() => {
@@ -261,9 +275,18 @@ onMounted(() => {
                   <template v-if="selectedRecord.indicationImages?.length">
                     <div class="info-label">{{ t('medicalRecord.treatment.images') }}</div>
                     <div class="info-value">
-                      <div class="images-grid">
-                        <div v-for="(image, index) in selectedRecord.indicationImages" :key="index" class="image-item">
-                          <img :src="image.imageUrl" :alt="image.imageType" />
+                      <div class="image-gallery">
+                        <div
+                          v-for="(image, index) in selectedRecord.indicationImages"
+                          :key="index"
+                          class="image-container"
+                        >
+                          <img
+                            :src="getImageSrc(image.imageUrl)"
+                            :alt="image.imageType"
+                            class="gallery-image"
+                            @click="openImagePreview(image.imageUrl)"
+                          />
                           <span class="image-type">{{ image.imageType }}</span>
                         </div>
                       </div>
@@ -273,6 +296,18 @@ onMounted(() => {
               </div>
             </div>
           </div>
+        </div>
+      </template>
+    </VaModal>
+
+    <!-- Add Image Preview Modal -->
+    <VaModal v-model="showImagePreview" class="image-preview-modal" hide-default-actions>
+      <div class="image-preview-container">
+        <img :src="getImageSrc(selectedImage)" alt="Preview" class="preview-image" />
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2 p-4">
+          <VaButton color="gray" @click="showImagePreview = false">{{ t('common.close') }}</VaButton>
         </div>
       </template>
     </VaModal>
@@ -290,10 +325,10 @@ onMounted(() => {
 /* Main card */
 .records-card {
   border-radius: 20px;
-  background: var(--va-background-secondary);
+  background: var(--va-white);
   box-shadow: var(--va-box-shadow);
   overflow: hidden;
-  border: 1px solid var(--va-border-color);
+  border: 1px solid var(--va-primary);
 }
 
 /* Card header */
@@ -302,18 +337,18 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 1px solid var(--va-border-color);
-  background: var(--va-background-secondary);
+  border-bottom: 2px solid var(--va-primary);
+  background: var(--va-white);
 }
 
 .header-left h1 {
   margin: 0;
   font-size: 1.8rem;
-  color: var(--va-text-primary);
+  color: var(--va-primary);
 }
 
 .subtitle {
-  color: var(--va-text-secondary);
+  color: var(--va-text-primary);
   margin: 0.5rem 0 0;
 }
 
@@ -321,10 +356,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: var(--va-background-primary);
+  background: var(--va-background-element);
   padding: 0.75rem;
   border-radius: 12px;
-  border: 1px solid var(--va-border-color);
+  border: 1px solid var(--va-primary);
 }
 
 .table-container {
@@ -361,6 +396,7 @@ onMounted(() => {
   border-radius: 50%;
   position: relative;
   z-index: 2;
+  box-shadow: 0 0 0 4px var(--va-primary-transparent);
 }
 
 .line {
@@ -369,7 +405,7 @@ onMounted(() => {
   left: 7px;
   width: 2px;
   height: calc(100% + 2rem);
-  background: var(--va-background-primary);
+  background: var(--va-primary-transparent);
 }
 
 .timeline-item:last-child .line {
@@ -391,17 +427,18 @@ onMounted(() => {
 }
 
 .timeline-card {
-  background: var(--va-background-secondary);
+  background: var(--va-white);
   border-radius: 20px;
   box-shadow: var(--va-box-shadow);
   transition: all 0.3s ease;
-  border: 1px solid var(--va-border-color);
+  border: 1px solid var(--va-primary);
   cursor: pointer;
 }
 
 .timeline-card:hover {
   transform: translateX(8px);
   box-shadow: var(--va-box-shadow-lg);
+  border-color: var(--va-primary);
 }
 
 .card-header {
@@ -440,13 +477,13 @@ onMounted(() => {
 .treatment-tag,
 .condition-tag,
 .indication-tag {
-  background: var(--va-background-primary);
-  color: var(--va-text-primary);
+  background: var(--va-primary-transparent);
+  color: var(--va-primary);
   padding: 0.6rem 1.2rem;
   border-radius: 25px;
   font-size: 0.9rem;
   font-weight: 500;
-  border: 1px solid var(--va-border-color);
+  border: 1px solid var(--va-primary);
   transition: all 0.3s ease;
 }
 
@@ -454,7 +491,8 @@ onMounted(() => {
 .condition-tag:hover,
 .indication-tag:hover {
   transform: translateY(-2px);
-  background: var(--va-background-secondary);
+  background: var(--va-primary);
+  color: var(--va-white);
 }
 
 .loading-overlay {
@@ -489,17 +527,16 @@ onMounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: var(--va-scrollbar-track);
-  border-radius: 3px;
+  background: var(--va-background-element);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--va-scrollbar-thumb);
+  background: var(--va-primary);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--va-scrollbar-thumb-hover);
+  background: var(--va-primary-dark);
 }
 
 .custom-scrollbar {
@@ -513,8 +550,9 @@ onMounted(() => {
 .detail-header {
   background: var(--va-primary);
   padding: 2.5rem;
-  color: white;
+  color: var(--va-white);
   border-radius: 20px 20px 40px 40px;
+  box-shadow: var(--va-box-shadow);
 }
 
 .patient-info {
@@ -526,12 +564,14 @@ onMounted(() => {
 .patient-avatar {
   width: 80px;
   height: 80px;
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--va-white);
+  color: var(--va-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
+  box-shadow: var(--va-box-shadow);
 }
 
 .info-main h2 {
@@ -563,12 +603,12 @@ onMounted(() => {
 }
 
 .detail-section {
-  background: var(--va-background-secondary);
+  background: var(--va-white);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   box-shadow: var(--va-box-shadow);
-  border: 1px solid var(--va-border-color);
+  border: 1px solid var(--va-primary);
   transition: all 0.3s ease;
 }
 
@@ -593,8 +633,9 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background: var(--va-primary);
-  color: white;
+  color: var(--va-white);
   margin-right: 1rem;
+  box-shadow: var(--va-box-shadow);
 }
 
 .section-header h3 {
@@ -613,11 +654,12 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   background: var(--va-primary);
-  color: white;
+  color: var(--va-white);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 500;
   margin-bottom: 0.5rem;
+  box-shadow: var(--va-box-shadow);
 }
 
 .conditions-list,
@@ -683,13 +725,13 @@ onMounted(() => {
   font-size: 0.95rem;
   line-height: 1.6;
   padding: 0.5rem;
-  background: var(--va-background-primary);
+  background: var(--va-background-element);
   border-radius: 8px;
-  border: 1px solid var(--va-border-color);
+  border: 1px solid var(--va-primary);
 }
 
 .detail-section {
-  background: var(--va-background-secondary);
+  background: var(--va-white);
   border-radius: 16px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -780,9 +822,10 @@ onMounted(() => {
 .tooth-diagnosis {
   margin-bottom: 1rem;
   padding: 1rem;
-  background: var(--va-background-secondary);
+  background: var(--va-background-element);
   border-radius: 8px;
-  border: 1px solid rgba(99, 102, 241, 0.1);
+  border: 1px solid var(--va-primary);
+  box-shadow: var(--va-box-shadow);
 }
 
 .tooth-diagnosis:last-child {
@@ -800,7 +843,8 @@ onMounted(() => {
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--va-box-shadow);
+  border: 1px solid var(--va-primary);
 }
 
 .image-item img {
@@ -815,8 +859,8 @@ onMounted(() => {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
+  background: var(--va-primary);
+  color: var(--va-white);
   padding: 0.5rem;
   font-size: 0.875rem;
   text-align: center;
@@ -849,8 +893,8 @@ onMounted(() => {
 }
 
 .total-badge {
-  background: #eef2ff;
-  color: #6366f1;
+  background: var(--va-primary);
+  color: var(--va-white);
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 1rem;
@@ -952,6 +996,80 @@ onMounted(() => {
 
   .tooth-diagnosis {
     padding: 0.75rem;
+  }
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.image-container {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.image-container:hover {
+  transform: scale(1.05);
+}
+
+.gallery-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-type {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--va-primary);
+  color: var(--va-white);
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.image-preview-modal {
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+  margin: 0 auto !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.image-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+/* Responsive styles */
+@media screen and (max-width: 768px) {
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .image-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
 }
 </style>

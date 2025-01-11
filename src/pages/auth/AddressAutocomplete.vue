@@ -22,6 +22,7 @@ watch(
   (newValue) => {
     if (newValue !== addressInput.value) {
       addressInput.value = newValue || ''
+      emit('update:modelValue', addressInput.value)
     }
   },
   { immediate: true },
@@ -67,6 +68,7 @@ const debouncedSearch = debounce(fetchAddressSuggestions, 500)
 const selectSuggestion = (prediction: any) => {
   addressInput.value = prediction.description
   isSelected.value = true
+  emit('update:modelValue', prediction.description)
   showSuggestions.value = false
   sessionToken = crypto.randomUUID()
   setTimeout(() => {

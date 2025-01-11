@@ -591,6 +591,8 @@ const submit = async () => {
       lastName: formData.lastName,
       gender: formData.gender,
       birthDate: date,
+      job: formData.job,
+      address: formData.address,
     }
     await userProfileStore
       .updateProfile(userDetailData)
