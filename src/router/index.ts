@@ -244,9 +244,9 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/servipage-procedure/DeletedServiceManagement.vue'),
       },
       {
-        path: '/procedures/detail',
+        path: '/service-procedures',
         name: 'ServiceProcedures',
-        component: () => import('../pages/servipage-procedure/ServiceProcedures.vue'),
+        component: () => import('@/pages/servipage-procedure/ServiceProcedures.vue'),
         meta: {
           requiresAuth: true,
         },

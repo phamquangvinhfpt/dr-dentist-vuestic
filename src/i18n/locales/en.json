@@ -1122,6 +1122,7 @@
   },
   "service": {
     "id": "ID",
+    "totalPrice": "Total Price",
     "name": "Service Name",
     "description": "Description",
     "price": "Price",

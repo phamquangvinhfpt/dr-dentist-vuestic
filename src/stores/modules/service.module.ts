@@ -189,9 +189,54 @@ export const useServiceStore = defineStore('service', {
         const response = await serviceService.addOrDeleteProcedure(serviceId, procedureId, isRemove)
         console.log('Store: API Response:', response)
 
-        await this.getServiceDetail(serviceId)
+        // Update store state with the returned ServiceDTO
+        if (response) {
+          const serviceData = response
+          this.serviceDetail = {
+            serviceID: serviceData.serviceID,
+            name: serviceData.name,
+            description: serviceData.description,
+            totalPrice: serviceData.totalPrice,
+            isActive: serviceData.isActive,
+            createBy: serviceData.createBy,
+            createdOn: serviceData.createdOn,
+            typeServiceID: serviceData.typeServiceID,
+            typeName: serviceData.typeName,
+            deletedOn: '',
+            deletedBy: '',
+          }
+
+          // Update procedures list
+          const mappedProcedures = (serviceData.procedures || []).map(
+            (proc: {
+              procedureID: string
+              name: string
+              description: string
+              price: number
+              createBy: string
+              createdOn: string
+              isRemove: boolean
+            }) => ({
+              serviceProcedureId: proc.procedureID,
+              procedureDetail: {
+                id: proc.procedureID,
+                name: proc.name,
+                description: proc.description,
+                price: proc.price,
+                createBy: proc.createBy,
+                createdOn: proc.createdOn,
+                isRemove: proc.isRemove,
+                deletedOn: '',
+                deletedBy: '',
+              },
+            }),
+          )
+
+          this.serviceProcedures = mappedProcedures
+        }
+
         this.isLoading = false
-        return response
+        return response // Return full response to get new serviceID
       } catch (error) {
         console.error('Store: Error in addOrDeleteProcedures:', error)
         this.isLoading = false

@@ -306,9 +306,11 @@ const deleteSelectedProcedures = () => {
 
 const handleDelete = async () => {
   try {
+    if (!serviceDetail.value?.serviceID) return
+
     console.log('Starting delete process...')
     isDeleting.value = true
-    const serviceId = (history.state as any)?.serviceId
+    const serviceId = serviceDetail.value.serviceID
     isRemove.value = true
 
     // Handle both single and multiple deletions
@@ -316,7 +318,16 @@ const handleDelete = async () => {
 
     const response = await serviceStore.addOrDeleteProcedures(serviceId, proceduresToDelete, isRemove.value)
 
-    console.log('Delete response:', response)
+    // Update state with new service ID
+    if (response?.serviceID && response.serviceID !== serviceId) {
+      console.log('New service ID received:', response.serviceID)
+      router.replace({
+        name: router.currentRoute.value.name as string,
+        replace: true,
+        state: { serviceId: response.serviceID },
+      })
+    }
+
     showDeleteModal.value = false
     selectedProcedures.value = [] // Clear selections
     isMultiSelectMode.value = false // Exit multi-select mode
@@ -355,17 +366,26 @@ const toggleNewProcedureSelection = (procedureId: string) => {
 
 const handleAddProcedures = async () => {
   try {
-    isAdding.value = true
-    const serviceId = (history.state as any)?.serviceId
+    if (!serviceDetail.value?.serviceID) return
 
-    await serviceStore.addOrDeleteProcedures(
+    isAdding.value = true
+    const serviceId = serviceDetail.value.serviceID
+
+    const response = await serviceStore.addOrDeleteProcedures(
       serviceId,
       selectedNewProcedures.value,
       false, // isRemove = false for adding
     )
 
-    // Refresh service detail data after adding
-    await serviceStore.getServiceDetail(serviceId)
+    // Update state with new service ID
+    if (response?.serviceID && response.serviceID !== serviceId) {
+      console.log('New service ID received:', response.serviceID)
+      router.replace({
+        name: router.currentRoute.value.name as string,
+        replace: true,
+        state: { serviceId: response.serviceID },
+      })
+    }
 
     showAddModal.value = false
     selectedNewProcedures.value = []
@@ -442,15 +462,15 @@ const handleToggleStatus = async () => {
 
   try {
     isToggling.value = true
-    const id = (history.state as any)?.serviceId
+    const serviceId = serviceDetail.value.serviceID
 
     await serviceStore.toggleServiceStatus({
-      id: id,
+      id: serviceId,
       activate: !serviceDetail.value.isActive,
     })
 
     // Refresh service detail data after toggling
-    await serviceStore.getServiceDetail(id)
+    await serviceStore.getServiceDetail(serviceId)
 
     init({
       message: t('service.statusUpdatedSuccessfully'),

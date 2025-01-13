@@ -143,7 +143,7 @@ class ServiceService {
       })
       .then((response) => {
         console.log('Service: API Response:', response)
-        return Promise.resolve(response.data)
+        return response.data
       })
       .catch((error) => {
         console.error('Service: API Error:', error)
