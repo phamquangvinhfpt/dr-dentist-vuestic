@@ -6,6 +6,7 @@
     :load="loading"
     :regist="registerCalendar"
     :reminder="reminderPartime"
+    :fetch="fetch"
     :get-working-calendar="getWorkingCalendar"
     :get-full-time-non="getFullTimeNonAcceptWorkingCalendar"
     :get-part-time-non="getPartTimeNonAcceptWorkingCalendar"

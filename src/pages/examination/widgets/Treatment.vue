@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Appointment } from '@/pages/appointment/types'
-import { onMounted, ref, computed, reactive } from 'vue'
+import { onMounted, ref, computed, reactive, watch } from 'vue'
 import {
   useToast,
   VaInnerLoading,
@@ -18,13 +18,14 @@ import {
 } from 'vuestic-ui'
 import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
-import { getErrorMessage } from '@/services/utils'
+import { getErrorMessage, isToday, validateDate, validateTime } from '@/services/utils'
 import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 import Prescription from './Prescription.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
 import DentalChart from './DentalChart.vue'
 import { useI18n } from 'vue-i18n'
+import { useCalendarStore } from '@/stores/modules/calendar.module'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -35,6 +36,7 @@ const { init } = useToast()
 const { t } = useI18n()
 const storeTreatment = useTreatmentStore()
 const storeMedicalRecord = useMedicalRecordStore()
+const storeCalendar = useCalendarStore()
 const showModalTreatment = ref(false)
 const prevent = ref(false)
 const titleModalTreatment = computed(() => {
@@ -42,7 +44,7 @@ const titleModalTreatment = computed(() => {
     return t('examination.add_treatment_detail')
   } else if (
     selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Active &&
-    !isToday(selectedTreatmentPlan.value?.startDate)
+    !checkToday(selectedTreatmentPlan.value?.startDate)
   ) {
     return t('examination.reschedule_treatment')
   }
@@ -56,6 +58,8 @@ const notes = ref('')
 const treatmentplans = ref<TreatmentPlanResponse[]>([])
 const user = useAuthStore()
 const isDoctor = user.musHaveRole('Dentist')
+const isStaff = user.musHaveRole('Staff')
+const isAdmin = user.musHaveRole('Admin')
 const showModalCreateRecord = ref(false)
 const record_form = useForm('record_form')
 const allColumns = computed(() => [
@@ -76,7 +80,7 @@ const allColumns = computed(() => [
 
 const columns = computed(() => {
   return allColumns.value.filter((column) => {
-    if (!isDoctor) {
+    if (!isDoctor && !isStaff && !isAdmin) {
       return column.key !== 'action'
     } else {
       return column.key !== 'doctorName'
@@ -160,16 +164,9 @@ const formatDateOnly = (date: any) => {
   return `${year}-${month}-${day}`
 }
 
-const optionsStartTimes = computed(() => {
-  const slots = []
-  for (let hour = 8; hour < 22; hour++) {
-    slots.push(`${hour.toString().padStart(2, '0')}:00`)
-    slots.push(`${hour.toString().padStart(2, '0')}:30`)
-  }
-  return slots
-})
+const optionsStartTimes = ref<string[]>([])
 
-const isToday = (dateString: string) => {
+const checkToday = (dateString: string) => {
   const today = new Date()
   const date = new Date(dateString)
   return (
@@ -227,12 +224,20 @@ const handleTreatmentAction = (item: TreatmentPlanResponse) => {
 const handleTreatmentDetails = (item: TreatmentPlanResponse) => {
   selectedTreatmentPlanId.value = item.treatmentPlanID
   selectedTreatmentPlan.value = item
+  getAvailablesTimesForDoctor({
+    date: formatDateOnly(date.value),
+    doctorId: selectedTreatmentPlan.value?.doctorID,
+  })
   showModalTreatment.value = true
 }
 
 const handleTreatmentSchedule = (item: TreatmentPlanResponse) => {
   selectedTreatmentPlanId.value = item.treatmentPlanID
   selectedTreatmentPlan.value = item
+  getAvailablesTimesForDoctor({
+    date: formatDateOnly(date.value),
+    doctorId: selectedTreatmentPlan.value?.doctorID,
+  })
   showModalTreatment.value = true
 }
 
@@ -279,7 +284,7 @@ const submitTreatmentDetail = () => {
       })
   } else if (
     selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Active &&
-    !isToday(selectedTreatmentPlan.value?.startDate)
+    !checkToday(selectedTreatmentPlan.value?.startDate)
   ) {
     storeTreatment
       .updateTreatmentDetail(request)
@@ -561,6 +566,48 @@ const removeImage = (type: any, index: number) => {
   }, 0)
 }
 
+const isRescheduleFormValid = computed(() => {
+  return (
+    date.value &&
+    startTime.value &&
+    !validateDate(date.value) &&
+    (!validateTime(startTime.value) || (validateTime(startTime.value) && !isToday(date.value)))
+  )
+})
+
+const getAvailablesTimesForDoctor = (data: any) => {
+  loading.value = true
+  storeCalendar
+    .getAvailableTimeSlots(data)
+    .then((response) => {
+      optionsStartTimes.value = response.data.map((slot: any) => slot.time.slice(0, 5))
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+watch(
+  date,
+  (newVal) => {
+    if (newVal && !validateDate(newVal)) {
+      getAvailablesTimesForDoctor({
+        date: formatDateOnly(newVal),
+        doctorId: selectedTreatmentPlan.value?.doctorID,
+      })
+    }
+  },
+  { deep: true },
+)
+
 onMounted(() => {
   getTreatmentPlans()
 })
@@ -620,7 +667,7 @@ onMounted(() => {
             </template>
             <template #cell(action)="{ rowData }">
               <VaButton
-                v-if="rowData.status === TreatmentPlanStatus.Active && isToday(rowData.startDate)"
+                v-if="rowData.status === TreatmentPlanStatus.Active && checkToday(rowData.startDate) && isDoctor"
                 preset="primary"
                 class="mr-6 mb-2"
                 round
@@ -631,7 +678,11 @@ onMounted(() => {
                 {{ t('examination.treatment_plan_table.treatment') }}
               </VaButton>
               <VaButton
-                v-else-if="rowData.status === TreatmentPlanStatus.Active && !isToday(rowData.startDate)"
+                v-else-if="
+                  rowData.status === TreatmentPlanStatus.Active &&
+                  !checkToday(rowData.startDate) &&
+                  (isStaff || isAdmin)
+                "
                 preset="primary"
                 class="mr-6 mb-2"
                 round
@@ -642,7 +693,7 @@ onMounted(() => {
                 {{ t('examination.treatment_plan_table.reschedule') }}
               </VaButton>
               <VaButton
-                v-else-if="rowData.status === TreatmentPlanStatus.Pending"
+                v-else-if="rowData.status === TreatmentPlanStatus.Pending && isDoctor"
                 preset="primary"
                 class="mr-6 mb-2"
                 round
@@ -653,7 +704,7 @@ onMounted(() => {
                 {{ t('examination.treatment_plan_table.detail') }}
               </VaButton>
               <Prescription
-                v-else-if="!rowData.hasPrescription"
+                v-else-if="!rowData.hasPrescription && rowData.status === TreatmentPlanStatus.Completed && isDoctor"
                 :items="rowData as TreatmentPlanResponse"
                 @update:refresh="fetchTreatment"
               />
@@ -677,7 +728,13 @@ onMounted(() => {
   </VaCard>
 
   <!-- Add TreatmentDetail modal -->
-  <VaModal v-model="showModalTreatment" ok-text="Apply" @close="handleCloseTreatmentDetail" @ok="submitTreatmentDetail">
+  <VaModal
+    v-model="showModalTreatment"
+    hide-default-actions
+    close-button
+    @close="handleCloseTreatmentDetail"
+    @ok="submitTreatmentDetail"
+  >
     <h3 class="va-h3">{{ titleModalTreatment }}</h3>
     <VaCard>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -689,9 +746,33 @@ onMounted(() => {
           class="col-span-1"
           label="Date"
           clearable
+          required-mark
+          :rules="[
+            (v) => !!v || t('appointment.reschedule_appointment.date_required'),
+            (v) => !validateDate(v) || t('appointment.reschedule_appointment.date_today'),
+          ]"
         />
-        <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
+        <VaSelect
+          v-model="startTime"
+          class="col-span-1"
+          label="Time"
+          :options="optionsStartTimes"
+          required-mark
+          :rules="[
+            (v) => !!v || t('appointment.reschedule_appointment.time_required'),
+            (v) => !validateTime(v) || !isToday(date) || t('appointment.reschedule_appointment.time_today'),
+          ]"
+        />
         <VaTextarea v-model="notes" class="col-span-2" label="Notes" />
+      </div>
+
+      <div class="flex items-end justify-end mt-5">
+        <VaButton class="mr-6" color="#ECF0F1" @click="showModalTreatment = false">{{
+          t('appointment.reschedule_appointment.cancel')
+        }}</VaButton>
+        <VaButton :disabled="!isRescheduleFormValid" @click="submitTreatmentDetail">{{
+          t('appointment.reschedule_appointment.submit')
+        }}</VaButton>
       </div>
     </VaCard>
   </VaModal>
@@ -717,14 +798,14 @@ onMounted(() => {
                 v-model="formData.BasicExamination.ExaminationContent"
                 :label="t('examination.examinationContent')"
                 class="mt-4"
-                :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+                :rules="[(v: any) => (v && v.length > 0) || t('examination.examinationContent_not_empty')]"
                 required-mark
               />
               <VaTextarea
                 v-model="formData.BasicExamination.TreatmentPlanNote"
                 :label="t('examination.treatmentPlanNote')"
                 class="mt-4"
-                :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+                :rules="[(v: any) => (v && v.length > 0) || t('examination.treatmentPlanNote_not_empty')]"
                 required-mark
               />
             </div>

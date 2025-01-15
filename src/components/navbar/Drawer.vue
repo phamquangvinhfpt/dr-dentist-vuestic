@@ -2,11 +2,7 @@
   <Teleport to="body">
     <!-- Overlay -->
     <Transition name="overlay">
-      <div
-        v-if="isOpen"
-        :class="['fixed inset-0 z-40', isDark ? 'bg-black/70' : 'bg-black/50']"
-        @click="closeDrawer"
-      ></div>
+      <div v-if="isOpen" class="fixed inset-0 z-40 bg-black/50 dark:bg-black/70" @click="closeDrawer"></div>
     </Transition>
 
     <!-- Drawer Panel -->
@@ -17,20 +13,15 @@
           'fixed top-0 h-full shadow-xl z-50 overflow-y-auto',
           side === 'right' ? 'right-0' : 'left-0',
           'transform transition-transform duration-300 ease-in-out',
-          isDark ? 'bg-[#111827]' : 'bg-white',
+          'bg-white dark:bg-gray-900',
         ]"
         :style="{ width }"
       >
         <!-- Drawer Header -->
-        <div
-          :class="['flex justify-between items-center p-4 border-b', isDark ? 'border-gray-700' : 'border-gray-200']"
-        >
-          <h2 :class="['text-xl font-semibold', isDark ? 'text-white' : 'text-gray-900']">{{ title }}</h2>
+        <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ title }}</h2>
           <button
-            :class="[
-              'p-2 transition-colors duration-200',
-              isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900',
-            ]"
+            class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
             @click="closeDrawer"
           >
             <svg
@@ -46,7 +37,7 @@
         </div>
 
         <!-- Drawer Content -->
-        <div :class="['p-4', isDark ? 'text-gray-200' : 'text-gray-800']">
+        <div class="p-4 text-gray-800 dark:text-gray-200">
           <slot></slot>
         </div>
       </div>
