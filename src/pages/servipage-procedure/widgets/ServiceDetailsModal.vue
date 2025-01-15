@@ -1,5 +1,5 @@
 <template>
-  <VaModal v-model="isVisible" :blur="true" hide-default-actions size="large" class="service-modal" animation="scale">
+  <VaModal v-model="isVisible" :blur="true" hide-default-actions size="medium" class="service-modal" animation="scale">
     <template #header>
       <div class="modal-header px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center">
         <div class="flex items-center gap-3">
@@ -57,19 +57,17 @@
           </div>
         </div>
 
-        <div v-else-if="activeTab === 'reviews'" class="reviews-section">
-          <div class="filter-section flex items-center gap-2 mb-4">
-            <span class="text-gray-700 dark:text-gray-300 font-medium">Lọc theo số sao:</span>
-            <VaChip
-              v-for="star in [5, 4, 3, 2, 1]"
-              :key="star"
-              :color="activeFilter === star ? 'primary' : 'secondary'"
-              class="cursor-pointer"
-              @click="filterReviews(star)"
-            >
-              {{ star }} ★
-            </VaChip>
-          </div>
+        <div v-else-if="activeTab === 'reviews'">
+          <span class="text-gray-700 dark:text-gray-300 font-medium">Lọc theo số sao:</span> <br />
+          <VaChip
+            v-for="star in [5, 4, 3, 2, 1]"
+            :key="star"
+            :color="activeFilter === star ? 'primary' : 'secondary'"
+            class="cursor-pointer"
+            @click="filterReviews(star)"
+          >
+            {{ star }} ★
+          </VaChip>
 
           <div v-if="filteredReviews.length === 0" class="text-gray-500 dark:text-gray-400">
             Không có đánh giá phù hợp.
@@ -86,12 +84,14 @@
                 <VaCard class="review-item flex items-start gap-4 w-full h-full">
                   <img
                     v-if="feedback.patientAvatar"
+                    loading="lazy"
                     :src="getSrcAvatar(feedback.patientAvatar)"
                     alt=" Avatar"
                     class="w-16 h-16 rounded-full"
                   />
                   <img
                     v-else
+                    loading="lazy"
                     src="https://png.pngtree.com/png-clipart/20230102/original/pngtree-business-man-avatar-png-image_8855195.png"
                     alt="Avatar"
                     class="w-16 h-16 rounded-full"
@@ -126,7 +126,7 @@
 
     <template #footer>
       <div class="modal-footer px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-        <VaButton size="large" class="w-full md:w-auto" color="primary" @click="closeModal"> Đóng </VaButton>
+        <VaButton class="w-full md:w-auto" color="primary" @click="closeModal"> Đóng </VaButton>
       </div>
     </template>
   </VaModal>

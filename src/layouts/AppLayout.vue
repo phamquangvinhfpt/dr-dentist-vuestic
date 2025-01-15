@@ -247,11 +247,12 @@ const setupSignalR = async () => {
 
 const cleanupSignalR = () => {
   if (signalRService.isConnected()) {
-    signalRService.off('NotificationFromServer', handleReceiveNotification)
-    signalRService.off('UpdateOnlineUsers', handleUserIsOnline)
-    signalRService.off('ReceiveMessage', handleReceiveMessage)
-    signalRService.off('Appointments', handleUpdateAppointments)
-    signalRService.off('HeartbeatResponse', handleCheckHeartbeat)
+    signalRService.off('NotificationFromServer')
+    signalRService.off('UpdateOnlineUsers')
+    signalRService.off('ReceiveMessage')
+    signalRService.off('Appointments')
+    signalRService.off('Fetch')
+    signalRService.off('HeartbeatResponse')
     signalRService.disconnect()
   }
 }

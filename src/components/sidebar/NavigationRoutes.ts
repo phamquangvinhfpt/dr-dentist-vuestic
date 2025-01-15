@@ -213,13 +213,5 @@ export default {
         roles: ['Patient'],
       },
     },
-    {
-      name: 'prescription-detail',
-      displayName: 'menu.prescription',
-      meta: {
-        icon: 'assignment',
-        roles: ['Patient'],
-      },
-    },
   ] as INavigationRoute[],
 }

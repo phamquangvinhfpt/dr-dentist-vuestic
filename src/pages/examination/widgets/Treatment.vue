@@ -16,7 +16,7 @@ import {
   VaDataTable,
   useForm,
 } from 'vuestic-ui'
-import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
+import { PrescriptionResponse, TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
 import { getErrorMessage, isToday, validateDate, validateTime } from '@/services/utils'
 import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
@@ -26,6 +26,8 @@ import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
 import DentalChart from './DentalChart.vue'
 import { useI18n } from 'vue-i18n'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
+import signalRService from '@/signalR'
+import PrescriptionModal from './PrescriptionModal.vue'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -62,6 +64,8 @@ const isStaff = user.musHaveRole('Staff')
 const isAdmin = user.musHaveRole('Admin')
 const showModalCreateRecord = ref(false)
 const record_form = useForm('record_form')
+const prescription = ref<PrescriptionResponse>()
+const showPrescriptionModal = ref(false)
 const allColumns = computed(() => [
   { key: 'step', sortable: true, title: 'S.L', label: t('examination.treatment_plan_table.step') },
   {
@@ -313,6 +317,29 @@ const submitTreatmentDetail = () => {
         loading.value = false
       })
   }
+}
+
+const getPrescriptionByTreatmentPlanId = (treatmentPlanId: string) => {
+  storeTreatment
+    .getPrescription(treatmentPlanId)
+    .then((response) => {
+      prescription.value = response
+      console.log(response)
+      showPrescriptionModal.value = true
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      init({
+        message: errorMessage,
+        color: 'danger',
+        title: 'Error',
+      })
+    })
+}
+
+const handleShowPrescription = (item: TreatmentPlanResponse) => {
+  console.log(item)
+  getPrescriptionByTreatmentPlanId(item.treatmentPlanID)
 }
 
 const fetchTreatment = () => {
@@ -595,6 +622,12 @@ const getAvailablesTimesForDoctor = (data: any) => {
     })
 }
 
+const handleFetchNewTreatment = (data: any) => {
+  if (data) {
+    getTreatmentPlans()
+  }
+}
+
 watch(
   date,
   (newVal) => {
@@ -610,6 +643,9 @@ watch(
 
 onMounted(() => {
   getTreatmentPlans()
+  if (signalRService.isConnected()) {
+    signalRService.on('Fetch', handleFetchNewTreatment)
+  }
 })
 </script>
 
@@ -691,6 +727,17 @@ onMounted(() => {
                 @click="handleTreatmentSchedule(rowData as TreatmentPlanResponse)"
               >
                 {{ t('examination.treatment_plan_table.reschedule') }}
+              </VaButton>
+              <VaButton
+                v-else-if="rowData.hasPrescription"
+                preset="primary"
+                class="mr-6 mb-2"
+                round
+                border-color="primary"
+                size="small"
+                @click="handleShowPrescription(rowData as TreatmentPlanResponse)"
+              >
+                {{ t('examination.treatment_plan_table.prescription') }}
               </VaButton>
               <VaButton
                 v-else-if="rowData.status === TreatmentPlanStatus.Pending && isDoctor"
@@ -909,6 +956,9 @@ onMounted(() => {
       </VaCardContent>
     </VaCard>
   </VaModal>
+
+  <!-- Prescription Modal -->
+  <PrescriptionModal v-model:isOpen="showPrescriptionModal" :prescription-data="prescription" />
 </template>
 
 <style scoped>

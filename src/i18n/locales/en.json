@@ -276,7 +276,6 @@
     "Email_Status": "Email Status",
     "Rating": "rating",
     "save": "Save",
-    "detail": "Detail",
     "reviews": "Reviews",
     "Basic_information": "Basic information",
     "service": "service",
@@ -315,7 +314,6 @@
     "Confirm": "Confirm",
     "cancel": "Cancel",
     "Success": "Success!",
-    "loading": "Loading",
     "Failed": "Failed!",
     "added": "Doctor was successfully added.",
     "close": "Close",
@@ -391,13 +389,11 @@
     "add_doctor_phone_regex": "Phone must match the pattern",
     "edit_doctor_phone_regex": "Phone must match the pattern",
     "delete_doctor_phone_regex": "Phone must match the pattern",
-    "education": "Education Level",
     "education_required": "Please enter your education level",
     "enter_education": "Enter your education level",
     "college": "Institution",
     "college_required": "Please enter your institution",
     "enter_college": "Enter your institution name",
-    "certification": "Certification",
     "certification_required": "Please enter your certification",
     "enter_certification": "Enter your certification details",
     "years_of_experience": "Years of Experience",
@@ -416,7 +412,12 @@
     "dosage": "Dosage",
     "enter_dosage": "Enter dosage",
     "frequency": "Frequency",
-    "enter_frequency": "Enter frequency"
+    "enter_frequency": "Enter frequency",
+    "date": "Date",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "print": "Print",
+    "downloadPDF": "Download PDF"
   },
   "phamarceutials": {
     "phamarceutial": "Phamarceutial"
@@ -730,7 +731,7 @@
     "services": "Service",
     "doctors": "Doctors",
     "medical-record-for-patient": "Medical Record",
-    "prescription" :"prescription",
+    "prescription": "prescription",
     "payment-for-patient": "Payment"
   },
   "bin": {
@@ -1585,7 +1586,8 @@
       "actions": "Actions",
       "treatment": "Treatment",
       "reschedule": "Reschedule",
-      "detail": "Detail"
+      "detail": "Detail",
+      "prescription": "Prescription"
     }
   },
   "calendar": {

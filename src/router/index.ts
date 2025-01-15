@@ -434,14 +434,6 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/user/listStaff.vue'),
       },
       {
-        path: '/prescriptions/:treatmentID',
-        name: 'prescription-detail',
-        component: () => import('../pages/Doctor/prescription.vue'),
-        meta: {
-          requiresAuth: true,
-        },
-      },
-      {
         path: 'prescriptions',
         name: 'prescription-detail',
         component: () => import('../pages/Doctor/PrescriptionPatient.vue'),

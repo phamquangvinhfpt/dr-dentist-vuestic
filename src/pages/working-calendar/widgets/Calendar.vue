@@ -1504,6 +1504,7 @@ watch(
       loading.value = false
     }
   },
+  { deep: true },
 )
 
 onMounted(() => {

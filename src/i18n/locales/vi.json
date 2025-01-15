@@ -263,7 +263,6 @@
     "Rating": "Đánh giá",
     "save": "Lưu",
     "Edit_staff": "Chỉnh sửa",
-    "loading": "Đang tải",
     "reviews": "Đánh giá",
     "Basic_information": "Thông tin cơ bản",
     "service": "Dịch vụ",
@@ -343,7 +342,12 @@
     "dosage": "Liều lượng",
     "enter_dosage": "Nhập liều lượng",
     "frequency": "Tần suất",
-    "enter_frequency": "Nhập tần suất"
+    "enter_frequency": "Nhập tần suất",
+    "date": "Ngày kê đơn",
+    "patient":"Bệnh Nhân",
+    "doctor":"Bác Sĩ",
+    "print": "In",
+    "downloadPDF": "Tải xuống PDF"
   },
   "phamarceutials": {
     "phamarceutial": "Dược phẩm"
@@ -655,7 +659,7 @@
     "services": "Dịch vụ",
     "doctors": "Bác sĩ",
     "medical-record-for-patient": "Hồ sơ bệnh án",
-    "prescription" :"Đơn thuốc",
+    "prescription": "Đơn thuốc",
     "payment-for-patient": "Thanh toán"
   },
   "bin": {
@@ -1476,7 +1480,8 @@
       "actions": "Thao Tác",
       "treatment": "Điều Trị",
       "reschedule": "Tái Khám",
-      "detail": "Chi Tiết"
+      "detail": "Chi Tiết",
+      "prescription": "Toa Thuốc"
     }
   },
   "calendar": {

@@ -9,6 +9,7 @@ import AddressAutocomplete from './AddressAutocomplete.vue'
 import { Capacitor } from '@capacitor/core'
 import OTPModal from './OTPModal.vue'
 import { useRouter } from 'vue-router'
+import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 
 const { t } = useI18n()
 
@@ -27,7 +28,7 @@ const formData = reactive({
     value: true,
     text: '',
   },
-  birthDay: '',
+  birthDay: new Date().toISOString(),
   username: '',
   password: '',
   repeatPassword: '',
@@ -37,11 +38,39 @@ const formData = reactive({
   role: 'Patient',
 })
 
-const formatDate = (dateString: string) => {
+const formatDate2 = (dateString: string) => {
   const date = new Date(dateString)
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${date.getFullYear()}-${month}-${day}`
+}
+
+const formatDate = (date: DateInputModelValue): string => {
+  if (date === null || date === undefined) return ''
+
+  const dateObj =
+    date instanceof Date
+      ? date
+      : typeof date === 'string'
+        ? new Date(date)
+        : date instanceof Number
+          ? new Date(Number(date))
+          : new Date()
+
+  if (isNaN(dateObj.getTime())) return ''
+
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0')
+  const day = dateObj.getDate().toString().padStart(2, '0')
+  const year = dateObj.getFullYear()
+
+  return `${day}/${month}/${year}`
+}
+
+const parseDate = (dateStr: string): DateInputValue => {
+  if (!dateStr) return null
+
+  const date = new Date(dateStr)
+  return isNaN(date.getTime()) ? null : date
 }
 
 const submit = () => {
@@ -55,7 +84,7 @@ const submit = () => {
       confirmPassword: formData.repeatPassword,
       phoneNumber: formData.phoneNumber,
       isMale: formData.isMale.value,
-      birthDay: formatDate(formData.birthDay),
+      birthDay: formatDate2(formData.birthDay),
       job: formData.job,
       address: formData.address,
       role: formData.role,
@@ -244,6 +273,8 @@ const handleEnter = (e: KeyboardEvent) => {
         <VaDateInput
           v-model="formData.birthDay"
           :rules="birthDayRules"
+          :format="formatDate"
+          :parse="parseDate"
           class="w-full"
           :label="t('auth.birthDay')"
           clearable
