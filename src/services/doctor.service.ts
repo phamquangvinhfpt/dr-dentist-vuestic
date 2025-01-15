@@ -61,6 +61,36 @@ class DoctorService {
         return Promise.reject(error)
       })
   }
+  async getPrescriptionDetail(id: string): Promise<any> {
+    return apiService
+      .get(`/treatmentplan/prescription/get/${id}`) // Added an empty object as the second argument
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async getPrescriptionDetailByPatient(id: string): Promise<any> {
+    return apiService
+      .get(`/treatmentplan/prescription/patient/get/${id}`) // Added an empty object as the second argument
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
+  async addPrescription(data: any): Promise<any> {
+    return apiService
+      .post(`/treatmentplan/prescription/add`, data) // Added an empty object as the second argument
+      .then((response) => {
+        return Promise.resolve(response.data)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
   async getDoctorDetailUpdate(id: string): Promise<any> {
     return apiService
       .get(`/users/get-user/${id}`) // Added an empty object as the second argument
