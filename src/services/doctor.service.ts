@@ -73,7 +73,7 @@ class DoctorService {
   }
   async getPrescriptionDetailByPatient(id: string): Promise<any> {
     return apiService
-      .get(`/treatmentplan/prescription/patient/get/${id}`) // Added an empty object as the second argument
+      .get(`/treatmentplan/precsription/patient/get/${id}`) // Added an empty object as the second argument
       .then((response) => {
         return Promise.resolve(response.data)
       })

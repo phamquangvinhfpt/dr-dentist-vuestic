@@ -730,6 +730,7 @@
     "services": "Service",
     "doctors": "Doctors",
     "medical-record-for-patient": "Medical Record",
+    "prescription" :"prescription",
     "payment-for-patient": "Payment"
   },
   "bin": {

@@ -442,7 +442,7 @@ const routes: Array<RouteRecordRaw> = [
         },
       },
       {
-        path: '/prescriptions/:treatmentID',
+        path: 'prescriptions',
         name: 'prescription-detail',
         component: () => import('../pages/Doctor/PrescriptionPatient.vue'),
         meta: {
