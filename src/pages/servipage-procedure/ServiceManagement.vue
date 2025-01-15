@@ -387,7 +387,11 @@ const getAllServicesPagination = async () => {
 }
 
 const viewDetails = (id: string) => {
-  router.push({ name: 'ServiceProcedures', params: { id } })
+  router.push({
+    name: 'ServiceProcedures',
+    replace: true,
+    state: { serviceId: id },
+  })
 }
 
 const formatPrice = (price: number) => {

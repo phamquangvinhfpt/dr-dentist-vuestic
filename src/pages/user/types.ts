@@ -112,6 +112,8 @@ export type UserDetailsUpdate = {
   lastName: string
   gender: boolean | null
   birthDate: string | null
+  job: string | null
+  address: string | null
   doctorProfile?: DoctorProfileInfo
 }
 

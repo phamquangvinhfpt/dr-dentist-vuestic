@@ -943,8 +943,11 @@
     "assign": "Phân Công",
     "viewDetails": "Xem Chi Tiết",
     "resultsPerPage": "Kết quả mỗi trang",
+    "contactTakenSuccessfully": "Liên hệ đã được lấy thành công",
+    "content": "Nội Dung",
     "management": {
       "subject": "Tiêu đề",
+      "dragAndDrop": "Kéo thả tệp vào đây để tải lên",
       "contactContent": "Nội Dung Liên Hệ",
       "emailContext": "Nội Dung Email",
       "attachedImages": "Hình Ảnh Đính Kèm",
@@ -1130,7 +1133,8 @@
     "deletedOn": "Đã xóa vào",
     "status": "Trạng Thái",
     "close": "Đóng",
-    "send": "Gửi Email"
+    "send": "Gửi Email",
+    "take": "Lấy"
   },
   "payment": {
     "patientCode": "Mã Bệnh Nhân",

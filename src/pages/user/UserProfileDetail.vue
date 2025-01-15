@@ -166,7 +166,6 @@ const getUserDetail = async () => {
       imageUrl: userProfileStore?.userDetails?.imageUrl,
       job: userProfileStore?.userDetails?.job,
       address: userProfileStore?.userDetails?.address,
-      // role: userProfileStore?.userDetails?.role,
       doctorProfile: {
         education: userProfileStore?.userDetails?.doctorProfile?.education ?? '',
         college: userProfileStore?.userDetails?.doctorProfile?.college ?? '',
@@ -179,10 +178,13 @@ const getUserDetail = async () => {
         isActive: userProfileStore?.userDetails?.doctorProfile?.isActive ?? true,
       },
       patientFamily: {
-        name: userProfileStore?.userDetails?.patientFamily?.name || '', // Thuộc tính `name` ở đây nằm trong `patientFamily`
-        phone: userProfileStore?.userDetails?.patientFamily?.phone || '',
-        email: userProfileStore?.userDetails?.patientFamily?.email || '',
-        relationship: userProfileStore?.userDetails?.patientFamily?.relationship || null,
+        name: userProfileStore?.userDetails?.patientFamily?.name ?? '',
+        phone: userProfileStore?.userDetails?.patientFamily?.phone ?? '',
+        email: userProfileStore?.userDetails?.patientFamily?.email ?? '',
+        relationship:
+          userProfileStore?.userDetails?.patientFamily?.relationship !== undefined
+            ? userProfileStore?.userDetails?.patientFamily?.relationship
+            : null,
       },
       medicalHistory: {
         medicalName: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
@@ -205,10 +207,13 @@ const getUserDetail = async () => {
       seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription,
     }
     patientFamily.value = {
-      name: userProfileStore?.userDetails?.patientFamily?.name,
-      phone: userProfileStore?.userDetails?.patientFamily?.phone,
-      email: userProfileStore?.userDetails?.patientFamily?.email,
-      relationship: userProfileStore?.userDetails?.patientFamily?.relationship || null,
+      name: userProfileStore?.userDetails?.patientFamily?.name ?? '',
+      phone: userProfileStore?.userDetails?.patientFamily?.phone ?? '',
+      email: userProfileStore?.userDetails?.patientFamily?.email ?? '',
+      relationship:
+        userProfileStore?.userDetails?.patientFamily?.relationship !== undefined
+          ? userProfileStore?.userDetails?.patientFamily?.relationship
+          : null,
     }
     medicalHistory.value = {
       medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
@@ -591,6 +596,8 @@ const submit = async () => {
       lastName: formData.lastName,
       gender: formData.gender,
       birthDate: date,
+      job: formData.job,
+      address: formData.address,
     }
     await userProfileStore
       .updateProfile(userDetailData)

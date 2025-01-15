@@ -33,7 +33,8 @@ class ContactStaffService {
         console.log('Mapping user:', user)
         return {
           id: user.id,
-          name: user.userName || user.email,
+          name: (user.userName || user.email).replace('.', ' '),
+          //chỗ này  replace . bằng space
         }
       })
     } catch (error) {

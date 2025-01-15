@@ -277,18 +277,21 @@ const columns = [
 // Methods
 const getAllPaymentsPagination = async () => {
   try {
+    console.log('Fetching payments with dates:', { startDate: startDate.value, endDate: endDate.value })
     const res = await paymentStore.getPatientPayments(
       {
         pageNumber: 1,
-        pageSize: 1000, // Lấy tất cả dữ liệu
+        pageSize: 1000,
         orderBy: formData.orderBy,
       },
       startDate.value,
       endDate.value,
     )
 
+    console.log('Payment response:', res)
     if (res?.data) {
       paymentList.value = res.data
+      console.log('Updated payment list:', paymentList.value)
     }
   } catch (error) {
     console.error('Error:', error)
@@ -416,6 +419,7 @@ watch(
   () => paymentStore.paymentList,
   (newValue) => {
     console.log('Payment store updated:', newValue)
+    console.log('Current payment list:', paymentList.value)
   },
   { deep: true },
 )
