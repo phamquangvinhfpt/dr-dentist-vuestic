@@ -69,6 +69,39 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         return await Promise.reject(error)
       }
     },
+    async getPrescriptionDetail(id: string): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.getPrescriptionDetail(id)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getPrescriptionDetailByPatient(id: string): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.getPrescriptionDetailByPatient(id)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async addPrescription(data: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await doctorService.addPrescription(data)
+        this.isLoading = false
+        return await Promise.resolve(response)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
     async getDoctorDetailUpdate(id: string): Promise<any> {
       try {
         this.isLoading = true
@@ -87,7 +120,6 @@ export const useDoctorProfileStore = defineStore('doctorProfile', {
         const response = await doctorService.updateDoctor(doctorData)
         this.isLoading = false
         // Optionally update the local state with the updated doctor
-        console.log('modules update', doctorData)
         return await Promise.resolve(response)
       } catch (error) {
         this.isLoading = false
