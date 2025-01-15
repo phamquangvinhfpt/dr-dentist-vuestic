@@ -2206,7 +2206,6 @@ watch(
 watch(
   [
     () => selectedDate.value,
-    () => selectedTime.value,
     () => currentView.value,
     () => paginationA.value.page,
     () => paginationA.value.perPage,
@@ -2216,13 +2215,12 @@ watch(
     () => paginationN.value.perPage,
     // () => isAppointment.value,
   ],
-  ([newDate, newTime, newView, newPageA, newPerPageA, newPageF, newPerPageF, newPageN, newPerPageN]) => {
+  ([newDate, newView, newPageA, newPerPageA, newPageF, newPerPageF, newPageN, newPerPageN]) => {
     // update request newView next newTime
     request.date = formatDateForm(newDate)
     // Update search values
     const updatedSearchValue = {
       date: formatDateForm(newDate),
-      time: newTime,
     }
 
     const getPageSize = (currentPageSize: any) => (newView === 'calendar' ? 20 : currentPageSize)

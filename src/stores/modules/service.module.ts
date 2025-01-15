@@ -384,5 +384,56 @@ export const useServiceStore = defineStore('service', {
           return Promise.reject(error)
         })
     },
+
+    async getServiceByIdForCustomer(id: string) {
+      try {
+        this.isLoading = true
+        const response = await serviceService.getServiceByIdForCustomer(id)
+
+        if (!response?.data) {
+          throw new Error('No data received from API')
+        }
+
+        const serviceData = response.data as ServiceDetailResponse
+        console.log('Service Data:', serviceData)
+        this.serviceDetail = {
+          serviceID: serviceData.serviceID,
+          name: serviceData.name,
+          description: serviceData.description,
+          totalPrice: serviceData.totalPrice,
+          isActive: serviceData.isActive,
+          createBy: serviceData.createBy,
+          createdOn: serviceData.createdOn,
+          typeServiceID: serviceData.typeServiceID,
+          typeName: serviceData.typeName,
+          deletedOn: '',
+          deletedBy: '',
+        }
+
+        const mappedProcedures = (serviceData.procedures || []).map((proc) => ({
+          serviceProcedureId: proc.procedureID,
+          procedureDetail: {
+            id: proc.procedureID,
+            name: proc.name,
+            description: proc.description,
+            price: proc.price,
+            createBy: proc.createBy,
+            createdOn: proc.createdOn,
+            isRemove: proc.isRemove,
+            deletedOn: '',
+            deletedBy: '',
+          },
+        }))
+
+        this.serviceProcedures = mappedProcedures
+
+        this.isLoading = false
+        return serviceData
+      } catch (error) {
+        this.isLoading = false
+        console.error('Error in getServiceDetail:', error)
+        throw error
+      }
+    },
   },
 })

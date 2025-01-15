@@ -169,7 +169,7 @@ const getServicesDetailById = async (id) => {
   isModalOpen.value = true
   isDetailsLoading.value = true
   try {
-    const response = await useServiceStore().getServiceDetail(id)
+    const response = await useServiceStore().getServiceByIdForCustomer(id)
     serviceDetails.value = response.serviceDTO
     reviews.value = response.feedbacks
     console.log('Giá trị của serviceDetails USER :', response.feedbacks)
