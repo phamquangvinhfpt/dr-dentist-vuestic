@@ -49,9 +49,13 @@ import AppNavbar from '../components/navbar/AppNavbar.vue'
 import AppSidebar from '../components/sidebar/AppSidebar.vue'
 import signalRService from '@/signalR'
 import { LocalNotifications } from '@capacitor/local-notifications'
+import { useAppointmentStore } from '@/stores/modules/appointment.module'
+import { useCalendarStore } from '@/stores/modules/calendar.module'
 
 const GlobalStore = useGlobalStore()
 const onlineUsersStore = useOnlineUsersStore()
+const appointmentStore = useAppointmentStore()
+const calendarStore = useCalendarStore()
 const breakpoints = useBreakpoint()
 const authStore = useAuthStore()
 
@@ -129,11 +133,21 @@ const handleReceiveMessage = (message) => {
       ],
     }
     if (authStore.user?.id !== message.senderId) {
-      console.log('user id', authStore.user?.id)
-      console.log('sender id', message.senderId)
       LocalNotifications.schedule(options)
     }
   }
+}
+
+const handleUpdateAppointments = (appointments) => {
+  appointmentStore.updateAppointment(appointments)
+}
+
+const handleUpdateWorkingCalendar = (data) => {
+  calendarStore.updateCalendar(data)
+}
+
+const handleCheckHeartbeat = () => {
+  console.log('Heartbeat checked')
 }
 
 const registerNotifications = async () => {
@@ -211,19 +225,13 @@ const setupSignalR = async () => {
     const url = import.meta.env.VITE_APP_BASE_URL
     const url_without_api = url.slice(0, -3)
     const path = url_without_api + 'notifications'
-
-    await signalRService.connect(`${path}`)
-
-    if (signalRService.isConnected()) {
-      connectionStatus.value = 'Connected'
-      console.log('SignalR Connected')
-
-      signalRService.on('NotificationFromServer', handleReceiveNotification)
-      signalRService.on('UpdateOnlineUsers', handleUserIsOnline)
-      signalRService.on('ReceiveMessage', handleReceiveMessage)
-    } else {
-      throw new Error('Connection failed')
-    }
+    signalRService.on('NotificationFromServer', handleReceiveNotification)
+    signalRService.on('UpdateOnlineUsers', handleUserIsOnline)
+    signalRService.on('ReceiveMessage', handleReceiveMessage)
+    signalRService.on('Appointments', handleUpdateAppointments)
+    signalRService.on('Fetch', handleUpdateWorkingCalendar)
+    signalRService.on('HeartbeatResponse', handleCheckHeartbeat)
+    await signalRService.initialize(`${path}`)
   } catch (error) {
     console.error('SignalR Connection Error:', error)
     connectionStatus.value = 'Error: ' + error.message
@@ -242,13 +250,15 @@ const cleanupSignalR = () => {
     signalRService.off('NotificationFromServer', handleReceiveNotification)
     signalRService.off('UpdateOnlineUsers', handleUserIsOnline)
     signalRService.off('ReceiveMessage', handleReceiveMessage)
+    signalRService.off('Appointments', handleUpdateAppointments)
+    signalRService.off('HeartbeatResponse', handleCheckHeartbeat)
     signalRService.disconnect()
   }
 }
 
 onMounted(async () => {
   if (!isGuest.value) {
-    setupSignalR()
+    await setupSignalR()
   }
   if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {
     registerNotifications().catch((error) => {

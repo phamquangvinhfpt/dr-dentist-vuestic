@@ -5,8 +5,12 @@ export const useCalendarStore = defineStore('calendar', {
   state: () => ({
     availableTimeSlots: [] as any[],
     isLoading: false as boolean,
+    update: null as any,
   }),
   actions: {
+    updateCalendar(data: any) {
+      this.update = data
+    },
     async getAvailableTimeSlots(data: any): Promise<any> {
       try {
         this.isLoading = true

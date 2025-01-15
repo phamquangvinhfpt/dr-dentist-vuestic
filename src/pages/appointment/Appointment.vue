@@ -393,6 +393,7 @@
             >
               <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
               <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
+              <template #cell(startTime)="{ value }"> {{ formatTime(value) }} </template>
               <template #cell(status)="{ value }">
                 <VaChip :color="getStatusColor(value)" class="text-sm">
                   {{ getStatusText(value) }}
@@ -478,6 +479,7 @@
               :no-data-html="t('appointment.no_items_found')"
             >
               <template #cell(date)="{ value }"> {{ formatDate(value) }} </template>
+              <template #cell(startTime)="{ value }"> {{ formatTime(value) }} </template>
               <template #cell(status)="{ value }">
                 <VaChip :color="getFollowUpStatusColor(value)" class="text-sm">
                   {{ getFollowUpStatusText(value) }}
@@ -492,6 +494,14 @@
                     color="#b1fadc"
                     icon-color="#812E9E"
                     @click="checkedFollowupAppointment(rowData.calendarID)"
+                  />
+                  <VaButton
+                    v-if="rowData.status !== 4 && rowData.status !== 2"
+                    round
+                    icon="arrow_forward"
+                    color="#b1fadc"
+                    icon-color="#812E9E"
+                    @click="router.push(`/examination/${rowData.appointmentId}`)"
                   />
                   <VaButton
                     v-if="rowData.status === 2"
@@ -546,6 +556,7 @@
             >
               <template #cell(appointmentDate)="{ value }"> {{ formatDate(value) }} </template>
               <template #cell(servicePrice)="{ value }"> {{ formatPrice(value) }}$ </template>
+              <template #cell(startTime)="{ value }"> {{ formatTime(value) }} </template>
               <template #cell(status)="{ value }">
                 <VaChip :color="getStatusColor(value)" class="text-sm">
                   {{ getStatusText(value) }}
@@ -795,14 +806,15 @@
                   <DialogTitle as="h3" class="text-lg font-medium leading-6">
                     {{ t('appointment.assign_doctor_modal.title') }}
                   </DialogTitle>
-                  <VaForm ref="doctor_form">
+                  <VaForm>
                     <div class="space-y-2">
                       <VaSelect
                         v-model="selectedDoctorId"
-                        :label="t('appointment.assign_doctor_modal.doctor')"
-                        :options="listDoctorsOptionsAssign"
                         autocomplete
                         highlight-matched-text
+                        mark-required
+                        :label="t('appointment.assign_doctor_modal.doctor')"
+                        :options="listDoctorsOptionsAssign"
                         :rules="[(v) => !!v || 'Please select a doctor']"
                       />
                     </div>
@@ -824,50 +836,61 @@
       <!-- Create Appointment Modal -->
       <VaModal v-model="showModalAppointment" close-button hide-default-actions>
         <h3 class="va-h3">{{ t('appointment.appointment_detail') }}</h3>
-        <VaForm ref="create_form">
+        <VaForm>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <VaSelect
               v-model="patientId"
               class="col-span-1"
+              autocomplete
+              required-mark
               :label="t('appointment.create_appointment.patient')"
               :options="optionsPatients"
-              autocomplete
               highlight-matched-text
               :rules="[(v) => !!v || t('appointment.create_appointment.patient_required')]"
             />
             <VaSelect
               v-model="serviceId"
               class="col-span-1"
+              autocomplete
+              required-mark
               :label="t('appointment.create_appointment.service')"
               :options="optionsServices"
-              autocomplete
               highlight-matched-text
               :rules="[(v) => !!v || t('appointment.create_appointment.service_required')]"
             />
             <VaDateInput
               v-model="date"
-              :format="formatDate"
-              :parse="parseDate"
               manual-input
               class="col-span-1"
-              :label="t('appointment.create_appointment.date')"
               clearable
-              :rules="[(v) => !!v || t('appointment.create_appointment.date_required')]"
+              required-mark
+              :format="formatDate"
+              :parse="parseDate"
+              :label="t('appointment.create_appointment.date')"
+              :rules="[
+                (v) => !!v || t('appointment.reschedule_appointment.date_required'),
+                (v) => !validateDate(v) || t('appointment.reschedule_appointment.date_today'),
+              ]"
             />
             <VaSelect
               v-model="startTime"
               class="col-span-1"
+              required-mark
               :label="t('appointment.create_appointment.time')"
               :options="optionsStartTimes"
-              :rules="[(v) => !!v || t('appointment.create_appointment.time_required')]"
+              :rules="[
+                (v) => !!v || t('appointment.reschedule_appointment.time_required'),
+                (v) => !validateTime(v) || !isToday(date) || t('appointment.reschedule_appointment.time_today'),
+              ]"
             />
             <VaSelect
               v-model="doctorId"
               class="col-span-1"
-              :label="t('appointment.create_appointment.doctor')"
-              :options="optionsDoctors"
+              required-mark
               autocomplete
               highlight-matched-text
+              :label="t('appointment.create_appointment.doctor')"
+              :options="optionsDoctors"
               :rules="[(v) => !!v || t('appointment.create_appointment.doctor_required')]"
             />
             <VaTextarea v-model="notes" :label="t('appointment.create_appointment.note')" />
@@ -876,7 +899,7 @@
             <VaButton class="mr-6" color="#ECF0F1" @click="showModalAppointment = false">{{
               t('appointment.create_appointment.cancel')
             }}</VaButton>
-            <VaButton :disabled="!create_form?.isValid" @click="submitAppointment">{{
+            <VaButton :disabled="!isCreateFormValid" @click="submitAppointment">{{
               t('appointment.create_appointment.submit')
             }}</VaButton>
           </div>
@@ -893,24 +916,32 @@
       >
         <h3 class="va-h3">{{ t('appointment.reschedule_appointment.title') }}</h3>
         <VaCard>
-          <VaForm ref="reschedule_form">
+          <VaForm>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <VaDateInput
                 v-model="date"
+                manual-input
+                required-mark
+                class="col-span-1"
                 :format="formatDate"
                 :parse="parseDate"
-                manual-input
-                class="col-span-1"
                 :label="t('appointment.reschedule_appointment.date')"
                 clearable
-                :rules="[(v) => !!v || t('appointment.reschedule_appointment.date_required')]"
+                :rules="[
+                  (v) => !!v || t('appointment.reschedule_appointment.date_required'),
+                  (v) => !validateDate(v) || t('appointment.reschedule_appointment.date_today'),
+                ]"
               />
               <VaSelect
                 v-model="startTime"
                 class="col-span-1"
+                required-mark
                 :label="t('appointment.reschedule_appointment.time')"
                 :options="availableTimes"
-                :rules="[(v) => !!v || t('appointment.reschedule_appointment.time_required')]"
+                :rules="[
+                  (v) => !!v || t('appointment.reschedule_appointment.time_required'),
+                  (v) => !validateTime(v) || !isToday(date) || t('appointment.reschedule_appointment.time_today'),
+                ]"
               />
             </div>
 
@@ -918,7 +949,7 @@
               <VaButton class="mr-6" color="#ECF0F1" @click="showModalReschedule = false">{{
                 t('appointment.reschedule_appointment.cancel')
               }}</VaButton>
-              <VaButton :disabled="!reschedule_form?.isValid" @click="submitReschedule(isAppointment)">{{
+              <VaButton :disabled="!isRescheduleFormValid" @click="submitReschedule(isAppointment)">{{
                 t('appointment.reschedule_appointment.submit')
               }}</VaButton>
             </div>
@@ -943,7 +974,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, Ref, nextTick, onBeforeMount } from 'vue'
 import { Dialog, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import {
-  useForm,
+  // useForm,
   useToast,
   VaAlert,
   VaButton,
@@ -975,7 +1006,7 @@ import {
   getAppointmentType,
 } from './types'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
-import { getErrorMessage, getSrcAvatar } from '@/services/utils'
+import { formatTime, getErrorMessage, getSrcAvatar, isToday, validateDate, validateTime } from '@/services/utils'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
@@ -989,6 +1020,7 @@ import ListAppointment from './widgets/list-appointment/ListAppointment.vue'
 import ListFollowUpAppointment from './widgets/list-appointment/ListFollowUpAppointment.vue'
 import { useI18n } from 'vue-i18n'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
+import { storeToRefs } from 'pinia'
 
 const selectedDate = ref(new Date())
 const showAllUnassignedModal = ref(false)
@@ -1006,6 +1038,7 @@ const loading = ref(false)
 const appointments = ref<Appointment[]>([])
 const followUpAppointments = ref<FollowUpAppointment[]>([])
 const storeAppointments = useAppointmentStore()
+const { update_date } = storeToRefs(storeAppointments)
 const calendarStore = useCalendarStore()
 const storeDoctors = useDoctorProfileStore()
 const storeServices = useServiceStore()
@@ -1027,9 +1060,9 @@ const items = ref<Appointment[]>([])
 const availableTimes = ref<string[]>([])
 const followitems = ref<FollowUpAppointment[]>([])
 const unassigneditems = ref<Appointment[]>([])
-const create_form = useForm('create_appointment_form')
-const reschedule_form = useForm('reschedule_appointment_form')
-const doctor_form = useForm('assign_appointment_form')
+// const create_form = useForm('create_appointment_form')
+// const reschedule_form = useForm('reschedule_appointment_form')
+// const doctor_form = useForm('assign_appointment_form')
 
 const weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -1173,7 +1206,23 @@ const getPatients = () => {
     })
 }
 
+const isCreateFormValid = computed(() => {
+  return (
+    patientId.value?.value &&
+    serviceId.value?.value &&
+    date.value &&
+    startTime.value &&
+    doctorId.value?.value &&
+    !validateDate(date.value) &&
+    (!validateTime(startTime.value) || (validateTime(startTime.value) && !isToday(date.value)))
+  )
+})
+
 const submitAppointment = () => {
+  if (!isCreateFormValid.value) {
+    return
+  }
+
   const appointment = {
     patientId: patientId.value?.value,
     dentistId: doctorId.value?.value,
@@ -1272,7 +1321,9 @@ const rescheduleModal = (appointment: any) => {
         : formatDateForm(appointment.date),
   }
   current_appointment.value = appointment
-  getAvailablesTimesForDoctor(request)
+  if (validateDate(date.value)) {
+    getAvailablesTimesForDoctor(request)
+  }
   showModalReschedule.value = true
   if (isAppointment.value === 'followup') {
     current_follow_up.value = appointment
@@ -1296,7 +1347,19 @@ const handleCloseCancel = () => {
   userId.value = ''
 }
 
+const isRescheduleFormValid = computed(() => {
+  return (
+    date.value &&
+    startTime.value &&
+    !validateDate(date.value) &&
+    (!validateTime(startTime.value) || (validateTime(startTime.value) && !isToday(date.value)))
+  )
+})
+
 const submitReschedule = (isAppointment: any) => {
+  if (!isRescheduleFormValid.value) {
+    return
+  }
   let request
   if (isAppointment === 'appointment' || isAppointment === 'unassigned') {
     request = {
@@ -1688,6 +1751,7 @@ const selectedBooking = ref<Appointment>({
   patientName: '',
   patientPhone: '',
   dentistId: '',
+  dentistUserID: '',
   dentistName: '',
   serviceId: '',
   serviceName: '',
@@ -2122,6 +2186,24 @@ const debouncedFetchNonDoctorAppointments = debounce(fetchNonDoctorAppointments,
 
 // Combine multiple watchers into a single watcher
 watch(
+  update_date,
+  () => {
+    if (update_date.value) {
+      console.log('update_date', update_date.value)
+      request.date = formatDateForm(update_date.value)
+    }
+    if (isAppointment.value === 'appointment') {
+      fetchAppointments(searchValueA.value)
+    } else if (isAppointment.value === 'unassigned') {
+      fetchNonDoctorAppointments(searchValueN.value)
+    } else {
+      fetchFollowUpAppointments(searchValueF.value)
+    }
+  },
+  { immediate: true },
+)
+
+watch(
   [
     () => selectedDate.value,
     () => selectedTime.value,
@@ -2232,7 +2314,7 @@ watch(
       debouncedFetchAvailableDoctors()
     }
 
-    if (newDate && showModalReschedule && current_appointment.value) {
+    if (newDate && !validateDate(newDate) && showModalReschedule && current_appointment.value) {
       const request = {
         doctorID:
           isAppointment.value === 'appointment'

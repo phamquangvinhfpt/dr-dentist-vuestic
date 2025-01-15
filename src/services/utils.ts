@@ -11,6 +11,8 @@ dayjs.extend(relativeTime)
 dayjs.extend(utc)
 dayjs.extend(timezone)
 import i18n from './../i18n'
+import { DateInputModelValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
+import { SelectableOption } from 'vuestic-ui/dist/types/composables'
 const { t } = i18n.global
 const local = i18n.global.locale.value === 'vi' ? 'vi' : 'en'
 
@@ -237,4 +239,47 @@ export const generateQRCode = async (
     console.error(error)
   }
   return ''
+}
+
+export const validateDate = (value: DateInputModelValue): boolean => {
+  if (!value) return false
+
+  const today = new Date()
+  const date = value instanceof Date ? value : new Date(value as string)
+
+  if (date.getFullYear() < today.getFullYear()) return true
+  if (date.getFullYear() > today.getFullYear()) return false
+
+  // Cùng năm, kiểm tra tháng
+  if (date.getMonth() < today.getMonth()) return true
+  if (date.getMonth() > today.getMonth()) return false
+
+  // Cùng năm và tháng, kiểm tra ngày
+  return date.getDate() < today.getDate()
+}
+
+export const isToday = (date: Date): boolean => {
+  if (!date) return false
+  const today = new Date()
+  const compareDate = typeof date === 'string' ? new Date(date) : date
+
+  return (
+    compareDate.getDate() === today.getDate() &&
+    compareDate.getMonth() === today.getMonth() &&
+    compareDate.getFullYear() === today.getFullYear()
+  )
+}
+
+export const validateTime = (value: SelectableOption): boolean => {
+  if (!value) return false
+
+  const today = new Date()
+  const time = value as string
+  const [hour, minute] = time.split(':').map(Number)
+
+  return today.getHours() > hour || (today.getHours() === hour && today.getMinutes() > minute)
+}
+
+export const formatTime = (time: string): string => {
+  return time.slice(0, 5)
 }
