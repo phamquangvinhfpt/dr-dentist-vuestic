@@ -22,7 +22,6 @@ watch(
   (newValue) => {
     if (newValue !== addressInput.value) {
       addressInput.value = newValue || ''
-      emit('update:modelValue', addressInput.value)
     }
   },
   { immediate: true },
@@ -75,16 +74,22 @@ const selectSuggestion = (prediction: any) => {
     isSelected.value = false
   }, 300)
 }
-
-watch(
-  () => addressInput.value,
-  (newValue) => {
-    if (!isSelected.value && newValue !== props.modelValue) {
-      emit('update:modelValue', newValue)
-      debouncedSearch(newValue)
-    }
-  },
-)
+// watch(
+//   () => addressInput.value,
+//   (newValue) => {
+//     if (!isSelected.value && newValue !== props.modelValue) {
+//       emit('update:modelValue', newValue)
+//       debouncedSearch(newValue)
+//     }
+//   },
+// )
+//tuấn viết
+const handleInput = (value: string) => {
+  if (!isSelected.value) {
+    emit('update:modelValue', value)
+    debouncedSearch(value)
+  }
+}
 </script>
 
 <template>
@@ -95,6 +100,7 @@ watch(
       class="mb-4 w-full"
       :label="t('auth.address')"
       autocomplete="off"
+      @update:modelValue="handleInput"
     />
 
     <div
