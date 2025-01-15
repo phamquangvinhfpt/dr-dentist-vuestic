@@ -655,6 +655,7 @@
     "services": "Dịch vụ",
     "doctors": "Bác sĩ",
     "medical-record-for-patient": "Hồ sơ bệnh án",
+    "prescription" :"Đơn thuốc",
     "payment-for-patient": "Thanh toán"
   },
   "bin": {
