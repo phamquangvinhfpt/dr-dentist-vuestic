@@ -255,6 +255,8 @@
     "Email_Status": "Trạng thái email",
     "Patient_Feedback": "Phản hồi từ bệnh nhân",
     "first_Name": "Họ",
+    "not_doctor": "Không tìm thấy bác sĩ phù hợp.",
+    "not_user": "không tìm thấy người dùng phù hợp.",
     "last_Name": "Tên riêng",
     "my": "Của tôi",
     "no_medical": "Không có lịch sử khám nào",
@@ -273,6 +275,7 @@
     "back": "Quay lại",
     "History_of_Examination": "Lịch sử khám bệnh",
     "search": "Tìm kiếm bác sĩ theo tên hoặc email...",
+    "search_placeholder": "Tìm kiếm Theo tên hoặc email...",
     "search_doctor": "Tìm kiếm",
     "not_doctor": "Không tìm thấy bác sĩ phù hợp.",
     "type_service": "Loại dịch vụ",
@@ -1079,7 +1082,19 @@
     "restoreError": "Khôi phục dịch vụ thất bại",
     "deleteSuccess": "Xóa dịch vụ thành công",
     "deleteError": "Xóa dịch vụ thất bại",
-    "serviceDeleteSuccess": "Dịch vụ đã được xóa thành công"
+    "serviceDeleteSuccess": "Dịch vụ đã được xóa thành công",
+    "service_head":"Dịch Vụ Nha Khoa",
+    "service_title":"Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi",
+    "Booking":"Đặt Lịch Ngay",
+    "noService": "Không có dịch vụ nào để hiển thị.",
+    "serviceList": "Danh Sách Dịch Vụ",
+    "Detail" : "chi tiết",
+    "price" :"Giá:",
+    "search":"Tìm kiếm",
+    "search_placeholder":"Tìm dịch vụ...",
+    "filter": "Lọc theo loại dịch vụ",
+    "all_service": "Tất cả dịch vụ"
+
   },
   "procedure": {
     "id": "Mã",

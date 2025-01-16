@@ -51,9 +51,9 @@
             <p class="mt-1 font-normal">
               {{
                 doctor.doctorProfile?.workingType === 2
-                  ? 'Toàn Thời Gian'
+                  ? t('doctor.full_time')
                   : doctor.doctorProfile?.workingType === 1
-                    ? 'Bán Thời Gian'
+                    ? t('doctor.part_time')
                     : 'Chưa có thông tin'
               }}
             </p>
@@ -200,14 +200,14 @@
                 <div class="flex justify-between">
                   <span class="font-semibold">{{ appointment.appointmentDate }}</span>
                 </div>
-                <p class="mt-1 text-gray-700">{{ appointment.patientName }}</p>
-                <p class="mt-1 text-gray-600">{{ t('doctor.service') }}: {{ appointment.serviceName }}</p>
+                <p class="mt-1">{{ appointment.patientName }}</p>
+                <p class="mt-1">{{ t('doctor.service') }}: {{ appointment.serviceName }}</p>
               </li>
             </ul>
             <div class="flex justify-between mt-4">
               <VaButton
                 :disabled="currentPage === 1"
-                class="px-2 py-1 bg-gray-100 font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                class="px-2 py-1 font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 @click="prevPage2"
               >
                 <ChevronLeft class="w-5 h-5" />

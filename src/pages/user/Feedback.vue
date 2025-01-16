@@ -1,28 +1,31 @@
 <template>
-  <VaCard class="min-h-screen bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center p-4">
-    <VaCard class="bg-white rounded-3xl shadow-xl p-8 max-w-lg w-full relative">
+  <VaCard
+    class="min-h-screen bg-gradient-to-br from-indigo-200 via-purple-300 to-pink-200 flex items-center justify-center p-6"
+  >
+    <VaCard class="bg-white rounded-3xl shadow-2xl p-8 max-w-lg w-full relative">
       <!-- Nút Đóng -->
-      <button
-        class="absolute right-4 top-4 w-8 h-8 flex items-center justify-center rounded-full bg-stone-500 text-white hover:bg-red-400"
-        @click="$emit('close')"
+      <VaButton
+        style="background-color: red !important; color: white !important"
+        class="absolute right-4 top-4 w-10 h-10 flex items-center justify-center rounded-full bg-gray-300 text-gray-700 hover:bg-red-400 hover:text-white transition-transform duration-200 transform hover:scale-110 shadow-md"
+        @click="goHome"
       >
         ×
-      </button>
+      </VaButton>
 
       <!-- Nội Dung Phản Hồi -->
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold 0 mb-2">Chúng tôi trân trọng ý kiến của bạn</h2>
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-3">Chúng tôi trân trọng ý kiến của bạn</h2>
         <p class="">Cải thiện trải nghiệm của bạn là ưu tiên hàng đầu của chúng tôi.</p>
       </div>
 
-      <form class="space-y-6" @submit.prevent="submitFeedback">
+      <VaForm class="space-y-6" @submit.prevent="submitFeedback">
         <!-- Đánh Giá Sao -->
-        <div class="flex justify-center space-x-1">
+        <div class="flex justify-center space-x-2">
           <template v-for="i in 5" :key="i">
             <button
               type="button"
-              class="text-3xl focus:outline-none transition-all duration-200"
-              :class="i <= rating ? 'text-yellow-500 scale-110' : 'text-gray-300'"
+              class="text-4xl focus:outline-none transition-all duration-300 transform hover:scale-125"
+              :class="i <= rating ? 'text-yellow-400' : 'text-gray-300'"
               @click="rating = i"
             >
               ★
@@ -35,32 +38,52 @@
         <div>
           <VaTextarea
             v-model="comment"
-            rows="4"
+            rows="5"
             placeholder="Nhập phản hồi của bạn tại đây..."
-            class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-300 resize-none transition-shadow duration-200"
+            class="w-full p-4 rounded-xl focus:ring-4 focus:ring-blue-400 resize-none transition-shadow duration-300"
           ></VaTextarea>
+          <p v-if="!comment" class="text-sm text-red-500 text-center">Vui lòng nhập nội dung phản hồi</p>
         </div>
 
         <!-- Nút Gửi -->
         <button
           type="submit"
-          class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-500 focus:ring-4 focus:ring-blue-200 transition-all duration-200 font-medium"
+          class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 text-white py-4 rounded-xl shadow-md hover:shadow-lg focus:ring-4 focus:ring-purple-300 transition-all duration-300 font-semibold text-lg"
           :class="{ 'opacity-50 pointer-events-none': isSubmitting }"
         >
           <span v-if="isSubmitting" class="animate-pulse">Đang gửi...</span>
           <span v-else>Gửi Phản Hồi Của Tôi</span>
         </button>
-      </form>
+      </VaForm>
     </VaCard>
-
+    <div v-if="showExitConfirmation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <VaCard class="bg-white rounded-3xl shadow-2xl p-6 max-w-sm w-full text-center space-y-6">
+        <h3 class="text-xl font-semibold">Bạn chưa đánh giá</h3>
+        <p class="">Bạn có chắc chắn muốn rời đi mà không gửi phản hồi?</p>
+        <div class="flex justify-between">
+          <button
+            class="bg-red-500 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+            @click="cancelExit"
+          >
+            Không
+          </button>
+          <button
+            class="bg-green-500 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+            @click="confirmExit"
+          >
+            Có
+          </button>
+        </div>
+      </VaCard>
+    </div>
     <!-- Modal Xác Nhận -->
     <div v-if="showConfirmation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl shadow-lg p-6 max-w-sm w-full text-center space-y-4">
-        <h3 class="text-xl font-semibold text-gray-800">Cảm ơn bạn!</h3>
+      <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center space-y-6">
+        <h3 class="text-2xl font-semibold text-gray-800">Cảm ơn bạn!</h3>
         <p class="text-gray-600">Phản hồi của bạn đã được gửi thành công.</p>
         <button
-          class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-500 transition-colors duration-200"
-          @click="showConfirmation = false"
+          class="bg-gradient-to-r from-green-500 to-teal-400 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all duration-300 font-medium"
+          @click="Home"
         >
           Đóng
         </button>
@@ -73,11 +96,13 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserProfileStore } from '@/stores/modules/user.module'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
+import { useToast, VaButton, VaCard, VaForm } from 'vuestic-ui'
 
 const route = useRoute()
 const router = useRouter()
 const userProfileStore = useUserProfileStore()
 const appointmentStore = useAppointmentStore()
+const { init: toast } = useToast()
 
 const rating = ref(0)
 const comment = ref('')
@@ -88,19 +113,41 @@ onMounted(async () => {
   const appointmentId = route.params.appointmentID as string
   try {
     const appointment = await appointmentStore.getAppointmentById(appointmentId)
+    console.log('appoiment', appointment)
     canFeedback.value = appointment.canFeedback
-    if (!canFeedback.value) {
-      router.push({ name: 'feedback-list' }) // Adjust the route name as necessary
-    }
   } catch (error) {
     console.error('Error fetching appointment:', error)
-    alert('Đã xảy ra lỗi khi tải thông tin cuộc hẹn.')
+    toast('Đã xảy ra lỗi khi lấy thông tin điều trị !')
   }
 })
+const Home = () => {
+  router.push({ name: 'dashboard' }) // Điều hướng về trang Home
+}
+const showExitConfirmation = ref(false)
 
+const goHome = () => {
+  if (rating.value > 0 || comment.value) {
+    showExitConfirmation.value = true
+  } else {
+    router.push({ name: 'dashboard' })
+  }
+}
+
+const cancelExit = () => {
+  showExitConfirmation.value = false
+}
+
+const confirmExit = () => {
+  router.push({ name: 'dashboard' })
+}
 const submitFeedback = async () => {
   if (rating.value === 0) {
-    alert('Vui lòng chọn một đánh giá')
+    toast('Vui lòng chọn một đánh giá!')
+    return
+  }
+
+  if (!comment.value.trim()) {
+    toast('Vui lòng nhập nội dung phản hồi!')
     return
   }
   isSubmitting.value = true
@@ -120,7 +167,8 @@ const submitFeedback = async () => {
     }, 1000)
   } catch (error) {
     console.error('Error submitting feedback:', error)
-    alert('Đã xảy ra lỗi khi gửi phản hồi.')
+    toast('Đã xảy ra lỗi khi gửi phản hồi. Vui lòng thử lại.')
+    isSubmitting.value = false // Đặt lại trạng thái để hiển thị lại nút
   }
 }
 </script>
@@ -133,11 +181,29 @@ const submitFeedback = async () => {
   transition-duration: 150ms;
 }
 /* Tăng hiệu ứng giao diện */
+
+button:focus {
+  outline: none;
+}
 button:hover {
-  transform: scale(1.05);
+  transform: scale(1.115);
 }
 
 button:focus {
   outline: none;
+}
+
+/* Gradient nền */
+.bg-gradient-to-br {
+  background: linear-gradient(to bottom right, #6dd5ed, #2193b0);
+}
+.btn-red {
+  background-color: red;
+  color: white;
+}
+
+.btn-red:hover {
+  background-color: #ff4d4d; /* Màu đỏ nhạt hơn khi hover */
+  color: white;
 }
 </style>

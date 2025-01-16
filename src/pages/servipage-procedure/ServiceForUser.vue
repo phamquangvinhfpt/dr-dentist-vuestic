@@ -2,17 +2,19 @@
   <VaCard style="padding-top: 0.5%" class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
       <div class="flex justify-between mb-3">
-        <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">Dịch Vụ Nha Khoa</h1>
+        <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">
+          {{ t('service.service_head') }}
+        </h1>
       </div>
       <div style="margin-bottom: 1%; margin-top: 5px" class="flex justify-between items-center mt-6">
-        <p class="text-sm md:text-base text-left mb-0">Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi</p>
+        <p class="text-sm md:text-base text-left mb-0">{{ t('service.service_title') }}</p>
 
         <button
           v-if="isMobile"
           class="bg-indigo-600 text-white font-semibold text-xs py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
           @click="bookAppointment"
         >
-          Đặt Lịch Ngay
+          {{ t('service.Booking') }}
         </button>
         <button
           v-else
@@ -20,7 +22,7 @@
           class="bg-indigo-600 text-white font-semibold text-xs py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
           @click="bookAppointment"
         >
-          Đặt Lịch Ngay
+          {{ t('service.Booking') }}
         </button>
       </div>
       <!-- Search and Filters -->
@@ -28,14 +30,14 @@
         <VaInput
           v-model="searchQuery"
           type="text"
-          placeholder="Tìm dịch vụ..."
-          label="Tìm kiếm"
+          :placeholder="t('service.search_placeholder')"
+          :label="t('service.search')"
           @input="onSearchChange"
         />
         <VaSelect
           v-model="selectedTypeService"
           :options="typeServiceOptions"
-          label="Lọc theo loại dịch vụ"
+          :label="t('service.filter')"
           @change="onFilterChange"
         />
       </div>
@@ -44,7 +46,7 @@
           <VaProgressCircle indeterminate />
         </div>
         <div v-if="filteredServices.length === 0 && !isLoading" class="col-span-full text-center">
-          Không có dịch vụ nào để hiển thị.
+          {{ t('service.noService') }}
         </div>
         <div v-for="service in paginatedServices" :key="service.serviceID" class="service-card">
           <VaCard class="p-6 flex flex-col justify-between h-full">
@@ -52,9 +54,11 @@
             <h2 class="text-lg font-semibold dark:text-blue-500 text-blue-900">{{ service.name }}</h2>
             <p class="text-xs mt-2">{{ truncateDescription(service.description) }}</p>
             <div class="flex justify-between items-center mt-4">
-              <p class="text-sm font-bold text-blue-600">Giá: {{ formatCurrency(service.totalPrice) }}</p>
+              <p class="text-sm font-bold text-blue-600">
+                {{ t('service.price') }} {{ formatCurrency(service.totalPrice) }}
+              </p>
               <button class="text-sm font-bold text-blue-600" @click.prevent="getServicesDetailById(service.serviceID)">
-                Chi Tiết
+                {{ t('service.Detail') }}
               </button>
             </div>
           </VaCard>
@@ -85,6 +89,8 @@ import { useRoute } from 'vue-router' // Để lấy tham số từ route
 import { VaCard, VaInput, VaSelect, VaPagination, VaProgressCircle } from 'vuestic-ui'
 import ServiceDetailsModal from './widgets/ServiceDetailsModal.vue'
 import { useServiceStore } from '@/stores/modules/service.module'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 // Reactive variables
 const searchQuery = ref('')
 const selectedTypeService = ref({ value: null, text: 'Tất cả dịch vụ' })
@@ -124,7 +130,7 @@ onMounted(async () => {
 
     if (Array.isArray(serviceTypes) && serviceTypes.length > 0) {
       typeServiceOptions.value = [
-        { value: null, text: 'Tất cả dịch vụ' },
+        { value: null, text: t('service.all_service') },
         ...serviceTypes.map((service) => ({
           value: service.id,
           text: service.typeName,
@@ -135,10 +141,10 @@ onMounted(async () => {
       // Sử dụng `.find` để tìm option phù hợp
       selectedTypeService.value = typeServiceOptions.value.find((option) => option.value == defaultTypeServiceId) || {
         value: null,
-        text: 'Tất cả dịch vụ',
+        text: t('service.all_service'),
       }
     } else {
-      console.warn('Không có loại dịch vụ nào để hiển thị')
+      console.warn(t('service.noServicesFound'))
     }
   } catch (error) {
     console.error('Error fetching service types:', error)

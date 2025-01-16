@@ -100,7 +100,7 @@ watch(currentPage, () => {
 <template>
   <VaCard style="padding-top: 0.1rem" class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-4 sm:px-10">
     <!-- Header Section -->
-    <VaCard class="mb-6 flex justify-between items-center">
+    <VaCard style="margin-top: 20px; margin-bottom: 10px" class="mb-6 flex justify-between items-center">
       <div class="flex-1 max-w-md">
         <VaInput v-model="searchQuery" :placeholder="t('doctor.search')" rounded outlined clearable /><svg
           class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -110,14 +110,7 @@ watch(currentPage, () => {
           stroke="currentColor"
           width="16"
           height="16"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M21 21l-4.35-4.35m1.6-5.4A7.5 7.5 0 1110 2.5a7.5 7.5 0 018.25 8.25z"
-          ></path>
-        </svg>
+        ></svg>
       </div>
       <VaButton color="primary" class="rounded-md" @click="router.push('/doctors/create')">
         <template #prepend>

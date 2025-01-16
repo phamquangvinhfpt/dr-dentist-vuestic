@@ -948,4 +948,74 @@ h3 {
   position: relative;
   z-index: 1;
 }
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(1, 1fr); /* Một cột trên màn hình nhỏ */
+  }
+
+  .form-container {
+    padding: 4px;
+  }
+
+  .input-group,
+  .va-input {
+    margin-bottom: 1rem; /* Giảm khoảng cách giữa các trường nhập */
+  }
+
+  h3 {
+    font-size: 18px; /* Điều chỉnh kích thước tiêu đề cho dễ đọc trên thiết bị nhỏ */
+  }
+
+  .va-input__input {
+    font-size: 14px; /* Giảm kích thước font để vừa vặn hơn */
+  }
+
+  .confirmation-modal,
+  .success-modal {
+    min-width: 300px;
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr; /* Chỉ một cột trên các thiết bị nhỏ hơn */
+  }
+
+  .input-group,
+  .va-input {
+    margin-bottom: 1rem; /* Giảm khoảng cách giữa các trường nhập */
+  }
+
+  .va-button {
+    width: 100%; /* Đảm bảo nút có độ rộng 100% trên màn hình nhỏ */
+  }
+
+  .va-card {
+    padding: 20px; /* Điều chỉnh padding cho card trên các thiết bị nhỏ */
+  }
+
+  .form-container {
+    padding: 4px; /* Điều chỉnh padding để phù hợp với không gian */
+  }
+}
+
+/* Media Query cho các thiết bị cực nhỏ */
+@media (max-width: 480px) {
+  .va-input__input {
+    font-size: 12px; /* Giảm kích thước font cho thiết bị di động */
+  }
+
+  .va-button {
+    padding: 10px; /* Điều chỉnh padding cho nút */
+  }
+
+  h3 {
+    font-size: 16px; /* Kích thước tiêu đề nhỏ hơn */
+  }
+
+  .input-group {
+    margin-bottom: 0.8rem; /* Giảm khoảng cách giữa các trường nhập */
+  }
+}
 </style>

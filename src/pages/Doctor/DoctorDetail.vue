@@ -51,9 +51,9 @@
             <p class="mt-1 font-normal">
               {{
                 doctor.doctorProfile?.workingType === 2
-                  ? 'Toàn Thời Gian'
+                  ? t('doctor.full_time')
                   : doctor.doctorProfile?.workingType === 1
-                    ? 'Bán Thời Gian'
+                    ? t('doctor.part_time')
                     : 'Chưa có thông tin'
               }}
             </p>
@@ -83,7 +83,7 @@
             class="px-4 py-2 rounded-full transition-all duration-200 text-sm font-medium"
             @click="filterRating(i)"
           >
-            <span v-if="i === 6">Tất Cả</span>
+            <span v-if="i === 6">{{ t('doctor.all') }}</span>
             <span v-else class="flex items-center space-x-1">
               <span>{{ i }}</span>
               <Star class="w-4 h-4" :class="i <= selectedRating ? 'fill-current' : 'stroke-current'" />
@@ -164,7 +164,7 @@
         class="w-full sm:w-auto mt-6 bg-gray-200 font-semibold py-1 px-3 rounded-lg shadow-md hover:bg-gray-300 transition-colors duration-200"
         @click="$router.go(-1)"
       >
-        Quay Về
+        {{ t('doctor.back') }}
       </VaButton>
     </div>
   </VaCard>
@@ -385,5 +385,21 @@ const setRating = (rating: number) => {
 
 .text-sm.font-normal {
   font-weight: normal;
+}
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.4s ease,
+    transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
 }
 </style>

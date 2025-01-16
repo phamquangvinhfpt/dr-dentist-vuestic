@@ -247,6 +247,7 @@
     "email": "Email",
     "phone": "Phone",
     "gender": "Gender",
+    "search_placeholder": "search by name or email...",
     "Add_User": "Add User",
     "Add_Staff": "Add Staff",
     "loading": "Loading data...",
@@ -288,6 +289,7 @@
     "search": "Search for a doctor by name or email...",
     "search_doctor": "Search",
     "not_doctor": "No suitable doctors found.",
+    "not_user": "No matching users found.",
     "type_service": "Type Service",
     "Sort_By": "Sort By",
     "asc": "asc",
@@ -1181,7 +1183,20 @@
     "statusUpdatedSuccessfully": "Status updated successfully",
     "serviceDetails": "Service Details",
     "serviceInformation": "Service Information",
-    "createSuccess": "Create service successfully"
+    "createSuccess": "Create service successfully",
+
+      "service_head": "Dental Services",
+      "service_title": "Caring for your smile is our top priority",
+      "Booking": "Book Now",
+      "noService": "No services to display.",
+      "serviceList": "Service List",
+      "Detail": "Details",
+      "price": "Price:",
+      "search": "Search",
+      "search_placeholder": "Search for services...",
+      "filter": "Filter by service type",
+      "all_service": "All services"
+  
   },
   "procedure": {
     "id": "ID",

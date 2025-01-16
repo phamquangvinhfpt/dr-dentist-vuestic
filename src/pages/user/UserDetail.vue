@@ -1,12 +1,11 @@
 <template>
   <VaCard class="user-detail">
-    <h1>{{ t('doctor.detail') }}</h1>
     <VaInnerLoading :loading="loading" :size="60">
       <!-- Personal Information Section -->
       <VaCard class="section personal-info">
         <div class="header">
           <h2>{{ t('doctor.Professional_Information') }}</h2>
-          <RouterLink :to="'/user-update/' + userId" class="edit-button">{{ t('doctor.Edit_staff') }}</RouterLink>
+          <RouterLink :to="'/user-update/' + userId" class="edit-button">{{ t('doctor.edit') }}</RouterLink>
         </div>
 
         <VaCard class="card">
@@ -63,7 +62,7 @@
         </ul>
       </VaCard>
     </VaInnerLoading>
-    <VaButton class="btn-back" @click="$router.go(-1)"> Back </VaButton>
+    <VaButton class="btn-back" @click="$router.go(-1)"> {{ t('doctor.back') }} </VaButton>
   </VaCard>
 </template>
 
@@ -132,16 +131,18 @@ onMounted(() => {
   max-width: 900px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
+  background-color: #eaf3fc;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .section {
   margin-bottom: 20px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #d0e3ff;
+  border-radius: 12px;
   padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .header {
@@ -160,6 +161,7 @@ onMounted(() => {
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #007bff;
 }
 
 .details ul {
@@ -167,48 +169,18 @@ onMounted(() => {
   padding: 0;
 }
 
-.tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.tabs button {
-  padding: 10px 20px;
-  border: none;
-  background: #e0e0e0;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.tabs button.active {
-  background: #007bff;
-}
-
-.transactions,
-.appointments {
-  list-style: none;
-  padding: 0;
-}
-
-.transactions li,
-.appointments li {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
-}
-
 .edit-button {
   padding: 8px 16px;
   background-color: #007bff;
   text-decoration: none;
   border-radius: 4px;
+  color: white;
+  font-weight: bold;
 }
 
 .status {
   margin-left: 8px;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
   font-size: 0.9em;
   font-weight: bold;
@@ -224,8 +196,18 @@ onMounted(() => {
   color: #004085;
 }
 
-.status.cancelled {
+.status.not-confirmed {
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.btn-back {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
 }
 </style>

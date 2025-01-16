@@ -316,4 +316,104 @@ onMounted(() => {
   font-weight: bold;
   cursor: default;
 }
+.user-detail {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.section {
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card {
+  display: flex;
+  gap: 20px;
+}
+
+.profile-picture img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #3498db;
+}
+
+.details ul {
+  list-style: none;
+  padding: 0;
+  font-size: 0.95em;
+  color: #4a4a4a;
+}
+
+.edit-button {
+  padding: 10px 20px;
+  background-color: #3498db;
+  text-decoration: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button:hover {
+  background-color: #217dbb;
+}
+
+.status {
+  margin-left: 10px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+.status.confirmed {
+  background-color: #eaffea;
+  color: #28a745;
+}
+
+.status.active {
+  background-color: #e7f3ff;
+  color: #007bff;
+}
+
+.status.not-confirmed {
+  background-color: #ffe6e6;
+  color: #e74c3c;
+}
+
+.btn-back {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.btn-back:hover {
+  background-color: #217dbb;
+}
+
+.additional-info {
+  background-color: #f4f9ff;
+  border-radius: 12px;
+  border: 1px solid #d6eaff;
+}
 </style>
