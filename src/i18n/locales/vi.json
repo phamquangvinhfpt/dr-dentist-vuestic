@@ -490,9 +490,9 @@
       "pattern": "Email phải hợp lệ"
     },
     "job": {
-      "required": "Trường Job field là bắt buộc",
-      "minLength": "Trường Job phải có ít nhất 2 ký tự",
-      "maxLength": "Trường Job phải có tối đa 20 ký tự"
+      "required": "Trường công việc là bắt buộc",
+      "minLength": "Trường công việc phải có ít nhất 2 ký tự",
+      "maxLength": "Trường công việc phải có tối đa 20 ký tự"
     },
     "address": {
       "required": "Địa chỉ là bắt buộc",
@@ -1083,18 +1083,17 @@
     "deleteSuccess": "Xóa dịch vụ thành công",
     "deleteError": "Xóa dịch vụ thất bại",
     "serviceDeleteSuccess": "Dịch vụ đã được xóa thành công",
-    "service_head":"Dịch Vụ Nha Khoa",
-    "service_title":"Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi",
-    "Booking":"Đặt Lịch Ngay",
+    "service_head": "Dịch Vụ Nha Khoa",
+    "service_title": "Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi",
+    "Booking": "Đặt Lịch Ngay",
     "noService": "Không có dịch vụ nào để hiển thị.",
     "serviceList": "Danh Sách Dịch Vụ",
-    "Detail" : "chi tiết",
-    "price" :"Giá:",
-    "search":"Tìm kiếm",
-    "search_placeholder":"Tìm dịch vụ...",
+    "Detail": "chi tiết",
+    "price": "Giá:",
+    "search": "Tìm kiếm",
+    "search_placeholder": "Tìm dịch vụ...",
     "filter": "Lọc theo loại dịch vụ",
     "all_service": "Tất cả dịch vụ"
-
   },
   "procedure": {
     "id": "Mã",

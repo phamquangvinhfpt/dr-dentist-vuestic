@@ -175,7 +175,7 @@ const checkBirthDayValid = (date: Date): boolean => {
     yearDiff--
   }
 
-  return yearDiff >= 18
+  return yearDiff >= 3
 }
 
 const birthDayRules = computed(() => [

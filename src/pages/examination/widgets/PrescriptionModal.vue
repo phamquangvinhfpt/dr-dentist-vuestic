@@ -178,7 +178,7 @@ const downloadPDF = async () => {
   const element = prescriptionContent.value
   const options = {
     margin: 10,
-    filename: `prescription_${prescription.value.patientID}.pdf`,
+    filename: `prescription_${prescription.value.createDate}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {
       scale: 2,

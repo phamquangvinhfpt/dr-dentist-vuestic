@@ -1185,18 +1185,17 @@
     "serviceInformation": "Service Information",
     "createSuccess": "Create service successfully",
 
-      "service_head": "Dental Services",
-      "service_title": "Caring for your smile is our top priority",
-      "Booking": "Book Now",
-      "noService": "No services to display.",
-      "serviceList": "Service List",
-      "Detail": "Details",
-      "price": "Price:",
-      "search": "Search",
-      "search_placeholder": "Search for services...",
-      "filter": "Filter by service type",
-      "all_service": "All services"
-  
+    "service_head": "Dental Services",
+    "service_title": "Caring for your smile is our top priority",
+    "Booking": "Book Now",
+    "noService": "No services to display.",
+    "serviceList": "Service List",
+    "Detail": "Details",
+    "price": "Price:",
+    "search": "Search",
+    "search_placeholder": "Search for services...",
+    "filter": "Filter by service type",
+    "all_service": "All services"
   },
   "procedure": {
     "id": "ID",

@@ -14,7 +14,6 @@ import {
   VaCheckbox,
   VaChip,
   VaDataTable,
-  useForm,
 } from 'vuestic-ui'
 import { PrescriptionResponse, TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
@@ -64,7 +63,6 @@ const isStaff = user.musHaveRole('Staff')
 const isAdmin = user.musHaveRole('Admin')
 const isPatient = user.musHaveRole('Patient')
 const showModalCreateRecord = ref(false)
-const record_form = useForm('record_form')
 const prescription = ref<PrescriptionResponse>()
 const showPrescriptionModal = ref(false)
 const allColumns = computed(() => [
@@ -629,6 +627,16 @@ const handleFetchNewTreatment = (data: any) => {
   }
 }
 
+const isFormValid = computed(() => {
+  return (
+    formData.BasicExamination.ExaminationContent &&
+    formData.BasicExamination.TreatmentPlanNote &&
+    formData.Diagnosis.length > 0 &&
+    formData.Indication.IndicationType.length > 0 &&
+    formData.IndicationImages.length > 0
+  )
+})
+
 watch(
   date,
   (newVal) => {
@@ -861,7 +869,9 @@ onMounted(() => {
 
           <!-- Tooth Conditions Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold mb-4">{{ t('examination.teeth_condition') }}</h3>
+            <h3 class="text-xl font-semibold mb-4">
+              {{ t('examination.teeth_condition') }} <span class="text-red-500 text-sm">*</span>
+            </h3>
             <div class="grid grid-cols-2 gap-4">
               <div class="relative">
                 <DentalChart
@@ -902,7 +912,9 @@ onMounted(() => {
 
           <!-- Indications Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold mb-4">{{ t('examination.indications') }}</h3>
+            <h3 class="text-xl font-semibold mb-4">
+              {{ t('examination.indications') }} <span class="text-red-500 text-sm">*</span>
+            </h3>
             <div class="grid grid-cols-2 gap-4">
               <VaCheckbox
                 v-for="indication in indicationTypes"
@@ -949,7 +961,7 @@ onMounted(() => {
             <VaButton class="mr-6" color="#ECF0F1" @click="closeModal">{{
               t('appointment.create_appointment.cancel')
             }}</VaButton>
-            <VaButton :disabled="!record_form?.isValid" @click="createMedicalRecord">{{
+            <VaButton :disabled="!isFormValid" @click="createMedicalRecord">{{
               t('appointment.create_appointment.submit')
             }}</VaButton>
           </div>

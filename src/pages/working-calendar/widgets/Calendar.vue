@@ -723,11 +723,11 @@ const calendarDays = computed(() => {
   const days: CalendarDay[] = []
 
   const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
-  const isDentist = auth.musHaveRole('Dentist')
+  // const isDentist = auth.musHaveRole('Dentist')
 
   // Helper function to get events for a specific date
   const getDayEvents = (date: number, month: number, year: number) => {
-    if (!isDentist) {
+    if (isStaffOrAdmin) {
       const workingCalendarEvents =
         props.workingCalendar?.data.flatMap((dentist) =>
           dentist.calendarDetails
@@ -764,24 +764,43 @@ const calendarDays = computed(() => {
 
       return [...workingCalendarEvents, ...partTimeEvents]
     } else {
-      // For part-time dentists, only return part-time events
-      return (
-        props.partTimeNon?.data.flatMap((dentist) =>
-          dentist.calendarDetails
-            .filter((detail: any) => {
-              const detailDate = new Date(detail.date)
-              return (
-                detailDate.getDate() === date && detailDate.getMonth() === month && detailDate.getFullYear() === year
-              )
-            })
-            .map((detail: any) => ({
-              ...detail,
-              dentistName: dentist.dentistName,
-              dentistUserID: dentist.dentistUserID,
-              type: isStaffOrAdmin ? (detail.workingStatus === 0 ? 'error' : 'warning') : 'warning',
-            })),
-        ) || []
-      )
+      if (typeDoctor.value === 'PartTime') {
+        return (
+          props.workingCalendar?.data.flatMap((dentist) =>
+            dentist.calendarDetails
+              .filter((detail: any) => {
+                const detailDate = new Date(detail.date)
+                return (
+                  detailDate.getDate() === date && detailDate.getMonth() === month && detailDate.getFullYear() === year
+                )
+              })
+              .map((detail: any) => ({
+                ...detail,
+                dentistName: dentist.dentistName,
+                dentistUserID: dentist.dentistUserID,
+                type: detail.workingStatus === 0 ? 'error' : 'usual',
+              })),
+          ) || []
+        )
+      } else {
+        return (
+          props.workingCalendar?.data.flatMap((dentist) =>
+            dentist.calendarDetails
+              .filter((detail: any) => {
+                const detailDate = new Date(detail.date)
+                return (
+                  detailDate.getDate() === date && detailDate.getMonth() === month && detailDate.getFullYear() === year
+                )
+              })
+              .map((detail: any) => ({
+                ...detail,
+                dentistName: dentist.dentistName,
+                dentistUserID: dentist.dentistUserID,
+                type: detail.workingStatus === 0 ? '' : 'usual',
+              })),
+          ) || []
+        )
+      }
     }
   }
 

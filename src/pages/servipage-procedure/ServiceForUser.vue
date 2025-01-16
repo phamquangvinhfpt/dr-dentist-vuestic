@@ -85,11 +85,12 @@
 </template>
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router' // Để lấy tham số từ route
+import { useRoute, useRouter } from 'vue-router' // Để lấy tham số từ route
 import { VaCard, VaInput, VaSelect, VaPagination, VaProgressCircle } from 'vuestic-ui'
 import ServiceDetailsModal from './widgets/ServiceDetailsModal.vue'
 import { useServiceStore } from '@/stores/modules/service.module'
 import { useI18n } from 'vue-i18n'
+import { useAuthStore } from '@/stores/modules/auth.module'
 const { t } = useI18n()
 // Reactive variables
 const searchQuery = ref('')
@@ -106,6 +107,8 @@ const reviews = ref(null)
 const isDetailsLoading = ref(false)
 const serviceStore = useServiceStore()
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
 const typeServiceOptions = ref([]) // Để lưu các loại dịch vụ
 const defaultTypeServiceId = route.params.id
 
@@ -195,6 +198,13 @@ const formatCurrency = (value) => {
 const truncateDescription = (description) => {
   const words = description.split(' ')
   return words.length > 13 ? words.slice(0, 13).join(' ') + '...' : description
+}
+const bookAppointment = () => {
+  if (auth.isAuthenticated) {
+    router.push({ name: 'create-appointment' })
+  } else {
+    router.push({ name: 'login' })
+  }
 }
 // Watchers and lifecycle hooks
 watch([searchQuery, selectedTypeService], applyFilters)

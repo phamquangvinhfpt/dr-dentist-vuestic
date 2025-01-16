@@ -46,7 +46,7 @@
                   </div>
                   <div class="ml-3 flex-grow overflow-hidden">
                     <div class="font-semibold truncate">{{ user.name }}</div>
-                    <div class="flex justify-between items-center">
+                    <div class="grid items-center">
                       <div class="text-sm font-thin truncate">{{ user.lastMessage }}</div>
                       <div class="text-xs">{{ user.createdOn ? convertDateTimeToTime(user.createdOn) : '' }}</div>
                     </div>
@@ -102,7 +102,10 @@
               >
                 <template v-for="(messageGroup, groupIndex) in groupedMessages" :key="groupIndex">
                   <div
-                    :class="['mb-4 flex', messageGroup[0].sender === 'me' ? 'justify-end' : 'justify-start relative']"
+                    :class="[
+                      'mb-4 flex',
+                      messageGroup[0].sender === 'me' ? 'justify-end relative' : 'justify-start relative',
+                    ]"
                   >
                     <div v-if="messageGroup[0].sender !== 'me'" class="mr-2 flex-shrink-0 self-end group">
                       <VaAvatar
@@ -183,40 +186,44 @@
                         </div>
                       </div>
                     </div>
+                    <VaScrollContainer
+                      v-if="selectedImages.length > 0"
+                      vertical
+                      class="mt-2 h-[100px] absolute bottom-0"
+                      color="primary"
+                    >
+                      <div class="flex gap-2">
+                        <div
+                          v-for="(image, index) in displayedImages"
+                          :key="index"
+                          class="relative cursor-pointer w-fit"
+                          @click="openImageCarousel(index)"
+                        >
+                          <img :src="image" class="w-16 h-16 object-cover rounded" />
+                          <VaButton
+                            icon="close"
+                            color="danger"
+                            size="small"
+                            class="absolute top-0 right-0 transform scale-75"
+                            @click.stop="removeImage(index)"
+                          />
+                        </div>
+                        <div
+                          v-if="selectedImages.length > 4"
+                          class="relative cursor-pointer"
+                          @click="openImageCarousel(3)"
+                        >
+                          <img :src="selectedImages[3]" class="w-16 h-16 object-cover rounded opacity-50" />
+                          <div
+                            class="absolute inset-0 flex items-center justify-center text-white text-lg font-bold bg-black bg-opacity-50 rounded"
+                          >
+                            +{{ selectedImages.length - 3 }}
+                          </div>
+                        </div>
+                      </div>
+                    </VaScrollContainer>
                   </div>
                 </template>
-                <VaScrollContainer
-                  v-if="selectedImages.length > 0"
-                  vertical
-                  class="mt-2 h-fit absolute bottom-0"
-                  color="primary"
-                >
-                  <div class="flex gap-2">
-                    <div
-                      v-for="(image, index) in displayedImages"
-                      :key="index"
-                      class="relative cursor-pointer w-fit"
-                      @click="openImageCarousel(index)"
-                    >
-                      <img :src="image" class="w-16 h-16 object-cover rounded" />
-                      <VaButton
-                        icon="close"
-                        color="danger"
-                        size="small"
-                        class="absolute top-0 right-0 transform scale-75"
-                        @click.stop="removeImage(index)"
-                      />
-                    </div>
-                    <div v-if="selectedImages.length > 4" class="relative cursor-pointer" @click="openImageCarousel(3)">
-                      <img :src="selectedImages[3]" class="w-16 h-16 object-cover rounded opacity-50" />
-                      <div
-                        class="absolute inset-0 flex items-center justify-center text-white text-lg font-bold bg-black bg-opacity-50 rounded"
-                      >
-                        +{{ selectedImages.length - 3 }}
-                      </div>
-                    </div>
-                  </div>
-                </VaScrollContainer>
               </VaScrollContainer>
 
               <!-- Message input -->
@@ -435,14 +442,12 @@ import {
 import { useOnlineUsersStore } from '@/stores/online-users-store'
 import { storeToRefs } from 'pinia'
 import { Message, User } from './types'
-import { useRouter } from 'vue-router'
 import { useNotificationStore } from '@/stores/modules/notification.module'
 import { debounce } from 'lodash'
 
 const authStore = useAuthStore()
 
 // Computed roles
-const isStaff = computed(() => authStore?.musHaveRole('Staff')).value
 const { init: notify } = useToast()
 // Refs
 const isUserListVisible = ref(false)
@@ -456,7 +461,6 @@ const { receivedMessage } = storeToRefs(onlineUsersStore)
 const newMessage = ref('')
 const keyword = ref('')
 const selectedUser = ref<User | null>(null)
-const router = useRouter()
 const isLargeScreen = ref(window.innerWidth >= 768 && window.innerWidth < 1024)
 const storeMessage = useNotificationStore()
 const selectedImages = ref<string[]>([])
@@ -546,11 +550,6 @@ const selectUser = async (user: User) => {
 const deselectUser = () => {
   selectedUser.value = null
   isUserListVisible.value = true
-
-  if (!isStaff) {
-    //redirect to home by router
-    router.push({ name: 'dashboard' })
-  }
 }
 
 const scrollToBottom = () => {
