@@ -108,6 +108,7 @@ export type PasswordDetailFormData = {
 }
 
 export type UserDetailsUpdate = {
+  userId?: string
   firstName: string
   lastName: string
   gender: boolean | null

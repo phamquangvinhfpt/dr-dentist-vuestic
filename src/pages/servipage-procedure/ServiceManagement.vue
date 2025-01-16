@@ -50,109 +50,113 @@
           </div>
         </div>
 
-        <VaDataTable
-          class="custom-table"
-          :items="paginatedServices"
-          :columns="columns"
-          hoverable
-          select-mode="multiple"
-          :disable-client-side-sorting="false"
-          sticky-header
-          striped
-          :no-data-html="`<div class='text-center'>${t('service.noServicesFound')}</div>`"
-        >
-          <template #cell(serviceName)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.name }}</span>
-            </div>
-          </template>
-
-          <!-- <template v-if="showBin" #cell(deletedOn)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ formatDate(row.rowData.deletedOn) }}</span>
-            </div>
-          </template>
-
-          <template v-if="showBin" #cell(deletedBy)="{ row }">
-            <div class="flex items-center gap-2">
-              <span>{{ row.rowData.deletedBy }}</span>
-            </div>
-          </template> -->
-
-          <template #cell(serviceDescription)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.description }}</span>
-            </div>
-          </template>
-
-          <template #cell(typeName)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ row.rowData.typeName }}</span>
-            </div>
-          </template>
-
-          <template #cell(totalPrice)="{ row }">
-            <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-              <span class="w-24">{{ formatPrice(row.rowData.totalPrice) }}</span>
-            </div>
-          </template>
-
-          <template #cell(status)="{ row }">
-            <div class="flex items-center gap-2">
-              <span :class="row.rowData.isActive ? 'text-green-500' : 'text-red-500'">
-                {{ row.rowData.isActive ? t('common.active') : t('common.inactive') }}
-              </span>
-            </div>
-          </template>
-
-          <template #cell(action)="{ row }">
-            <div class="action-buttons">
-              <template v-if="!showBin">
-                <VaButton
-                  color="info"
-                  size="small"
-                  class="action-button-circle"
-                  preset="primary"
-                  round
-                  @click="viewDetails(row.rowData.serviceID)"
-                >
-                  <VaIcon name="visibility" />
-                </VaButton>
-                <VaButton
-                  color="warning"
-                  size="small"
-                  class="action-button-circle"
-                  :disabled="isToggling"
-                  :loading="isToggling"
-                  round
-                  @click="handleToggleStatus(row.rowData as ServiceDTO)"
-                >
-                  <VaIcon :name="row.rowData.isActive ? 'toggle_off' : 'toggle_on'" />
-                </VaButton>
-                <VaButton
-                  color="danger"
-                  size="small"
-                  class="action-button-circle"
-                  round
-                  @click="confirmDelete(row.rowData as ServiceDTO)"
-                >
-                  <VaIcon name="delete" />
-                </VaButton>
+        <div class="table-wrapper">
+          <VaInnerLoading :loading="isLoading">
+            <VaDataTable
+              class="custom-table"
+              :items="paginatedServices"
+              :columns="columns"
+              hoverable
+              select-mode="multiple"
+              :disable-client-side-sorting="false"
+              sticky-header
+              striped
+              :no-data-html="`<div class='text-center'>${t('service.noServicesFound')}</div>`"
+            >
+              <template #cell(serviceName)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">{{ row.rowData.name }}</span>
+                </div>
               </template>
-              <template v-else>
-                <VaButton
-                  color="success"
-                  size="small"
-                  class="action-button-circle"
-                  round
-                  @click="handleRestore(row.rowData as ServiceDTO)"
-                >
-                  <VaIcon name="restore" />
-                </VaButton>
+
+              <!-- <template v-if="showBin" #cell(deletedOn)="{ row }">
+                <div class="flex items-center gap-2">
+                  <span>{{ formatDate(row.rowData.deletedOn) }}</span>
+                </div>
               </template>
-            </div>
-          </template>
-        </VaDataTable>
+
+              <template v-if="showBin" #cell(deletedBy)="{ row }">
+                <div class="flex items-center gap-2">
+                  <span>{{ row.rowData.deletedBy }}</span>
+                </div>
+              </template> -->
+
+              <template #cell(serviceDescription)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">{{ row.rowData.description }}</span>
+                </div>
+              </template>
+
+              <template #cell(typeName)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">{{ row.rowData.typeName }}</span>
+                </div>
+              </template>
+
+              <template #cell(totalPrice)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">{{ formatPrice(row.rowData.totalPrice) }}</span>
+                </div>
+              </template>
+
+              <template #cell(status)="{ row }">
+                <div class="flex items-center gap-2">
+                  <span :class="row.rowData.isActive ? 'text-green-500' : 'text-red-500'">
+                    {{ row.rowData.isActive ? t('common.active') : t('common.inactive') }}
+                  </span>
+                </div>
+              </template>
+
+              <template #cell(action)="{ row }">
+                <div class="action-buttons">
+                  <template v-if="!showBin">
+                    <VaButton
+                      color="info"
+                      size="small"
+                      class="action-button-circle"
+                      preset="primary"
+                      round
+                      @click="viewDetails(row.rowData.serviceID)"
+                    >
+                      <VaIcon name="visibility" />
+                    </VaButton>
+                    <VaButton
+                      color="warning"
+                      size="small"
+                      class="action-button-circle"
+                      :disabled="isToggling"
+                      :loading="isToggling"
+                      round
+                      @click="handleToggleStatus(row.rowData as ServiceDTO)"
+                    >
+                      <VaIcon :name="row.rowData.isActive ? 'toggle_off' : 'toggle_on'" />
+                    </VaButton>
+                    <VaButton
+                      color="danger"
+                      size="small"
+                      class="action-button-circle"
+                      round
+                      @click="confirmDelete(row.rowData as ServiceDTO)"
+                    >
+                      <VaIcon name="delete" />
+                    </VaButton>
+                  </template>
+                  <template v-else>
+                    <VaButton
+                      color="success"
+                      size="small"
+                      class="action-button-circle"
+                      round
+                      @click="handleRestore(row.rowData as ServiceDTO)"
+                    >
+                      <VaIcon name="restore" />
+                    </VaButton>
+                  </template>
+                </div>
+              </template>
+            </VaDataTable>
+          </VaInnerLoading>
+        </div>
 
         <div class="table-footer">
           <div v-if="serviceList.length > 0" class="footer-content">
@@ -275,6 +279,7 @@ const formData = reactive({
 })
 
 const serviceList: Ref<ServiceDTO[]> = ref([])
+const isLoading = ref(false)
 
 const showDeleteModal = ref(false)
 const selectedService = ref<ServiceDTO | null>(null)
@@ -343,6 +348,7 @@ const handlePageSizeChange = (size: number) => {
 
 const getAllServicesPagination = async () => {
   try {
+    isLoading.value = true
     const filters = []
 
     // Add type filter
@@ -383,6 +389,8 @@ const getAllServicesPagination = async () => {
   } catch (error) {
     console.error('Error fetching services:', error)
     serviceList.value = []
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -1211,5 +1219,29 @@ onMounted(async () => {
   :deep(.va-modal__actions) {
     padding: 0.8rem;
   }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+  background: var(--va-background-secondary);
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--va-primary);
+  border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--va-primary-dark);
 }
 </style>

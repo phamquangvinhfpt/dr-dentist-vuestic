@@ -592,6 +592,7 @@ const submit = async () => {
     const dob: any = formData?.dob
     const date = getDateFormated(new Date(dob))
     const userDetailData: UserDetailsUpdate = {
+      userId: userProfileStore?.userDetails?.id, // Adding userId from store
       firstName: formData.firstName,
       lastName: formData.lastName,
       gender: formData.gender,
@@ -1432,7 +1433,7 @@ const openImagePreview = (image: string) => {
                 preset="solid"
               />
             </VaField>
-            <VaField class="col-span-2" width="100%">
+            <VaField>
               <VaTextarea
                 v-model="formData.doctorProfile.seftDescription"
                 :label="t('auth.self_description')"
@@ -1447,7 +1448,6 @@ const openImagePreview = (image: string) => {
             <!-- Display certification images -->
             <VaField
               v-if="formData.doctorProfile?.certificationImage && formData.doctorProfile.certificationImage.length > 0"
-              class="col-span-2"
             >
               <label class="block uppercase text-primary font-bold mb-2" style="font-size: 0.57rem">
                 {{ t('auth.certification_images') }}
