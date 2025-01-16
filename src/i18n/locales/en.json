@@ -1246,7 +1246,8 @@
     "status": "Status",
     "close": "Close",
     "send": "Send Email",
-    "take": "Take"
+    "take": "Take",
+    "export": "Export"
   },
   "payment": {
     "patientCode": "Patient Code",
