@@ -231,7 +231,7 @@ const formData = reactive<PaginationFilter>({
 
 const searchKeyword = ref('')
 const currentPage = ref(1)
-const startDate = ref(new Date().toISOString().split('T')[0])
+const startDate = ref(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0])
 const endDate = ref(new Date().toISOString().split('T')[0])
 const maxDate = ref(new Date().toISOString().split('T')[0])
 
@@ -412,6 +412,7 @@ onMounted(async () => {
     router.push({ name: 'dashboard' })
     return
   }
+
   await getAllPaymentsPagination()
 })
 

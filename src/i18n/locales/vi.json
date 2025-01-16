@@ -1139,7 +1139,8 @@
     "status": "Trạng Thái",
     "close": "Đóng",
     "send": "Gửi Email",
-    "take": "Lấy"
+    "take": "Lấy",
+    "export": "Xuất file"
   },
   "payment": {
     "patientCode": "Mã Bệnh Nhân",
@@ -1178,7 +1179,7 @@
     "paymentDetails": "Chi Tiết Thanh Toán",
     "statusIncomplete": "Chưa Hoàn Thành",
     "statusCompleted": "Đã Hoàn Thành",
-    "selectPatient": "Chọn bệnh nhân",
+    "selectPatient": "Chọn bệnh nhân để xuất file",
     "exportFileName": "lich-su-thanh-toan-{name}-{startDate}-den-{endDate}.xlsx",
     "exportFileNameAll": "tat-ca-thanh-toan-{startDate}-den-{endDate}.xlsx",
     "exportSuccess": "Xuất file thành công",
