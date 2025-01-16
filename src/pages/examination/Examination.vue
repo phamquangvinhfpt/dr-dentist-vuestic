@@ -74,7 +74,7 @@ onMounted(() => {
 })
 </script>
 <template>
-  <VaTabs v-if="appointmentStatus != 5" v-model="selectedTab">
+  <VaTabs v-model="selectedTab">
     <template #tabs>
       <VaTab v-for="tab in tabs" :key="tab.id" :name="tab.id" @click="selectSettingOption(tab)">
         <VaIcon :name="tab.icon" class="mr-2" />
@@ -82,9 +82,9 @@ onMounted(() => {
       </VaTab>
     </template>
   </VaTabs>
-  <div v-else>
+  <!-- <div v-else>
     <p class="text-center text-2xl">{{ t('examination.medical_record') }}:</p>
-  </div>
+  </div> -->
   <MedicalRecord v-if="selectedTab === 1 && !loading" v-model:patientId="patientid" />
   <Treatment v-if="selectedTab === 2" :appointment="appointment" @update:appointment="appointment = $event" />
 </template>

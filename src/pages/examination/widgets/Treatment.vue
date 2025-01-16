@@ -62,6 +62,7 @@ const user = useAuthStore()
 const isDoctor = user.musHaveRole('Dentist')
 const isStaff = user.musHaveRole('Staff')
 const isAdmin = user.musHaveRole('Admin')
+const isPatient = user.musHaveRole('Patient')
 const showModalCreateRecord = ref(false)
 const record_form = useForm('record_form')
 const prescription = ref<PrescriptionResponse>()
@@ -84,7 +85,7 @@ const allColumns = computed(() => [
 
 const columns = computed(() => {
   return allColumns.value.filter((column) => {
-    if (!isDoctor && !isStaff && !isAdmin) {
+    if (!isDoctor && !isStaff && !isAdmin && !isPatient) {
       return column.key !== 'action'
     } else {
       return column.key !== 'doctorName'

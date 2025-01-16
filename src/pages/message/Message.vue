@@ -569,19 +569,26 @@ const sendMessage = async () => {
     formData.append('Message', newMessage.value)
     formData.append('ReceiverId', selectedUser.value?.id.toString() || '')
     if (selectedFiles.value.length > 0) {
+      isLoading.value = true
       selectedFiles.value.forEach((file) => {
         formData.append('Images', file)
       })
     }
 
-    await storeMessage.sendMessage(formData).catch((error) => {
-      const message = getErrorMessage(error)
-      notify({
-        title: 'Error',
-        message: message,
-        color: 'danger',
+    await storeMessage
+      .sendMessage(formData)
+      .catch((error) => {
+        const message = getErrorMessage(error)
+        notify({
+          title: 'Error',
+          message: message,
+          color: 'danger',
+        })
+        isLoading.value = false
       })
-    })
+      .finally(() => {
+        isLoading.value = false
+      })
     newMessage.value = ''
     selectedFiles.value = []
     selectedImages.value = []

@@ -125,7 +125,7 @@ const passwordRules = [
   (v: any) => (v && v.length >= 8) || t('validation.password.minLength'),
   (v: any) => (v && /[A-Za-z]/.test(v)) || t('validation.password.letter'),
   (v: any) => (v && /\d/.test(v)) || t('validation.password.number'),
-  (v: any) => (v && /[!@#$%^&*(),.?":{}|<>]/.test(v)) || t('validation.password.specialCharacter'),
+  (v: any) => (v && /[!@#$%^&*(),.?":{}|<>\-_=+[\];'`~]/.test(v)) || t('validation.password.specialCharacter'),
 ]
 
 const usernameRules = [

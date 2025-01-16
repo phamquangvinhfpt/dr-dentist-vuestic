@@ -423,7 +423,11 @@
                     @click="router.push(`/examination/${rowData.appointmentId}`)"
                   />
                   <VaButton
-                    v-if="rowData.status === 6 && role?.includes('Staff') && rowData.paymentStatus === 1"
+                    v-if="
+                      (rowData.status === 6 || rowData.status === 5) &&
+                      role?.includes('Staff') &&
+                      rowData.paymentStatus === 1
+                    "
                     round
                     icon="payments"
                     color="#b1fadc"
