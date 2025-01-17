@@ -663,7 +663,8 @@
     "doctors": "Bác sĩ",
     "medical-record-for-patient": "Hồ sơ bệnh án",
     "prescription": "Đơn thuốc",
-    "payment-for-patient": "Thanh toán"
+    "payment-for-patient": "Thanh toán",
+    "current-treatment": "Điều trị hiện tại"
   },
   "bin": {
     "title": "Thùng rác",

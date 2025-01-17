@@ -734,7 +734,8 @@
     "doctors": "Doctors",
     "medical-record-for-patient": "Medical Record",
     "prescription": "prescription",
-    "payment-for-patient": "Payment"
+    "payment-for-patient": "Payment",
+    "current-treatment": "Current Treatment"
   },
   "bin": {
     "title": "Trash",

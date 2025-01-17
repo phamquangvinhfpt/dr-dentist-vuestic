@@ -101,6 +101,16 @@ class TreatmentClass {
         return Promise.reject(error)
       })
   }
+  async getCurrentPlan(id: any): Promise<any> {
+    return apiService
+      .get(`/treatmentplan/current/get/${id}`)
+      .then((response) => {
+        return Promise.resolve(response)
+      })
+      .catch((error) => {
+        return Promise.reject(error)
+      })
+  }
 }
 
 export const treatmentService = new TreatmentClass()

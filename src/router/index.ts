@@ -65,17 +65,34 @@ const routes: Array<RouteRecordRaw> = [
           {
             name: 'appointment-detail',
             path: 'appointment/:id',
+            meta: {
+              requireAuth: true,
+            },
             component: () => import('../pages/appointment/widgets/list-appointment/AppointmentDetail.vue'),
           },
           {
             name: 'followup-detail',
             path: 'appointment/:id',
+            meta: {
+              requireAuth: true,
+            },
             component: () => import('../pages/appointment/widgets/list-appointment/FollowupDetail.vue'),
           },
           {
             name: 'view-appointment',
             path: '',
+            meta: {
+              requireAuth: true,
+            },
             component: () => import('../pages/appointment/Appointment.vue'),
+          },
+          {
+            name: 'current-treatment',
+            path: 'current-treatment',
+            meta: {
+              requireAuth: true,
+            },
+            component: () => import('../pages/appointment/CurrentTreatmentPlan.vue'),
           },
         ],
       },
