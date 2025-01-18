@@ -1,81 +1,120 @@
 <template>
-  <VaCard class="min-h-screen bg-gradient-to-br from-blue-50 to-white py-10 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-4xl mx-auto space-y-8">
-      <!-- Doctor Information -->
-      <VaCard class="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
-        <div class="flex flex-col sm:flex-row items-center sm:items-start">
-          <img
-            v-if="doctor.imageUrl"
-            :src="getSrcAvatar(doctor.imageUrl)"
-            :alt="`${doctor.firstName} ${doctor.lastName}`"
-            class="h-32 w-32 sm:h-40 sm:w-40 rounded-full object-cover shadow-lg border-4 border-white"
-          />
-          <span v-else class="text-sm">No image available</span>
-          <div class="sm:ml-8 mt-6 sm:mt-0 text-center sm:text-left flex-1">
-            <h1 class="text-3xl font-bold va-h1">{{ doctor.firstName }} {{ doctor.lastName }}</h1>
-            <div class="flex items-center justify-center sm:justify-start mt-2">
+  <VaCard class="min-h-screen bg-gradient-to-br from-blue-50 to-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Admin Action Bar -->
+      <div class="mb-6 flex justify-between items-center"></div>
+
+      <!-- Doctor Information Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Profile Section -->
+        <VaCard class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6">
+          <div class="flex flex-col items-center">
+            <div class="relative">
+              <img
+                v-if="doctor.imageUrl"
+                :src="getSrcAvatar(doctor.imageUrl)"
+                :alt="`${doctor.firstName} ${doctor.lastName}`"
+                class="h-48 w-48 rounded-full object-cover border-4 border-blue-100 shadow-lg"
+              />
+              <span v-else class="h-48 w-48 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
+                <i class="fas fa-user-md text-4xl"></i>
+              </span>
+            </div>
+            <h2 class="mt-4 text-2xl font-bold text-gray-900">{{ doctor.firstName }} {{ doctor.lastName }}</h2>
+            <div class="flex items-center mt-2">
               <span v-for="i in 5" :key="i" class="text-yellow-400">
                 <Star :class="i <= Math.round(doctor.rating || 0) ? 'fill-current' : 'stroke-current'" />
               </span>
-              <span class="ml-2 text-sm font-semibold">({{ doctor.totalFeedback }} {{ t('doctor.rating') }})</span>
+              <span class="ml-2 text-sm font-medium">({{ doctor.totalFeedback }})</span>
             </div>
-            <div class="mt-4">
-              <p class="font-bold">
-                <Mail class="inline mr-2" /> {{ t('doctor.email') }}:
-                <span class="font-normal">{{ doctor.email }}</span>
-              </p>
-              <p class="font-bold">
-                <Phone class="inline mr-2" /> {{ t('doctor.phone') }}:
-                <span class="font-normal">{{ doctor.phoneNumber }}</span>
-              </p>
+            <div class="w-full mt-6 space-y-3">
+              <VaCard class="flex items-center p-3 bg-gray-50 rounded-lg">
+                <Mail class="w-5 h-5 text-gray-500 mr-3" />
+                <div>
+                  <p class="text-sm text-gray-500">{{ t('doctor.email') }}</p>
+                  <p class="font-medium">{{ doctor.email }}</p>
+                </div>
+              </VaCard>
+              <VaCard class="flex items-center p-3 bg-gray-50 rounded-lg">
+                <Phone class="w-5 h-5 text-gray-500 mr-3" />
+                <div>
+                  <p class="text-sm text-gray-500">{{ t('doctor.phone') }}</p>
+                  <p class="font-medium">{{ doctor.phoneNumber }}</p>
+                </div>
+              </VaCard>
             </div>
           </div>
-        </div>
-      </VaCard>
+        </VaCard>
 
-      <!-- Professional Information -->
-      <VaCard class="rounded-2xl shadow-xl p-6 sm:p-8">
-        <h2 class="text-2xl font-semibold mb-6 va-h2">{{ t('doctor.Professional_Information') }}</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <h3 class="text-sm font-bold">{{ t('doctor.education') }}</h3>
-            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.education || 'Chưa có thông tin' }}</p>
-            <p class="font-normal">{{ doctor.doctorProfile?.college || 'Chưa có thông tin' }}</p>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold">{{ t('doctor.experience') }}</h3>
-            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.yearOfExp || 'Chưa có thông tin' }}</p>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold">{{ t('doctor.Job_Type') }}</h3>
-            <p class="mt-1 font-normal">
-              {{
-                doctor.doctorProfile?.workingType === 2
-                  ? t('doctor.full_time')
-                  : doctor.doctorProfile?.workingType === 1
-                    ? t('doctor.part_time')
-                    : 'Chưa có thông tin'
-              }}
-            </p>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold">{{ t('doctor.certification') }}</h3>
-            <p class="mt-1 font-normal">{{ doctor.doctorProfile?.certification || 'Chưa có thông tin' }}</p>
-          </div>
-        </div>
-        <div class="mt-6">
-          <h3 class="text-sm font-bold">{{ t('doctor.seftDescription') }}</h3>
-          <p class="mt-1 font-normal">{{ doctor.doctorProfile?.seftDescription || 'Chưa có thông tin' }}</p>
-        </div>
-        <h2 class="text-2xl font-semibold mb-6 va-h2">{{ t('doctor.certification_image') }}</h2>
-        <img
-          alt="Preview"
-          :src="getSrcAvatar(doctor.doctorProfile.certificationImage)"
-          class="w-32 h-32 object-cover border border-gray-300 rounded-lg shadow hover:zoom-image"
-        />
-      </VaCard>
+        <!-- Professional Info & Stats -->
+        <VaCard class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 gap-4">
+              <VaCard class="bg-purple-50 p-4 rounded-lg">
+                <h3 class="text-sm font-medium text-purple-900">{{ t('doctor.appointments') }}</h3>
+                <p class="text-2xl font-bold text-purple-700">{{ appointments.length }}</p>
+              </VaCard>
+              <VaCard class="bg-orange-50 p-4 rounded-lg">
+                <h3 class="text-sm font-medium text-orange-900">{{ t('doctor.avg_rating') }}</h3>
+                <p class="text-2xl font-bold text-orange-700">{{ doctor.rating?.toFixed(1) || 0 }}</p>
+              </VaCard>
+            </div>
 
-      <!-- Patient Feedback -->
+            <!-- Professional Details -->
+            <div class="space-y-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ t('doctor.Professional_Information') }}</h3>
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">{{ t('doctor.education') }}</p>
+                    <p class="text-gray-900">{{ doctor.doctorProfile?.education || t('doctor.no_info') }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">{{ t('doctor.experience') }}</p>
+                    <p class="text-gray-900">{{ doctor.doctorProfile?.yearOfExp || t('doctor.no_info') }}</p>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-500">{{ t('doctor.Job_Type') }}</p>
+                    <p class="text-gray-900">
+                      {{
+                        doctor.doctorProfile?.workingType === 2
+                          ? t('doctor.full_time')
+                          : doctor.doctorProfile?.workingType === 1
+                            ? t('doctor.part_time')
+                            : t('doctor.no_info')
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certification Section -->
+          <div class="mt-6 border-t pt-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ t('doctor.certification') }}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <p class="text-gray-900">{{ doctor.doctorProfile?.certification || t('doctor.no_info') }}</p>
+              </div>
+              <div>
+                <img
+                  v-if="doctor.doctorProfile?.certificationImage"
+                  :src="getSrcAvatar(doctor.doctorProfile.certificationImage)"
+                  alt="Certification"
+                  class="w-full h-40 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
+                />
+                <div v-else class="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <span class="text-gray-400">{{ t('doctor.no_certification_image') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </VaCard>
+      </div>
+
+      <!-- Tabs Section -->
       <div class="container mx-auto p-6">
         <!-- Navbar -->
         <div class="border-b border-gray-200">
@@ -251,7 +290,7 @@
               v-for="i in 5"
               :key="i"
               class="w-6 h-6 cursor-pointer"
-              :class="i <= editFeedback.rating ? 'text-yellow-400 fill-current' : 'text-gray-300 stroke-current'"
+              :class="i <= editFeedback.rating ? 'fill-current' : 'stroke-current'"
               @click="editFeedback.rating = i"
             />
           </div>

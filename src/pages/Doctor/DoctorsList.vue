@@ -192,17 +192,15 @@ watch(currentPage, () => {
         <!-- Phân trang -->
         <ul class="pagination flex items-center space-x-2">
           <li>
-            <VaButton :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">←</VaButton>
+            <button :disabled="currentPage === 1" class="pagination-button" @click="currentPage--">←</button>
           </li>
           <li v-for="page in totalPages" :key="page">
-            <VaButton :class="['pagination-button', { active: currentPage === page }]" @click="currentPage = page">
+            <button :class="['pagination-button', { active: currentPage === page }]" @click="currentPage = page">
               {{ page }}
-            </VaButton>
+            </button>
           </li>
           <li>
-            <VaButton :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++"
-              >→</VaButton
-            >
+            <button :disabled="currentPage === totalPages" class="pagination-button" @click="currentPage++">→</button>
           </li>
         </ul>
       </VaCard>

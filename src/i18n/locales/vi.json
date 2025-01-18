@@ -1108,19 +1108,13 @@
     "Booking": "Đặt Lịch Ngay",
     "noService": "Không có dịch vụ nào để hiển thị.",
     "serviceList": "Danh Sách Dịch Vụ",
-    "Detail": "chi tiết",
-    "price": "Giá:",
-    "rating": "đánh giá",
-    "search": "Tìm kiếm",
-    "loading_infor": "Đang tải thông tin, vui lòng chờ...",
-    "search_placeholder": "Tìm dịch vụ...",
+    "Detail" : "chi tiết",
+    "price" :"Giá:",
+    "search":"Tìm kiếm",
+    "search_placeholder":"Tìm dịch vụ...",
     "filter": "Lọc theo loại dịch vụ",
-    "all_service": "Tất cả dịch vụ",
-    "filter_rating": "Lọc theo số sao:",
-    "filter_noinfor": "Không có đánh giá phù hợp.",
-    "doctor": "Bác Sĩ",
-    "patient": "Bệnh Nhân",
-    "detail_service": "Chi Tiết Dịch Vụ"
+    "all_service": "Tất cả dịch vụ"
+
   },
   "procedure": {
     "id": "Mã",

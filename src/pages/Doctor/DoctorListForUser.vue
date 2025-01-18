@@ -1,93 +1,97 @@
 <template>
-  <VaCard style="padding: 0.5%" class="doctor-listing-page">
-    <VaCardContent style="padding-top: 0%">
-      <div style="padding-top: 0%" class="md:container mx-auto p-4">
-        <!-- Header -->
+  <VaCard class="doctor-listing-page bg-gray-50 min-h-screen py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header Section with Hero Banner -->
+      <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-8 mb-8 text-white shadow-lg">
+        <h1 class="text-3xl font-bold mb-3 text-center">{{ t('doctor.doctor_list') }}</h1>
+        <p class="text-lg text-center opacity-90">{{ t('doctor.find_doctor') }}</p>
+      </div>
 
-        <VaCard style="margin-bottom: 0%" class="text-center mb-6">
-          <h1 class="text-2xl font-semibold va-h1 mb-2">{{ t('doctor.doctor_list') }}</h1>
-          <p class="text-sm">{{ t('doctor.find_doctor') }}</p>
-        </VaCard>
-
-        <!-- Search and Filters -->
-        <div class="rounded-2xl p-4 shadow-md space-y-4">
-          <div class="relative mb-4">
+      <!-- Search and Filters Card -->
+      <VaCard class="mb-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div class="p-6">
+          <!-- Search Bar -->
+          <div class="mb-6">
             <VaInput
               v-model="searchQuery"
               type="text"
               :placeholder="t('doctor.find')"
               :label="t('doctor.search_doctor')"
+              class="search-input"
             >
               <template #prependInner>
-                <VaIcon name="pageview" color="secondary" />
+                <VaIcon name="search" color="primary" />
               </template>
             </VaInput>
           </div>
 
-          <!-- Filters -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div>
-              <VaSelect v-model="selectedTypeService" :options="typeServiceOptions" :label="t('doctor.type_service')" />
-            </div>
-
-            <div>
-              <VaSelect v-model="sortField" :options="arrange" :label="t('doctor.Sort_By')" />
-            </div>
-
-            <div>
-              <VaSelect v-model="sortOrder" :options="step" :label="t('doctor.Order')" />
-            </div>
+          <!-- Filters Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <VaSelect
+              v-model="selectedTypeService"
+              :options="typeServiceOptions"
+              :label="t('doctor.type_service')"
+              class="filter-select"
+            />
+            <VaSelect v-model="sortField" :options="arrange" :label="t('doctor.Sort_By')" class="filter-select" />
+            <VaSelect v-model="sortOrder" :options="step" :label="t('doctor.Order')" class="filter-select" />
           </div>
         </div>
+      </VaCard>
 
-        <!-- Loading / Error States -->
-        <div v-if="loading" class="flex justify-center items-center py-8">
-          <VaProgressCircle indeterminate size="large" />
-        </div>
-        <VaAlert v-else-if="error" color="danger" class="mb-6" closeable>
-          {{ error }}
-          <template #actions>
-            <VaButton size="small" @click="fetchDoctors"> Thử lại </VaButton>
-          </template>
-        </VaAlert>
-
-        <!-- Doctors Grid -->
-        <DoctorsGrid v-else :doctors="paginatedDoctors" />
-
-        <!-- Pagination -->
-        <div class="flex justify-center gap-4 mt-6">
-          <VaPagination
-            v-model="currentPage"
-            buttons-preset="secondary"
-            :pages="totalPages"
-            :boundary-links="true"
-            :direction-links="true"
-            :visible-pages="isMobile ? 3 : 5"
-            class="va-pagination--small"
-          />
-          <div v-if="!isMobile" class="flex justify-center gap-4 w-full">
-            <VaButton
-              :disabled="currentPage === 1"
-              icon="arrow_back"
-              size="small"
-              class="pagination-button"
-              @click="prevPage"
-            >
-              {{ t('doctor.previous_page') }}
-            </VaButton>
-            <VaButton
-              :disabled="currentPage === totalPages"
-              icon-right="arrow_forward"
-              size="small"
-              class="pagination-button"
-              @click="nextPage"
-            >
-              {{ t('doctor.NEXT_PAGE') }}
-            </VaButton>
-          </div>
-        </div>
+      <!-- Loading State -->
+      <div v-if="loading" class="flex justify-center items-center py-12">
+        <VaProgressCircle indeterminate color="primary" size="large" />
       </div>
-    </VaCardContent>
+
+      <!-- Error State -->
+      <VaAlert v-else-if="error" color="danger" class="mb-6 shadow-md" closeable>
+        <div class="flex items-center justify-between">
+          <span>{{ error }}</span>
+          <VaButton size="small" color="danger" class="ml-4" @click="fetchDoctors">
+            {{ t('common.retry') }}
+          </VaButton>
+        </div>
+      </VaAlert>
+
+      <!-- Doctors Grid -->
+      <div v-else>
+        <DoctorsGrid :doctors="paginatedDoctors" class="mb-8" />
+      </div>
+
+      <!-- Pagination Section -->
+      <VaCard class="bg-white rounded-lg shadow-md p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <VaPagination
+          v-model="currentPage"
+          :pages="totalPages"
+          :boundary-links="true"
+          :direction-links="true"
+          :visible-pages="isMobile ? 3 : 5"
+          class="pagination-modern"
+        />
+
+        <div v-if="!isMobile" class="flex gap-4">
+          <VaButton
+            :disabled="currentPage === 1"
+            icon="arrow_back"
+            preset="secondary"
+            class="pagination-button hover:shadow-md transition-shadow"
+            @click="prevPage"
+          >
+            {{ t('doctor.previous_page') }}
+          </VaButton>
+          <VaButton
+            :disabled="currentPage === totalPages"
+            icon-right="arrow_forward"
+            preset="primary"
+            class="pagination-button hover:shadow-md transition-shadow"
+            @click="nextPage"
+          >
+            {{ t('doctor.NEXT_PAGE') }}
+          </VaButton>
+        </div>
+      </VaCard>
+    </div>
   </VaCard>
 </template>
 
@@ -96,7 +100,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import DoctorsGrid from './DoctorsGrid.vue'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
 import { useServiceStore } from '@/stores/modules/service.module'
-import { VaCard, VaCardContent } from 'vuestic-ui'
+import { VaCard } from 'vuestic-ui'
 import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 // Define interfaces for our data structures
@@ -252,6 +256,53 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.doctor-listing-page {
+  background-color: #f8fafc;
+}
+
+.search-input :deep(.va-input-wrapper__field) {
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.search-input :deep(.va-input-wrapper__field:focus-within) {
+  box-shadow: 0 0 0 3px rgba(var(--va-primary-rgb), 0.2);
+}
+
+.filter-select :deep(.va-select__field) {
+  border-radius: 0.75rem;
+}
+
+.pagination-modern {
+  --va-pagination-button-border-radius: 0.5rem;
+  --va-pagination-button-padding: 0.5rem 1rem;
+  --va-pagination-button-margin: 0 0.25rem;
+}
+
+.pagination-modern :deep(.va-pagination__button) {
+  transition: all 0.2s ease;
+}
+
+.pagination-modern :deep(.va-pagination__button:hover) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.pagination-button {
+  min-width: 120px;
+  border-radius: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .pagination-button {
+    min-width: auto;
+    padding: 0.5rem;
+  }
+}
+
 .doctor-listing-page {
   background-color: #f9fafb;
   min-height: 100vh;

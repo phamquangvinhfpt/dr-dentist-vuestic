@@ -1,79 +1,105 @@
 <template>
-  <VaCard style="padding-top: 0.5%" class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex justify-between mb-3">
-        <h1 class="va-h1 text-2xl font-extrabold dark:text-blue-500 text-blue-900 text-left mb-4">
-          {{ t('service.service_head') }}
-        </h1>
+  <VaCard class="service-page bg-gradient-to-br from-blue-50 via-white to-blue-50 min-h-screen py-12">
+    <VaCard class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      <!-- Hero Section with enhanced visual appeal -->
+      <div
+        class="bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl p-10 text-white shadow-xl transform hover:scale-[1.01] transition-all duration-300"
+      >
+        <div class="max-w-3xl mx-auto text-center space-y-6">
+          <h1 class="text-4xl font-bold">{{ t('service.service_head') }}</h1>
+          <p class="text-xl opacity-90 leading-relaxed">{{ t('service.service_title') }}</p>
+          <button
+            class="mt-8 bg-white text-blue-600 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+            @click="bookAppointment"
+          >
+            {{ t('service.Booking') }}
+          </button>
+        </div>
       </div>
-      <div style="margin-bottom: 1%; margin-top: 5px" class="flex justify-between items-center mt-6">
-        <p class="text-sm md:text-base text-left mb-0">{{ t('service.service_title') }}</p>
 
-        <button
-          v-if="isMobile"
-          class="bg-indigo-600 text-white font-semibold text-xs py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-          @click="bookAppointment"
-        >
-          {{ t('service.Booking') }}
-        </button>
-        <button
-          v-else
-          style="height: 4cap"
-          class="bg-indigo-600 text-white font-semibold text-xs py-1 px-1 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-          @click="bookAppointment"
-        >
-          {{ t('service.Booking') }}
-        </button>
+      <!-- Search and Filters Card with improved spacing -->
+      <VaCard class="rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+        <VaCard class="p-8 space-y-8 bg-white">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Search Input with enhanced styling -->
+            <VaInput
+              v-model="searchQuery"
+              type="text"
+              :placeholder="t('service.search_placeholder')"
+              :label="t('service.search')"
+              class="search-input hover:shadow-md transition-shadow duration-200"
+              @input="onSearchChange"
+            >
+              <template #prependInner>
+                <VaIcon name="search" color="primary" />
+              </template>
+            </VaInput>
+
+            <!-- Filter Select with matching style -->
+            <VaSelect
+              v-model="selectedTypeService"
+              :options="typeServiceOptions"
+              :label="t('service.filter')"
+              class="filter-select hover:shadow-md transition-shadow duration-200"
+              @change="onFilterChange"
+            />
+          </div>
+        </VaCard>
+      </VaCard>
+
+      <!-- Loading State with improved visual feedback -->
+      <div v-if="isLoading" class="flex justify-center items-center py-16">
+        <VaProgressCircle indeterminate color="primary" size="large" />
       </div>
-      <!-- Search and Filters -->
-      <div class="rounded-2xl p-4 shadow-md mb-6 space-y-4">
-        <VaInput
-          v-model="searchQuery"
-          type="text"
-          :placeholder="t('service.search_placeholder')"
-          :label="t('service.search')"
-          @input="onSearchChange"
-        />
-        <VaSelect
-          v-model="selectedTypeService"
-          :options="typeServiceOptions"
-          :label="t('service.filter')"
-          @change="onFilterChange"
-        />
-      </div>
-      <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        <div v-if="isLoading" class="col-span-full text-center">
-          <VaProgressCircle indeterminate />
-        </div>
-        <div v-if="filteredServices.length === 0 && !isLoading" class="col-span-full text-center">
-          {{ t('service.noService') }}
-        </div>
-        <div v-for="service in paginatedServices" :key="service.serviceID" class="service-card">
-          <VaCard class="p-6 flex flex-col justify-between h-full">
-            <div class="service-icon">🦷</div>
-            <h2 class="text-lg font-semibold dark:text-blue-500 text-blue-900">{{ service.name }}</h2>
-            <p class="text-xs mt-2">{{ truncateDescription(service.description) }}</p>
-            <div class="flex justify-between items-center mt-4">
-              <p class="text-sm font-bold text-blue-600">
-                {{ t('service.price') }} {{ formatCurrency(service.totalPrice) }}
-              </p>
-              <button class="text-sm font-bold text-blue-600" @click.prevent="getServicesDetailById(service.serviceID)">
-                {{ t('service.Detail') }}
-              </button>
+
+      <!-- No Results State with better visual feedback -->
+      <VaCard v-else-if="filteredServices.length === 0" class="text-center py-16 bg-white rounded-2xl shadow-lg">
+        <VaIcon name="search_off" size="large" color="secondary" class="mb-4" />
+        <p class="text-lg text-gray-600">{{ t('service.noService') }}</p>
+      </VaCard>
+
+      <!-- Services Grid with enhanced card design -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div
+          v-for="service in paginatedServices"
+          :key="service.serviceID"
+          class="transform hover:-translate-y-2 transition-all duration-300"
+        >
+          <VaCard class="service-card h-full rounded-2xl shadow-lg hover:shadow-xl overflow-hidden">
+            <div class="p-6 space-y-4">
+              <div class="service-icon-wrapper mb-6 text-center">
+                <span class="service-icon text-4xl bg-blue-50 p-4 rounded-full inline-block">🦷</span>
+              </div>
+              <h2 class="text-xl font-bold mb-3">{{ service.name }}</h2>
+              <p class="text-sm leading-relaxed">{{ truncateDescription(service.description) }}</p>
+              <div class="flex justify-between items-center pt-6 mt-4 border-t border-gray-100">
+                <span class="text-xl font-bold">{{ formatCurrency(service.totalPrice) }}</span>
+                <VaButton
+                  preset="secondary"
+                  size="small"
+                  class="details-button px-6 py-2 rounded-xl hover:bg-blue-50 transition-colors duration-200"
+                  @click="getServicesDetailById(service.serviceID)"
+                >
+                  {{ t('service.Detail') }}
+                </VaButton>
+              </div>
             </div>
           </VaCard>
         </div>
       </div>
-      <!-- Pagination -->
-      <div class="mt-6 flex justify-center">
+
+      <!-- Pagination with improved styling -->
+      <VaCard class="mt-10 bg-white rounded-2xl shadow-lg p-6">
         <VaPagination
           v-model="currentPage"
           :total="Math.ceil(filteredServices.length / pageSize)"
+          class="pagination-modern"
           @input="fetchPaginatedServices"
         />
-      </div>
-    </div>
+      </VaCard>
+    </VaCard>
 
+    <!-- Service Details Modal -->
     <ServiceDetailsModal
       :is-open="isModalOpen"
       :service-details="serviceDetails"
@@ -83,6 +109,7 @@
     />
   </VaCard>
 </template>
+
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router' // Để lấy tham số từ route
@@ -212,91 +239,49 @@ onMounted(fetchServices)
 </script>
 
 <style scoped>
-.services-container {
-  padding: 2rem;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.services-title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-}
-
-.services-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
+.service-page {
+  min-height: 100vh;
 }
 
 .service-card {
-  border-radius: 10px;
-  padding: 1.5rem;
-  text-align: center;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
-  transition:
-    transform 0.3s,
-    box-shadow 0.3s;
+  background: white;
+  transition: all 0.3s ease;
 }
 
-.service-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+.service-icon-wrapper {
+  transition: transform 0.3s ease;
 }
 
-.service-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.service-card:hover .service-icon-wrapper {
+  transform: scale(1.1);
 }
 
-.service-name {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0.5rem 0;
+.search-input :deep(input),
+.filter-select :deep(.va-select__value) {
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
 }
 
-.service-description {
-  color: #666;
-  margin-bottom: 1rem;
+.search-input :deep(input:focus),
+.filter-select :deep(.va-select__value:focus) {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-.learn-more {
-  color: #007bff;
-  text-decoration: none;
+.pagination-modern {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.learn-more:hover {
-  text-decoration: underline;
+.pagination-modern :deep(.va-pagination__item) {
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
 }
 
-.appointment-button {
-  display: block;
-  margin: 2rem auto 0;
-  padding: 0.75rem 1.5rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
-}
-
-.appointment-button:hover {
-  background-color: #0056b3;
-}
-
-.learn-more-button {
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.learn-more-button:hover {
-  color: #0056b3;
+.pagination-modern :deep(.va-pagination__item--active) {
+  transform: scale(1.1);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 </style>
