@@ -278,7 +278,6 @@
     "search": "Tìm kiếm bác sĩ theo tên hoặc email...",
     "search_placeholder": "Tìm kiếm Theo tên hoặc email...",
     "search_doctor": "Tìm kiếm",
-    "not_doctor": "Không tìm thấy bác sĩ phù hợp.",
     "type_service": "Loại dịch vụ",
     "Sort_By": "Sắp xếp theo",
     "asc": "Tăng dần",
@@ -335,7 +334,8 @@
     "enter_years_of_experience": "Nhập số năm kinh nghiệm",
     "self_description": "Tóm tắt chuyên môn",
     "description_required": "Vui lòng nhập tóm tắt chuyên môn",
-    "enter_self_description": "Nhập mô tả ngắn gọn về bản thân"
+    "enter_self_description": "Nhập mô tả ngắn gọn về bản thân",
+    "view_profile": "Chi tiết"
   },
   "prescriptions": {
     "prescription": "Đơn thuốc",

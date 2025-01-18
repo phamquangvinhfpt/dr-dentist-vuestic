@@ -404,7 +404,8 @@
     "enter_years_of_experience": "Enter your years of experience",
     "self_description": "Professional Summary",
     "description_required": "Please enter your professional summary",
-    "enter_self_description": "Enter a brief description about yourself"
+    "enter_self_description": "Enter a brief description about yourself",
+    "view_profile": "View Profile"
   },
   "prescriptions": {
     "prescription": "Prescription",

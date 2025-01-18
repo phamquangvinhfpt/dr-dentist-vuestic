@@ -517,7 +517,7 @@ const fetchAvailableDoctors = async () => {
       if (response && response.length > 0) {
         doctors.value = response.map((doctor: any) => ({
           text: `${doctor.firstName} ${doctor.lastName}`,
-          value: doctor.id,
+          value: doctor.doctorProfile.id,
         }))
       }
     })

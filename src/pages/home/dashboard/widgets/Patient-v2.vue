@@ -416,7 +416,7 @@ window.addEventListener('resize', () => {
                     @click="router.push({ name: 'doctor-detail', params: { id: doctor.id } })"
                   >
                     <span class="material-symbols-outlined text-white text-sm">visibility</span>
-                    View Profile
+                    {{ doctor.doctorProfile.education }}
                   </button>
 
                   <!-- Nút Đánh giá -->
