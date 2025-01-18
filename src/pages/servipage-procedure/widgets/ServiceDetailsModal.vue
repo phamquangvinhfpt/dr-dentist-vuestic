@@ -9,7 +9,7 @@
             <VaIcon name="medical_services" size="large" color="primary" />
           </div>
           <h3 class="va-h3 text-2xl font-semibold mb-0 text-gray-800 dark:text-white">
-            {{ t('service.detail_service') }}
+            {{ t('service.serviceDetails') }}
           </h3>
         </div>
         <VaButton
@@ -48,7 +48,7 @@
               <div
                 v-for="detail in serviceDetails.procedures"
                 :key="detail.procedureID"
-                class="procedure-item border p-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700"
+                class="procedure-item p-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700"
               >
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
                   <div class="flex-1">
@@ -121,18 +121,20 @@
               </div>
             </div>
           </div>
-          <div class="flex flex-wrap gap-3 items-center mb-6">
+          <div class="flex flex-col justify-center items-center gap-4">
             <span class="dark:text-gray-300 font-medium text-lg">{{ t('service.filter_rating') }}</span>
-            <VaChip
-              v-for="star in [5, 4, 3, 2, 1]"
-              :key="star"
-              :color="activeFilter === star ? 'primary' : 'gray'"
-              class="review-item hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-              size="large"
-              @click="filterReviews(star)"
-            >
-              {{ star }} <span class="text-yellow-400">★</span>
-            </VaChip>
+            <div class="flex flex-wrap gap-3">
+              <VaChip
+                v-for="star in [5, 4, 3, 2, 1]"
+                :key="star"
+                :color="activeFilter === star ? 'primary' : 'gray'"
+                class="review-item text-xs md:text-lg hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                size="large"
+                @click="filterReviews(star)"
+              >
+                {{ star }} <span class="text-yellow-400">★</span>
+              </VaChip>
+            </div>
           </div>
 
           <div v-if="filteredReviews.length === 0" class="flex flex-col items-center justify-center py-12 space-y-4">

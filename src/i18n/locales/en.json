@@ -1206,13 +1206,11 @@
     "serviceDetails": "Service Details",
     "serviceInformation": "Service Information",
     "createSuccess": "Create service successfully",
-
     "service_head": "Dental Services",
     "service_title": "Caring for your smile is our top priority",
     "Booking": "Book Now",
     "noService": "No services to display.",
     "serviceList": "Service List",
-
     "rating": "Rating",
     "loading_infor": "Loading information, please wait...",
     "patient": "Patient",
@@ -1221,7 +1219,6 @@
     "filter_rating": "Filter by rating:",
     "detail_service": "Service Details",
     "Detail": "Details",
-    "price": "Price:",
     "search": "Search",
     "search_placeholder": "Search for services...",
     "filter": "Filter by service type",

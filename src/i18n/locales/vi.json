@@ -1108,12 +1108,13 @@
     "Booking": "Đặt Lịch Ngay",
     "noService": "Không có dịch vụ nào để hiển thị.",
     "serviceList": "Danh Sách Dịch Vụ",
-    "Detail": "chi tiết",
-    "price": "Giá:",
+    "Detail": "Chi tiết",
     "search": "Tìm kiếm",
     "search_placeholder": "Tìm dịch vụ...",
     "filter": "Lọc theo loại dịch vụ",
-    "all_service": "Tất cả dịch vụ"
+    "all_service": "Tất cả dịch vụ",
+    "filter_rating": "Lọc theo đánh giá",
+    "rating": "Đánh giá"
   },
   "procedure": {
     "id": "Mã",
