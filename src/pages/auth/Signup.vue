@@ -97,7 +97,7 @@ const submit = () => {
       .then(() => {
         init({
           title: 'Success',
-          message: t('auth.account_created'),
+          message: t('auth.account_created_message'),
           color: 'success',
         })
         if (Capacitor.getPlatform() === 'android' || Capacitor.getPlatform() === 'ios') {

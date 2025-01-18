@@ -5,19 +5,18 @@ import { useToast, VaInnerLoading, VaCard, VaButton, VaRadio, VaDivider, VaDataT
 import { PaymentDetailResponse, PaymentMethod } from '../types'
 import { generateQRCode, getErrorMessage } from '@/services/utils'
 import QrSelection from '@/pages/appointment/widgets/create-appointment/QrSelection.vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 // const for payment
 const router = useRoute()
-const route = useRouter()
 const appointmentId = router.params.id as string
 const showQrCode = ref(false)
 const bankInfo = ref<any>({
-  bankName: 'Vietcombank',
-  accountNo: '1017044309',
+  bankName: 'MB Bank',
+  accountNo: '0942705605',
   accountName: 'PHAM QUANG VINH',
-  acqId: 970436,
+  acqId: 970422,
   amount: '',
   addInfo: '',
 })
@@ -92,7 +91,6 @@ const confirmPayment = () => {
           color: 'success',
           title: 'Success',
         })
-        route.push({ name: 'payment-for-patient' })
       })
       .catch((error) => {
         const errorMessage = getErrorMessage(error)
@@ -126,7 +124,7 @@ const confirmPayment = () => {
         })
         showQrCode.value = true
         bankInfo.value.amount = paymentDetailResponse.value?.paymentResponse.remainingAmount
-        bankInfo.value.description = paymentDetailResponse.value?.paymentResponse.patientCode
+        bankInfo.value.addInfo = paymentDetailResponse.value?.paymentResponse.patientCode
         generateQRCode(
           bankInfo.value.accountNo,
           bankInfo.value.accountName,

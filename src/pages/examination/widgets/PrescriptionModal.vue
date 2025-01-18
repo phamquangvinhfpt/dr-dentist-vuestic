@@ -3,7 +3,7 @@
     v-model="isModalOpen"
     hide-default-actions
     :title="$t('prescriptions.prescription')"
-    size="large"
+    fullscreen
     @close="closeModal"
   >
     <div ref="prescriptionContent">
@@ -38,7 +38,9 @@
           <VaDivider />
           <div class="prescription-items">
             <h3 class="va-h5 mb-3">{{ t('prescriptions.medicine') }}</h3>
-            <VaDataTable :items="prescription.items" :columns="columns" striped hoverable />
+            <div class="table-container">
+              <VaDataTable :items="prescription.items" :columns="columns" striped hoverable />
+            </div>
           </div>
           <VaDivider />
           <div class="prescription-notes mt-4">
@@ -131,7 +133,7 @@ const printStyles = `
       width: 100%;
     }
     .prescription-card {
-      max-width: 800px;
+      max-width: 100%;
       margin: 0 auto;
       padding: 2rem;
       box-shadow: none !important;
@@ -151,17 +153,28 @@ const printStyles = `
     .va-card {
       box-shadow: none !important;
     }
+    .table-container {
+      overflow: visible !important;
+      page-break-inside: avoid;
+    }
+    .va-data-table {
+      width: 100% !important;
+      overflow: visible !important;
+      page-break-inside: avoid;
+    }
+    .va-data-table__table {
+      width: 100% !important;
+      overflow: visible !important;
+    }
   }
 `
 
 const printPrescription = () => {
-  // Create print styles
   const style = document.createElement('style')
   style.type = 'text/css'
   style.innerHTML = printStyles
   document.head.appendChild(style)
 
-  // Create print section
   const printSection = document.createElement('div')
   printSection.id = 'printSection'
   printSection.innerHTML = prescriptionContent.value.innerHTML
@@ -169,7 +182,6 @@ const printPrescription = () => {
 
   window.print()
 
-  // Cleanup
   document.head.removeChild(style)
   document.body.removeChild(printSection)
 }
@@ -202,10 +214,18 @@ const downloadPDF = async () => {
 </script>
 
 <style scoped>
-.prescription-card {
+.prescription-container {
+  width: 100%;
   max-width: 800px;
   margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.prescription-card {
+  width: 100%;
+  margin: 0 auto;
   padding: 2rem;
+  background-color: white;
 }
 
 .clinic-info {
@@ -213,31 +233,39 @@ const downloadPDF = async () => {
   margin-bottom: 1rem;
 }
 
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
 .clinic-logo {
   width: 100px;
   height: auto;
-  margin-bottom: 0.5rem;
-  align-items: center;
+  object-fit: contain;
 }
 
 .clinic-name {
   font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .clinic-address,
 .clinic-contact {
   font-size: 0.9rem;
   color: var(--va-text-secondary);
+  margin-bottom: 0.25rem;
+  text-align: center;
 }
 
 .prescription-header {
-  margin-bottom: 1rem;
+  width: 100%;
 }
 
 .prescription-info {
-  margin-top: 1rem;
+  margin: 1rem 0;
 }
 
 .prescription-info p {
@@ -245,11 +273,47 @@ const downloadPDF = async () => {
 }
 
 .prescription-items {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.table-container {
+  width: 100%;
+  overflow: visible;
+}
+
+.va-data-table {
+  width: 100%;
+  overflow: visible;
 }
 
 .prescription-notes {
-  margin-top: 1rem;
+  margin: 1.5rem 0;
+}
+
+.my-4 {
+  margin: 1rem 0;
+}
+
+@media print {
+  .prescription-container {
+    padding: 0;
+  }
+
+  .prescription-card {
+    box-shadow: none !important;
+  }
+
+  .table-container,
+  .va-data-table,
+  .va-data-table__table {
+    overflow: visible !important;
+    width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  .va-divider {
+    margin: 1rem 0 !important;
+  }
 }
 </style>

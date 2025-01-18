@@ -45,7 +45,7 @@
         <section class="sm:max-h-[350px] max-w-[450px] p-2 overflow-y">
           <section v-if="notificationsWithRelativeTime?.length <= 0" class="flex flex-col items-center">
             <VaIcon name="notifications" color="secondary" size="4rem" />
-            <p class="text-lg font-semibold">You do not have any notifications</p>
+            <p class="text-lg font-semibold">{{ t('notifications.no_notifications') }}</p>
           </section>
           <VaList v-if="notificationsWithRelativeTime?.length > 0" class="space-y-1 mb-2">
             <template v-for="(item, index) in notificationsWithRelativeTime" :key="item?.id">

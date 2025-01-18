@@ -206,7 +206,7 @@ onMounted(async () => {
                               {{ formatCurrency(item.price) }} VND
                             </div>
                             <div class="flex gap-2">
-                              <VaButton
+                              <!-- <VaButton
                                 v-if="item.hasPrescription"
                                 size="small"
                                 color="info"
@@ -214,7 +214,7 @@ onMounted(async () => {
                                 class="hover:shadow-md transition-shadow"
                               >
                                 Đơn thuốc
-                              </VaButton>
+                              </VaButton> -->
                             </div>
                           </div>
                         </div>

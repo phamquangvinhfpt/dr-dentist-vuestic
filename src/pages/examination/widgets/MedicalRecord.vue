@@ -186,10 +186,17 @@ const getMedicalRecord = async () => {
     .getMedicalRecord(props.patientId)
     .then((response) => {
       medicalRecords.value = response
-      medicalRecords.value = medicalRecords.value.filter(
-        (record: any) =>
-          record.date <= formatDateForm(value.value.end) && record.date >= formatDateForm(value.value.start),
-      )
+      medicalRecords.value = medicalRecords.value.filter((record: any) => {
+        const recordDate = new Date(record.date)
+        const startDate = new Date(formatDateForm(value.value.start))
+        const endDate = new Date(formatDateForm(value.value.end))
+
+        startDate.setHours(0, 0, 0, 0)
+
+        endDate.setHours(23, 59, 59, 999)
+
+        return recordDate >= startDate && recordDate <= endDate
+      })
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)

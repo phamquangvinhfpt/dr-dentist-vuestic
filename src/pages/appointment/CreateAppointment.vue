@@ -31,10 +31,10 @@ const availableTimes = ref<string[]>([])
 const defaultTimeSelection = ref<string[]>([])
 const qrCodeUrl = ref<string>('')
 const bankInfo = ref<any>({
-  bankName: 'Vietcombank',
-  accountNo: '1017044309',
+  bankName: 'MB Bank',
+  accountNo: '0942705605',
   accountName: 'PHAM QUANG VINH',
-  acqId: 970436,
+  acqId: 970422,
   amount: '',
   addInfo: '',
 })
@@ -170,7 +170,7 @@ const saveBookingData = async (data: any) => {
       appointmentDepositRequest.value = response.data
       console.log('Appointment deposit request:', appointmentDepositRequest.value)
       bankInfo.value.amount = appointmentDepositRequest.value.amount
-      bankInfo.value.description = appointmentDepositRequest.value.patientCode
+      bankInfo.value.addInfo = appointmentDepositRequest.value.patientCode
       showQrCode.value = true
     })
     .catch((error) => {
