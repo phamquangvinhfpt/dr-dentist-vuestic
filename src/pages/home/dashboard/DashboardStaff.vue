@@ -85,7 +85,7 @@
       close-button
       hide-default-actions
       @close="handleCloseReschedule"
-      @ok="selectedDoctorId ? handleAssignBooking() : submitReschedule(isAppointment)"
+      @ok="isSelectDoctor ? handleAssignBooking() : submitReschedule(isAppointment)"
     >
       <div class="grid grid-cols-2 gap-4">
         <h3 class="va-h3">{{ t('appointment.reschedule_appointment.title') }}</h3>
@@ -134,7 +134,7 @@
             }}</VaButton>
             <VaButton
               :disabled="!isRescheduleFormValid"
-              @click="selectedDoctorId ? handleAssignBooking() : submitReschedule(isAppointment)"
+              @click="isSelectDoctor ? handleAssignBooking() : submitReschedule(isAppointment)"
               >{{ t('appointment.reschedule_appointment.submit') }}</VaButton
             >
           </div>
@@ -167,12 +167,14 @@ import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/compo
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
+import { useTreatmentStore } from '@/stores/modules/treatment.module'
 
 const isLoading = ref(false)
 const dashboardStore = useDashboardStore()
 const appointmentStore = useAppointmentStore()
 const calendarStore = useCalendarStore()
 const doctorStore = useDoctorProfileStore()
+const treatmentStore = useTreatmentStore()
 const current_date = ref<string>()
 const isAppointment = ref(true)
 const showModalCancel = ref(false)
@@ -193,6 +195,11 @@ interface Options {
   value: string
 }
 const selectedDoctorId = ref<Options>()
+const isSelectDoctor = computed(() => {
+  const check = selectedDoctorId.value?.value !== ''
+  console.log('check', check)
+  return check
+})
 const doctors = ref<Options[]>([])
 const tableItems = computed<DataTableItem[]>(() => (isAppointment.value ? appointments.value : followups.value))
 
@@ -528,15 +535,19 @@ const fetchAvailableDoctors = async () => {
 }
 
 const handleAssignBooking = () => {
+  console.log('selectedDoctorId', selectedDoctorId.value)
+  console.log('isAppointment', isSelectDoctor.value)
   isLoading.value = true
   const request = {
+    appointmentId: appointmentId.value,
+    treatmentId: isAppointment.value ? current_appointment.value.treatmentID : current_follow_up.value.treatmentID,
+    treatmentDate: formatDateForm(date.value),
+    treatmentTime: startTime.value + ':00',
+    note: '',
     doctorID: selectedDoctorId.value?.value,
-    appointmentID: isAppointment.value
-      ? current_appointment.value.appointmentId
-      : current_follow_up.value.appointmentId,
   }
-  appointmentStore
-    .assignDoctor(request)
+  treatmentStore
+    .updateTreatmentDetail(request)
     .then((response) => {
       init({
         title: 'success',

@@ -423,7 +423,7 @@ const validateForm = () => {}
 const createMedicalRecord = async () => {
   loading.value = true
   const form = new FormData()
-  form.append('AppointmentId', formData.AppointmentId || '')
+  form.append('AppointmentId', props.appointment?.appointmentId || '')
 
   // Phẳng hóa BasicExamination
   form.append('BasicExamination.ExaminationContent', formData.BasicExamination.ExaminationContent)

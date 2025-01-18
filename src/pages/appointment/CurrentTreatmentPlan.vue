@@ -114,7 +114,7 @@ onMounted(async () => {
           <VaCardContent>
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 mb-1">Tổng chi phí điều trị</p>
+                <p class="text-sm mb-1">Tổng chi phí điều trị</p>
                 <p class="text-2xl font-bold text-primary">{{ formatCurrency(totalCost) }} VND</p>
               </div>
               <VaIcon name="payments" size="large" color="primary" />
@@ -126,7 +126,7 @@ onMounted(async () => {
           <VaCardContent>
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 mb-1">Tiến độ điều trị</p>
+                <p class="text-sm mb-1">Tiến độ điều trị</p>
                 <p class="text-2xl font-bold text-success">{{ progress }}%</p>
               </div>
               <VaIcon name="trending_up" size="large" color="success" />
@@ -138,7 +138,7 @@ onMounted(async () => {
           <VaCardContent>
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 mb-1">Bác sĩ điều trị</p>
+                <p class="text-sm mb-1">Bác sĩ điều trị</p>
                 <p class="text-lg font-semibold text-info">{{ sortedTreatment[0]?.doctorName }}</p>
               </div>
               <VaIcon name="person" size="large" color="info" />
@@ -186,10 +186,10 @@ onMounted(async () => {
                           <!-- Header -->
                           <div class="flex justify-between items-start">
                             <div>
-                              <h3 class="sm:text-xs md:text-lg font-semibold text-gray-800">
+                              <h3 class="sm:text-xs md:text-lg font-semibold">
                                 {{ item.procedureName }}
                               </h3>
-                              <div class="flex items-center gap-2 text-gray-600 mt-1">
+                              <div class="flex items-center gap-2 mt-1">
                                 <VaIcon name="event" size="small" />
                                 <span class="text-sm">{{ formatDate(item.startDate) }}</span>
                               </div>

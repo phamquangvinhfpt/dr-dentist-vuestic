@@ -130,9 +130,10 @@
                               <div class="grid grid-cols-3 gap-4 mt-4">
                                 <div v-for="image in record.indicationImages" :key="image.imageType" class="relative">
                                   <img
+                                    loading="lazy"
                                     :src="getSrcAvatar(image.imageUrl)"
                                     :alt="image.imageType"
-                                    class="w-full h-64 object-cover border-2 border-dashed"
+                                    class="w-full h-fit object-cover border-2 border-dashed"
                                   />
                                   <div class="text-center">{{ image.imageType }}</div>
                                 </div>

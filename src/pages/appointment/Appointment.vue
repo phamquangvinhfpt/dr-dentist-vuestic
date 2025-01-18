@@ -1105,7 +1105,6 @@ const unassignedColumns = computed(() => [
   { key: 'servicePrice', label: t('appointment.appointment_data_table.price'), name: 'servicePrice' },
   { key: 'status', label: t('appointment.appointment_data_table.status'), name: 'status' },
   { key: 'paymentStatus', label: t('appointment.appointment_data_table.payment_status'), name: 'paymentStatus' },
-  { key: 'actions', label: t('appointment.appointment_data_table.actions'), name: 'actions' },
 ])
 
 const views = [
@@ -1114,17 +1113,10 @@ const views = [
 ]
 
 const types = computed(() => {
-  if (role?.includes('Staff') || role?.includes('Admin')) {
-    return [
-      { id: 'appointment', label: t('appointment.appointment') },
-      { id: 'followup', label: t('appointment.follow_up') },
-      { id: 'unassigned', label: t('appointment.no_specific_doctor') },
-    ]
-  }
-
   return [
     { id: 'appointment', label: t('appointment.appointment') },
     { id: 'followup', label: t('appointment.follow_up') },
+    { id: 'unassigned', label: t('appointment.no_specific_doctor') },
   ]
 })
 
