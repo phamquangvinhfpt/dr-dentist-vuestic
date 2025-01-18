@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onBeforeMount } from 'vue'
 import { useAuthStore } from '@modules/auth.module'
 import Patient from './widgets/Patient-v2.vue'
 import RevenueUpdates from './charts/RevenueReport.vue'
@@ -11,11 +11,19 @@ import DoctorRateTable from './charts/DoctorRateTable.vue'
 import BookingAna from './charts/BookingAna.vue'
 import DashboardStaff from './DashboardStaff.vue'
 import Appointment from '@/pages/appointment/Appointment.vue'
+import { useRouter } from 'vue-router'
 
 const authStore = useAuthStore()
 const isPatient = computed(() => authStore.musHaveRole('Patient') || authStore.user === null)
 const isDoctor = computed(() => authStore.musHaveRole('Dentist'))
 const isStaff = computed(() => authStore.musHaveRole('Staff'))
+const router = useRouter()
+
+onBeforeMount(() => {
+  if (isPatient.value || !authStore.isAuthenticated) {
+    router.push({ name: 'home-page' })
+  }
+})
 </script>
 
 <template>
