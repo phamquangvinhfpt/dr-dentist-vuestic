@@ -4,7 +4,7 @@
       <div class="modal-header px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center">
         <div class="flex items-center gap-3">
           <VaImage src="http://www.w3.org/2000/svg" alt="Chi tiết dịch vụ" class="w-8 h-8" />
-          <h3 class="va-h3 text-2xl font-semibold mb-0">Chi Tiết Dịch Vụ</h3>
+          <h3 class="va-h3 text-2xl font-semibold mb-0">{{ t('service.detail_service') }}</h3>
         </div>
       </div>
     </template>
@@ -12,22 +12,22 @@
     <VaCard class="va-card--no-border">
       <VaCardContent class="p-6">
         <VaTabs v-model="activeTab">
-          <VaTab name="details">Chi Tiết</VaTab>
-          <VaTab name="reviews">Đánh Giá</VaTab>
+          <VaTab name="details">{{ t('service.Detail') }}</VaTab>
+          <VaTab name="reviews">{{ t('service.rating') }}</VaTab>
         </VaTabs>
 
         <div v-if="activeTab === 'details'">
           <!-- Danh sách chi tiết -->
           <div v-if="isLoading" class="flex justify-center items-center py-12">
             <VaProgressCircle indeterminate size="large" class="text-blue-500" />
-            <p class="text-gray-600 dark:text-gray-400 mt-4">Đang tải thông tin, vui lòng chờ...</p>
+            <p class="text-gray-600 dark:text-gray-400 mt-4">{{ t('service.loading_infor') }}</p>
           </div>
 
           <div
             v-else-if="!Array.isArray(serviceDetails.procedures) || serviceDetails.procedures.length === 0"
             class="text-center py-12"
           >
-            <div class="text-gray-500 dark:text-gray-400">Không có thông tin chi tiết để hiển thị.</div>
+            <div class="text-gray-500 dark:text-gray-400">{{ t('service.noService') }}</div>
           </div>
 
           <div v-else class="service-details">
@@ -58,7 +58,7 @@
         </div>
 
         <div v-else-if="activeTab === 'reviews'">
-          <span class="text-gray-700 dark:text-gray-300 font-medium">Lọc theo số sao:</span> <br />
+          <span class="text-gray-700 dark:text-gray-300 font-medium">{{ t('service.filter_rating') }}</span> <br />
           <VaChip
             v-for="star in [5, 4, 3, 2, 1]"
             :key="star"
@@ -70,7 +70,7 @@
           </VaChip>
 
           <div v-if="filteredReviews.length === 0" class="text-gray-500 dark:text-gray-400">
-            Không có đánh giá phù hợp.
+            {{ t('service.filter_noinfor') }}
           </div>
           <div v-else>
             <div v-for="reviewGroup in paginatedReviews" :key="reviewGroup.ratingType" class="review-group space-y-4">
@@ -78,7 +78,9 @@
                 <span v-for="i in 5" :key="i" class="text-yellow-400">
                   <Star :class="i <= Math.round(reviewGroup.ratingType || 0) ? 'fill-current' : 'stroke-current'" />
                 </span>
-                <span class="ml-2 text-sm font-semibold">({{ reviewGroup.totalFeedback }} đánh giá)</span>
+                <span class="ml-2 text-sm font-semibold"
+                  >({{ reviewGroup.totalFeedback }} {{ t('service.rating') }})</span
+                >
               </div>
               <div v-for="feedback in reviewGroup.feedbacks" :key="feedback.feedbackId">
                 <VaCard class="review-item flex items-start gap-4 w-full h-full">
@@ -98,11 +100,12 @@
                   />
                   <div class="flex-1 flex flex-col">
                     <h5 class="font-semibold text-gray-900 dark:text-white text-xl">
-                      {{ feedback.patientName }} (Bệnh Nhân)
+                      {{ feedback.patientName }} ({{ t('service.patient') }})
                     </h5>
                     <p class="text-gray-600 dark:text-gray-300 text-base mb-2">{{ feedback.message }}</p>
                     <div class="text-sm text-gray-500">
-                      Đánh giá: {{ feedback.ratings }} ★ | Bác sĩ: {{ feedback.doctorName }}
+                      {{ t('service.rating') }}: {{ feedback.ratings }} ★ | {{ t('service.doctor') }}:
+                      {{ feedback.doctorName }}
                     </div>
                   </div>
                 </VaCard>
@@ -111,12 +114,10 @@
 
             <!-- Điều hướng phân trang -->
             <div class="pagination flex justify-center items-center mt-4">
-              <VaButton size="small" :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-                Trước
-              </VaButton>
+              <VaButton size="small" :disabled="currentPage === 1" @click="changePage(currentPage - 1)"> ← </VaButton>
               <span class="mx-4">{{ currentPage }} / {{ totalPages }}</span>
               <VaButton size="small" :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-                Tiếp
+                →
               </VaButton>
             </div>
           </div>
@@ -126,7 +127,7 @@
 
     <template #footer>
       <div class="modal-footer px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-        <VaButton class="w-full md:w-auto" color="primary" @click="closeModal"> Đóng </VaButton>
+        <VaButton class="w-full md:w-auto" color="primary" @click="closeModal"> {{ t('doctor.close') }} </VaButton>
       </div>
     </template>
   </VaModal>
@@ -137,7 +138,8 @@ import { VaModal, VaCard, VaCardContent, VaChip, VaButton, VaProgressCircle, VaT
 import { ref, computed, watch } from 'vue'
 import { Star } from 'lucide-vue-next'
 import { getSrcAvatar } from '@/services/utils'
-
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const currentPage = ref(1)
 const itemsPerPage = 5
 const props = defineProps({

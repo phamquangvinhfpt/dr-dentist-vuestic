@@ -911,7 +911,23 @@
     "inputField": "Trường nhập liệu",
     "fileTypeIncorrect": "Loại tệp không đúng",
     "select": "Chọn một tùy chọn",
-    "message": "Tin nhắn"
+    "message": "Tin nhắn",
+    "feedback_mess":"Chúng tôi trân trọng ý kiến của bạn",
+    "feedback_type":"Cải thiện trải nghiệm của bạn là ưu tiên hàng đầu của chúng tôi.",
+    "feedback_rating":"Vui lòng chọn số sao",
+    "feedback_button":"Gửi phản hồi",
+    "feedback_placeholder":"Viết phản hồi của bạn",
+    "feedback_not":"Nhập phản hồi của bạn tại đây...",
+  "feedback_submiting":"Đang gửi...",
+  "feedback_submit":"Gửi Phản Hồi Của Tôi",
+  "feedback_success":"Cảm ơn bạn đã gửi phản hồi!",
+  "feedback_success1": "Phản hồi của bạn đã được gửi thành công.",
+  "feedback_error":"Xin lỗi, đã xảy ra lỗi khi gửi phản hồi",
+  "feedback_placeholder_error":"Vui lòng nhập phản hồi",
+  "feedback_placeholder_success":"Cảm ơn bạn đã gửi phản hồi",
+  "feedback_close":"Đóng"
+  
+
   },
   "contact": {
     "get-in-touch": "Liên hệ",
@@ -1091,10 +1107,17 @@
     "serviceList": "Danh Sách Dịch Vụ",
     "Detail": "chi tiết",
     "price": "Giá:",
+    "rating":"đánh giá",
     "search": "Tìm kiếm",
+    "loading_infor": "Đang tải thông tin, vui lòng chờ...",
     "search_placeholder": "Tìm dịch vụ...",
     "filter": "Lọc theo loại dịch vụ",
-    "all_service": "Tất cả dịch vụ"
+    "all_service": "Tất cả dịch vụ",
+    "filter_rating":"Lọc theo số sao:",
+    "filter_noinfor": "Không có đánh giá phù hợp.",
+    "doctor" :"Bác Sĩ",
+    "patient":"Bệnh Nhân",
+    "detail_service": "Chi Tiết Dịch Vụ"
   },
   "procedure": {
     "id": "Mã",

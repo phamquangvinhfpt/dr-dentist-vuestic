@@ -982,7 +982,24 @@
     "inputField": "Input field",
     "fileTypeIncorrect": "File type is incorrect",
     "select": "Select an option",
-    "message": "Message"
+    "message": "Message",
+    
+      "feedback_mess": "We respect your feedback",
+      "feedback_type": "Improving your experience is our top priority.",
+      "feedback_rating": "Please select a rating",
+      "feedback_button": "Submit Feedback",
+      "feedback_placeholder": "Write your feedback",
+      "feedback_not": "Enter your feedback here...",
+      "feedback_submiting": "Submitting...",
+      "feedback_submit": "Submit My Feedback",
+      "feedback_success": "Thank you for your feedback!",
+      "feedback_success1": "Your feedback has been submitted successfully.",
+      "feedback_error": "Sorry, an error occurred while submitting your feedback",
+      "feedback_placeholder_error": "Please enter feedback",
+      "feedback_placeholder_success": "Thank you for your feedback",
+      "feedback_close": "Close"
+  
+  
   },
   "contact": {
     "get-in-touch": "Get in Touch",
@@ -1191,6 +1208,13 @@
     "Booking": "Book Now",
     "noService": "No services to display.",
     "serviceList": "Service List",
+    "rating":"Rating",
+    "loading_infor": "Loading information, please wait...",
+    "patient": "Patient",
+    "doctor": "Doctor",
+    "filter_noinfor": "No suitable reviews found.",
+    "filter_rating": "Filter by rating:",
+    "detail_service": "Service Details",
     "Detail": "Details",
     "price": "Price:",
     "search": "Search",

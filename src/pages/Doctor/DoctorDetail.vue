@@ -138,7 +138,7 @@
               class="mt-2 text-blue-600 hover:text-blue-800 transition-colors duration-200"
               @click="openEditPopup(review)"
             >
-              {{ t('doctor.Edit') }}
+              {{ t('doctor.edit') }}
             </button>
           </div>
         </div>
@@ -194,11 +194,12 @@
         </div>
         <div class="mt-6 flex justify-end space-x-3">
           <VaButton
-            class="px-2 py-1 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+            class="px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
             @click="isEditPopupOpen = false"
           >
             {{ t('doctor.cancel') }}
           </VaButton>
+
           <VaButton
             class="px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
             @click="saveEditFeedback"
