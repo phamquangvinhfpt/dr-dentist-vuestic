@@ -51,11 +51,13 @@ import signalRService from '@/signalR'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { useAppointmentStore } from '@/stores/modules/appointment.module'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
+import { useTreatmentStore } from '@/stores/modules/treatment.module'
 
 const GlobalStore = useGlobalStore()
 const onlineUsersStore = useOnlineUsersStore()
 const appointmentStore = useAppointmentStore()
 const calendarStore = useCalendarStore()
+const treatmentStore = useTreatmentStore()
 const breakpoints = useBreakpoint()
 const authStore = useAuthStore()
 
@@ -144,6 +146,7 @@ const handleUpdateAppointments = (appointments) => {
 
 const handleUpdateWorkingCalendar = (data) => {
   calendarStore.updateCalendar(data)
+  treatmentStore.updateTreatments(data)
 }
 
 const handleCheckHeartbeat = () => {

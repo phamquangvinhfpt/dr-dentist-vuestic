@@ -5,8 +5,12 @@ export const useTreatmentStore = defineStore('treatment', {
   state: () => ({
     treatments: [],
     isLoading: false,
+    update: null as any,
   }),
   actions: {
+    updateTreatment(data: any) {
+      this.update = data
+    },
     async getTreatmentList(id: any) {
       try {
         this.isLoading = true

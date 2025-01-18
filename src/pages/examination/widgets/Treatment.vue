@@ -27,6 +27,7 @@ import { useI18n } from 'vue-i18n'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
 import signalRService from '@/signalR'
 import PrescriptionModal from './PrescriptionModal.vue'
+import { storeToRefs } from 'pinia'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -38,6 +39,7 @@ const { t } = useI18n()
 const storeTreatment = useTreatmentStore()
 const storeMedicalRecord = useMedicalRecordStore()
 const storeCalendar = useCalendarStore()
+const { update } = storeToRefs(storeTreatment)
 const showModalTreatment = ref(false)
 const prevent = ref(false)
 const titleModalTreatment = computed(() => {
@@ -636,6 +638,17 @@ const isFormValid = computed(() => {
     formData.IndicationImages.length > 0
   )
 })
+
+watch(
+  update,
+  () => {
+    if (update) {
+      fetchTreatment()
+      update.value = false
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   date,

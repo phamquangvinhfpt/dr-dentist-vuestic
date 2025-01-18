@@ -28,7 +28,7 @@ const regularDoctorData = computed(() => dashboard.regularDoctorData)
 const totalServiceData = computed(() => dashboard.totalServiceData)
 const appointmentDoneData = computed(() => dashboard.appointmentDoneData)
 const feedBackData = computed(() => dashboard.feedbackData)
-const INTERVAL_TIME = 3000
+const INTERVAL_TIME = 5000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
 
 const startContentAnimation = () => {
@@ -47,7 +47,7 @@ const startContentAnimation = () => {
         currentSlide.value = (currentSlide.value + 1) % items.length
         animationFrame = requestAnimationFrame(animate)
       }, INTERVAL_TIME)
-    }, 500)
+    }, 1500)
   }
 
   // Start the initial animation
@@ -416,7 +416,7 @@ window.addEventListener('resize', () => {
                     @click="router.push({ name: 'doctor-detail', params: { id: doctor.id } })"
                   >
                     <span class="material-symbols-outlined text-white text-sm">visibility</span>
-                    {{ doctor.doctorProfile.education }}
+                    {{ t('doctor.view_profile') }}
                   </button>
 
                   <!-- Nút Đánh giá -->

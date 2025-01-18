@@ -479,7 +479,7 @@
                     <div v-for="event in selectedDayEvents" :key="event.id" class="border-b pb-4">
                       <div class="flex justify-between items-center">
                         <span class="font-semibold">{{ event.dentistName }}</span>
-                        <span :class="getEventClass(event.type)" class="px-2 py-1 rounded-full text-xs">
+                        <span :class="getEvent2Class(event.workingStatus)" class="px-2 py-1 rounded-full text-xs">
                           {{ workingStatusLabel(event.workingStatus) }}
                         </span>
                       </div>
@@ -992,6 +992,14 @@ function getEventClass(type: Event['type']) {
   }[type]
 }
 
+function getEvent2Class(type: number) {
+  return {
+    0: 'bg-yellow-100 text-yellow-800',
+    1: 'bg-green-100 text-green-800',
+    2: 'bg-red-100 text-red-800',
+  }[type]
+}
+
 function getEventDotClass(type: Event['type']) {
   return {
     warning: 'bg-yellow-500',
@@ -1362,8 +1370,8 @@ watch(
   update,
   () => {
     if (update) {
-      console.log('update')
       props.fetch()
+      update.value = false
     }
   },
   { immediate: true },
