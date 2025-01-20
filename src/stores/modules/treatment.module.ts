@@ -5,8 +5,12 @@ export const useTreatmentStore = defineStore('treatment', {
   state: () => ({
     treatments: [],
     isLoading: false,
+    update: null as any,
   }),
   actions: {
+    updateTreatment(data: any) {
+      this.update = data
+    },
     async getTreatmentList(id: any) {
       try {
         this.isLoading = true
@@ -101,6 +105,28 @@ export const useTreatmentStore = defineStore('treatment', {
       try {
         this.isLoading = true
         const response = await treatmentService.cancelPayment(code)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getPrescription(id: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await treatmentService.getPrescription(id)
+        this.isLoading = false
+        return await Promise.resolve(response.data)
+      } catch (error) {
+        this.isLoading = false
+        return await Promise.reject(error)
+      }
+    },
+    async getCurrentPlan(id: any): Promise<any> {
+      try {
+        this.isLoading = true
+        const response = await treatmentService.getCurrentPlan(id)
         this.isLoading = false
         return await Promise.resolve(response.data)
       } catch (error) {

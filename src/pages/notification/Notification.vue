@@ -1,7 +1,7 @@
 <template>
   <VaCard class="md:mx-64">
     <VaCardTitle class="flex justify-between">
-      <p class="text-xl">Notifications</p>
+      <p class="text-xl">{{ t('notifications.notifications') }}</p>
       <VaDropdown placement="right-bottom">
         <template #anchor>
           <VaButton preset="secondary" color="textPrimary" class="rounded-full">
@@ -19,7 +19,7 @@
             @click="handleMarkAllAsRead"
           >
             <VaIcon name="check" class="mr-1" />
-            Mark all as read
+            {{ t('notifications.markAllAsRead') }}
           </p>
         </VaDropdownContent>
       </VaDropdown>
@@ -34,7 +34,7 @@
             class="mr-2"
             @click="handleFilterNotification(true)"
           >
-            All
+            {{ t('notifications.all_tab') }}
           </VaButton>
           <VaButton
             round
@@ -43,13 +43,13 @@
             class=""
             @click="handleFilterNotification(false)"
           >
-            Unread
+            {{ t('notifications.unread_tab') }}
           </VaButton>
         </div>
         <section class="py-4 overflow-auto">
           <section v-if="notificationsWithRelativeTime?.length <= 0" class="flex flex-col items-center">
             <VaIcon name="notifications" color="secondary" size="4rem" />
-            <p class="text-lg font-semibold">You do not have any notifications</p>
+            <p class="text-lg font-semibold">{{ t('notifications.no_notifications') }}</p>
           </section>
           <VaList v-if="notificationsWithRelativeTime?.length > 0" class="space-y-1 mb-2">
             <template v-for="(item, index) in notificationsWithRelativeTime" :key="item?.id">

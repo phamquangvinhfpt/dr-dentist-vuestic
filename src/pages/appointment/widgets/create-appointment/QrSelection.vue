@@ -13,7 +13,7 @@ const props = defineProps<{
     accountName: string
     acqId: number
     amount: number
-    description: string
+    addInfo: string
   }
   qrCodeUrl: string
   isMobile: boolean
@@ -85,7 +85,7 @@ const updateRemainingTime = () => {
 
 const cancelPayment = () => {
   storeTreatment
-    .cancelPayment(props.bankInfo.description)
+    .cancelPayment(props.bankInfo.addInfo)
     .then(() => {
       init({
         title: t('payment.payment_cancel'),
@@ -239,9 +239,9 @@ watch(
                 <p class="text-base font-medium dark:text-gray-300">{{ $t('booking.description') }}</p>
                 <button
                   class="mt-3 px-4 py-2 bg-[#F1FAFF] hover:bg-[#009ef7] hover:text-white text-[#55A0F7] rounded transition-colors duration-200 ease-in-out text-base font-sans font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#009ef7] text-left"
-                  @click="isMobile ? writeToClipboard(bankInfo.description) : copyToClipboard(bankInfo.description)"
+                  @click="isMobile ? writeToClipboard(bankInfo.addInfo) : copyToClipboard(bankInfo.addInfo)"
                 >
-                  {{ bankInfo.description }}
+                  {{ bankInfo.addInfo }}
                 </button>
               </div>
             </div>
@@ -259,7 +259,7 @@ watch(
             <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ $t('booking.qrCode') }}</h3>
             <p class="text-gray-600 dark:text-gray-300 mb-3">{{ $t('booking.scanQrCode') }}</p>
             <div class="flex justify-center">
-              <img lazy :src="qrCodeUrl" alt="QR Code" class="w-full h-auto" />
+              <img loading="lazy" :src="qrCodeUrl" alt="QR Code" class="w-full h-auto" />
             </div>
           </div>
         </div>
@@ -297,9 +297,9 @@ watch(
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('booking.Description') }}</p>
                 <button
                   class="mt-3 px-4 py-2 bg-[#F1FAFF] hover:bg-[#009ef7] hover:text-white text-[#55A0F7] rounded transition-colors duration-200 ease-in-out text-base font-sans font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#009ef7] text-left"
-                  @click="isMobile ? writeToClipboard(bankInfo.description) : copyToClipboard(bankInfo.description)"
+                  @click="isMobile ? writeToClipboard(bankInfo.addInfo) : copyToClipboard(bankInfo.addInfo)"
                 >
-                  {{ bankInfo.description }}
+                  {{ bankInfo.addInfo }}
                 </button>
               </div>
             </div>

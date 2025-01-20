@@ -143,7 +143,7 @@ class ServiceService {
       })
       .then((response) => {
         console.log('Service: API Response:', response)
-        return Promise.resolve(response.data)
+        return response.data
       })
       .catch((error) => {
         console.error('Service: API Error:', error)
@@ -257,6 +257,24 @@ class ServiceService {
       .catch((error) => {
         return Promise.reject(error)
       })
+  }
+
+  async getServiceByIdForCustomer(id: string): Promise<any> {
+    try {
+      const response = await apiService.get(`/service/customer/get/${id}`)
+      console.log('API Response in service:', response) // Debug log
+
+      if (!response || !response.data) {
+        throw new Error('Invalid response from API')
+      }
+
+      return {
+        data: response.data, // Tr về trực tiếp response.data
+      }
+    } catch (error) {
+      console.error('Error in getServiceById:', error) // Debug log
+      throw error
+    }
   }
 }
 export default new ServiceService()

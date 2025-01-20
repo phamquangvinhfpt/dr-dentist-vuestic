@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useDoctorProfileStore } from '@/stores/modules/doctor.module'
-import { computed, onBeforeMount, onMounted, ref } from 'vue'
+import { computed, onBeforeMount, onMounted, onUnmounted, ref } from 'vue'
 import { VaCarousel, VaInnerLoading, VaButton, VaCardContent, VaCardTitle, useToast, VaCardActions } from 'vuestic-ui'
 import { Doctors, TypeService } from './types'
 import { useRouter } from 'vue-router'
@@ -28,17 +28,40 @@ const regularDoctorData = computed(() => dashboard.regularDoctorData)
 const totalServiceData = computed(() => dashboard.totalServiceData)
 const appointmentDoneData = computed(() => dashboard.appointmentDoneData)
 const feedBackData = computed(() => dashboard.feedbackData)
-const INTERVAL_TIME = 3000
+const INTERVAL_TIME = 5000
 const items = ['images/slider/slider-6-1.jpg', 'images/slider/slider-6-2.jpg']
 
 const startContentAnimation = () => {
-  setInterval(() => {
+  let animationFrame: number
+  let timeoutId: NodeJS.Timeout
+
+  const animate = () => {
     showContent.value = false
     animationKey.value++
-    setTimeout(() => {
+
+    timeoutId = setTimeout(() => {
       showContent.value = true
-    }, 500)
-  }, INTERVAL_TIME)
+
+      // Schedule next animation cycle
+      timeoutId = setTimeout(() => {
+        currentSlide.value = (currentSlide.value + 1) % items.length
+        animationFrame = requestAnimationFrame(animate)
+      }, INTERVAL_TIME)
+    }, 1500)
+  }
+
+  // Start the initial animation
+  animationFrame = requestAnimationFrame(animate)
+
+  // Cleanup function
+  return () => {
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame)
+    }
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+    }
+  }
 }
 
 const handleGetDoctors = async () => {
@@ -98,18 +121,23 @@ onMounted(() => {
     isLargeScreen.value = window.innerWidth >= 768
   }
   handleResize()
-  window.addEventListener('resize', handleResize)
+  window.addEventListener('resize', handleResize, { passive: true })
+  window.addEventListener('touchstart', () => {}, { passive: true })
 })
 
 onMounted(() => {
   loading.value = false
-  startContentAnimation()
+  const cleanup = startContentAnimation()
   handleGetServiceType()
   dashboard.getSatisfied()
   dashboard.getRegularDoctor()
   dashboard.getTotalService()
   dashboard.getAppointmentDone()
   dashboard.getPatientTestimonials()
+
+  onUnmounted(() => {
+    cleanup()
+  })
 })
 
 onBeforeMount(() => {
@@ -146,10 +174,10 @@ window.addEventListener('resize', () => {
         <!-- Content container -->
         <div class="absolute inset-0 flex items-center justify-center overflow-hidden">
           <Transition
-            enter-active-class="transition-all duration-1000 ease-out"
+            enter-active-class="transition-specific duration-1000 ease-out"
             enter-from-class="opacity-0"
             enter-to-class="opacity-100"
-            leave-active-class="transition-all duration-1000 ease-in"
+            leave-active-class="transition-specific duration-1000 ease-in"
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
           >
@@ -203,7 +231,7 @@ window.addEventListener('resize', () => {
           <!-- Service 1-->
           <a href="#" class="group block">
             <div
-              class="service-card dark:bg-gray-800 bg-white rounded-lg shadow p-6 flex flex-col border-2 border-solid dark:border-gray-700 transition-all duration-300 hover:bg-sky-500 dark:hover:bg-sky-600 hover:border-sky-500 dark:hover:border-sky-600"
+              class="service-card dark:bg-gray-800 bg-white rounded-lg shadow p-6 flex flex-col border-2 border-solid dark:border-gray-700 transition-specific duration-300 hover:bg-sky-500 dark:hover:bg-sky-600 hover:border-sky-500 dark:hover:border-sky-600"
             >
               <div class="flex justify-center mb-6">
                 <div
@@ -232,7 +260,7 @@ window.addEventListener('resize', () => {
           <!-- Service 2 -->
           <a href="#" class="group block">
             <div
-              class="service-card dark:bg-gray-800 bg-white rounded-lg shadow p-6 flex flex-col border-2 border-solid dark:border-gray-700 transition-all duration-300 hover:bg-sky-500 dark:hover:bg-sky-600 hover:border-sky-500 dark:hover:border-sky-600"
+              class="service-card dark:bg-gray-800 bg-white rounded-lg shadow p-6 flex flex-col border-2 border-solid dark:border-gray-700 transition-specific duration-300 hover:bg-sky-500 dark:hover:bg-sky-600 hover:border-sky-500 dark:hover:border-sky-600"
             >
               <div class="flex justify-center mb-6">
                 <div
@@ -261,7 +289,7 @@ window.addEventListener('resize', () => {
           <!-- Service 3 -->
           <a href="#" class="group block">
             <div
-              class="service-card dark:bg-gray-800 bg-white rounded-lg shadow p-6 flex flex-col border-2 border-solid dark:border-gray-700 transition-all duration-300 hover:bg-sky-500 dark:hover:bg-sky-600 hover:border-sky-500 dark:hover:border-sky-600"
+              class="service-card dark:bg-gray-800 bg-white rounded-lg shadow p-6 flex flex-col border-2 border-solid dark:border-gray-700 transition-specific duration-300 hover:bg-sky-500 dark:hover:bg-sky-600 hover:border-sky-500 dark:hover:border-sky-600"
             >
               <div class="flex justify-center mb-6">
                 <div
@@ -348,7 +376,7 @@ window.addEventListener('resize', () => {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div
               v-for="(doctor, index) in doctors"
-              :key="index"
+              :key="doctor.id"
               class="doctor-card bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-lg border-0 flex flex-col min-w-[200px] relative transform transition-transform duration-500 hover:scale-105"
               :class="[
                 'animate__animated',
@@ -358,10 +386,10 @@ window.addEventListener('resize', () => {
               <!-- Avatar và thông tin -->
               <div class="relative overflow-hidden rounded-t-2xl md:rounded-t-3xl">
                 <img
-                  lazy
+                  loading="lazy"
                   :src="doctor.imageUrl ? getSrcAvatar(doctor.imageUrl) : 'https://via.placeholder.com/200x200'"
                   :alt="`${doctor.firstName} ${doctor.lastName}`"
-                  class="w-full h-52 md:h-64 object-cover transition-all duration-500 hover:scale-110"
+                  class="w-full h-52 md:h-64 object-cover transition-specific duration-500 hover:scale-110"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-4">
                   <h3 class="text-xl font-bold text-white">{{ doctor.firstName }} {{ doctor.lastName }}</h3>
@@ -384,16 +412,16 @@ window.addEventListener('resize', () => {
                 <div class="flex justify-between mt-auto space-x-2">
                   <!-- Nút View Profile -->
                   <button
-                    class="flex-1 py-3 bg-gradient-to-br from-blue-500 to-green-400 text-white rounded-full shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-green-500 transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2"
+                    class="flex-1 py-3 bg-gradient-to-br from-blue-500 to-green-400 text-white rounded-full shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-green-500 transition-specific duration-300 text-sm font-medium flex items-center justify-center gap-2"
                     @click="router.push({ name: 'doctor-detail', params: { id: doctor.id } })"
                   >
                     <span class="material-symbols-outlined text-white text-sm">visibility</span>
-                    View Profile
+                    {{ t('doctor.view_profile') }}
                   </button>
 
                   <!-- Nút Đánh giá -->
                   <button
-                    class="flex-1 py-3 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full shadow-lg hover:shadow-xl hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 text-sm font-medium flex items-center justify-center gap-2"
+                    class="flex-1 py-3 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full shadow-lg hover:shadow-xl hover:from-yellow-500 hover:to-orange-600 transition-specific duration-300 text-sm font-medium flex items-center justify-center gap-2"
                   >
                     <span>{{ doctor.rating }}</span>
                     <span class="material-symbols-outlined text-yellow-300">star</span>
@@ -704,14 +732,16 @@ window.addEventListener('resize', () => {
 </template>
 
 <style scoped>
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+.transition-specific {
+  transition-property: opacity, transform;
+  transition-duration: 1s;
+  transition-timing-function: ease;
 }
 
 .slide-down {
   animation: slideDown 1s ease forwards;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 @keyframes slideDown {
@@ -728,6 +758,7 @@ window.addEventListener('resize', () => {
 .slide-up {
   animation: slideUp 1s ease forwards;
   opacity: 0;
+  will-change: opacity, transform;
 }
 
 @keyframes slideUp {

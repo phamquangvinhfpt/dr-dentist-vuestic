@@ -12,8 +12,12 @@ export const useAppointmentStore = defineStore('appointment', {
   state: () => ({
     isLoading: false,
     appointments: [] as Appointment[],
+    update_date: null as any,
   }),
   actions: {
+    updateAppointment(data: any) {
+      this.update_date = data
+    },
     async createAppointment(appointment: any): Promise<any> {
       try {
         this.isLoading = true

@@ -50,7 +50,7 @@
         '--va-data-table-grid-tr-border': '1px solid var(--va-background-border)',
       }"
       sticky-header
-      :no-data-html="`<div class='text-center'>{$t('contact.management.no_contacts')}</div>`"
+      :no-data-html="`<div class='text-center'>${t('contact.management.no_contacts')}</div>`"
     >
       <template #cell(title)="{ row }">
         <div class="flex items-center gap-2">
@@ -573,6 +573,18 @@ const submitEmail = async () => {
     emailData.subject = ''
     emailData.content = ''
 
+    // Refresh contacts data after sending email
+    await fetchContacts()
+
+    // Update selected contact data if modal is open
+    if (showDetailsModal.value && selectedContact.value) {
+      const updatedContacts = contacts.value
+      const updatedContact = updatedContacts.find((c) => c.contactId === selectedContact.value?.contactId)
+      if (updatedContact) {
+        selectedContact.value = updatedContact
+      }
+    }
+
     init({
       message: t('contact.emailSentSuccessfully'),
       color: 'success',
@@ -608,7 +620,6 @@ const submitImages = async () => {
   try {
     isSubmitting.value = true
 
-    // Gửi trực tiếp File objects thay vì chỉ gửi tên
     console.log('Sending images:', {
       contactId: selectedContactId.value,
       fileCount: selectedImages.value.length,
@@ -619,13 +630,24 @@ const submitImages = async () => {
 
     showImageModal.value = false
     selectedImages.value = []
+
+    // Refresh contacts data after updating images
+    await fetchContacts()
+
+    // Update selected contact data if modal is open
+    if (showDetailsModal.value && selectedContact.value) {
+      const updatedContacts = contacts.value
+      const updatedContact = updatedContacts.find((c) => c.contactId === selectedContact.value?.contactId)
+      if (updatedContact) {
+        selectedContact.value = updatedContact
+      }
+    }
+
     init({
       message: t('contact.imagesUpdatedSuccessfully'),
       color: 'success',
       duration: 3000,
     })
-
-    await fetchContacts()
   } catch (error) {
     console.error('Error uploading images:', error)
     init({

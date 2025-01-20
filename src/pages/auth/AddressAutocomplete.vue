@@ -67,22 +67,29 @@ const debouncedSearch = debounce(fetchAddressSuggestions, 500)
 const selectSuggestion = (prediction: any) => {
   addressInput.value = prediction.description
   isSelected.value = true
+  emit('update:modelValue', prediction.description)
   showSuggestions.value = false
   sessionToken = crypto.randomUUID()
   setTimeout(() => {
     isSelected.value = false
   }, 300)
 }
-
-watch(
-  () => addressInput.value,
-  (newValue) => {
-    if (!isSelected.value && newValue !== props.modelValue) {
-      emit('update:modelValue', newValue)
-      debouncedSearch(newValue)
-    }
-  },
-)
+// watch(
+//   () => addressInput.value,
+//   (newValue) => {
+//     if (!isSelected.value && newValue !== props.modelValue) {
+//       emit('update:modelValue', newValue)
+//       debouncedSearch(newValue)
+//     }
+//   },
+// )
+//tuấn viết
+const handleInput = (value: string) => {
+  if (!isSelected.value) {
+    emit('update:modelValue', value)
+    debouncedSearch(value)
+  }
+}
 </script>
 
 <template>
@@ -93,6 +100,7 @@ watch(
       class="mb-4 w-full"
       :label="t('auth.address')"
       autocomplete="off"
+      @update:modelValue="handleInput"
     />
 
     <div

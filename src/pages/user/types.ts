@@ -108,10 +108,13 @@ export type PasswordDetailFormData = {
 }
 
 export type UserDetailsUpdate = {
+  userId?: string
   firstName: string
   lastName: string
   gender: boolean | null
   birthDate: string | null
+  job: string | null
+  address: string | null
   doctorProfile?: DoctorProfileInfo
 }
 

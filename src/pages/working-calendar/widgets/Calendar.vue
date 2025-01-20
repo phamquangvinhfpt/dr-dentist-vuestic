@@ -80,11 +80,11 @@
                         </div>
                       </div>
                       <div class="flex items-center">
-                        <VaIcon
-                          size="small"
-                          name="done_all"
+                        <VaButton
+                          round
+                          icon="done_all"
                           color="#0081cf"
-                          class="mr-2"
+                          preset="secondary"
                           @click="AutoSetRoomForPartTime(dentist.calendarDetails)"
                         />
                         <VaIcon
@@ -479,7 +479,7 @@
                     <div v-for="event in selectedDayEvents" :key="event.id" class="border-b pb-4">
                       <div class="flex justify-between items-center">
                         <span class="font-semibold">{{ event.dentistName }}</span>
-                        <span :class="getEventClass(event.type)" class="px-2 py-1 rounded-full text-xs">
+                        <span :class="getEvent2Class(event.workingStatus)" class="px-2 py-1 rounded-full text-xs">
                           {{ workingStatusLabel(event.workingStatus) }}
                         </span>
                       </div>
@@ -575,6 +575,7 @@ import { useToast } from 'vuestic-ui/web-components'
 import { useCalendarStore } from '@/stores/modules/calendar.module'
 import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 
 const auth = useAuthStore()
 const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
@@ -600,6 +601,7 @@ const newScheduleDate = ref<Date | null>(null)
 const newScheduleTime = ref<string | null>(null)
 const partTimeSchedules = ref<PartTimeSchedule[]>([])
 const calendarStore = useCalendarStore()
+const { update } = storeToRefs(calendarStore)
 const getAllRooms = ref<any>()
 const loading = ref(false)
 const closeAddModal = () => {
@@ -689,6 +691,7 @@ const props = defineProps<{
   getPartTimeNon: (day: any, year: any) => void
   regist: (id: any, date: any) => Promise<void>
   reminder: (id: any, date: any) => void
+  fetch: () => void
   load: boolean
   workingCalendar: SearchResponse | null
   fullTimeNon: SearchResponse | null
@@ -719,70 +722,122 @@ const calendarDays = computed(() => {
   const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0)
   const days: CalendarDay[] = []
 
+  const isStaffOrAdmin = auth.musHaveRole('Admin') || auth.musHaveRole('Staff')
+  // const isDentist = auth.musHaveRole('Dentist')
+
+  // Helper function to get events for a specific date
+  const getDayEvents = (date: number, month: number, year: number) => {
+    if (isStaffOrAdmin) {
+      const workingCalendarEvents =
+        props.workingCalendar?.data.flatMap((dentist) =>
+          dentist.calendarDetails
+            .filter((detail: any) => {
+              const detailDate = new Date(detail.date)
+              return (
+                detailDate.getDate() === date && detailDate.getMonth() === month && detailDate.getFullYear() === year
+              )
+            })
+            .map((detail: any) => ({
+              ...detail,
+              dentistName: dentist.dentistName,
+              dentistUserID: dentist.dentistUserID,
+              type: isStaffOrAdmin ? (dentist.workingType === 1 ? 'warning' : 'usual') : 'usual',
+            })),
+        ) || []
+
+      const partTimeEvents =
+        props.partTimeNon?.data.flatMap((dentist) =>
+          dentist.calendarDetails
+            .filter((detail: any) => {
+              const detailDate = new Date(detail.date)
+              return (
+                detailDate.getDate() === date && detailDate.getMonth() === month && detailDate.getFullYear() === year
+              )
+            })
+            .map((detail: any) => ({
+              ...detail,
+              dentistName: dentist.dentistName,
+              dentistUserID: dentist.dentistUserID,
+              type: isStaffOrAdmin ? (detail.workingStatus === 0 ? 'error' : 'warning') : 'warning',
+            })),
+        ) || []
+
+      return [...workingCalendarEvents, ...partTimeEvents]
+    } else {
+      if (typeDoctor.value === 'PartTime') {
+        return (
+          props.workingCalendar?.data.flatMap((dentist) =>
+            dentist.calendarDetails
+              .filter((detail: any) => {
+                const detailDate = new Date(detail.date)
+                return (
+                  detailDate.getDate() === date && detailDate.getMonth() === month && detailDate.getFullYear() === year
+                )
+              })
+              .map((detail: any) => ({
+                ...detail,
+                dentistName: dentist.dentistName,
+                dentistUserID: dentist.dentistUserID,
+                type: detail.workingStatus === 0 ? 'error' : 'usual',
+              })),
+          ) || []
+        )
+      } else {
+        return (
+          props.workingCalendar?.data.flatMap((dentist) =>
+            dentist.calendarDetails
+              .filter((detail: any) => {
+                const detailDate = new Date(detail.date)
+                return (
+                  detailDate.getDate() === date && detailDate.getMonth() === month && detailDate.getFullYear() === year
+                )
+              })
+              .map((detail: any) => ({
+                ...detail,
+                dentistName: dentist.dentistName,
+                dentistUserID: dentist.dentistUserID,
+                type: detail.workingStatus === 0 ? '' : 'usual',
+              })),
+          ) || []
+        )
+      }
+    }
+  }
+
   // Previous month days
   const prevMonthDays = firstDay.getDay()
   const prevMonth = new Date(currentYear.value, currentMonth.value - 1, 0)
+  const prevMonthValue = currentMonth.value - 1
+  const prevYearValue = prevMonthValue < 0 ? currentYear.value - 1 : currentYear.value
+
   for (let i = prevMonthDays - 1; i >= 0; i--) {
+    const date = prevMonth.getDate() - i
     days.push({
-      date: prevMonth.getDate() - i,
+      date,
       isCurrentMonth: false,
-      events: [],
+      events: getDayEvents(date, prevMonthValue < 0 ? 11 : prevMonthValue, prevYearValue),
     })
   }
 
   // Current month days
   for (let date = 1; date <= lastDay.getDate(); date++) {
-    const dayEvents = [
-      ...(props.workingCalendar?.data.flatMap((dentist) =>
-        dentist.calendarDetails
-          .filter((detail: any) => {
-            const detailDate = new Date(detail.date)
-            return (
-              detailDate.getDate() === date &&
-              detailDate.getMonth() === currentMonth.value &&
-              detailDate.getFullYear() === currentYear.value
-            )
-          })
-          .map((detail: any) => ({
-            ...detail,
-            dentistName: dentist.dentistName,
-            dentistUserID: dentist.dentistUserID,
-            type: isStaffOrAdmin ? (dentist.workingType === 1 ? 'warning' : 'usual') : 'usual',
-          })),
-      ) || []),
-      ...(props.partTimeNon?.data.flatMap((dentist) =>
-        dentist.calendarDetails
-          .filter((detail: any) => {
-            const detailDate = new Date(detail.date)
-            return (
-              detailDate.getDate() === date &&
-              detailDate.getMonth() === currentMonth.value &&
-              detailDate.getFullYear() === currentYear.value
-            )
-          })
-          .map((detail: any) => ({
-            ...detail,
-            dentistName: dentist.dentistName,
-            dentistUserID: dentist.dentistUserID,
-            type: isStaffOrAdmin ? (detail.workingStatus === 0 ? 'error' : 'warning') : 'warning',
-          })),
-      ) || []),
-    ]
-
     days.push({
       date,
       isCurrentMonth: true,
-      events: dayEvents,
+      events: getDayEvents(date, currentMonth.value, currentYear.value),
     })
   }
 
   // Next month days
   const remainingDays = 42 - days.length
+  const nextMonthValue = currentMonth.value + 1
+  const nextYearValue = nextMonthValue > 11 ? currentYear.value + 1 : currentYear.value
+
   for (let i = 1; i <= remainingDays; i++) {
     days.push({
       date: i,
       isCurrentMonth: false,
-      events: [],
+      events: getDayEvents(i, nextMonthValue > 11 ? 0 : nextMonthValue, nextYearValue),
     })
   }
 
@@ -934,6 +989,14 @@ function getEventClass(type: Event['type']) {
     warning: 'bg-yellow-100 text-yellow-800',
     usual: 'bg-green-100 text-green-800',
     error: 'bg-red-100 text-red-800',
+  }[type]
+}
+
+function getEvent2Class(type: number) {
+  return {
+    0: 'bg-yellow-100 text-yellow-800',
+    1: 'bg-green-100 text-green-800',
+    2: 'bg-red-100 text-red-800',
   }[type]
 }
 
@@ -1304,6 +1367,17 @@ const export_calendar = () => {
 }
 
 watch(
+  update,
+  () => {
+    if (update) {
+      props.fetch()
+      update.value = false
+    }
+  },
+  { immediate: true },
+)
+
+watch(
   () => listValue.value,
   () => {
     if (listValue.value.length === 2) {
@@ -1457,6 +1531,7 @@ watch(
       loading.value = false
     }
   },
+  { deep: true },
 )
 
 onMounted(() => {

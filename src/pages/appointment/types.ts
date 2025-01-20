@@ -116,6 +116,7 @@ export type Appointment = {
   patientName: string | null
   patientPhone: string | null
   dentistId: string
+  dentistUserID: string
   dentistName: string | null
   serviceId: string
   serviceName: string | null
@@ -144,6 +145,7 @@ export type FollowUpAppointment = {
   patientPhone: string
   patientProfileID: string
   doctorProfileID: string
+  doctorUserID: string
   doctorName: string
   appointmentId: string
   serviceID: string

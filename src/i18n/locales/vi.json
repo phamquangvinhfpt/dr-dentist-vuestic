@@ -95,6 +95,7 @@
     "forgot_password?": "Quên mật khẩu?",
     "keep_signed_in": "Giữ tôi đăng nhập trên thiết bị này",
     "account_created": "Tài khoản được tạo thành công",
+    "account_created_message": "Tài khoản của bạn đã được tạo thành công. Vui lòng kiểm tra email/sms của bạn để xác minh tài khoản.",
     "password_reset_success": "Mật khẩu đã được đặt lại thành công",
     "female": "Nữ",
     "male": "Nam",
@@ -244,6 +245,7 @@
     "address": "Địa chỉ",
     "Add_User": "Thêm Người Dùng",
     "Add_Staff": "Thêm Nhân Viên",
+    "loading": "Loading data...",
     "birth_date": "Ngày sinh",
     "specialty": "Chuyên khoa",
     "experience": "Kinh nghiệm",
@@ -254,6 +256,8 @@
     "Email_Status": "Trạng thái email",
     "Patient_Feedback": "Phản hồi từ bệnh nhân",
     "first_Name": "Họ",
+    "not_doctor": "Không tìm thấy bác sĩ phù hợp.",
+    "not_user": "không tìm thấy người dùng phù hợp.",
     "last_Name": "Tên riêng",
     "my": "Của tôi",
     "no_medical": "Không có lịch sử khám nào",
@@ -262,7 +266,6 @@
     "Rating": "Đánh giá",
     "save": "Lưu",
     "Edit_staff": "Chỉnh sửa",
-    "loading": "Đang tải",
     "reviews": "Đánh giá",
     "Basic_information": "Thông tin cơ bản",
     "service": "Dịch vụ",
@@ -273,8 +276,8 @@
     "back": "Quay lại",
     "History_of_Examination": "Lịch sử khám bệnh",
     "search": "Tìm kiếm bác sĩ theo tên hoặc email...",
+    "search_placeholder": "Tìm kiếm Theo tên hoặc email...",
     "search_doctor": "Tìm kiếm",
-    "not_doctor": "Không tìm thấy bác sĩ phù hợp.",
     "type_service": "Loại dịch vụ",
     "Sort_By": "Sắp xếp theo",
     "asc": "Tăng dần",
@@ -331,7 +334,8 @@
     "enter_years_of_experience": "Nhập số năm kinh nghiệm",
     "self_description": "Tóm tắt chuyên môn",
     "description_required": "Vui lòng nhập tóm tắt chuyên môn",
-    "enter_self_description": "Nhập mô tả ngắn gọn về bản thân"
+    "enter_self_description": "Nhập mô tả ngắn gọn về bản thân",
+    "view_profile": "Chi tiết"
   },
   "prescriptions": {
     "prescription": "Đơn thuốc",
@@ -342,7 +346,12 @@
     "dosage": "Liều lượng",
     "enter_dosage": "Nhập liều lượng",
     "frequency": "Tần suất",
-    "enter_frequency": "Nhập tần suất"
+    "enter_frequency": "Nhập tần suất",
+    "date": "Ngày kê đơn",
+    "patient": "Bệnh Nhân",
+    "doctor": "Bác Sĩ",
+    "print": "In",
+    "downloadPDF": "Tải xuống PDF"
   },
   "phamarceutials": {
     "phamarceutial": "Dược phẩm"
@@ -482,9 +491,9 @@
       "pattern": "Email phải hợp lệ"
     },
     "job": {
-      "required": "Trường Job field là bắt buộc",
-      "minLength": "Trường Job phải có ít nhất 2 ký tự",
-      "maxLength": "Trường Job phải có tối đa 20 ký tự"
+      "required": "Trường công việc là bắt buộc",
+      "minLength": "Trường công việc phải có ít nhất 2 ký tự",
+      "maxLength": "Trường công việc phải có tối đa 20 ký tự"
     },
     "address": {
       "required": "Địa chỉ là bắt buộc",
@@ -654,7 +663,9 @@
     "services": "Dịch vụ",
     "doctors": "Bác sĩ",
     "medical-record-for-patient": "Hồ sơ bệnh án",
-    "payment-for-patient": "Thanh toán"
+    "prescription": "Đơn thuốc",
+    "payment-for-patient": "Thanh toán",
+    "current-treatment": "Điều trị hiện tại"
   },
   "bin": {
     "title": "Thùng rác",
@@ -676,11 +687,15 @@
     "all": "Xem tất cả thông báo",
     "more": "Xem thêm thông báo",
     "less": "Xem ít hơn thông báo",
+    "no_notifications": "Bạn không có thông báo nào",
     "mark_as_read": "Đánh dấu là đã đọc",
     "sentMessage": "đã gửi cho bạn một tin nhắn",
     "uploadedZip": "đã tải lên một tệp Zip mới với {type}",
     "startedTopic": "đã bắt đầu một chủ đề mới",
-    "markAllAsRead": "Đánh dấu tất cả là đã đọc"
+    "markAllAsRead": "Đánh dấu tất cả là đã đọc",
+    "notifications": "Thông báo",
+    "all_tab": "Tất cả",
+    "unread_tab": "Chưa đọc"
   },
   "user": {
     "language": "Thay đổi ngôn ngữ",
@@ -901,7 +916,21 @@
     "inputField": "Trường nhập liệu",
     "fileTypeIncorrect": "Loại tệp không đúng",
     "select": "Chọn một tùy chọn",
-    "message": "Tin nhắn"
+    "message": "Tin nhắn",
+    "feedback_mess": "Chúng tôi trân trọng ý kiến của bạn",
+    "feedback_type": "Cải thiện trải nghiệm của bạn là ưu tiên hàng đầu của chúng tôi.",
+    "feedback_rating": "Vui lòng chọn số sao",
+    "feedback_button": "Gửi phản hồi",
+    "feedback_placeholder": "Viết phản hồi của bạn",
+    "feedback_not": "Nhập phản hồi của bạn tại đây...",
+    "feedback_submiting": "Đang gửi...",
+    "feedback_submit": "Gửi Phản Hồi Của Tôi",
+    "feedback_success": "Cảm ơn bạn đã gửi phản hồi!",
+    "feedback_success1": "Phản hồi của bạn đã được gửi thành công.",
+    "feedback_error": "Xin lỗi, đã xảy ra lỗi khi gửi phản hồi",
+    "feedback_placeholder_error": "Vui lòng nhập phản hồi",
+    "feedback_placeholder_success": "Cảm ơn bạn đã gửi phản hồi",
+    "feedback_close": "Đóng"
   },
   "contact": {
     "get-in-touch": "Liên hệ",
@@ -942,8 +971,11 @@
     "assign": "Phân Công",
     "viewDetails": "Xem Chi Tiết",
     "resultsPerPage": "Kết quả mỗi trang",
+    "contactTakenSuccessfully": "Liên hệ đã được lấy thành công",
+    "content": "Nội Dung",
     "management": {
       "subject": "Tiêu đề",
+      "dragAndDrop": "Kéo thả tệp vào đây để tải lên",
       "contactContent": "Nội Dung Liên Hệ",
       "emailContext": "Nội Dung Email",
       "attachedImages": "Hình Ảnh Đính Kèm",
@@ -1070,7 +1102,19 @@
     "restoreError": "Khôi phục dịch vụ thất bại",
     "deleteSuccess": "Xóa dịch vụ thành công",
     "deleteError": "Xóa dịch vụ thất bại",
-    "serviceDeleteSuccess": "Dịch vụ đã được xóa thành công"
+    "serviceDeleteSuccess": "Dịch vụ đã được xóa thành công",
+    "service_head": "Dịch Vụ Nha Khoa",
+    "service_title": "Chăm sóc nụ cười của bạn là ưu tiên hàng đầu của chúng tôi",
+    "Booking": "Đặt Lịch Ngay",
+    "noService": "Không có dịch vụ nào để hiển thị.",
+    "serviceList": "Danh Sách Dịch Vụ",
+    "Detail": "Chi tiết",
+    "search": "Tìm kiếm",
+    "search_placeholder": "Tìm dịch vụ...",
+    "filter": "Lọc theo loại dịch vụ",
+    "all_service": "Tất cả dịch vụ",
+    "filter_rating": "Lọc theo đánh giá",
+    "rating": "Đánh giá"
   },
   "procedure": {
     "id": "Mã",
@@ -1129,7 +1173,9 @@
     "deletedOn": "Đã xóa vào",
     "status": "Trạng Thái",
     "close": "Đóng",
-    "send": "Gửi Email"
+    "send": "Gửi Email",
+    "take": "Lấy",
+    "export": "Xuất file"
   },
   "payment": {
     "patientCode": "Mã Bệnh Nhân",
@@ -1168,7 +1214,7 @@
     "paymentDetails": "Chi Tiết Thanh Toán",
     "statusIncomplete": "Chưa Hoàn Thành",
     "statusCompleted": "Đã Hoàn Thành",
-    "selectPatient": "Chọn bệnh nhân",
+    "selectPatient": "Chọn bệnh nhân để xuất file",
     "exportFileName": "lich-su-thanh-toan-{name}-{startDate}-den-{endDate}.xlsx",
     "exportFileNameAll": "tat-ca-thanh-toan-{startDate}-den-{endDate}.xlsx",
     "exportSuccess": "Xuất file thành công",
@@ -1377,6 +1423,8 @@
       "doctor": "Bác Sĩ",
       "date": "Ngày",
       "date_required": "Trường ngày là bắt buộc",
+      "date_today": "Trường ngày không thể nhỏ hơn ngày hôm nay",
+      "time_today": "Trường giờ không thể nhỏ hơn giờ hiện tại",
       "time": "Giờ",
       "time_required": "Trường giờ là bắt buộc",
       "submit": "Đặt Lịch",
@@ -1437,7 +1485,9 @@
     "examination": "Khám",
     "doctor": "Bác Sĩ",
     "examinationContent": "Nội dung khám",
+    "examinationContent_not_empty": "Nội dung khám không được để trống",
     "treatmentPlanNote": "Ghi chú kế hoạch điều trị",
+    "treatmentPlanNote_not_empty": "Ghi chú kế hoạch điều trị không được để trống",
     "teeth_condition": "Tình trạng răng",
     "no_condition": "Không có tình trạng",
     "tooth": "Răng",
@@ -1466,7 +1516,8 @@
       "actions": "Thao Tác",
       "treatment": "Điều Trị",
       "reschedule": "Tái Khám",
-      "detail": "Chi Tiết"
+      "detail": "Chi Tiết",
+      "prescription": "Toa Thuốc"
     }
   },
   "calendar": {

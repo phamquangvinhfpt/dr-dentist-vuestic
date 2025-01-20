@@ -13,10 +13,10 @@ const router = useRoute()
 const appointmentId = router.params.id as string
 const showQrCode = ref(false)
 const bankInfo = ref<any>({
-  bankName: 'Vietcombank',
-  accountNo: '1017044309',
+  bankName: 'MB Bank',
+  accountNo: '0942705605',
   accountName: 'PHAM QUANG VINH',
-  acqId: 970436,
+  acqId: 970422,
   amount: '',
   addInfo: '',
 })
@@ -37,7 +37,6 @@ const getRemainingAppointment = () => {
     .getRemainingAppointment(appointmentId)
     .then((response) => {
       paymentDetailResponse.value = response
-      console.log(paymentDetailResponse.value)
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)
@@ -92,7 +91,6 @@ const confirmPayment = () => {
           color: 'success',
           title: 'Success',
         })
-        getRemainingAppointment()
       })
       .catch((error) => {
         const errorMessage = getErrorMessage(error)
@@ -126,7 +124,7 @@ const confirmPayment = () => {
         })
         showQrCode.value = true
         bankInfo.value.amount = paymentDetailResponse.value?.paymentResponse.remainingAmount
-        bankInfo.value.description = paymentDetailResponse.value?.paymentResponse.patientCode
+        bankInfo.value.addInfo = paymentDetailResponse.value?.paymentResponse.patientCode
         generateQRCode(
           bankInfo.value.accountNo,
           bankInfo.value.accountName,

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Appointment } from '@/pages/appointment/types'
-import { onMounted, ref, computed, reactive } from 'vue'
+import { onMounted, ref, computed, reactive, watch } from 'vue'
 import {
   useToast,
   VaInnerLoading,
@@ -14,17 +14,20 @@ import {
   VaCheckbox,
   VaChip,
   VaDataTable,
-  useForm,
 } from 'vuestic-ui'
-import { TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
+import { PrescriptionResponse, TreatmentPlanResponse, TreatmentPlanStatus } from '../types'
 import { useTreatmentStore } from '@/stores/modules/treatment.module'
-import { getErrorMessage } from '@/services/utils'
+import { getErrorMessage, isToday, validateDate, validateTime } from '@/services/utils'
 import { DateInputModelValue, DateInputValue } from 'vuestic-ui/dist/types/components/va-date-input/types'
 import Prescription from './Prescription.vue'
 import { useAuthStore } from '@/stores/modules/auth.module'
 import { useMedicalRecordStore } from '@/stores/modules/medicalrecord.module'
 import DentalChart from './DentalChart.vue'
 import { useI18n } from 'vue-i18n'
+import { useCalendarStore } from '@/stores/modules/calendar.module'
+import signalRService from '@/signalR'
+import PrescriptionModal from './PrescriptionModal.vue'
+import { storeToRefs } from 'pinia'
 
 const loading = ref(false)
 const props = defineProps<{
@@ -35,6 +38,8 @@ const { init } = useToast()
 const { t } = useI18n()
 const storeTreatment = useTreatmentStore()
 const storeMedicalRecord = useMedicalRecordStore()
+const storeCalendar = useCalendarStore()
+const { update } = storeToRefs(storeTreatment)
 const showModalTreatment = ref(false)
 const prevent = ref(false)
 const titleModalTreatment = computed(() => {
@@ -42,7 +47,7 @@ const titleModalTreatment = computed(() => {
     return t('examination.add_treatment_detail')
   } else if (
     selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Active &&
-    !isToday(selectedTreatmentPlan.value?.startDate)
+    !checkToday(selectedTreatmentPlan.value?.startDate)
   ) {
     return t('examination.reschedule_treatment')
   }
@@ -56,8 +61,12 @@ const notes = ref('')
 const treatmentplans = ref<TreatmentPlanResponse[]>([])
 const user = useAuthStore()
 const isDoctor = user.musHaveRole('Dentist')
+const isStaff = user.musHaveRole('Staff')
+const isAdmin = user.musHaveRole('Admin')
+const isPatient = user.musHaveRole('Patient')
 const showModalCreateRecord = ref(false)
-const record_form = useForm('record_form')
+const prescription = ref<PrescriptionResponse>()
+const showPrescriptionModal = ref(false)
 const allColumns = computed(() => [
   { key: 'step', sortable: true, title: 'S.L', label: t('examination.treatment_plan_table.step') },
   {
@@ -76,7 +85,7 @@ const allColumns = computed(() => [
 
 const columns = computed(() => {
   return allColumns.value.filter((column) => {
-    if (!isDoctor) {
+    if (!isDoctor && !isStaff && !isAdmin && !isPatient) {
       return column.key !== 'action'
     } else {
       return column.key !== 'doctorName'
@@ -160,16 +169,9 @@ const formatDateOnly = (date: any) => {
   return `${year}-${month}-${day}`
 }
 
-const optionsStartTimes = computed(() => {
-  const slots = []
-  for (let hour = 8; hour < 22; hour++) {
-    slots.push(`${hour.toString().padStart(2, '0')}:00`)
-    slots.push(`${hour.toString().padStart(2, '0')}:30`)
-  }
-  return slots
-})
+const optionsStartTimes = ref<string[]>([])
 
-const isToday = (dateString: string) => {
+const checkToday = (dateString: string) => {
   const today = new Date()
   const date = new Date(dateString)
   return (
@@ -227,12 +229,20 @@ const handleTreatmentAction = (item: TreatmentPlanResponse) => {
 const handleTreatmentDetails = (item: TreatmentPlanResponse) => {
   selectedTreatmentPlanId.value = item.treatmentPlanID
   selectedTreatmentPlan.value = item
+  getAvailablesTimesForDoctor({
+    date: formatDateOnly(date.value),
+    doctorId: selectedTreatmentPlan.value?.doctorID,
+  })
   showModalTreatment.value = true
 }
 
 const handleTreatmentSchedule = (item: TreatmentPlanResponse) => {
   selectedTreatmentPlanId.value = item.treatmentPlanID
   selectedTreatmentPlan.value = item
+  getAvailablesTimesForDoctor({
+    date: formatDateOnly(date.value),
+    doctorId: selectedTreatmentPlan.value?.doctorID,
+  })
   showModalTreatment.value = true
 }
 
@@ -279,7 +289,7 @@ const submitTreatmentDetail = () => {
       })
   } else if (
     selectedTreatmentPlan.value?.status === TreatmentPlanStatus.Active &&
-    !isToday(selectedTreatmentPlan.value?.startDate)
+    !checkToday(selectedTreatmentPlan.value?.startDate)
   ) {
     storeTreatment
       .updateTreatmentDetail(request)
@@ -308,6 +318,29 @@ const submitTreatmentDetail = () => {
         loading.value = false
       })
   }
+}
+
+const getPrescriptionByTreatmentPlanId = (treatmentPlanId: string) => {
+  storeTreatment
+    .getPrescription(treatmentPlanId)
+    .then((response) => {
+      prescription.value = response
+      console.log(response)
+      showPrescriptionModal.value = true
+    })
+    .catch((error) => {
+      const errorMessage = getErrorMessage(error)
+      init({
+        message: errorMessage,
+        color: 'danger',
+        title: 'Error',
+      })
+    })
+}
+
+const handleShowPrescription = (item: TreatmentPlanResponse) => {
+  console.log(item)
+  getPrescriptionByTreatmentPlanId(item.treatmentPlanID)
 }
 
 const fetchTreatment = () => {
@@ -392,7 +425,7 @@ const validateForm = () => {}
 const createMedicalRecord = async () => {
   loading.value = true
   const form = new FormData()
-  form.append('AppointmentId', formData.AppointmentId || '')
+  form.append('AppointmentId', props.appointment?.appointmentId || '')
 
   // Phẳng hóa BasicExamination
   form.append('BasicExamination.ExaminationContent', formData.BasicExamination.ExaminationContent)
@@ -561,8 +594,80 @@ const removeImage = (type: any, index: number) => {
   }, 0)
 }
 
+const isRescheduleFormValid = computed(() => {
+  return (
+    date.value &&
+    startTime.value &&
+    !validateDate(date.value) &&
+    (!validateTime(startTime.value) || (validateTime(startTime.value) && !isToday(date.value)))
+  )
+})
+
+const getAvailablesTimesForDoctor = (data: any) => {
+  loading.value = true
+  storeCalendar
+    .getAvailableTimeSlots(data)
+    .then((response) => {
+      optionsStartTimes.value = response.data.map((slot: any) => slot.time.slice(0, 5))
+    })
+    .catch((error) => {
+      const message = getErrorMessage(error)
+      init({
+        title: 'error',
+        message: message,
+        color: 'danger',
+      })
+    })
+    .finally(() => {
+      loading.value = false
+    })
+}
+
+const handleFetchNewTreatment = (data: any) => {
+  if (data) {
+    getTreatmentPlans()
+  }
+}
+
+const isFormValid = computed(() => {
+  return (
+    formData.BasicExamination.ExaminationContent &&
+    formData.BasicExamination.TreatmentPlanNote &&
+    formData.Diagnosis.length > 0 &&
+    formData.Indication.IndicationType.length > 0 &&
+    formData.IndicationImages.length > 0
+  )
+})
+
+watch(
+  update,
+  () => {
+    if (update) {
+      fetchTreatment()
+      update.value = false
+    }
+  },
+  { immediate: true },
+)
+
+watch(
+  date,
+  (newVal) => {
+    if (newVal && !validateDate(newVal)) {
+      getAvailablesTimesForDoctor({
+        date: formatDateOnly(newVal),
+        doctorId: selectedTreatmentPlan.value?.doctorID,
+      })
+    }
+  },
+  { deep: true },
+)
+
 onMounted(() => {
   getTreatmentPlans()
+  if (signalRService.isConnected()) {
+    signalRService.on('Fetch', handleFetchNewTreatment)
+  }
 })
 </script>
 
@@ -620,7 +725,7 @@ onMounted(() => {
             </template>
             <template #cell(action)="{ rowData }">
               <VaButton
-                v-if="rowData.status === TreatmentPlanStatus.Active && isToday(rowData.startDate)"
+                v-if="rowData.status === TreatmentPlanStatus.Active && checkToday(rowData.startDate) && isDoctor"
                 preset="primary"
                 class="mr-6 mb-2"
                 round
@@ -631,7 +736,11 @@ onMounted(() => {
                 {{ t('examination.treatment_plan_table.treatment') }}
               </VaButton>
               <VaButton
-                v-else-if="rowData.status === TreatmentPlanStatus.Active && !isToday(rowData.startDate)"
+                v-else-if="
+                  rowData.status === TreatmentPlanStatus.Active &&
+                  !checkToday(rowData.startDate) &&
+                  (isStaff || isAdmin)
+                "
                 preset="primary"
                 class="mr-6 mb-2"
                 round
@@ -642,7 +751,18 @@ onMounted(() => {
                 {{ t('examination.treatment_plan_table.reschedule') }}
               </VaButton>
               <VaButton
-                v-else-if="rowData.status === TreatmentPlanStatus.Pending"
+                v-else-if="rowData.hasPrescription"
+                preset="primary"
+                class="mr-6 mb-2"
+                round
+                border-color="primary"
+                size="small"
+                @click="handleShowPrescription(rowData as TreatmentPlanResponse)"
+              >
+                {{ t('examination.treatment_plan_table.prescription') }}
+              </VaButton>
+              <VaButton
+                v-else-if="rowData.status === TreatmentPlanStatus.Pending && isDoctor"
                 preset="primary"
                 class="mr-6 mb-2"
                 round
@@ -653,7 +773,7 @@ onMounted(() => {
                 {{ t('examination.treatment_plan_table.detail') }}
               </VaButton>
               <Prescription
-                v-else-if="!rowData.hasPrescription"
+                v-else-if="!rowData.hasPrescription && rowData.status === TreatmentPlanStatus.Completed && isDoctor"
                 :items="rowData as TreatmentPlanResponse"
                 @update:refresh="fetchTreatment"
               />
@@ -677,7 +797,13 @@ onMounted(() => {
   </VaCard>
 
   <!-- Add TreatmentDetail modal -->
-  <VaModal v-model="showModalTreatment" ok-text="Apply" @close="handleCloseTreatmentDetail" @ok="submitTreatmentDetail">
+  <VaModal
+    v-model="showModalTreatment"
+    hide-default-actions
+    close-button
+    @close="handleCloseTreatmentDetail"
+    @ok="submitTreatmentDetail"
+  >
     <h3 class="va-h3">{{ titleModalTreatment }}</h3>
     <VaCard>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -689,9 +815,33 @@ onMounted(() => {
           class="col-span-1"
           label="Date"
           clearable
+          required-mark
+          :rules="[
+            (v) => !!v || t('appointment.reschedule_appointment.date_required'),
+            (v) => !validateDate(v) || t('appointment.reschedule_appointment.date_today'),
+          ]"
         />
-        <VaSelect v-model="startTime" class="col-span-1" label="Time" :options="optionsStartTimes" />
+        <VaSelect
+          v-model="startTime"
+          class="col-span-1"
+          label="Time"
+          :options="optionsStartTimes"
+          required-mark
+          :rules="[
+            (v) => !!v || t('appointment.reschedule_appointment.time_required'),
+            (v) => !validateTime(v) || !isToday(date) || t('appointment.reschedule_appointment.time_today'),
+          ]"
+        />
         <VaTextarea v-model="notes" class="col-span-2" label="Notes" />
+      </div>
+
+      <div class="flex items-end justify-end mt-5">
+        <VaButton class="mr-6" color="#ECF0F1" @click="showModalTreatment = false">{{
+          t('appointment.reschedule_appointment.cancel')
+        }}</VaButton>
+        <VaButton :disabled="!isRescheduleFormValid" @click="submitTreatmentDetail">{{
+          t('appointment.reschedule_appointment.submit')
+        }}</VaButton>
       </div>
     </VaCard>
   </VaModal>
@@ -717,14 +867,14 @@ onMounted(() => {
                 v-model="formData.BasicExamination.ExaminationContent"
                 :label="t('examination.examinationContent')"
                 class="mt-4"
-                :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+                :rules="[(v: any) => (v && v.length > 0) || t('examination.examinationContent_not_empty')]"
                 required-mark
               />
               <VaTextarea
                 v-model="formData.BasicExamination.TreatmentPlanNote"
                 :label="t('examination.treatmentPlanNote')"
                 class="mt-4"
-                :rules="[(v: any) => (v && v.length > 0) || 'Không được để trống']"
+                :rules="[(v: any) => (v && v.length > 0) || t('examination.treatmentPlanNote_not_empty')]"
                 required-mark
               />
             </div>
@@ -732,7 +882,9 @@ onMounted(() => {
 
           <!-- Tooth Conditions Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold mb-4">{{ t('examination.teeth_condition') }}</h3>
+            <h3 class="text-xl font-semibold mb-4">
+              {{ t('examination.teeth_condition') }} <span class="text-red-500 text-sm">*</span>
+            </h3>
             <div class="grid grid-cols-2 gap-4">
               <div class="relative">
                 <DentalChart
@@ -773,7 +925,9 @@ onMounted(() => {
 
           <!-- Indications Section -->
           <div class="mb-6">
-            <h3 class="text-xl font-semibold mb-4">{{ t('examination.indications') }}</h3>
+            <h3 class="text-xl font-semibold mb-4">
+              {{ t('examination.indications') }} <span class="text-red-500 text-sm">*</span>
+            </h3>
             <div class="grid grid-cols-2 gap-4">
               <VaCheckbox
                 v-for="indication in indicationTypes"
@@ -820,7 +974,7 @@ onMounted(() => {
             <VaButton class="mr-6" color="#ECF0F1" @click="closeModal">{{
               t('appointment.create_appointment.cancel')
             }}</VaButton>
-            <VaButton :disabled="!record_form?.isValid" @click="createMedicalRecord">{{
+            <VaButton :disabled="!isFormValid" @click="createMedicalRecord">{{
               t('appointment.create_appointment.submit')
             }}</VaButton>
           </div>
@@ -828,6 +982,9 @@ onMounted(() => {
       </VaCardContent>
     </VaCard>
   </VaModal>
+
+  <!-- Prescription Modal -->
+  <PrescriptionModal v-model:isOpen="showPrescriptionModal" :prescription-data="prescription" />
 </template>
 
 <style scoped>

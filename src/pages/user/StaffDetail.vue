@@ -1,72 +1,129 @@
 <template>
-  <VaCard class="user-detail">
-    <h1>{{ t('doctor.detail') }}</h1>
-    <VaInnerLoading :loading="loading" :size="60">
-      <!-- Personal Information Section -->
-      <VaCard class="section personal-info">
-        <div class="header">
-          <h2>{{ t('doctor.Professional_Information') }}</h2>
-          <RouterLink :to="'/user-update/' + userId" class="edit-button">{{ t('doctor.Edit_staff') }}</RouterLink>
+  <div class="bg-gray-50 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <VaCard class="staff-detail-card">
+        <!-- Header Section -->
+        <div class="flex justify-end items-center mb-8 border-b pb-6">
+          <RouterLink :to="'/user-update/' + userId" class="edit-link">
+            <VaIcon name="edit" />
+            <span class="ml-2">{{ t('doctor.Edit_staff') }}</span>
+          </RouterLink>
         </div>
 
-        <VaCard class="card">
-          <div class="profile-picture">
-            <img v-if="user.imageUrl" :src="getSrcAvatar(user.imageUrl)" />
-            <span v-else class="text-sm">No image available</span>
-          </div>
-          <VaCard class="details">
-            <h3 class="name">{{ user.name }}</h3>
-            <p class="username">@{{ user.userName }}</p>
-            <p class="job">{{ user.jobTitle }}</p>
-            <ul>
-              <li>
-                <strong>{{ t('doctor.email') }}:</strong>
-                <a :href="'mailto:' + user.email">{{ user.email }}</a>
-                <span v-if="user.emailStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
-              </li>
-              <li>
-                <strong>{{ t('doctor.phone') }}:</strong>
-                <a :href="'tel:' + user.phone">{{ user.phone }}</a>
-              </li>
-              <li>
-                <strong>{{ t('doctor.address') }}:</strong> {{ user.address }}
-              </li>
-              <li>
-                <strong>{{ t('doctor.birth_date') }}:</strong> {{ user.birthDate }}
-              </li>
-              <li>
-                <strong>{{ t('doctor.gender') }}:</strong> {{ user.gender ? t('doctor.male') : t('doctor.female') }}
-              </li>
-            </ul>
-          </VaCard>
-        </VaCard>
-      </VaCard>
+        <VaInnerLoading :loading="loading" :size="60">
+          <!-- Profile Card -->
+          <div class="profile-section mb-8">
+            <div class="flex flex-col md:flex-row gap-8">
+              <!-- Profile Image -->
+              <div class="profile-image-container">
+                <div class="profile-image">
+                  <img v-if="user.imageUrl" :src="getSrcAvatar(user.imageUrl)" :alt="user.name" />
+                  <div v-else class="placeholder-image">
+                    <VaIcon name="person" size="large" />
+                  </div>
+                </div>
+              </div>
 
-      <!-- Account Status Section -->
-      <VaCard class="section account-status">
-        <h2>{{ t('doctor.Account_Status') }}</h2>
-        <ul>
-          <li>
-            <strong>{{ t('doctor.Status') }}:</strong>
-            <span v-if="user.status" class="status active">{{ t('doctor.Active') }}</span>
-          </li>
-          <li>
-            <strong>{{ t('doctor.Email_Status') }}:</strong>
-            <span v-if="user.emailStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
-            <span v-else class="status not-confirmed">{{ t('doctor.UnConfirmed') }}</span>
-          </li>
-          <li>
-            <strong>{{ t('doctor.Phone_Status') }}:</strong>
-            <span v-if="user.phoneStatus" class="status confirmed">{{ t('doctor.Confirmed') }}</span>
-            <span v-else class="status not-confirmed">{{ t('doctor.UnConfirmed') }}</span>
-          </li>
-        </ul>
+              <!-- Basic Info -->
+              <div class="flex-grow">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ user.name }}</h2>
+                <p class="text-blue-600 font-medium mb-4">{{ user.jobTitle }}</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="info-item">
+                    <VaIcon name="email" color="primary" />
+                    <div>
+                      <label>{{ t('doctor.email') }}</label>
+                      <a :href="'mailto:' + user.email" class="info-value">{{ user.email }}</a>
+                      <span v-if="user.emailStatus" class="verification-badge">
+                        <VaIcon name="check_circle" size="small" />
+                        {{ t('doctor.Confirmed') }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <VaIcon name="phone" color="primary" />
+                    <div>
+                      <label>{{ t('doctor.phone') }}</label>
+                      <a :href="'tel:' + user.phone" class="info-value">{{ user.phone }}</a>
+                      <span v-if="user.phoneStatus" class="verification-badge">
+                        <VaIcon name="check_circle" size="small" />
+                        {{ t('doctor.Confirmed') }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <VaIcon name="location_on" color="primary" />
+                    <div>
+                      <label>{{ t('doctor.address') }}</label>
+                      <span class="info-value">{{ user.address }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <VaIcon name="cake" color="primary" />
+                    <div>
+                      <label>{{ t('doctor.birth_date') }}</label>
+                      <span class="info-value">{{ user.birthDate }}</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <VaIcon name="person" color="primary" />
+                    <div>
+                      <label>{{ t('doctor.gender') }}</label>
+                      <span class="info-value">{{ user.gender ? t('doctor.male') : t('doctor.female') }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Status Section -->
+          <div class="status-section">
+            <h3 class="text-lg font-semibold mb-4">{{ t('doctor.Account_Status') }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="status-card" :class="{ active: user.status }">
+                <VaIcon name="account_circle" />
+                <div>
+                  <label>{{ t('doctor.Status') }}</label>
+                  <span class="status">{{ user.status ? t('doctor.Active') : t('doctor.Inactive') }}</span>
+                </div>
+              </div>
+
+              <div class="status-card" :class="{ active: user.emailStatus }">
+                <VaIcon name="email" />
+                <div>
+                  <label>{{ t('doctor.Email_Status') }}</label>
+                  <span class="status">{{ user.emailStatus ? t('doctor.Confirmed') : t('doctor.UnConfirmed') }}</span>
+                </div>
+              </div>
+
+              <div class="status-card" :class="{ active: user.phoneStatus }">
+                <VaIcon name="phone" />
+                <div>
+                  <label>{{ t('doctor.Phone_Status') }}</label>
+                  <span class="status">{{ user.phoneStatus ? t('doctor.Confirmed') : t('doctor.UnConfirmed') }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </VaInnerLoading>
+
+        <!-- Back Button -->
+        <div class="mt-8 text-center">
+          <VaButton class="back-button" preset="secondary" @click="$router.go(-1)">
+            <VaIcon name="arrow_back" />
+            <span class="ml-2">{{ t('doctor.back') }}</span>
+          </VaButton>
+        </div>
       </VaCard>
-    </VaInnerLoading>
-    <VaButton class="btn-back" @click="$router.go(-1)"> {{ t('doctor.back') }} </VaButton>
-  </VaCard>
+    </div>
+  </div>
 </template>
-ss
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
@@ -129,111 +186,176 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.user-detail {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
+.staff-detail-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.section {
-  margin-bottom: 20px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
+.edit-link {
+  display: inline-flex;
   align-items: center;
+  padding: 0.5rem 1rem;
+  color: var(--va-primary);
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
 }
 
-.card {
-  display: flex;
-  gap: 16px;
+.edit-link:hover {
+  background-color: rgba(var(--va-primary-rgb), 0.1);
+  transform: translateY(-1px);
 }
 
-.profile-picture img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+.profile-section {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.profile-image-container {
+  position: relative;
+  text-align: center;
+}
+
+.profile-image {
+  width: 160px;
+  height: 160px;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.details ul {
-  list-style: none;
-  padding: 0;
-}
-
-.tabs {
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e6e9f0 0%, #eef1f5 100%);
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  align-items: center;
+  justify-content: center;
 }
 
-.tabs button {
-  padding: 10px 20px;
-  border: none;
-  background: #e0e0e0;
-  border-radius: 4px;
-  cursor: pointer;
+.status-indicator {
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
-.tabs button.active {
-  background: #007bff;
-  color: #fff;
+.status-indicator.active {
+  background: #dcfce7;
+  color: #166534;
 }
 
-.transactions,
-.appointments {
-  list-style: none;
-  padding: 0;
-}
-
-.transactions li,
-.appointments li {
+.info-item {
   display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
 }
 
-.edit-button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 4px;
+.info-item label {
+  display: block;
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
 }
 
-.status {
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  font-weight: bold;
+.info-value {
+  display: block;
+  font-weight: 500;
+  color: #1e293b;
 }
 
-.status.confirmed {
-  background-color: #d4edda;
-  color: #155724;
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: #ecfdf5;
+  color: #059669;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-.status.active {
-  background-color: #cce5ff;
-  color: #004085;
+.status-section {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-top: 2rem;
 }
 
-.status.cancelled {
-  background-color: #f8d7da;
-  color: #721c24;
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
 }
 
-.status.not-confirmed {
-  color: rgba(255, 0, 0, 0.822);
-  background-color: #eeb7b0a6;
+.status-card.active {
+  background: #f0fdf4;
+}
+
+.status-card label {
+  display: block;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.status-card .status {
+  display: block;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .profile-image {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+  }
+
+  .info-item {
+    padding: 0.75rem;
+  }
+
+  .status-card {
+    padding: 0.75rem;
+  }
 }
 </style>

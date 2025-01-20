@@ -166,7 +166,6 @@ const getUserDetail = async () => {
       imageUrl: userProfileStore?.userDetails?.imageUrl,
       job: userProfileStore?.userDetails?.job,
       address: userProfileStore?.userDetails?.address,
-      // role: userProfileStore?.userDetails?.role,
       doctorProfile: {
         education: userProfileStore?.userDetails?.doctorProfile?.education ?? '',
         college: userProfileStore?.userDetails?.doctorProfile?.college ?? '',
@@ -179,10 +178,13 @@ const getUserDetail = async () => {
         isActive: userProfileStore?.userDetails?.doctorProfile?.isActive ?? true,
       },
       patientFamily: {
-        name: userProfileStore?.userDetails?.patientFamily?.name || '', // Thuộc tính `name` ở đây nằm trong `patientFamily`
-        phone: userProfileStore?.userDetails?.patientFamily?.phone || '',
-        email: userProfileStore?.userDetails?.patientFamily?.email || '',
-        relationship: userProfileStore?.userDetails?.patientFamily?.relationship || null,
+        name: userProfileStore?.userDetails?.patientFamily?.name ?? '',
+        phone: userProfileStore?.userDetails?.patientFamily?.phone ?? '',
+        email: userProfileStore?.userDetails?.patientFamily?.email ?? '',
+        relationship:
+          userProfileStore?.userDetails?.patientFamily?.relationship !== undefined
+            ? userProfileStore?.userDetails?.patientFamily?.relationship
+            : null,
       },
       medicalHistory: {
         medicalName: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
@@ -205,10 +207,13 @@ const getUserDetail = async () => {
       seftDescription: userProfileStore?.userDetails?.doctorProfile?.seftDescription,
     }
     patientFamily.value = {
-      name: userProfileStore?.userDetails?.patientFamily?.name,
-      phone: userProfileStore?.userDetails?.patientFamily?.phone,
-      email: userProfileStore?.userDetails?.patientFamily?.email,
-      relationship: userProfileStore?.userDetails?.patientFamily?.relationship || null,
+      name: userProfileStore?.userDetails?.patientFamily?.name ?? '',
+      phone: userProfileStore?.userDetails?.patientFamily?.phone ?? '',
+      email: userProfileStore?.userDetails?.patientFamily?.email ?? '',
+      relationship:
+        userProfileStore?.userDetails?.patientFamily?.relationship !== undefined
+          ? userProfileStore?.userDetails?.patientFamily?.relationship
+          : null,
     }
     medicalHistory.value = {
       medicalname: userProfileStore?.userDetails?.medicalHistory?.medicalName || [],
@@ -587,10 +592,13 @@ const submit = async () => {
     const dob: any = formData?.dob
     const date = getDateFormated(new Date(dob))
     const userDetailData: UserDetailsUpdate = {
+      userId: userProfileStore?.userDetails?.id, // Adding userId from store
       firstName: formData.firstName,
       lastName: formData.lastName,
       gender: formData.gender,
       birthDate: date,
+      job: formData.job,
+      address: formData.address,
     }
     await userProfileStore
       .updateProfile(userDetailData)
@@ -1425,7 +1433,7 @@ const openImagePreview = (image: string) => {
                 preset="solid"
               />
             </VaField>
-            <VaField class="col-span-2" width="100%">
+            <VaField>
               <VaTextarea
                 v-model="formData.doctorProfile.seftDescription"
                 :label="t('auth.self_description')"
@@ -1440,7 +1448,6 @@ const openImagePreview = (image: string) => {
             <!-- Display certification images -->
             <VaField
               v-if="formData.doctorProfile?.certificationImage && formData.doctorProfile.certificationImage.length > 0"
-              class="col-span-2"
             >
               <label class="block uppercase text-primary font-bold mb-2" style="font-size: 0.57rem">
                 {{ t('auth.certification_images') }}

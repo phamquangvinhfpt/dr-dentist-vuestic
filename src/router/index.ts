@@ -18,9 +18,6 @@ const routes: Array<RouteRecordRaw> = [
       {
         name: 'dashboard',
         path: 'dashboard',
-        meta: {
-          requiresAuth: true,
-        },
         component: () => import('../pages/home/dashboard/Dashboard.vue'),
       },
       {
@@ -65,17 +62,34 @@ const routes: Array<RouteRecordRaw> = [
           {
             name: 'appointment-detail',
             path: 'appointment/:id',
+            meta: {
+              requireAuth: true,
+            },
             component: () => import('../pages/appointment/widgets/list-appointment/AppointmentDetail.vue'),
           },
           {
             name: 'followup-detail',
             path: 'appointment/:id',
+            meta: {
+              requireAuth: true,
+            },
             component: () => import('../pages/appointment/widgets/list-appointment/FollowupDetail.vue'),
           },
           {
             name: 'view-appointment',
             path: '',
+            meta: {
+              requireAuth: true,
+            },
             component: () => import('../pages/appointment/Appointment.vue'),
+          },
+          {
+            name: 'current-treatment',
+            path: 'current-treatment',
+            meta: {
+              requireAuth: true,
+            },
+            component: () => import('../pages/appointment/CurrentTreatmentPlan.vue'),
           },
         ],
       },
@@ -244,9 +258,9 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../pages/servipage-procedure/DeletedServiceManagement.vue'),
       },
       {
-        path: '/procedures/:id',
+        path: '/service-procedures',
         name: 'ServiceProcedures',
-        component: () => import('../pages/servipage-procedure/ServiceProcedures.vue'),
+        component: () => import('@/pages/servipage-procedure/ServiceProcedures.vue'),
         meta: {
           requiresAuth: true,
         },
@@ -297,16 +311,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           requiresAuth: true,
         },
-        redirect: () => {
-          const today = new Date().toISOString().split('T')[0]
-          return `/payment-for-patient/${today}/${today}`
-        },
-        children: [
-          {
-            path: ':startDate/:endDate',
-            component: () => import('../pages/PaymentPages/PaymentForPatient.vue'),
-          },
-        ],
+        component: () => import('../pages/PaymentPages/PaymentForPatient.vue'),
       },
       {
         name: 'form-application',
@@ -432,6 +437,14 @@ const routes: Array<RouteRecordRaw> = [
           requiresAuth: true,
         },
         component: () => import('../pages/user/listStaff.vue'),
+      },
+      {
+        path: 'prescriptions',
+        name: 'prescription-detail',
+        component: () => import('../pages/Doctor/PrescriptionPatient.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
     ],
   },

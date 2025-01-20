@@ -130,9 +130,10 @@
                               <div class="grid grid-cols-3 gap-4 mt-4">
                                 <div v-for="image in record.indicationImages" :key="image.imageType" class="relative">
                                   <img
+                                    loading="lazy"
                                     :src="getSrcAvatar(image.imageUrl)"
                                     :alt="image.imageType"
-                                    class="w-full h-64 object-cover border-2 border-dashed"
+                                    class="w-full h-fit object-cover border-2 border-dashed"
                                   />
                                   <div class="text-center">{{ image.imageType }}</div>
                                 </div>
@@ -185,10 +186,17 @@ const getMedicalRecord = async () => {
     .getMedicalRecord(props.patientId)
     .then((response) => {
       medicalRecords.value = response
-      medicalRecords.value = medicalRecords.value.filter(
-        (record: any) =>
-          record.date <= formatDateForm(value.value.end) && record.date >= formatDateForm(value.value.start),
-      )
+      medicalRecords.value = medicalRecords.value.filter((record: any) => {
+        const recordDate = new Date(record.date)
+        const startDate = new Date(formatDateForm(value.value.start))
+        const endDate = new Date(formatDateForm(value.value.end))
+
+        startDate.setHours(0, 0, 0, 0)
+
+        endDate.setHours(23, 59, 59, 999)
+
+        return recordDate >= startDate && recordDate <= endDate
+      })
     })
     .catch((error) => {
       const errorMessage = getErrorMessage(error)

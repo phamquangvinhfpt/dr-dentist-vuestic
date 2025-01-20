@@ -1,221 +1,224 @@
 <template>
-  <div class="payment-management-container">
-    <VaCard class="payment-card">
-      <VaCardTitle class="card-title">
-        <i class="fas fa-money-bill-wave title-icon"></i>
-        {{ t('payment.management') }}
-      </VaCardTitle>
+  <div>
+    <PaymentManagementMobile v-if="isMobileView" />
+    <div v-else class="payment-management-container">
+      <VaCard class="payment-card">
+        <VaCardTitle class="card-title">
+          <i class="fas fa-money-bill-wave title-icon"></i>
+          {{ t('payment.management') }}
+        </VaCardTitle>
 
-      <VaCardContent>
-        <!-- Loading -->
-        <VaInnerLoading :loading="isLoading">
-          <template #default>
-            <div class="search-filter-container">
-              <div class="top-row">
-                <div class="search-box">
-                  <VaInput
-                    v-model="searchKeyword"
-                    :placeholder="searchPlaceholder"
-                    class="search-input"
-                    @keyup.enter="handleSearch"
-                  >
-                    <template #append>
-                      <i class="fas fa-search search-icon"></i>
-                    </template>
-                  </VaInput>
-                </div>
-
-                <div class="date-range">
-                  <div class="date-input-group">
+        <VaCardContent>
+          <!-- Loading -->
+          <VaInnerLoading :loading="isLoading">
+            <template #default>
+              <div class="search-filter-container">
+                <div class="top-row">
+                  <div class="search-box">
                     <VaInput
-                      v-model="startDate"
-                      type="date"
-                      :max="maxDate"
-                      class="date-input"
-                      @update:modelValue="handleDateChange"
+                      v-model="searchKeyword"
+                      :placeholder="searchPlaceholder"
+                      class="search-input"
+                      @keyup.enter="handleSearch"
                     >
-                      <template #prepend>
-                        <i class="fas fa-calendar text-gray-500"></i>
-                      </template>
-                    </VaInput>
-                    <div class="date-separator">
-                      <div class="separator-line"></div>
-                    </div>
-                    <VaInput
-                      v-model="endDate"
-                      type="date"
-                      :min="startDate"
-                      :max="maxDate"
-                      class="date-input"
-                      @update:modelValue="handleDateChange"
-                    >
-                      <template #prepend>
-                        <i class="fas fa-calendar text-gray-500"></i>
+                      <template #append>
+                        <i class="fas fa-search search-icon"></i>
                       </template>
                     </VaInput>
                   </div>
+
+                  <div class="date-range">
+                    <div class="date-input-group">
+                      <VaInput
+                        v-model="startDate"
+                        type="date"
+                        :max="maxDate"
+                        class="date-input"
+                        @update:modelValue="handleDateChange"
+                      >
+                        <template #prepend>
+                          <i class="fas fa-calendar text-gray-500"></i>
+                        </template>
+                      </VaInput>
+                      <div class="date-separator">
+                        <div class="separator-line"></div>
+                      </div>
+                      <VaInput
+                        v-model="endDate"
+                        type="date"
+                        :min="startDate"
+                        :max="maxDate"
+                        class="date-input"
+                        @update:modelValue="handleDateChange"
+                      >
+                        <template #prepend>
+                          <i class="fas fa-calendar text-gray-500"></i>
+                        </template>
+                      </VaInput>
+                    </div>
+                  </div>
+
+                  <div class="export-button-container">
+                    <VaButton class="export-button" preset="secondary" :loading="isExporting" @click="handleExport">
+                      <i class="va-icon material-icons">file_download</i>
+                    </VaButton>
+                  </div>
                 </div>
 
-                <div class="export-button-container">
-                  <VaButton class="export-button" preset="secondary" :loading="isExporting" @click="handleExport">
-                    <i class="va-icon material-icons">file_download</i>
-                  </VaButton>
+                <div class="bottom-row">
+                  <div class="patient-selector">
+                    <VaSelect
+                      v-model="selectedPatient"
+                      :options="patientOptions"
+                      track-by="id"
+                      text-by="name"
+                      :placeholder="t('payment.selectPatient')"
+                      class="patient-select"
+                      clearable
+                      searchable
+                    />
+                  </div>
+
+                  <div class="status-filter">
+                    <div class="status-tabs">
+                      <button
+                        v-for="status in statusFilterOptions"
+                        :key="status.id"
+                        class="status-tab"
+                        :class="{ active: selectedStatusFilter === status.value }"
+                        :data-status="status.id"
+                        @click="handleStatusFilterChange(status.value)"
+                      >
+                        {{ status.label }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="method-filter">
+                    <div class="method-tabs">
+                      <button
+                        v-for="method in methodFilterOptions"
+                        :key="method.id"
+                        class="method-tab"
+                        :class="{ active: selectedMethodFilter === method.value }"
+                        :data-method="method.id"
+                        @click="handleMethodFilterChange(method.value)"
+                      >
+                        {{ method.label }}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="bottom-row">
-                <div class="patient-selector">
+              <VaDataTable
+                class="my-table va-table--hoverable"
+                :items="paginatedPayments"
+                :columns="columns"
+                hoverable
+                sticky-header
+                striped
+                :no-data-html="`<div class='text-center'>${t('payment.noPaymentFound')}</div>`"
+              >
+                <template #cell(patientCode)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ row.rowData.patientCode }}</span>
+                  </div>
+                </template>
+
+                <template #cell(patientName)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ row.rowData.patientName }}</span>
+                  </div>
+                </template>
+
+                <template #cell(serviceName)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ row.rowData.serviceName }}</span>
+                  </div>
+                </template>
+
+                <template #cell(depositAmount)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ formatPrice(row.rowData.depositAmount) }}</span>
+                  </div>
+                </template>
+
+                <template #cell(depositDate)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{
+                      !row.rowData.depositDate ? t('payment.notDeposited') : formatDate(row.rowData.depositDate)
+                    }}</span>
+                  </div>
+                </template>
+
+                <template #cell(remainingAmount)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ formatPrice(row.rowData.remainingAmount) }}</span>
+                  </div>
+                </template>
+
+                <template #cell(totalAmount)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ formatPrice(row.rowData.totalAmount) }}</span>
+                  </div>
+                </template>
+
+                <template #cell(method)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span>{{ getPaymentMethod(row.rowData.method) }}</span>
+                  </div>
+                </template>
+
+                <template #cell(status)="{ row }">
+                  <div class="flex items-center gap-2">
+                    <span :class="getStatusClass(row.rowData.status)">
+                      {{ getStatusText(row.rowData.status) }}
+                    </span>
+                  </div>
+                </template>
+              </VaDataTable>
+
+              <!-- Pagination -->
+              <div
+                v-if="paginatedPayments.length > 0"
+                class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2"
+              >
+                <div>
+                  <b>{{ filteredPayments.length }} {{ t('common.result') }}.</b>
+                  {{ t('common.resultPerPage') }}
                   <VaSelect
-                    v-model="selectedPatient"
-                    :options="patientOptions"
-                    track-by="id"
-                    text-by="name"
-                    :placeholder="t('payment.selectPatient')"
-                    class="patient-select"
-                    clearable
-                    searchable
+                    v-model="formData.pageSize"
+                    class="!w-20"
+                    :options="[10, 50, 100]"
+                    @update:modelValue="handlePageSizeChange"
                   />
                 </div>
-
-                <div class="status-filter">
-                  <div class="status-tabs">
-                    <button
-                      v-for="status in statusFilterOptions"
-                      :key="status.id"
-                      class="status-tab"
-                      :class="{ active: selectedStatusFilter === status.value }"
-                      :data-status="status.id"
-                      @click="handleStatusFilterChange(status.value)"
-                    >
-                      {{ status.label }}
-                    </button>
-                  </div>
-                </div>
-
-                <div class="method-filter">
-                  <div class="method-tabs">
-                    <button
-                      v-for="method in methodFilterOptions"
-                      :key="method.id"
-                      class="method-tab"
-                      :class="{ active: selectedMethodFilter === method.value }"
-                      :data-method="method.id"
-                      @click="handleMethodFilterChange(method.value)"
-                    >
-                      {{ method.label }}
-                    </button>
-                  </div>
+                <div v-if="totalPages > 1" class="flex">
+                  <VaPagination
+                    v-model="currentPage"
+                    buttons-preset="secondary"
+                    :pages="totalPages"
+                    :visible-pages="5"
+                    :boundary-links="true"
+                    :direction-links="true"
+                    @update:modelValue="handlePageChange"
+                  />
                 </div>
               </div>
-            </div>
-
-            <VaDataTable
-              class="my-table va-table--hoverable"
-              :items="paginatedPayments"
-              :columns="columns"
-              hoverable
-              sticky-header
-              striped
-              :no-data-html="`<div class='text-center'>${t('payment.noPaymentFound')}</div>`"
-            >
-              <template #cell(patientCode)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{ row.rowData.patientCode }}</span>
-                </div>
-              </template>
-
-              <template #cell(patientName)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{ row.rowData.patientName }}</span>
-                </div>
-              </template>
-
-              <template #cell(serviceName)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{ row.rowData.serviceName }}</span>
-                </div>
-              </template>
-
-              <template #cell(depositAmount)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{ formatPrice(row.rowData.depositAmount) }}</span>
-                </div>
-              </template>
-
-              <template #cell(depositDate)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{
-                    !row.rowData.depositDate ? t('payment.notDeposited') : formatDate(row.rowData.depositDate)
-                  }}</span>
-                </div>
-              </template>
-
-              <template #cell(remainingAmount)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{ formatPrice(row.rowData.remainingAmount) }}</span>
-                </div>
-              </template>
-
-              <template #cell(totalAmount)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{ formatPrice(row.rowData.totalAmount) }}</span>
-                </div>
-              </template>
-
-              <template #cell(method)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span>{{ getPaymentMethod(row.rowData.method) }}</span>
-                </div>
-              </template>
-
-              <template #cell(status)="{ row }">
-                <div class="flex items-center gap-2">
-                  <span :class="getStatusClass(row.rowData.status)">
-                    {{ getStatusText(row.rowData.status) }}
-                  </span>
-                </div>
-              </template>
-            </VaDataTable>
-
-            <!-- Pagination -->
-            <div
-              v-if="paginatedPayments.length > 0"
-              class="flex flex-col-reverse md:flex-row gap-2 justify-between items-center p-2"
-            >
-              <div>
-                <b>{{ filteredPayments.length }} {{ t('common.result') }}.</b>
-                {{ t('common.resultPerPage') }}
-                <VaSelect
-                  v-model="formData.pageSize"
-                  class="!w-20"
-                  :options="[10, 50, 100]"
-                  @update:modelValue="handlePageSizeChange"
-                />
-              </div>
-              <div v-if="totalPages > 1" class="flex">
-                <VaPagination
-                  v-model="currentPage"
-                  buttons-preset="secondary"
-                  :pages="totalPages"
-                  :visible-pages="5"
-                  :boundary-links="true"
-                  :direction-links="true"
-                  @update:modelValue="handlePageChange"
-                />
-              </div>
-            </div>
-          </template>
-        </VaInnerLoading>
-        <!-- End Loading -->
-      </VaCardContent>
-    </VaCard>
+            </template>
+          </VaInnerLoading>
+          <!-- End Loading -->
+        </VaCardContent>
+      </VaCard>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { usePaymentStore } from '@/stores/modules/payment.module'
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, ref, reactive, computed, watch } from 'vue'
+import { onMounted, ref, reactive, computed, watch, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vuestic-ui'
 import { PaymentMethod, PaymentStatus } from './types'
@@ -225,6 +228,7 @@ import { useAuthStore } from '@/stores/modules/auth.module'
 // import userService from '@/services/user.service'
 import apiService from '@/services/api.service'
 import { useUserProfileStore } from '@/stores/modules/user.module'
+import PaymentManagementMobile from './PaymentManagementMobile.vue'
 
 const { t } = useI18n()
 const { init } = useToast()
@@ -529,6 +533,22 @@ watch(selectedPatient, async (newValue) => {
     currentPage.value = 1
     await getAllPaymentsPagination()
   }
+})
+
+// Add mobile view detection
+const isMobileView = ref(false)
+
+const checkMobileView = () => {
+  isMobileView.value = window.innerWidth <= 768
+}
+
+onMounted(() => {
+  checkMobileView()
+  window.addEventListener('resize', checkMobileView)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobileView)
 })
 
 onMounted(async () => {

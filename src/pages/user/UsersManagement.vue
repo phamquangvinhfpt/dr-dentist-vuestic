@@ -1,9 +1,9 @@
 <template>
   <VaCard class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-10 px-4 sm:px-10">
     <!-- Header Section -->
-    <div class="mb-6 flex justify-between items-center">
+    <div style="margin-bottom: 10px" class="mb-6 flex justify-between items-center">
       <div class="flex-1 max-w-md">
-        <VaInput v-model="searchQuery" placeholder="Search by name or email..." rounded outlined clearable />
+        <VaInput v-model="searchQuery" :placeholder="t('doctor.search_placeholder')" rounded outlined clearable />
       </div>
       <VaButton color="primary" class="rounded-md" @click="router.push('/user/create')">
         <template #prepend>
@@ -23,8 +23,9 @@
         <div>{{ t('doctor.phone') }}</div>
       </div>
       <div v-if="isLoading" class="py-10 text-center text-gray-500">{{ t('doctor.loading') }}...</div>
-      <div v-else-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">No matching users found.</div>
-
+      <div v-else-if="filteredUsers.length === 0" class="py-10 text-center text-gray-500">
+        {{ t('doctor.not_user') }}
+      </div>
       <ul v-else>
         <li
           v-for="user in paginatedUsers"

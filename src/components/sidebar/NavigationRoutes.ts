@@ -63,6 +63,15 @@ export default {
             permission: 'Appointment.View',
           },
         },
+        {
+          name: 'current-treatment',
+          displayName: 'menu.current-treatment',
+          meta: {
+            icon: 'news',
+            permission: 'Appointment.View',
+            role: 'Patient',
+          },
+        },
       ],
     },
     {

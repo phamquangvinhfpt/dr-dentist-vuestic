@@ -38,70 +38,72 @@
         </div>
 
         <div class="table-wrapper">
-          <VaDataTable
-            class="custom-table"
-            :items="paginatedProcedures"
-            :columns="columnsWithActions"
-            hoverable
-            select-mode="multiple"
-            :disable-client-side-sorting="false"
-            sticky-header
-            striped
-            :no-data-html="`<div class='text-center'>${t('procedure.noProceduresFound')}</div>`"
-          >
-            <template #cell(name)="{ row }">
-              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-                <span class="w-24">{{ row.rowData.name }}</span>
-              </div>
-            </template>
+          <VaInnerLoading :loading="isLoading">
+            <VaDataTable
+              class="custom-table"
+              :items="paginatedProcedures"
+              :columns="columnsWithActions"
+              hoverable
+              select-mode="multiple"
+              :disable-client-side-sorting="false"
+              sticky-header
+              striped
+              :no-data-html="`<div class='text-center'>${t('procedure.noProceduresFound')}</div>`"
+            >
+              <template #cell(name)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">{{ row.rowData.name }}</span>
+                </div>
+              </template>
 
-            <template #cell(description)="{ row }">
-              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-                <span class="w-24">{{ row.rowData.description }}</span>
-              </div>
-            </template>
+              <template #cell(description)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">{{ row.rowData.description }}</span>
+                </div>
+              </template>
 
-            <template #cell(price)="{ row }">
-              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-                <span class="w-24">{{ formatPrice(row.rowData.price) }}</span>
-              </div>
-            </template>
+              <template #cell(price)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">{{ formatPrice(row.rowData.price) }}</span>
+                </div>
+              </template>
 
-            <template #cell(createdOn)="{ row }">
-              <div class="flex items-center gap-2 ellipsis max-w-[230px]">
-                <span class="w-24">
-                  {{ validateDate(row.rowData.createdOn) ? formatDate(row.rowData.createdOn) : 'Ngày không hợp lệ' }}
-                </span>
-              </div>
-            </template>
+              <template #cell(createdOn)="{ row }">
+                <div class="flex items-center gap-2 ellipsis max-w-[230px]">
+                  <span class="w-24">
+                    {{ validateDate(row.rowData.createdOn) ? formatDate(row.rowData.createdOn) : 'Ngày không hợp lệ' }}
+                  </span>
+                </div>
+              </template>
 
-            <template #cell(actions)="{ row }">
-              <div class="flex gap-2">
-                <template v-if="!showBin">
-                  <VaButton
-                    small
-                    round
-                    color="danger"
-                    class="action-button-circle"
-                    @click="confirmDelete(row.rowData as ProcedureDTO)"
-                  >
-                    <i class="va-icon material-icons">{{ t('procedure.delete') }}</i>
-                  </VaButton>
-                </template>
-                <template v-else>
-                  <VaButton
-                    small
-                    round
-                    color="success"
-                    class="action-button-circle"
-                    @click="handleRestore(row.rowData as ProcedureDTO)"
-                  >
-                    <i class="va-icon material-icons">{{ t('procedure.restore') }}</i>
-                  </VaButton>
-                </template>
-              </div>
-            </template>
-          </VaDataTable>
+              <template #cell(actions)="{ row }">
+                <div class="flex gap-2">
+                  <template v-if="!showBin">
+                    <VaButton
+                      small
+                      round
+                      color="danger"
+                      class="action-button-circle"
+                      @click="confirmDelete(row.rowData as ProcedureDTO)"
+                    >
+                      <i class="va-icon material-icons">{{ t('procedure.delete') }}</i>
+                    </VaButton>
+                  </template>
+                  <template v-else>
+                    <VaButton
+                      small
+                      round
+                      color="success"
+                      class="action-button-circle"
+                      @click="handleRestore(row.rowData as ProcedureDTO)"
+                    >
+                      <i class="va-icon material-icons">{{ t('procedure.restore') }}</i>
+                    </VaButton>
+                  </template>
+                </div>
+              </template>
+            </VaDataTable>
+          </VaInnerLoading>
         </div>
 
         <div class="table-footer">
@@ -190,6 +192,7 @@ const formData = reactive({
 const procedureList: Ref<ProcedureDTO[]> = ref([])
 const currentPage = ref(1)
 const searchQuery = ref('')
+const isLoading = ref(false)
 
 const filteredProcedures = computed(() => {
   if (!procedureList.value || procedureList.value.length === 0) return []
@@ -241,6 +244,7 @@ const selectedProcedure = ref<ProcedureDTO | null>(null)
 
 const getAllProceduresPagination = async () => {
   try {
+    isLoading.value = true
     const res = showBin.value
       ? await serviceStore.getDeletedProcedures({
           pageNumber: 1,
@@ -258,6 +262,8 @@ const getAllProceduresPagination = async () => {
   } catch (error) {
     console.error('Error fetching procedures:', error)
     procedureList.value = []
+  } finally {
+    isLoading.value = false
   }
 }
 

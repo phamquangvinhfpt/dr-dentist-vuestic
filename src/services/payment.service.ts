@@ -64,7 +64,10 @@ class PaymentService {
 
       // Filter lại kết quả theo ngày tháng ở client
       const filteredPayments = response.data.data.filter((payment: PaymentDTO) => {
-        const paymentDate = new Date(payment.depositDate || '').getTime()
+        // Nếu không có depositDate (payment mới), luôn hiển thị
+        if (!payment.depositDate) return true
+
+        const paymentDate = new Date(payment.depositDate).getTime()
         const startDateTime = new Date(startDate).getTime()
         const endDateTime = new Date(endDate).getTime()
 
