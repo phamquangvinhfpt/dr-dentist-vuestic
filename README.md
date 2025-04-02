@@ -1,35 +1,32 @@
-# Dr.Dentist (Dental Clinic Management System)
-
-```
-  ____             _        _  ____ _ _       _      __  __                                                   _   ____            _
- |  _ \  ___ _ __ | |_ __ _| |/ ___| (_)_ __ (_) ___|  \/  | __ _ _ __   __ _  __ _  ___ _ __ ___   ___ _ __ | |_/ ___| _   _ ___| |_ ___ _ __ ___
- | | | |/ _ \ '_ \| __/ _` | | |   | | | '_ \| |/ __| |\/| |/ _` | '_ \ / _` |/ _` |/ _ \ '_ ` _ \ / _ \ '_ \| __\___ \| | | / __| __/ _ \ '_ ` _ \
- | |_| |  __/ | | | || (_| | | |___| | | | | | | (__| |  | | (_| | | | | (_| | (_| |  __/ | | | | |  __/ | | | |_ ___) | |_| \__ \ ||  __/ | | | | |
- |____/ \___|_| |_|\__\__,_|_|\____|_|_|_| |_|_|\___|_|  |_|\__,_|_| |_|\__,_|\__, |\___|_| |_| |_|\___|_| |_|\__|____/ \__, |___/\__\___|_| |_| |_|
-                                                                              |___/                                     |___/
-```
+# 🦷 DrDentist - Dental Clinic Management System
 
 <p align="center">
-  <a href="#" target="_blank">
+  <a href="https://drdentist.me" target="_blank">
     <img alt="DCMS Logo" width="300" src="./public/1.png"/>
   </a>
 </p>
 
 <p align="center">
-  Developed by Dr.Dentist Team.</br>
-  Based on innovative web solutions.
+  <a href="https://vuejs.org/"><img src="https://img.shields.io/badge/Vue.js-3.5-42b883?style=flat-square&logo=vue.js" alt="Vue.js"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.2-blue?style=flat-square&logo=typescript" alt="TypeScript"></a>
+  <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38bdf8?style=flat-square&logo=tailwindcss" alt="Tailwind CSS"></a>
+  <a href="https://capacitorjs.com/"><img src="https://img.shields.io/badge/Capacitor-6.1-119eff?style=flat-square&logo=capacitor" alt="Capacitor"></a>
+  <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-4.4-646cff?style=flat-square&logo=vite" alt="Vite"></a>
 </p>
 
 <p align="center">
-  <a href="https://drdentist.me"> Live Demo </a> |
-  <a href="#"> About DrDentist </a> |
-  <a href="#">Documentation</a>
+  <b><a href="https://drdentist.me">Live Demo</a></b> •
+  <b><a href="#features">Features</a></b> •
+  <b><a href="#getting-started">Getting Started</a></b> •
+  <b><a href="#mobile-app">Mobile App</a></b> •
+  <b><a href="#testing-accounts">Testing Accounts</a></b>
 </p>
 
-> This is built with modern web technologies. See our
-> <a href="#">issues</a>,
-> <a href="#">contributing guide</a> and join discussions on our
-> <a href="#">Community Forum</a> to help us improved.
+---
+
+## 📋 Overview
+
+DrDentist is a comprehensive web and mobile application for dental clinic management. Built with Vue.js 3 and TypeScript, this modern frontend interfaces with our [.NET 7 API backend](https://github.com/phamquangvinhfpt/dr-dentist-api) to provide a complete solution for dental clinics.
 
 <p align="center">
   <a href="#" target="_blank">
@@ -37,41 +34,148 @@
   </a>
 </p>
 
-### Quick start
+## ✨ Features
 
-Use the following command to quickly start Dr.Dentist project.
+- 💼 **Dashboard** - Overview of clinic operations, statistics, and performance
+- 📅 **Appointment Management** - Schedule, reschedule, and track appointments
+- 👥 **Patient Management** - Patient profiles, history, and medical records
+- 🩺 **Examination Tools** - Digital tools for dental examinations and diagnoses
+- 📝 **Treatment Planning** - Create and manage treatment plans
+- 💰 **Payment Processing** - Handle payments and invoicing
+- 📊 **Reports & Analytics** - Generate insights from clinic data
+- 📱 **Mobile Experience** - Access via Android mobile app using Capacitor
+- 🌙 **Dark/Light Themes** - Customizable UI appearance
+- 🌐 **Internationalization** - Support for multiple languages
+- 🔔 **Real-time Notifications** - Using SignalR for instant updates
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v16 or newer)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [Git](https://git-scm.com/)
+
+### Installation
+
+1. **Clone the repository**
 
 ```bash
-git https://github.com/phamquangvinhfpt/dr-dentist-vuestic.git
-cd DR-DENTIST-VUESTIC
-npm install
-npm run dev
+git clone https://github.com/phamquangvinhfpt/dr-dentist-vuestic.git
+cd dr-dentist-vuestic
 ```
 
-### Account for testing: All same pass 123Pa$$word!
+2. **Install dependencies**
 
-- Admin: admin@root.com
-- Staff: staff@root.com
-- Doctor: dentist@root.com
-- Patient: patient@root.com
-- Patient for testing: patient1-4@root.com
+```bash
+npm install
+# or
+yarn install
+```
 
-### How to started mobile app
+3. **Configure environment variables**
 
-- Run build project:
+```bash
+cp .env.example .env
+```
+
+Edit the `.env` file to match your backend API configuration.
+
+4. **Start the development server**
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+The application will be available at `http://localhost:5173` (or another port if 5173 is in use).
+
+### Building for Production
 
 ```bash
 npm run build
+# or
+yarn build
 ```
 
-- Sync project:
+The build output will be in the `dist` directory.
+
+## 📱 Mobile App
+
+This project supports Android mobile deployment using Capacitor.
+
+### Building the Mobile App
+
+1. **Build the project first**
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+2. **Sync assets with Capacitor**
 
 ```bash
 npx cap sync
 ```
 
-- Open android studio
+3. **Open in Android Studio**
 
 ```bash
 npx cap open android
 ```
+
+4. **Build and run from Android Studio**
+
+Use Android Studio's build and run features to deploy to a device or emulator.
+
+## 🧪 Testing Accounts
+
+All test accounts share the same password: `123Pa$$word!`
+
+| Role | Email | Description |
+|------|-------|-------------|
+| Admin | admin@root.com | Full system access |
+| Staff | staff@root.com | Clinic management access |
+| Doctor | dentist@root.com | Medical staff access |
+| Patient | patient@root.com | Patient portal access |
+| Test Patients | patient1-4@root.com | Additional test patient accounts |
+
+## 🛠️ Technology Stack
+
+- **Frontend Framework**: Vue.js 3.5 with Composition API
+- **State Management**: Pinia
+- **Styling**: Tailwind CSS and Vuestic UI components
+- **API Communication**: Axios
+- **Routing**: Vue Router
+- **Real-time Features**: SignalR
+- **Form Validation**: Vue Composition API
+- **Internationalization**: Vue i18n
+- **Mobile Support**: Capacitor
+- **Build Tool**: Vite
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Team
+
+Developed by the DrDentist Team. For support or inquiries, please open an issue on the GitHub repository.
+
+---
+
+<p align="center">
+  Made with ❤️ by DrDentist Team
+</p>
