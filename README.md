@@ -1,7 +1,7 @@
 # 🦷 DrDentist - Dental Clinic Management System
 
 <p align="center">
-  <a href="https://drdentist.me" target="_blank">
+  <a href="https://drdentist.site" target="_blank">
     <img alt="DCMS Logo" width="300" src="./public/1.png"/>
   </a>
 </p>
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <b><a href="https://drdentist.me">Live Demo</a></b> •
+  <b><a href="https://drdentist.site">Live Demo</a></b> •
   <b><a href="#features">Features</a></b> •
   <b><a href="#getting-started">Getting Started</a></b> •
   <b><a href="#mobile-app">Mobile App</a></b> •
