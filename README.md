@@ -135,12 +135,12 @@ Use Android Studio's build and run features to deploy to a device or emulator.
 
 All test accounts share the same password: `123Pa$$word!`
 
-| Role | Email | Description |
-|------|-------|-------------|
-| Admin | admin@root.com | Full system access |
-| Staff | staff@root.com | Clinic management access |
-| Doctor | dentist@root.com | Medical staff access |
-| Patient | patient@root.com | Patient portal access |
+| Role          | Email               | Description                      |
+| ------------- | ------------------- | -------------------------------- |
+| Admin         | admin@root.com      | Full system access               |
+| Staff         | staff@root.com      | Clinic management access         |
+| Doctor        | dentist@root.com    | Medical staff access             |
+| Patient       | patient@root.com    | Patient portal access            |
 | Test Patients | patient1-4@root.com | Additional test patient accounts |
 
 ## 🛠️ Technology Stack
